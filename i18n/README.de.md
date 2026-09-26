@@ -36,7 +36,9 @@ App-Code, öffentliche Inhalte und private Kontodaten liegen getrennt. MMD erhä
 
 ## Stand
 
-Version 0.1 ist eine frühe Web-Vorschau. Dienste benötigen eine private Konfiguration. Native Apps, Offline-Downloads, breitere Literatursuche und ein vollständiger Moderationsablauf folgen später.
+Version 0.2 ergänzt Entwicklervorschauen für iOS und Android: sichere dauerhafte Anmeldung, PDF-Import, natives Teilen von Markdown und Offline-Lesen mit Gleichungen und Abbildungen. Der Cloud-Dienst ist verfügbar. Diese Builds sind noch nicht in TestFlight oder den App-Stores veröffentlicht. Kontolöschung, umfassendere Moderation und Tests auf echten Smartphones stehen vor der Veröffentlichung noch aus.
+
+[docs/native.md](../docs/native.md)
 
 ## Unterstützung
 

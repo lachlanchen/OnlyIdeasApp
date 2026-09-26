@@ -36,7 +36,9 @@ App code, content and private account data have separate homes. MMD preserves Te
 
 ## Status
 
-Version 0.1 is an early web preview. Provider connections require private configuration. Native apps, offline downloads, broader literature discovery and a complete moderation workflow are next steps.
+Version 0.2 adds iOS and Android developer previews: secure persistent sign-in, PDF import, native Markdown sharing, and offline papers with equations and figures. The cloud service is live. These builds are not yet in TestFlight or the app stores. Account deletion, fuller moderation and physical-phone testing remain release gates.
+
+[docs/native.md](docs/native.md)
 
 ## Support
 

@@ -1,0 +1,17 @@
+{
+  "bundleId": "art.onlyideas.app",
+  "version": "0.2.0",
+  "build": "1",
+  "archiveSucceeded": true,
+  "exportSucceeded": true,
+  "exportedSignatureVerified": true,
+  "sha256": "03c7f58592e0c19562abfe31fe4cbc10f7207be9b10cf95821f2e6fa1a3dca35",
+  "signature": [
+    "Identifier=art.onlyideas.app",
+    "Signature size=4786",
+    "Authority=Apple Distribution: LazyingArt LLC (Q8M2S2FY77)",
+    "Authority=Apple Worldwide Developer Relations Certification Authority",
+    "Authority=Apple Root CA",
+    "TeamIdentifier=Q8M2S2FY77"
+  ]
+}

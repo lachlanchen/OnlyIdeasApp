@@ -36,7 +36,9 @@ Mã ứng dụng, nội dung công khai và dữ liệu riêng được lưu tá
 
 ## Trạng thái
 
-Phiên bản 0.1 là bản xem trước web ban đầu. Các dịch vụ cần cấu hình riêng tư. Ứng dụng gốc, tải ngoại tuyến, tìm kiếm tài liệu rộng hơn và quy trình kiểm duyệt đầy đủ là các bước tiếp theo.
+Phiên bản 0.2 bổ sung bản xem trước dành cho nhà phát triển trên iOS và Android: duy trì đăng nhập an toàn, nhập PDF, chia sẻ Markdown bằng chức năng của hệ điều hành và đọc ngoại tuyến với phương trình cùng hình ảnh. Dịch vụ đám mây đang hoạt động. Các bản dựng chưa có trên TestFlight hoặc cửa hàng ứng dụng. Cần hoàn thiện xóa tài khoản, kiểm duyệt và thử nghiệm trên điện thoại thật trước khi phát hành.
+
+[docs/native.md](../docs/native.md)
 
 ## Ủng hộ
 

@@ -21,3 +21,18 @@ dialog{border:1px solid var(--line);border-radius:14px;background:var(--surface)
 @media(max-width:640px){.hero{overflow:hidden}.hero-art{right:0}}
 @media(max-width:360px){.hero-art{display:none}.app-header{padding:0 14px;gap:6px}.brand{font-size:21px;gap:7px}.brand img{width:26px;height:26px}.account{max-width:78px;font-size:9px}}
 @media(max-width:640px){.hero-art{display:none}}
+/* Native chrome, large touch targets and device-owned downloads. */
+:root[data-native] body{padding-bottom:env(safe-area-inset-bottom);overscroll-behavior-y:none}
+:root[data-native] .app-header{height:calc(68px + env(safe-area-inset-top));padding-top:env(safe-area-inset-top)}
+:root[data-native] .icon-button{min-width:40px;min-height:44px}
+:root[data-native] .account{min-height:44px}
+:root[data-native] dialog{max-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 24px)}
+:root[data-native] .reading-panel{padding-bottom:env(safe-area-inset-bottom)}
+:root[data-native] .job-pill{bottom:calc(12px + env(safe-area-inset-bottom))}
+.paper-actions{display:flex;flex-wrap:wrap;gap:10px 22px;margin:18px 0}
+.paper-actions button{min-height:40px}
+.connection-notice{padding:12px 5%;background:var(--soft);font-size:12px;display:flex;align-items:center;justify-content:space-between;gap:15px}
+.connection-notice button{font-weight:700;text-decoration:underline;min-height:32px}
+@media(max-width:640px){input,textarea,select{font-size:16px!important}:root[data-native] .app-header{gap:4px;padding-left:16px;padding-right:16px}:root[data-native] .brand{font-size:21px}:root[data-native] .account{max-width:90px}}
+
+.recovery{max-width:540px;margin:15vh auto;padding:24px}.recovery h1{font-family:var(--serif);font-weight:400;font-size:32px;margin:25px 0 12px}

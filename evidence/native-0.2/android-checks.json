@@ -1,0 +1,32 @@
+{
+  "android-account": {
+    "signedIn": true,
+    "publicAndPrivatePapers": 2,
+    "noCredentialsInLocalStorage": true,
+    "privateFigures": true,
+    "privateDownload": true
+  },
+  "android-offline": {
+    "offline": true,
+    "signedIn": true,
+    "math": 1,
+    "figures": true
+  },
+  "android-native-files": {
+    "systemPickerSelectedPDF": true,
+    "pdfImportAccepted": true,
+    "exportSheetRequested": true
+  },
+  "android-signout": {
+    "signedOut": true,
+    "privateDownloads": 0,
+    "privateDraftKeys": 0
+  },
+  "android-release": {
+    "signedReleaseInstalled": true,
+    "readerOpened": true,
+    "offlineDownload": true,
+    "androidBackToLibrary": true,
+    "nativeGithubBrowserLaunched": true
+  }
+}

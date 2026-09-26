@@ -1,0 +1,53 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { randomBytes, createHash } from 'node:crypto';
+import { mkdtempSync, rmSync, mkdirSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { Store } from '../server/store.mjs';
+import { createApp } from '../server/app.mjs';
+import { makePaper } from '../server/domain.mjs';
+
+test('native OAuth binds PKCE, browser cookie, origin and one-use redemption; bearer sessions retain private assets and revoke', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'onlyideas-native-')), store = new Store(dir);
+  const origin = 'https://agent.onlyideas.art', native = 'capacitor://localhost';
+  const app = createApp(store, { origin, github: { clientId: 'test', clientSecret: 'fixture' } }, { worker: false, provider: async url => url.endsWith('/user') ? { id: 123, login: 'test-reader' } : { access_token: 'provider-token-never-retained' } });
+  await new Promise(resolve => app.listen(0, '127.0.0.1', resolve));
+  const base = `http://127.0.0.1:${app.address().port}`;
+  const call = async (path, { method = 'POST', body = {}, from = native, token, cookie, marker = true } = {}) => fetch(base + path, { method, redirect: 'manual', headers: { Origin: from, ...(marker ? { 'X-OnlyIdeas-Client': 'native' } : {}), ...(token ? { Authorization: `Bearer ${token}` } : {}), ...(cookie ? { Cookie: cookie } : {}), 'Content-Type': 'application/json' }, ...(method === 'POST' ? { body: JSON.stringify(body) } : {}) });
+  try {
+    const verifier = randomBytes(32).toString('base64url'), challenge = createHash('sha256').update(verifier).digest('base64url');
+    assert.equal((await call('/api/auth/native/start', { from: 'https://evil.test', body: { challenge } })).status, 403);
+    assert.equal((await call('/api/auth/native/start', { marker: false, body: { challenge } })).status, 403);
+    assert.equal((await call('/api/auth/native/start', { body: { challenge: 'wrong' } })).status, 400);
+    const preflight = await call('/api/session', { method: 'OPTIONS' });
+    assert.equal(preflight.status, 204); assert.equal(preflight.headers.get('access-control-allow-origin'), native); assert.equal(preflight.headers.get('access-control-allow-credentials'), null);
+    assert.equal((await call('/api/session', { method: 'OPTIONS', from: 'https://evil.test' })).status, 403);
+    const started = await call('/api/auth/native/start', { body: { challenge } }), flow = await started.json();
+    assert.equal(started.headers.get('set-cookie'), null);
+    const pending = await call('/api/auth/native/complete', { body: { flow: flow.flow, verifier } }); assert.deepEqual(await pending.json(), { pending: true });
+    const launch = await fetch(base + new URL(flow.url).pathname + new URL(flow.url).search, { redirect: 'manual' });
+    const browserCookie = launch.headers.get('set-cookie').split(';')[0];
+    const state = new URL(launch.headers.get('location')).searchParams.get('state');
+    const callback = `/api/auth/callback?state=${state}&code=test&iss=https%3A%2F%2Fgithub.com%2Flogin%2Foauth`;
+    assert.equal((await call(callback, { method: 'GET', from: origin, marker: false })).status, 403);
+    const completed = await call(callback, { method: 'GET', from: origin, marker: false, cookie: browserCookie });
+    assert.equal(completed.status, 200); assert.match(await completed.text(), /art.onlyideas.app:\/\/oauth\/complete/);
+    assert.equal((await call('/api/auth/native/complete', { body: { flow: flow.flow, verifier: randomBytes(32).toString('base64url') } })).status, 403);
+    const redeemed = await call('/api/auth/native/complete', { body: { flow: flow.flow, verifier } }), account = await redeemed.json();
+    assert.equal(account.user.id, 'github-123'); assert.equal(redeemed.headers.get('set-cookie'), null);
+    assert.equal((await call('/api/auth/native/complete', { body: { flow: flow.flow, verifier } })).status, 400);
+    const p = makePaper({ id: 'private-paper', owner: account.user.id, title: 'Private', mmd: '# Private', assets: [{ path: 'figures/a.svg' }] }); store.savePaper(p);
+    mkdirSync(join(dir, 'papers', p.id, 'figures'), { recursive: true }); writeFileSync(join(dir, 'papers', p.id, 'figures/a.svg'), '<svg/>');
+    const token = account.token;
+    assert.equal((await (await call('/api/session', { method: 'GET', token })).json()).user.id, account.user.id);
+    assert.equal((await (await call('/api/session', { method: 'GET', token, marker: false })).json()).user, null);
+    assert.equal((await (await call('/api/session', { method: 'GET', cookie: `__Host-onlyideas=${token}` })).json()).user, null, 'native requests never inherit browser cookies');
+    assert.equal((await call('/content/private-paper/figures/a.svg', { method: 'GET', token })).status, 200);
+    assert.equal((await call('/content/private-paper/figures/a.svg', { method: 'GET' })).status, 404);
+    await call('/api/auth/logout', { token });
+    assert.equal((await (await call('/api/session', { method: 'GET', token })).json()).user, null);
+    assert.equal((await call('/content/private-paper/figures/a.svg', { method: 'GET', token })).status, 404);
+    assert.equal(store.db.prepare("SELECT count(*) AS n FROM oauth WHERE body LIKE '%provider-token%'").get().n, 0);
+  } finally { await new Promise(resolve => app.close(resolve)); store.close(); rmSync(dir, { recursive: true, force: true }); }
+});

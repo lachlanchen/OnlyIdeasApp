@@ -1,3 +1,4 @@
+import { request } from './native'
 export type User = { id: string; name: string; login: string }
 export type Session = { user: User | null; development: boolean; capabilities: { login: boolean; pdf: boolean; assistant: boolean; publishing: boolean }; languages: Record<string, string>; maxPages: number }
 export type Section = { id: string; title: string; text: string }
@@ -6,7 +7,7 @@ export type Comment = { id: string; author: string; login: string; text: string;
 export type Job = { id: string; kind: string; state: string; message: string; created: number; paperId?: string; artifactId?: string }
 export type Artifact = { id: string; kind: string; language: string; text: string; model: string; sectionId?: string }
 export async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const res = await fetch(`/api${path}`, { credentials: 'same-origin', ...options, headers: { ...(options.body && typeof options.body === 'string' ? { 'Content-Type': 'application/json' } : {}), ...options.headers }, signal: AbortSignal.timeout(60_000) })
+  const res = await request(`/api${path}`, options)
   const data = await res.json().catch(() => ({ error: 'Connection interrupted. Please try again.' }))
   if (!res.ok) throw new Error(data.error || 'Could not complete this request.')
   return data

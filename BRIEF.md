@@ -35,3 +35,12 @@ Native signed builds/store registration; account moderation operations; tested
 production OAuth and provider credentials; live paid conversion after bounded cost
 review; accessible reader review; on-device offline downloads and sync conflicts.
 The name is a repository/product working name, not a trademark availability claim.
+
+## Native continuation · 2026-09-26
+
+The owner requested iOS and Android development after the web preview. Version
+0.2 adds separate Capacitor projects, secure native account sessions, document
+import, local offline paper/figure downloads, sharing and native navigation.
+Signed developer-preview binaries and simulator/emulator evidence are required.
+Store listing creation, price selection and formal store submission are separate
+release actions; no existing Bunko listing is reused for OnlyIdeas.

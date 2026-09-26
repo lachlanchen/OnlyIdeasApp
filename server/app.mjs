@@ -5,9 +5,10 @@ import { join, extname, resolve } from 'node:path';
 import { AppError, requireValue, hash, makePaper, publicPaper, mayPublish, languages } from './domain.mjs';
 import { providerJSON } from './network.mjs';
 import { startWorker } from './providers.mjs';
+import { nativeOrigins, nativeFlow, startNative, finishNative, redeemNative } from './native-auth.mjs';
 const uuid = /^[a-f0-9-]{36}$/;
 const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif', '.woff2': 'font/woff2', '.ttf': 'font/ttf', '.json': 'application/json' };
-export function createApp(store, config, { worker = true } = {}) {
+export function createApp(store, config, { worker = true, provider = providerJSON } = {}) {
   const origin = config.origin || 'http://127.0.0.1:4182';
   const secure = origin.startsWith('https://');
   requireValue(secure || /^http:\/\/(127\.0\.0\.1|localhost):\d+$/.test(origin), 'Only HTTPS or explicit loopback origins are permitted.');
@@ -38,19 +39,39 @@ export function createApp(store, config, { worker = true } = {}) {
   const server = createServer(async (req, res) => {
     res.setHeader('X-Content-Type-Options', 'nosniff'); res.setHeader('Referrer-Policy', 'no-referrer');
     res.setHeader('X-Frame-Options', 'DENY'); res.setHeader('Cache-Control', 'no-store');
-    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'");
+    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'");
     try {
       const url = new URL(req.url, origin), path = url.pathname, method = req.method;
       requireValue(!/%2f|%5c|%00|(?:^|\/)\.\.(?:\/|$)/i.test(req.url.split('?')[0]), 'Invalid path.');
+      const nativeOrigin = nativeOrigins.has(req.headers.origin);
+      if (nativeOrigin) {
+        res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+        res.setHeader('Vary', 'Origin');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, POST, PUT, DELETE, OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type, X-OnlyIdeas-Client, X-Request-Id, X-Paper-Title, X-Paper-Language');
+      }
+      if (method === 'OPTIONS') { requireValue(nativeOrigin, 'Origin not allowed.', 403); res.writeHead(204); return res.end(); }
+      const native = nativeOrigin && req.headers['x-onlyideas-client'] === 'native';
       requireValue(['GET', 'POST', 'DELETE', 'PUT', 'HEAD'].includes(method), 'Method not allowed.', 405);
-      if (method !== 'GET' && method !== 'HEAD') requireValue(req.headers.origin === origin, 'Please reload the app and try again.', 403);
+      if (method !== 'GET' && method !== 'HEAD') requireValue(req.headers.origin === origin || native, 'Please reload the app and try again.', 403);
       const cookies = Object.fromEntries(String(req.headers.cookie || '').split(';').map(x => x.trim().split('=')));
-      const user = store.session(cookies[cookieName]);
-      if (user) res.setHeader('Set-Cookie', cookie(cookieName, cookies[cookieName], 90 * 86400));
+      const token = native ? String(req.headers.authorization || '').match(/^Bearer ([a-f0-9-]{72})$/)?.[1] : nativeOrigin ? null : cookies[cookieName];
+      const user = store.session(token);
+      if (user && !native) res.setHeader('Set-Cookie', cookie(cookieName, token, 90 * 86400));
       const requireUser = () => { requireValue(user, 'Sign in to save papers and join the conversation.', 401); return user; };
       const paperFor = id => { const p = store.paper(id); requireValue(p && (p.visibility === 'public' || p.owner === user?.id), 'Paper not found.', 404); return p; };
       if (path.startsWith('/api/')) limit(user?.id || req.socket.remoteAddress, 240);
-      if (path === '/api/health' && method === 'GET') return response(res, { service: 'onlyideas', version: '0.1.0', ok: true });
+      if (path === '/api/health' && method === 'GET') return response(res, { service: 'onlyideas', version: '0.2.0', ok: true });
+      if (path === '/api/auth/native/start' && method === 'POST') {
+        requireValue(native, 'Open sign-in from the app.', 403);
+        requireValue(config.github?.clientId && config.github?.clientSecret, 'GitHub sign-in is unavailable.', 503);
+        limit(`login:${req.socket.remoteAddress}`, 20);
+        return response(res, startNative(store, (await json(req)).challenge, origin));
+      }
+      if (path === '/api/auth/native/complete' && method === 'POST') {
+        requireValue(native, 'Open sign-in from the app.', 403);
+        const b = await json(req); return response(res, redeemNative(store, b.flow, b.verifier));
+      }
       if (path === '/api/session' && method === 'GET') return response(res, { user, development: !!config.development, capabilities: { login: !!config.github?.clientId, pdf: !!config.mathpix?.appKey, assistant: !!config.model?.url, publishing: !!(config.github?.contentToken || config.github?.checkout) }, languages, maxPages: config.maxPages || 30 });
       if (path === '/api/auth/local' && method === 'POST') {
         requireValue(config.development && ['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(req.socket.remoteAddress), 'Not available.', 404);
@@ -58,15 +79,17 @@ export function createApp(store, config, { worker = true } = {}) {
         res.setHeader('Set-Cookie', cookie(cookieName, store.createSession(local), 90 * 86400)); return response(res, { user: local });
       }
       if (path === '/api/auth/logout' && method === 'POST') {
-        store.db.prepare('DELETE FROM sessions WHERE id=?').run(hash(cookies[cookieName] || ''));
-        res.setHeader('Set-Cookie', cookie(cookieName, '', 0)); return response(res, { ok: true });
+        store.db.prepare('DELETE FROM sessions WHERE id=?').run(hash(token || ''));
+        if (!native) res.setHeader('Set-Cookie', cookie(cookieName, '', 0)); return response(res, { ok: true });
       }
       if (path === '/api/auth/github' && method === 'GET') {
         requireValue(config.github?.clientId && config.github?.clientSecret, 'GitHub sign-in is being connected. You can read public papers now.', 503);
         limit(`login:${req.socket.remoteAddress}`, 20);
+        const flow = url.searchParams.get('flow');
+        if (flow) { const pending = nativeFlow(store, flow); requireValue(!pending.user, 'Sign-in has already finished.'); }
         const state = randomBytes(32).toString('base64url'), verifier = randomBytes(32).toString('base64url'), binder = randomBytes(32).toString('base64url');
         store.db.prepare('DELETE FROM oauth WHERE expires<?').run(Date.now());
-        store.db.prepare('INSERT INTO oauth VALUES(?,?,?)').run(hash(state), JSON.stringify({ verifier, binder: hash(binder) }), Date.now() + 10 * 60_000);
+        store.db.prepare('INSERT INTO oauth VALUES(?,?,?)').run(hash(state), JSON.stringify({ verifier, binder: hash(binder), flow }), Date.now() + 10 * 60_000);
         res.setHeader('Set-Cookie', cookie(`${cookieName}-oauth`, binder, 600));
         const auth = new URL('https://github.com/login/oauth/authorize');
         auth.search = new URLSearchParams({ client_id: config.github.clientId, redirect_uri: `${origin}/api/auth/callback`, scope: 'read:user', state, code_challenge: Buffer.from(hash(verifier), 'hex').toString('base64url'), code_challenge_method: 'S256' }).toString();
@@ -79,11 +102,17 @@ export function createApp(store, config, { worker = true } = {}) {
         requireValue(hash(cookies[`${cookieName}-oauth`] || '') === data.binder, 'Use the same browser that started sign-in.', 403);
         store.db.prepare('DELETE FROM oauth WHERE id=?').run(state);
         requireValue(url.searchParams.get('code'), 'GitHub sign-in was cancelled.');
-        const result = await providerJSON('https://github.com/login/oauth/access_token', { method: 'POST', headers: { Accept: 'application/json', 'Content-Type': 'application/json' }, body: JSON.stringify({ client_id: config.github.clientId, client_secret: config.github.clientSecret, code: url.searchParams.get('code'), code_verifier: data.verifier, redirect_uri: `${origin}/api/auth/callback` }) });
+        const result = await provider('https://github.com/login/oauth/access_token', { method: 'POST', headers: { Accept: 'application/json', 'Content-Type': 'application/json' }, body: JSON.stringify({ client_id: config.github.clientId, client_secret: config.github.clientSecret, code: url.searchParams.get('code'), code_verifier: data.verifier, redirect_uri: `${origin}/api/auth/callback` }) });
         requireValue(result.access_token, 'GitHub did not complete sign-in. Please try again.', 502);
-        const account = await providerJSON('https://api.github.com/user', { headers: { Authorization: `Bearer ${result.access_token}`, Accept: 'application/vnd.github+json' } });
+        const account = await provider('https://api.github.com/user', { headers: { Authorization: `Bearer ${result.access_token}`, Accept: 'application/vnd.github+json' } });
         requireValue(account.id && account.login, 'GitHub account details are unavailable.', 502);
         const u = { id: `github-${account.id}`, name: account.name || account.login, login: account.login };
+        if (data.flow) {
+          finishNative(store, data.flow, u);
+          res.setHeader('Set-Cookie', cookie(`${cookieName}-oauth`, '', 0));
+          res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+          return res.end(`<!doctype html><html lang="en"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Signed in · OnlyIdeas</title><body style="font:20px system-ui;background:#f6f4ed;color:#244f45;padding:10vh 8vw"><h1>Welcome back.</h1><p>You’re signed in. Return to OnlyIdeas to keep reading.</p><a style="color:inherit" href="art.onlyideas.app://oauth/complete?flow=${data.flow}">Open OnlyIdeas</a></body></html>`);
+        }
         // No GitHub token is retained: this app's session does not inherit an 8-hour token lifetime.
         res.setHeader('Set-Cookie', [cookie(cookieName, store.createSession(u), 90 * 86400), cookie(`${cookieName}-oauth`, '', 0)]);
         res.writeHead(303, { Location: '/' }); return res.end();

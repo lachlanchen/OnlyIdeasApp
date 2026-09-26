@@ -7,3 +7,16 @@ dist/
 *.tsbuildinfo
 config.local.json
 coverage/
+
+release/
+android/local.properties
+*.keystore
+*.jks
+*.p12
+*.mobileprovision
+*.ipa
+*.apk
+*.aab
+
+__pycache__/
+*.pyc

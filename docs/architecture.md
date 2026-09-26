@@ -72,3 +72,20 @@ Native iOS/Android packaging, offline paper downloads, bibliography search with
 source-specific license discovery, semantic annotations across revised papers,
 discussion GitHub mirroring, moderation/admin UI, account deletion/export, retention
 automation, backup restore drill and additional language/accessibility review.
+
+## Native clients (0.2)
+
+Capacitor packages the reader and its renderer locally. Native API requests use
+an opaque bearer session read from Keychain/Keystore, with exact CORS origins
+`capacitor://localhost` and `https://localhost`. Native requests do not inherit web
+cookies. Web sessions continue using HttpOnly cookies and the same-origin CSRF
+check. A client challenge plus a browser-bound GitHub flow yields a one-use native
+receipt. The callback URL carries only the flow identifier. Provider tokens are
+still discarded after profile lookup.
+
+Paper downloads are explicit, revision-keyed IndexedDB records containing MMD
+and figure blobs together; the public namespace is separate from the signed-in
+account. Private data and drafts are removed on sign-out. Browser-return refreshes
+check the local authentication revision before applying a session response. The
+share sheet uses an app-private cache file, retained long enough for the receiving
+app to read it and cleared on the next cold launch or sign-out.

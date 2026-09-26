@@ -36,7 +36,9 @@ Le code, les contenus publics et les données privées sont séparés. MMD prés
 
 ## État
 
-La version 0.1 est un premier aperçu web. Les services nécessitent une configuration privée. Applications natives, lecture hors ligne, recherche bibliographique élargie et modération complète restent à développer.
+La version 0.2 ajoute des aperçus pour développeurs sur iOS et Android : connexion persistante sécurisée, import PDF, partage natif de Markdown et lecture hors ligne avec équations et figures. Le service cloud est en ligne. Ces versions ne sont pas encore disponibles sur TestFlight ni dans les boutiques. La suppression de compte, une modération plus complète et les tests sur téléphones physiques restent nécessaires.
+
+[docs/native.md](../docs/native.md)
 
 ## Soutenir
 

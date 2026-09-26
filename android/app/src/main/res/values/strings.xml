@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">OnlyIdeas</string>
+    <string name="title_activity_main">OnlyIdeas</string>
+    <string name="package_name">art.onlyideas.app</string>
+    <string name="custom_url_scheme">art.onlyideas.app</string>
+</resources>

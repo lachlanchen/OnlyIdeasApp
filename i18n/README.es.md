@@ -36,7 +36,9 @@ El código, el contenido público y los datos privados se guardan por separado. 
 
 ## Estado
 
-La versión 0.1 es una vista previa web inicial. Los servicios necesitan configuración privada. Las aplicaciones nativas, las descargas sin conexión, una búsqueda bibliográfica más amplia y la moderación completa quedan para siguientes etapas.
+La versión 0.2 añade versiones preliminares para desarrolladores de iOS y Android: sesión persistente segura, importación de PDF, uso compartido nativo de Markdown y lectura sin conexión con ecuaciones y figuras. El servicio en la nube está activo. Estas versiones aún no están en TestFlight ni en las tiendas. Faltan la eliminación de cuentas, una moderación más completa y las pruebas en teléfonos físicos.
+
+[docs/native.md](../docs/native.md)
 
 ## Apoyo
 
