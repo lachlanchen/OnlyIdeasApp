@@ -1,0 +1,19 @@
+{
+  "passed": true,
+  "checks": [
+    "Guide is explicitly labeled",
+    "Phone reader fits 390px",
+    "Library fits 320px",
+    "Equation reader fits 320px",
+    "Mathpix starred sections produce four anchors",
+    "Comment persists across browser reload",
+    "Live one-page Mathpix conversion: equation and figure preserved",
+    "Private notes and sign-in survive reload",
+    "Private comment submitted once inside app",
+    "Japanese passage translation preserves rendered equation"
+  ],
+  "liveMathpix": true,
+  "liveDigest": true,
+  "fixture": "Original CC0 test document",
+  "liveJapaneseTranslation": true
+}

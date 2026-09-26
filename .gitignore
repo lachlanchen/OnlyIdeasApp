@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.runtime/
+.env*
+*.sqlite*
+*.log
+*.tsbuildinfo
+config.local.json
+coverage/
