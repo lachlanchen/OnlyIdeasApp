@@ -1,0 +1,17 @@
+{
+  "oauth": true,
+  "persistentSession": true,
+  "sessionCookie": {
+    "secure": true,
+    "httpOnly": true,
+    "sameSite": "Lax",
+    "inactivityDays": 90
+  },
+  "liveConversion": "passed",
+  "publicPreview": "https://agent.onlyideas.art",
+  "otherSitesPreserved": true,
+  "equations": true,
+  "durableFigure": true,
+  "liveDigest": "passed",
+  "anonymousLibraryExcludesPrivateUploads": true
+}
