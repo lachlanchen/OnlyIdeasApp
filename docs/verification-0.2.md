@@ -50,8 +50,10 @@ No other project's identity, profile, simulator or desktop was replaced.
 
 No physical iPhone/Android test or completed share-to-another-app transfer is
 claimed. iOS GitHub sign-in has not yet been exercised end to end; the full
-native OAuth interaction was tested on Android. Store review, TestFlight and Play internal-track publication have not
-occurred. See [native.md](native.md) for the remaining public-release gates.
+native OAuth interaction was tested on Android. Build 1 subsequently entered
+internal TestFlight and Google Play testing; public store review has not been
+submitted. See the [publication record](store-release-20260926.md) for the store
+states and [native.md](native.md) for the remaining public-release work.
 
 Final APK and exported IPA contain the same 17 web assets as the verified
 production bundle. The exported IPA passes deep/strict signature verification.

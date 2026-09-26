@@ -66,6 +66,25 @@ separate from formal review; no additional physical-device prerequisite was adde
 
 ## Repeatable workflow
 
+### Status recheck and reading flow
+
+A subsequent live readback confirmed Apple build 1 is `VALID` /
+`IN_BETA_TESTING`, with external beta `READY_FOR_BETA_SUBMISSION`. The formal
+Apple version remains `PREPARE_FOR_SUBMISSION`. Google Console still shows
+0.2.0 (1) as **Available to internal testers**, **Not reviewed**. The accepted
+binaries were not uploaded again.
+
+The live API reports PDF conversion enabled, with a 30-page limit. The app accepts
+a direct public HTTPS PDF link or an uploaded PDF (up to 20 MB). Mathpix converts
+it to flowing Markdown with TeX equations and durable figure files. The reader
+uses adjustable text, passage discussions and explicit offline downloads; it
+does not require reading the original fixed-page PDF. Ordinary publisher landing
+pages and paywalled links are not supported as PDF inputs. Previous live
+conversion evidence is in [the web verification](verification-0.1.md), and native
+reading/picker/offline evidence is in [native verification](verification-0.2.md).
+
+### Publication procedure
+
 1. Fetch origin and verify source/status, then read AGENTS/BRIEF and native docs.
 2. Reuse the exact signed candidate where application inputs are unchanged.
 3. Verify bundle/package, version, signing identity and artifact SHA-256.
