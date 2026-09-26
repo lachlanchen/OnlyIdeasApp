@@ -36,9 +36,11 @@ Mã ứng dụng, nội dung công khai và dữ liệu riêng được lưu tá
 
 ## Trạng thái
 
-Phiên bản 0.2 bổ sung bản xem trước dành cho nhà phát triển trên iOS và Android: duy trì đăng nhập an toàn, nhập PDF, chia sẻ Markdown bằng chức năng của hệ điều hành và đọc ngoại tuyến với phương trình cùng hình ảnh. Dịch vụ đám mây đang hoạt động. Các bản dựng chưa có trên TestFlight hoặc cửa hàng ứng dụng. Cần hoàn thiện xóa tài khoản, kiểm duyệt và thử nghiệm trên điện thoại thật trước khi phát hành.
+Dịch vụ đám mây đang hoạt động. Bản thử nghiệm được phân phối qua các nhóm nội bộ của chủ sở hữu trên TestFlight và Google Play; bản ghi cập nhật ứng dụng gốc nêu trạng thái bản dựng đã xác nhận. Việc gửi xét duyệt công khai vẫn cần hoàn thiện xóa tài khoản, kiểm duyệt, tuân thủ yêu cầu đăng nhập iOS và thông tin cửa hàng. Phạm vi thử nghiệm trên thiết bị thật và toàn bộ quy trình đăng nhập iOS còn hạn chế.
 
-[docs/native.md](../docs/native.md)
+Phiên bản 0.3 có màn hình SwiftUI trên iOS và giao diện gốc Android, chữ đọc lớn hơn có thể điều chỉnh, trang hồ sơ riêng và hội thoại với tác nhân được lưu lại. Tác nhân trên máy trạm tìm trong các chỉ mục nghiên cứu mở và tải PDF, dùng mô hình cục bộ qua LazyEdge. Chọn chuyển đổi và thêm để tạo bản đọc Mathpix riêng tư, giữ nguyên phương trình và hình ảnh. Xem bản ghi cập nhật ứng dụng gốc để biết trạng thái bản dựng và kiểm thử.
+
+[0.3](../docs/native-0.3.md) · [docs/native.md](../docs/native.md)
 
 ## Ủng hộ
 

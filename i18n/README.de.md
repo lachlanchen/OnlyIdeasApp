@@ -36,9 +36,11 @@ App-Code, öffentliche Inhalte und private Kontodaten liegen getrennt. MMD erhä
 
 ## Stand
 
-Version 0.2 ergänzt Entwicklervorschauen für iOS und Android: sichere dauerhafte Anmeldung, PDF-Import, natives Teilen von Markdown und Offline-Lesen mit Gleichungen und Abbildungen. Der Cloud-Dienst ist verfügbar. Diese Builds sind noch nicht in TestFlight oder den App-Stores veröffentlicht. Kontolöschung, umfassendere Moderation und Tests auf echten Smartphones stehen vor der Veröffentlichung noch aus.
+Der Cloud-Dienst ist verfügbar. Testversionen werden über die internen TestFlight- und Google-Play-Gruppen des Eigentümers verteilt; der Bericht zur nativen Aktualisierung nennt den bestätigten Build-Status. Für die öffentliche Prüfung fehlen noch Kontolöschung, umfassendere Moderation, die Einhaltung der iOS-Anmeldevorgaben und die Store-Einträge. Tests auf echten Geräten und vollständige iOS-Anmeldetests sind weiterhin begrenzt.
 
-[docs/native.md](../docs/native.md)
+Version 0.3 bietet SwiftUI-Ansichten auf iOS und native Android-Bedienelemente, größere einstellbare Leseschrift, eine eigene Profilseite und gespeicherte Agentengespräche. Ein Agent auf der Workstation durchsucht offene Forschungsindizes und lädt PDFs herunter; ein lokales Modell wird über LazyEdge angebunden. Mit Konvertieren und hinzufügen erstellt Mathpix eine private Lesefassung mit Gleichungen und Abbildungen. Der Bericht zur nativen Aktualisierung enthält den Stand der Builds und Tests.
+
+[0.3](../docs/native-0.3.md) · [docs/native.md](../docs/native.md)
 
 ## Unterstützung
 

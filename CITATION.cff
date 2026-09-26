@@ -2,7 +2,7 @@ cff-version: 1.2.0
 message: "Please cite this repository when using it in research."
 type: software
 title: "OnlyIdeasApp: Read deeply, think together"
-version: 0.2.0
+version: 0.3.0
 date-released: 2026-09-26
 authors:
   - family-names: Chen

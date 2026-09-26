@@ -1,5 +1,8 @@
 # Native mobile preview · 0.2.0 (1)
 
+This is the original wrapper implementation record. The current implementation
+and test status are described in [Native reading and agent chat · 0.3](native-0.3.md).
+
 OnlyIdeas has independent iOS and Android projects with bundle/application ID
 `art.onlyideas.app`. The reader, equation renderer, fonts and interface ship in the
 binary. The API remains at `https://agent.onlyideas.art`; no provider key ships in

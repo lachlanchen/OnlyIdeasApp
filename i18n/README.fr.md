@@ -36,9 +36,11 @@ Le code, les contenus publics et les données privées sont séparés. MMD prés
 
 ## État
 
-La version 0.2 ajoute des aperçus pour développeurs sur iOS et Android : connexion persistante sécurisée, import PDF, partage natif de Markdown et lecture hors ligne avec équations et figures. Le service cloud est en ligne. Ces versions ne sont pas encore disponibles sur TestFlight ni dans les boutiques. La suppression de compte, une modération plus complète et les tests sur téléphones physiques restent nécessaires.
+Le service cloud est en ligne. Les versions de test sont distribuées aux groupes internes du propriétaire sur TestFlight et Google Play ; le journal de la mise à jour native indique leur état confirmé. La soumission publique attend la suppression de compte, une modération plus complète, la conformité de la connexion iOS et la préparation de la fiche. Les tests sur appareils physiques et la validation complète de la connexion iOS restent limités.
 
-[docs/native.md](../docs/native.md)
+La version 0.3 apporte des écrans SwiftUI sur iOS et des commandes natives sur Android, un texte de lecture plus grand et réglable, une page Profil et des conversations enregistrées avec l’agent. Un agent sur la station de travail recherche dans les index de publications ouvertes et télécharge les PDF, avec un modèle local via LazyEdge. Choisissez de convertir et d’ajouter un article pour créer une copie privée avec Mathpix, équations et figures comprises. Le journal de la mise à jour native précise l’état des versions et des tests.
+
+[0.3](../docs/native-0.3.md) · [docs/native.md](../docs/native.md)
 
 ## Soutenir
 

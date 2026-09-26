@@ -6,6 +6,7 @@ import { AppError, requireValue, hash, makePaper, publicPaper, mayPublish, langu
 import { providerJSON } from './network.mjs';
 import { startWorker } from './providers.mjs';
 import { nativeOrigins, nativeFlow, startNative, finishNative, redeemNative } from './native-auth.mjs';
+import { createChats } from './chat.mjs';
 const uuid = /^[a-f0-9-]{36}$/;
 const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif', '.woff2': 'font/woff2', '.ttf': 'font/ttf', '.json': 'application/json' };
 export function createApp(store, config, { worker = true, provider = providerJSON } = {}) {
@@ -16,6 +17,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
   const cookieName = secure ? '__Host-onlyideas' : 'onlyideas-local';
   const cookie = (name, value, seconds) => `${name}=${value}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${seconds}${secure ? '; Secure' : ''}`;
   const stopWorker = worker ? startWorker(store, config) : () => {};
+  const chats = createChats(store, config);
   const limits = new Map();
   const response = (res, data, code = 200) => { res.writeHead(code, { 'Content-Type': 'application/json; charset=utf-8' }); res.end(JSON.stringify(data)); };
   const readBody = async (req, max = 100_000) => {
@@ -43,6 +45,13 @@ export function createApp(store, config, { worker = true, provider = providerJSO
     try {
       const url = new URL(req.url, origin), path = url.pathname, method = req.method;
       requireValue(!/%2f|%5c|%00|(?:^|\/)\.\.(?:\/|$)/i.test(req.url.split('?')[0]), 'Invalid path.');
+      if (path.startsWith('/api/worker/')) {
+        requireValue(chats.authorized(req), 'Worker authorization required.', 401);
+        requireValue(method === 'POST', 'Method not allowed.', 405);
+        if (path === '/api/worker/claim') return response(res, chats.claim());
+        if (path === '/api/worker/result') return response(res, chats.finish(await json(req)));
+        requireValue(false, 'Not found.', 404);
+      }
       const nativeOrigin = nativeOrigins.has(req.headers.origin);
       if (nativeOrigin) {
         res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
@@ -59,9 +68,14 @@ export function createApp(store, config, { worker = true, provider = providerJSO
       const user = store.session(token);
       if (user && !native) res.setHeader('Set-Cookie', cookie(cookieName, token, 90 * 86400));
       const requireUser = () => { requireValue(user, 'Sign in to save papers and join the conversation.', 401); return user; };
+      if (path === '/api/chats' || path.startsWith('/api/chats/')) {
+        limit(`chat:${user?.id || req.socket.remoteAddress}`, 60);
+        const result = await chats.client(path, method, user, method === 'POST' ? await json(req) : {}, enqueue);
+        requireValue(result, 'Not found.', 404); return response(res, result);
+      }
       const paperFor = id => { const p = store.paper(id); requireValue(p && (p.visibility === 'public' || p.owner === user?.id), 'Paper not found.', 404); return p; };
       if (path.startsWith('/api/')) limit(user?.id || req.socket.remoteAddress, 240);
-      if (path === '/api/health' && method === 'GET') return response(res, { service: 'onlyideas', version: '0.2.0', ok: true });
+      if (path === '/api/health' && method === 'GET') return response(res, { service: 'onlyideas', version: '0.3.0', ok: true });
       if (path === '/api/auth/native/start' && method === 'POST') {
         requireValue(native, 'Open sign-in from the app.', 403);
         requireValue(config.github?.clientId && config.github?.clientSecret, 'GitHub sign-in is unavailable.', 503);

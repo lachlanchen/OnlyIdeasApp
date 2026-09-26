@@ -44,3 +44,18 @@ import, local offline paper/figure downloads, sharing and native navigation.
 Signed developer-preview binaries and simulator/emulator evidence are required.
 Store listing creation, price selection and formal store submission are separate
 release actions; no existing Bunko listing is reused for OnlyIdeas.
+
+## Native redesign and paper agent · 2026-09-26
+
+The owner requested native implementation, larger type, a real Profile page from
+the top-right account button, and a chat composer with persistent conversations.
+Version 0.3 uses SwiftUI on iOS and native Android Views; only the paper body uses
+an isolated renderer for Mathpix Markdown, equations and figures. Sign out is a
+separate confirmed Profile action. Reading size and system text scaling apply.
+
+A workstation agent, using a local model through LazyEdge, searches open research
+indexes and checks/downloads PDFs. Conversations are private and available across
+signed-in devices. Conversion remains an explicit bounded action. The worker
+receives structured tasks through an authenticated outbound queue, never shell
+commands or browser credentials. Test updates use the existing OnlyIdeas internal
+TestFlight and Google Play groups. Formal public review remains a separate gate.

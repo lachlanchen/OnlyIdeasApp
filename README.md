@@ -36,9 +36,11 @@ App code, content and private account data have separate homes. MMD preserves Te
 
 ## Status
 
-Version 0.2 adds iOS and Android previews: secure persistent sign-in, PDF import, native Markdown sharing, and offline papers with equations and figures. The cloud service is live. Build 1 is available to the owner's internal TestFlight and Google Play test groups. Public store review is not yet submitted: account deletion, fuller moderation, iOS sign-in compliance and listing preparation remain. Physical-phone coverage and iOS login end-to-end QA are still limited.
+The cloud service is live. Test distribution uses the owner’s internal TestFlight and Google Play groups; the native update record gives the confirmed build status. Public review remains pending account deletion, fuller moderation, iOS sign-in compliance and listing preparation. Physical-device coverage and iOS sign-in end-to-end QA remain limited.
 
-[docs/native.md](docs/native.md) · [Store publication record](docs/store-release-20260926.md)
+Version 0.3 introduces SwiftUI screens on iOS and native Android controls, larger adjustable reading text, a dedicated Profile page, and persistent agent conversations. A workstation agent searches open research indexes and downloads PDFs, using a local model through LazyEdge. Choose Convert & add to create a private Mathpix reading copy with equations and figures. See the native update record for build and test status.
+
+[0.3](docs/native-0.3.md) · [docs/native.md](docs/native.md) · [Store publication record](docs/store-release-20260926.md)
 
 ## Support
 

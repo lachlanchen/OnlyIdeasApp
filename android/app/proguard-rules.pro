@@ -19,3 +19,8 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# The isolated paper renderer calls these native methods by annotation/name.
+-keepclassmembers class * {
+    @android.webkit.JavascriptInterface <methods>;
+}

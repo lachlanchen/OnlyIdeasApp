@@ -36,9 +36,11 @@ El código, el contenido público y los datos privados se guardan por separado. 
 
 ## Estado
 
-La versión 0.2 añade versiones preliminares para desarrolladores de iOS y Android: sesión persistente segura, importación de PDF, uso compartido nativo de Markdown y lectura sin conexión con ecuaciones y figuras. El servicio en la nube está activo. Estas versiones aún no están en TestFlight ni en las tiendas. Faltan la eliminación de cuentas, una moderación más completa y las pruebas en teléfonos físicos.
+El servicio en la nube está activo. Las pruebas se distribuyen a los grupos internos del propietario en TestFlight y Google Play; el registro de la actualización nativa indica el estado confirmado de cada compilación. La revisión pública sigue pendiente de la eliminación de cuentas, una moderación más completa, el cumplimiento del inicio de sesión de iOS y la preparación de la ficha. La cobertura en dispositivos físicos y las pruebas completas de inicio de sesión de iOS siguen siendo limitadas.
 
-[docs/native.md](../docs/native.md)
+La versión 0.3 incorpora pantallas SwiftUI en iOS y controles nativos en Android, texto de lectura más grande y ajustable, una página de perfil y conversaciones persistentes con el agente. Un agente en la estación de trabajo busca en índices de investigación abierta y descarga PDF usando un modelo local mediante LazyEdge. Elige convertir y añadir para crear una copia privada con Mathpix que conserve ecuaciones y figuras. El registro de la actualización nativa detalla las compilaciones y pruebas.
+
+[0.3](../docs/native-0.3.md) · [docs/native.md](../docs/native.md)
 
 ## Apoyo
 

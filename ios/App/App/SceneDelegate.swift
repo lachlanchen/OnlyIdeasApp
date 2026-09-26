@@ -1,5 +1,6 @@
 import UIKit
 import Capacitor
+import SwiftUI
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
@@ -9,9 +10,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         window = UIWindow(windowScene: windowScene)
         #if DEBUG
-        window?.rootViewController = ProcessInfo.processInfo.arguments.contains("--onlyideas-smoke") ? OnlyIdeasSmokeController() : CAPBridgeViewController()
+        window?.rootViewController = ProcessInfo.processInfo.arguments.contains("--onlyideas-smoke") ? OnlyIdeasSmokeController() : UIHostingController(rootView: NativeReadingApp())
         #else
-        window?.rootViewController = CAPBridgeViewController()
+        window?.rootViewController = UIHostingController(rootView: NativeReadingApp())
         #endif
         window?.makeKeyAndVisible()
 

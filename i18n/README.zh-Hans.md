@@ -36,9 +36,11 @@ npm run dev
 
 ## 状态
 
-0.2 新增 iOS 和 Android 开发者预览：安全持久登录、PDF 导入、系统 Markdown 分享，以及保留公式和插图的离线阅读。云端服务已上线。这些构建尚未发布到 TestFlight 或应用商店。正式发布前仍需完善账号删除、社区管理，并完成真机测试。
+云端服务已上线。测试版通过所有者的 TestFlight 和 Google Play 内部测试组分发；各构建的已确认状态见原生更新记录。公开商店审核仍需完成账号删除、完整社区管理、iOS 登录合规和商店资料准备。真机覆盖和 iOS 登录全流程验证仍有限。
 
-[docs/native.md](../docs/native.md)
+0.3 改用 iOS SwiftUI 界面和 Android 原生控件，增大并支持调节阅读字号，加入独立个人主页和保存历史的智能体聊天。工作站上的智能体通过 LazyEdge 使用本地模型，搜索开放研究索引并下载 PDF。点击转换并添加后，Mathpix 会生成保留公式和插图的私人阅读副本。构建与测试状态见原生更新记录。
+
+[0.3](../docs/native-0.3.md) · [docs/native.md](../docs/native.md)
 
 ## 支持
 
