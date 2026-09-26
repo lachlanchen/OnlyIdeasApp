@@ -36,9 +36,9 @@ App code, content and private account data have separate homes. MMD preserves Te
 
 ## Status
 
-Version 0.2 adds iOS and Android developer previews: secure persistent sign-in, PDF import, native Markdown sharing, and offline papers with equations and figures. The cloud service is live. These builds are not yet in TestFlight or the app stores. Account deletion, fuller moderation and physical-phone testing remain release gates.
+Version 0.2 adds iOS and Android previews: secure persistent sign-in, PDF import, native Markdown sharing, and offline papers with equations and figures. The cloud service is live. Build 1 is available to the owner's internal TestFlight and Google Play test groups. Public store review is not yet submitted: account deletion, fuller moderation, iOS sign-in compliance and listing preparation remain. Physical-phone coverage and iOS login end-to-end QA are still limited.
 
-[docs/native.md](docs/native.md)
+[docs/native.md](docs/native.md) · [Store publication record](docs/store-release-20260926.md)
 
 ## Support
 

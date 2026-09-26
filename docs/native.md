@@ -76,12 +76,15 @@ Documents/native-smoke.json. The harness compiles out of Release builds.
 
 ## Distribution status
 
-This is a native developer preview, not an App Store or Google Play publication.
-Signed artifacts do not imply a TestFlight invitation or a store review. Before
-public store submission: finish account deletion and moderation/blocking flows,
-review the iOS sign-in requirements, complete store privacy disclosures and
-metadata, and test on physical phones. Physical-device behavior, background
-uploads and low-storage eviction are not yet fully validated.
+Build 0.2.0 (1) is now in internal TestFlight and Google Play internal testing for
+the owner. [The publication record](store-release-20260926.md) distinguishes the
+accepted uploads and actual testing state from public store review, which has
+not been submitted. Before public submission: finish account deletion and
+moderation/blocking flows, review the iOS sign-in requirements, complete store
+privacy disclosures and metadata, and qualify iOS login end to end. Physical
+testing remains valuable; no new cross-platform hardware gate is introduced.
+Physical-device behavior, background uploads and low-storage eviction are not
+yet fully validated.
 
 ## References
 

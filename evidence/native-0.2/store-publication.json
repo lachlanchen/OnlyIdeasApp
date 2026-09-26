@@ -1,0 +1,31 @@
+{
+  "observedDate": "2026-09-26",
+  "app": "OnlyIdeas",
+  "bundleId": "art.onlyideas.app",
+  "version": "0.2.0",
+  "build": 1,
+  "sourceCommit": "d9f6cef55e7df9f33b238a54b396e2e30ff11c72",
+  "apple": {
+    "appId": "6816392935",
+    "buildId": "cafe63b2-c3dc-470f-b12e-ae091d036309",
+    "processingState": "VALID",
+    "internalBuildState": "IN_BETA_TESTING",
+    "externalBuildState": "READY_FOR_BETA_SUBMISSION",
+    "internalGroupId": "aa16986d-2d1d-443b-9cf8-99677d3f7a68",
+    "internalTesterCount": 1,
+    "formalReviewSubmitted": false,
+    "externalBetaReviewSubmitted": false
+  },
+  "google": {
+    "appId": "4974173414823223936",
+    "trackId": "4701325459048995948",
+    "track": "internal",
+    "state": "Active",
+    "releaseState": "Available to internal testers",
+    "reviewState": "Not reviewed",
+    "testerCount": 1,
+    "joinUrl": "https://play.google.com/apps/internaltest/4701512710674115784",
+    "productionReviewSubmitted": false
+  },
+  "publiclyReleased": false
+}
