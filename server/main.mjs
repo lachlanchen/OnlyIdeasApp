@@ -1,4 +1,4 @@
-import { readFileSync, statSync } from 'node:fs';
+import { readFileSync, lstatSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { homedir } from 'node:os';
 import { Store } from './store.mjs';
@@ -8,7 +8,12 @@ process.umask(0o077);
 const file = process.env.ONLYIDEAS_CONFIG || resolve(homedir(), '.config/onlyideas/config.json');
 let config;
 try {
-  if (statSync(file).mode & 0o077) throw new Error('OnlyIdeas config must have mode 600.');
+  const stat = lstatSync(file);
+  const credentialDir = process.env.CREDENTIALS_DIRECTORY;
+  const managedCredential = credentialDir?.startsWith('/run/credentials/') && resolve(file) === resolve(credentialDir, 'config.json');
+  // systemd credentials can be 0440 inside their protected service mount.
+  // Ordinary operator configuration must remain owner-only.
+  if (!stat.isFile() || stat.mode & (managedCredential ? 0o027 : 0o077)) throw new Error('OnlyIdeas config must be a protected regular file (normally mode 600).');
   config = JSON.parse(readFileSync(file, 'utf8'));
 } catch (e) {
   if (e.code !== 'ENOENT') throw e;

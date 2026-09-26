@@ -1,6 +1,6 @@
 import { createServer } from 'node:http';
 import { randomUUID, randomBytes } from 'node:crypto';
-import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { readFile, writeFile, mkdir, rm } from 'node:fs/promises';
 import { join, extname, resolve } from 'node:path';
 import { AppError, requireValue, hash, makePaper, publicPaper, mayPublish, languages } from './domain.mjs';
 import { providerJSON } from './network.mjs';
@@ -41,7 +41,7 @@ export function createApp(store, config, { worker = true } = {}) {
     res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'");
     try {
       const url = new URL(req.url, origin), path = url.pathname, method = req.method;
-      requireValue(!/%2f|%5c|%00|(?:^|\/)\.\.(?:\/|$)/i.test(req.url), 'Invalid path.');
+      requireValue(!/%2f|%5c|%00|(?:^|\/)\.\.(?:\/|$)/i.test(req.url.split('?')[0]), 'Invalid path.');
       requireValue(['GET', 'POST', 'DELETE', 'PUT', 'HEAD'].includes(method), 'Method not allowed.', 405);
       if (method !== 'GET' && method !== 'HEAD') requireValue(req.headers.origin === origin, 'Please reload the app and try again.', 403);
       const cookies = Object.fromEntries(String(req.headers.cookie || '').split(';').map(x => x.trim().split('=')));
@@ -114,7 +114,9 @@ export function createApp(store, config, { worker = true } = {}) {
         const dedupe = `import:${hash(bytes || link)}`;
         const previousContent = store.existing(user.id, dedupe); if (previousContent) return response(res, { job: previousContent }, 202);
         if (bytes) { const dir = join(store.directory, 'jobs', requestId); await mkdir(dir, { recursive: true, mode: 0o700 }); await writeFile(join(dir, 'source.pdf'), bytes, { mode: 0o600 }); }
-        const job = enqueue(user, { id: requestId, dedupe, kind: 'import', url: link, metadata: { title: metadata.title, authors: String(metadata.authors || ''), language: metadata.language || 'en', license: 'private', category: String(metadata.category || 'Research') } });
+        let job;
+        try { job = enqueue(user, { id: requestId, dedupe, kind: 'import', url: link, metadata: { title: metadata.title, authors: String(metadata.authors || ''), language: metadata.language || 'en', license: 'private', category: String(metadata.category || 'Research') } }); }
+        catch (error) { if (bytes) await rm(join(store.directory, 'jobs', requestId), { recursive: true, force: true }); throw error; }
         return response(res, { job }, 202);
       }
       if (path === '/api/jobs' && method === 'GET') { requireUser(); return response(res, { jobs: store.jobs(user.id).map(j => { const { metadata, url, pdfId, dedupe, ...safe } = j; return safe; }) }); }

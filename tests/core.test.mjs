@@ -58,6 +58,8 @@ test('API enforces ownership, CSRF, persistent sessions, comment idempotency, pr
     assert.equal((await call('/session', { token: a })).data.user.id, 'a');
     assert.match((await call('/session', { token: a })).headers.get('set-cookie'), /HttpOnly; SameSite=Lax; Max-Age=7776000/);
     assert.equal((await call('/auth/local', { method: 'POST', body: {}, from: 'https://evil.test' })).status, 403);
+    const oauth = await call('/auth/callback?state=missing&iss=https%3A%2F%2Fgithub.com%2Flogin%2Foauth');
+    assert.match(oauth.data.error, /Sign-in expired/, 'valid encoded OAuth issuer query must reach the callback handler');
     const id = randomUUID();
     assert.equal((await call('/papers/markdown', { method: 'POST', body: { title: 'Private', mmd: '# Private', requestId: id } })).status, 401);
     const created = await call('/papers/markdown', { token: a, method: 'POST', body: { title: 'Private', mmd: '# Private\n\nOriginal text.', requestId: id } });
