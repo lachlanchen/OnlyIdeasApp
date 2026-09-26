@@ -1,0 +1,4 @@
+Signer #1 certificate DN: CN=OnlyIdeas, O=LazyingArt LLC, C=US
+Signer #1 certificate SHA-256 digest: bc0fdbe374ae9e31fe1f487014417768e74d5ab1f1b06dc76cc528cf5e0b85b0
+Signer #1 certificate SHA-1 digest: e0e7ef9f7f5d3cebcb5a4540ac301703895d22ad
+Signer #1 certificate MD5 digest: 1639cc1914bfb6bdcc97e1776e9b473c

@@ -59,19 +59,31 @@ native reader. Use only project-owned test devices and clean them up after QA.
 
 ## Verification and distribution
 
-Build 0.3.0 (2) is being prepared for the existing internal test groups. See the
-release record for the confirmed upload state. Public store review remains a
-separate pending release gate.
+Build **0.3.0 (2)** is available in the existing internal TestFlight and Google
+Play groups. Apple reports `VALID` / `IN_BETA_TESTING`; Google reports **Available
+to internal testers**, **Not reviewed**. The existing owner is enrolled in both.
+Use TestFlight with the invited Apple account, or the restricted
+[Google Play test link](https://play.google.com/apps/internaltest/4701512710674115784).
+Public store review remains pending the requirements in the
+[store publication record](store-release-20260926.md).
+
+Source: `d6f9bf4e78361b17f209c572c3c4d63479d9a9e6`. Artifact hashes, native checks
+and exact distribution outcomes are in the
+[release manifest](../evidence/native-0.3/release-manifest.json).
 
 Live verification passed for account-isolated chat, saved history, local-model
 responses through LazyEdge, research search, a direct arXiv PDF download and
 Mathpix conversion. The converted private paper retained 10,500 characters,
 12 sections and one figure. No public test discussion or paper was published.
 
-Native iOS navigation/composer/reader XCTest passed. Android native build and
-secure-session instrumentation passed; final device evidence is recorded with
-the release. KVM simulator screenshots have incomplete rendering of some iOS 26
-system glass surfaces; physical-device visual coverage remains limited.
+Native iOS navigation, Profile, text controls, keyboard dismissal, reader and
+offline cold-launch XCTest passed on the iOS 26.3 simulator. Android API 34
+emulator checks passed for actual account sign-in, chat history, native Profile,
+the signed release reader and private offline cold launch. Two secure-session
+instrumentation tests passed. Android lint reported zero errors and 36 warnings;
+11 server/agent tests and the production build passed. KVM screenshots have
+incomplete rendering of some iOS 26 system glass surfaces; physical-device visual
+coverage and iOS sign-in end-to-end QA remain limited.
 
 When upgrading from the earlier web wrapper, existing cloud papers and secure
 sessions remain available. Offline papers saved by the earlier wrapper should be

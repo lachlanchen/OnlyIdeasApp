@@ -1,0 +1,112 @@
+{
+  "app": "OnlyIdeas",
+  "bundleId": "art.onlyideas.app",
+  "version": "0.3.0",
+  "build": 2,
+  "sourceCommit": "d6f9bf4e78361b17f209c572c3c4d63479d9a9e6",
+  "verifiedAt": "2026-09-26T14:55:43.389016+00:00",
+  "artifacts": [
+    {
+      "filename": "OnlyIdeas-0.3.0-2.aab",
+      "bytes": 4609794,
+      "sha256": "054e084181b01f796031b61dd9cebaaf26a414255192b2317aa2c3254f7d2d03"
+    },
+    {
+      "filename": "OnlyIdeas-0.3.0-2.apk",
+      "bytes": 4198120,
+      "sha256": "7bb22f87a995d71158e0cf031299d39ec897ed44093fd8bf6afc6809a4c1ac11"
+    },
+    {
+      "filename": "OnlyIdeas-0.3.0-2.ipa",
+      "bytes": 5028300,
+      "sha256": "77aa2efa106565f4bac1d703033a18947d00beca41edaaebc7f7b28904ad4a42"
+    }
+  ],
+  "tests": {
+    "serverAndAgent": {
+      "passed": 11,
+      "failed": 0
+    },
+    "typeScriptAndProductionBuild": true,
+    "profileReadmes": 11,
+    "android": {
+      "device": "API 34 emulator",
+      "nativeSessionInstrumentationPassed": 2,
+      "lintErrors": 0,
+      "lintWarnings": 36,
+      "releaseInstall": true,
+      "profileOpensWithoutLogout": true,
+      "livePKCELogin": true,
+      "chatHistory": true,
+      "privateOfflineColdLaunch": true,
+      "mathNodes": 6,
+      "downloadedFigures": 1,
+      "defaultPaperFontPx": 22
+    },
+    "ios": {
+      "device": "iOS 26.3 simulator on KVM",
+      "nativeUITestPassed": 1,
+      "profileTextControls": true,
+      "composerAndKeyboardDismissal": true,
+      "onlineReader": true,
+      "offlineColdLaunch": true,
+      "resultBundle": "Native-0.3-fresh.xcresult",
+      "physicalDeviceTested": false,
+      "systemGlassScreenshotRenderingLimited": true
+    }
+  },
+  "signing": {
+    "androidCertificateSha256": "bc0fdbe374ae9e31fe1f487014417768e74d5ab1f1b06dc76cc528cf5e0b85b0",
+    "iosExportMethod": "app-store-connect",
+    "iosExportedSignatureVerified": true,
+    "appleValidation": "passed, no errors"
+  },
+  "packagedNativeRendererMatchesSourceBuild": {
+    "apk": true,
+    "aab": true,
+    "ipa": true
+  },
+  "liveAgent": {
+    "model": "localllm-pocket",
+    "gateway": "LazyEdge",
+    "search": "arXiv with OpenAlex fallback",
+    "directPdfDownload": true,
+    "mathpixConversion": {
+      "state": "completed",
+      "visibility": "private",
+      "pages": 5,
+      "characters": 10500,
+      "sections": 12,
+      "figures": 1
+    },
+    "cloudRelease": "6e689bb92358d1b9",
+    "workstationRelease": "133510375700e302"
+  },
+  "distribution": {
+    "google": {
+      "versionCode": 2,
+      "track": "internal",
+      "state": "Available to internal testers",
+      "review": "Not reviewed",
+      "selectedTesterList": "OnlyIdeas Internal Owner"
+    },
+    "apple": {
+      "buildId": "06611810-72b9-460a-949d-7b42fbc95658",
+      "version": "0.3.0",
+      "build": "2",
+      "processingState": "VALID",
+      "internalBuildState": "IN_BETA_TESTING",
+      "externalBuildState": "READY_FOR_BETA_SUBMISSION",
+      "group": "OnlyIdeas Internal",
+      "autoNotifyEnabled": true,
+      "ownerTesterState": "INSTALLED"
+    },
+    "formalPublicReviewSubmitted": false
+  },
+  "limitations": [
+    "iOS end-to-end OAuth and physical-device visual coverage remain limited",
+    "KVM screenshots incompletely render iOS 26 system glass surfaces",
+    "Previous wrapper offline copies need downloading again",
+    "Public review still requires account deletion, fuller moderation, iOS sign-in compliance and listing preparation"
+  ]
+}

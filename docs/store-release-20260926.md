@@ -1,5 +1,9 @@
 # OnlyIdeas first store test publication
 
+**Latest update:** [Native reading and agent chat · 0.3](native-0.3.md) is now
+available as build 2 in the same internal groups. The original build 1 record
+below is retained as history; the build 2 outcome is appended at the end.
+
 Owner request: upload OnlyIdeas to Apple and Google Play for testing and review.
 The standalone application is `art.onlyideas.app`, not EchoMind's embedded
 OnlyIdeas module or the legacy OnlyIdeasResearch application.
@@ -106,3 +110,23 @@ reading/picker/offline evidence is in [native verification](verification-0.2.md)
 Sources: [Apple account deletion](https://developer.apple.com/support/offering-account-deletion-in-your-app/),
 [Apple review guidelines](https://developer.apple.com/app-store/review/guidelines/),
 [Google internal testing](https://support.google.com/googleplay/android-developer/answer/9845334?hl=en).
+
+## Native redesign · 0.3.0 (2)
+
+- Source `d6f9bf4e78361b17f209c572c3c4d63479d9a9e6`; signed artifact hashes in the
+  [0.3 release manifest](../evidence/native-0.3/release-manifest.json).
+- Native SwiftUI and Android screens, larger adjustable text, dedicated Profile,
+  persistent chat history, and a workstation paper agent through LazyEdge.
+- Public web/API updated; private live PDF conversion retained equations, one
+  figure, 12 sections and 10,500 characters. No private QA content was published.
+- Apple validation and one upload succeeded without errors. Delivery/build ID
+  `06611810-72b9-460a-949d-7b42fbc95658`; processing `VALID`. Build 2 is attached to
+  the existing OnlyIdeas Internal group and reports `IN_BETA_TESTING`, with
+  automatic notifications enabled. The existing owner tester reports `INSTALLED`.
+- Google internal release **0.3.0 (2) - Native reader and paper agent** is active,
+  **Available to internal testers**, **Not reviewed**. The OnlyIdeas Internal
+  Owner list remains the only selected list. The restricted test link is unchanged.
+- No external beta or production review was submitted; the public-release
+  requirements above remain open. Store review status is separate from testing.
+- OnlyIdeas emulator, simulator, archive job and temporary store tab were cleaned
+  up. The production paper worker and restricted LazyEdge tunnel remain enabled.
