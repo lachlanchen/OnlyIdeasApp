@@ -49,6 +49,11 @@ No other project's identity, profile, simulator or desktop was replaced.
 ## Limits
 
 No physical iPhone/Android test or completed share-to-another-app transfer is
-claimed. iOS GitHub interaction has not been exercised end to end on a physical
-phone. Store review, TestFlight and Play internal-track publication have not
+claimed. iOS GitHub sign-in has not yet been exercised end to end; the full
+native OAuth interaction was tested on Android. Store review, TestFlight and Play internal-track publication have not
 occurred. See [native.md](native.md) for the remaining public-release gates.
+
+Final APK and exported IPA contain the same 17 web assets as the verified
+production bundle. The exported IPA passes deep/strict signature verification.
+Artifact hashes and source provenance are in
+[release-manifest.json](../evidence/native-0.2/release-manifest.json).

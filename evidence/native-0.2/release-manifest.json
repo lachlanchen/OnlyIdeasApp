@@ -1,0 +1,56 @@
+{
+  "app": "OnlyIdeas",
+  "bundleId": "art.onlyideas.app",
+  "version": "0.2.0",
+  "build": 1,
+  "sourceCommit": "d9f6cef55e7df9f33b238a54b396e2e30ff11c72",
+  "verifiedAt": "2026-09-26T08:33:37.068803+00:00",
+  "distribution": "local signed preview; no store upload",
+  "artifacts": [
+    {
+      "filename": "OnlyIdeas-0.2.0-1.aab",
+      "bytes": 3241480,
+      "sha256": "ee25234b7d5e399eb53ca33b63e0ba223dec92fec8ef85d3dcfb71b59b458097"
+    },
+    {
+      "filename": "OnlyIdeas-0.2.0-1.apk",
+      "bytes": 2782024,
+      "sha256": "f719fdc3eeff9525e27e3444cefda3d4553b72273857024808e2e9d30e0b9825"
+    },
+    {
+      "filename": "OnlyIdeas-0.2.0-1.ipa",
+      "bytes": 2999454,
+      "sha256": "03c7f58592e0c19562abfe31fe4cbc10f7207be9b10cf95821f2e6fa1a3dca35"
+    }
+  ],
+  "android": {
+    "targetSdk": 36,
+    "minSdk": 24,
+    "certificateSha256": "bc0fdbe374ae9e31fe1f487014417768e74d5ab1f1b06dc76cc528cf5e0b85b0",
+    "releaseApkInstalledAndTested": true
+  },
+  "ios": {
+    "minimumOS": "15.0",
+    "archiveAndExportSucceeded": true,
+    "exportedSignatureVerified": true,
+    "exportMethod": "app-store-connect"
+  },
+  "packagedWebAssetsMatchCurrentDist": {
+    "apk": true,
+    "ipa": true,
+    "fileCount": 17
+  },
+  "cloudRelease": "2c88c3feac558225",
+  "tests": {
+    "serverDataAndNativeAuth": 8,
+    "android": "API 34 emulator; authentication, private offline reading, picker, share sheet, release smoke",
+    "ios": "iOS 26.3 simulator; final debug build online and offline reader checks"
+  },
+  "remaining": [
+    "Physical-device QA",
+    "iOS OAuth end-to-end interaction",
+    "Account deletion and moderation/blocking",
+    "Store privacy, sign-in compliance and listing preparation",
+    "TestFlight / Play internal-track upload"
+  ]
+}
