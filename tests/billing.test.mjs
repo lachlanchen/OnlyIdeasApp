@@ -9,7 +9,8 @@ import {promisify} from 'node:util';
 import {Store} from '../server/store.mjs';
 import {creditSummary,creditTransaction,reserveImport,finishImportCredits} from '../server/credits.mjs';
 import {billingAccount,applyVerifiedPurchase,activePlan,deleteBillingAccount} from '../server/billing-ledger.mjs';
-import {appleProof,googleProof,createPurchaseVerifiers} from '../server/purchase-verification.mjs';
+import {appleProof,googleProof,createPurchaseVerifiers,verifyAppleSigned} from '../server/purchase-verification.mjs';
+import {VerificationStatus} from '@apple/app-store-server-library';
 const config={credits:{enabled:true}};
 function fixture(t){const directory=mkdtempSync(join(tmpdir(),'onlyideas-billing-')),store=new Store(directory);t.after(()=>{store.close();rmSync(directory,{recursive:true,force:true});});return {directory,store};}
 function proof(store,fields={}){return {platform:'apple',environment:'Sandbox',accountToken:billingAccount(store,'reader'),receipt:randomUUID(),subscription:'subscription-one',product:'art.onlyideas.reader.monthly',expires:Date.now()+30*86400_000,observed:Date.now(),purchased:Date.now(),paid:true,revoked:false,state:'active',...fields};}
@@ -88,6 +89,21 @@ test('official Apple verifier rejects unsigned forged receipts before any transa
  const verifier=createPurchaseVerifiers({billing:{allowSandbox:true,apple:{keyFile:key,keyId:'TESTKEY',issuerId:randomUUID()}}});
  const fake=Buffer.from(JSON.stringify({alg:'none'})).toString('base64url')+'.'+Buffer.from(JSON.stringify({bundleId:'art.onlyideas.app',transactionId:'123',environment:'Sandbox'})).toString('base64url')+'.fake';
  await assert.rejects(verifier.apple(fake),/signature could not be verified/);
+});
+
+test('sandbox notification fallback handles the SDK app-ID check without bypassing verification',async()=>{
+ const calls=[],signed='opaque-signed-test-notification';
+ const reject=status=>({verifier:{verifyAndDecodeNotification:async()=>{calls.push(status);throw Object.assign(new Error('SDK rejected'),{status});}}});
+ const sandbox={verifier:{verifyAndDecodeNotification:async value=>{assert.equal(value,signed);calls.push('sandbox verified');return {notificationType:'TEST',data:{bundleId:'art.onlyideas.app',environment:'Sandbox'}};}}};
+ const production=reject(VerificationStatus.INVALID_APP_IDENTIFIER);
+ const result=await verifyAppleSigned(new Map([['Production',production],['Sandbox',sandbox]]),signed,true);
+ assert.equal(result.environment,'Sandbox');assert.equal(result.decoded.notificationType,'TEST');assert.deepEqual(calls,[VerificationStatus.INVALID_APP_IDENTIFIER,'sandbox verified']);
+ calls.length=0;
+ await assert.rejects(verifyAppleSigned(new Map([['Production',production]]),signed,true),/environment is not enabled/);
+ await assert.rejects(verifyAppleSigned(new Map([['Production',production],['Sandbox',reject(VerificationStatus.INVALID_APP_IDENTIFIER)]]),signed,true),/environment is not enabled/);
+ calls.length=0;
+ await assert.rejects(verifyAppleSigned(new Map([['Production',reject(VerificationStatus.VERIFICATION_FAILURE)],['Sandbox',sandbox]]),signed,true),/signature could not be verified/);
+ assert.deepEqual(calls,[VerificationStatus.VERIFICATION_FAILURE]);
 });
 
 test('purchase service persists before acknowledgement and recovers after restart without a second grant',async t=>{

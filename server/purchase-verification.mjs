@@ -37,6 +37,22 @@ export function googleProof(purchase,order,token) {
     state:revoked?'revoked':!latest||expires<=Date.now()?'expired':states[purchase.subscriptionState]};
 }
 
+export async function verifyAppleSigned(services,signed,notification=false) {
+  requireValue(services,'App Store purchase verification is not connected yet.',503);
+  requireValue(typeof signed==='string'&&signed.length>20&&signed.length<=100_000,'Invalid signed purchase.');
+  for(const [environment,service] of services) {
+    try {return {environment,service,decoded:await service.verifier[notification?'verifyAndDecodeNotification':'verifyAndDecodeTransaction'](signed)};}
+    catch(error) {
+      // The SDK checks appAppleId before environment for notifications. Sandbox
+      // TEST notifications omit that ID, so the production verifier reports an
+      // app mismatch first. The next verifier still checks the full signature,
+      // bundle and environment; a signature failure never falls through.
+      if(![VerificationStatus.INVALID_ENVIRONMENT,VerificationStatus.INVALID_APP_IDENTIFIER].includes(error.status))throw new AppError('The App Store signature could not be verified. Try restoring purchases.',400);
+    }
+  }
+  throw new AppError('This purchase environment is not enabled.',403);
+}
+
 export function createPurchaseVerifiers(config,{googleAuth=null}={}) {
   const settings=config.billing||{};
   let apple=null,google=googleAuth;
@@ -54,15 +70,7 @@ export function createPurchaseVerifiers(config,{googleAuth=null}={}) {
     const client=await google.getClient();
     return (await client.request({url:'https://androidpublisher.googleapis.com/androidpublisher/v3/applications/'+bundle+path,method,data,timeout:30_000})).data;
   };
-  async function decodeApple(signed,notification=false) {
-    requireValue(apple,'App Store purchase verification is not connected yet.',503);
-    requireValue(typeof signed==='string'&&signed.length>20&&signed.length<=100_000,'Invalid signed purchase.');
-    for(const [environment,service] of apple) {
-      try {return {environment,service,decoded:await service.verifier[notification?'verifyAndDecodeNotification':'verifyAndDecodeTransaction'](signed)};}
-      catch(error) {if(error.status!==VerificationStatus.INVALID_ENVIRONMENT)throw new AppError('The App Store signature could not be verified. Try restoring purchases.',400);}
-    }
-    throw new AppError('This purchase environment is not enabled.',403);
-  }
+  const decodeApple=(signed,notification=false)=>verifyAppleSigned(apple,signed,notification);
   return {
     ready:{apple:!!apple,google:!!google},
     async apple(signed) {
