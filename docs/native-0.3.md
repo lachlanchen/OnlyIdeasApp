@@ -76,6 +76,12 @@ responses through LazyEdge, research search, a direct arXiv PDF download and
 Mathpix conversion. The converted private paper retained 10,500 characters,
 12 sections and one figure. No public test discussion or paper was published.
 
+A [fresh live web/service verification on 2026-09-27](live-agent-verification-20260927.md)
+also passed research chat, direct PDF download, deduplicated import, a new
+one-page upload and Mathpix conversion, equation/figure rendering, private
+discussion persistence and saved agent history. This does not extend the native
+device coverage described below.
+
 Native iOS navigation, Profile, text controls, keyboard dismissal, reader and
 offline cold-launch XCTest passed on the iOS 26.3 simulator. Android API 34
 emulator checks passed for actual account sign-in, chat history, native Profile,
