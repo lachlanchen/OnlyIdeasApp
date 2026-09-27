@@ -571,7 +571,7 @@ public class MainActivity extends AppCompatActivity {
             + " conversations and personal papers stay in your account.");
     for (String policy : new String[]{"Support", "Privacy", "Terms"}) {
       about.addView(button(policy.equals("Terms") ? "Community Terms" : policy, false,
-          () -> startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://agent.onlyideas.art/" + policy.toLowerCase(java.util.Locale.ROOT) + ".html")))));
+          () -> startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://lachlan.lazying.art/OnlyIdeasApp/" + policy.toLowerCase(java.util.Locale.ROOT) + ".html")))));
     }
     addCard(c, about);
     if (account != null) {
@@ -1344,7 +1344,7 @@ public class MainActivity extends AppCompatActivity {
           terms.setText("I accept the Community Terms"); terms.setTextSize(18); terms.setTextColor(ink);
           if (isPublic) {
             c.addView(terms);
-            c.addView(button("Read Community Terms", false, () -> startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://agent.onlyideas.art/terms.html")))));
+            c.addView(button("Read Community Terms", false, () -> startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://lachlan.lazying.art/OnlyIdeasApp/terms.html")))));
             caption(c, "Public comments are reviewed before other readers can see them.");
           }
           EditText draft = new EditText(this);

@@ -36,7 +36,7 @@ App code, content and private account data have separate homes. MMD preserves Te
 
 ## Status
 
-The cloud service is live. Candidate 1.0.0 (5) adds account deletion, moderation queues, blocking, in-app reports and Sign in with Apple on iOS. Automated checks and native reader/offline tests passed. Formal store review, final listing assets and live Apple sign-in verification are still pending. Existing internal groups remain the testing channel.
+The cloud service is live. Candidate 1.0.0 (6) adds account deletion, moderation queues, blocking, in-app reports and Sign in with Apple on iOS. Automated checks and native reader/offline tests passed. Formal store review, final listing assets and live Apple sign-in verification are still pending. Existing internal groups remain the testing channel.
 
 Version 0.3 introduces SwiftUI screens on iOS and native Android controls, larger adjustable reading text, a dedicated Profile page, and persistent agent conversations. A workstation agent searches open research indexes and downloads PDFs, using a local model through LazyEdge. Choose Convert & add to create a private Mathpix reading copy with equations and figures. See the native update record for build and test status.
 

@@ -36,7 +36,7 @@ Le code, les contenus publics et les données privées sont séparés. MMD prés
 
 ## État
 
-Le service cloud est disponible. La version candidate 1.0.0 (5) ajoute la suppression de compte, les files de modération, le blocage, les signalements intégrés et la connexion avec Apple sur iOS. Les contrôles automatisés et les tests natifs de lecture, y compris hors ligne, ont réussi. La soumission officielle, les visuels définitifs et la vérification réelle de la connexion Apple restent en attente. Les groupes internes existants restent le canal de test.
+Le service cloud est disponible. La version candidate 1.0.0 (6) ajoute la suppression de compte, les files de modération, le blocage, les signalements intégrés et la connexion avec Apple sur iOS. Les contrôles automatisés et les tests natifs de lecture, y compris hors ligne, ont réussi. La soumission officielle, les visuels définitifs et la vérification réelle de la connexion Apple restent en attente. Les groupes internes existants restent le canal de test.
 
 La version 0.3 apporte des écrans SwiftUI sur iOS et des commandes natives sur Android, un texte de lecture plus grand et réglable, une page Profil et des conversations enregistrées avec l’agent. Un agent sur la station de travail recherche dans les index de publications ouvertes et télécharge les PDF, avec un modèle local via LazyEdge. Choisissez de convertir et d’ajouter un article pour créer une copie privée avec Mathpix, équations et figures comprises. Le journal de la mise à jour native précise l’état des versions et des tests.
 

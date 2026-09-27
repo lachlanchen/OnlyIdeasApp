@@ -60,6 +60,20 @@ Back up SQLite with the SQLite backup API or `VACUUM INTO`, along with private
 figure files. Keep a matching manifest; do not copy a live SQLite file without WAL.
 No private data goes in Git. Restore testing is required before broad availability.
 
+### Static policy mirror
+
+Store policy checks encountered timeouts resolving the application's authoritative
+DNS. The same privacy, terms, support and account-deletion content is also published
+on this repository's `gh-pages` branch. Its canonical Pages address is
+`https://lachlan.lazying.art/OnlyIdeasApp/` (the account's custom Pages domain).
+Native apps and store forms use this mirror. The API origin remains unchanged.
+
+After a policy change, run `python3 tools/export-policy-pages.py <empty-directory>`
+and review/copy its output to a separate `gh-pages` checkout. Commit and push that
+branch, then verify all four pages return HTTPS 200. The exporter has no deployment
+side effects. Only these public HTML pages belong there; never copy runtime data,
+credentials, paper payloads or the application database into the Pages branch.
+
 ## Source references
 
 - [Mathpix document conversion](https://docs.mathpix.com/guides/pdf-processing)

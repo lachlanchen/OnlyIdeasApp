@@ -36,7 +36,10 @@ export async function searchPapers(query) {
   return parseOpenAlex(JSON.parse((await downloadPublic(url.href,{maxBytes:2_000_000})).toString()));
 }
 export function directPaper(text) {
-  const value=text.match(/https:\/\/[^\s<>"\]]+/)?.[0]?.replace(/[),.;]+$/,'');if(!value)return null;
+  // Preserve a supplied identifier instead of letting a language model turn an
+  // exact-paper request into a broad keyword search.
+  const identifier=text.match(/\b(\d{2}(?:0[1-9]|1[0-2])\.\d{4,5}(?:v\d+)?)\b/i)?.[1];
+  const value=text.match(/https:\/\/[^\s<>"\]]+/)?.[0]?.replace(/[),.;]+$/,'') || (identifier ? `https://arxiv.org/abs/${identifier}` : '');if(!value)return null;
   const u=new URL(value);requireValue(!u.username&&!u.password&&!u.port,'Use a public HTTPS paper link.');
   if(['arxiv.org','www.arxiv.org','export.arxiv.org'].includes(u.hostname)) {
     const id=u.pathname.match(/^\/(?:abs|pdf|html)\/([a-zA-Z0-9.\/-]+)$/)?.[1]?.replace(/\.pdf$/,'');

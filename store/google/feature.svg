@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="500" viewBox="0 0 1024 500">
+<rect width="1024" height="500" fill="#f7f6ef"/>
+<path d="M72 72h880M72 428h880" stroke="#dce4de" stroke-width="2"/>
+<g transform="translate(72 166) scale(2.625)"><rect width="64" height="64" rx="18" fill="#244f45"/><path d="M18 22c7-5 15-2 14 5-1 8-12 7-12 15m24-20c-7-5-15-2-14 5 1 8 12 7 12 15" fill="none" stroke="#f6f4ed" stroke-width="4" stroke-linecap="round"/><circle cx="32" cy="46" r="3" fill="#e2bb71"/></g>
+<text x="288" y="248" font-family="DejaVu Sans,sans-serif" font-size="76" font-weight="700" letter-spacing="-3" fill="#244f45">OnlyIdeas</text>
+<text x="294" y="306" font-family="DejaVu Sans,sans-serif" font-size="27" fill="#5e7168">Read papers. Follow questions.</text>
+</svg>

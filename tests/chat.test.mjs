@@ -63,6 +63,9 @@ test('paper agent uses observed metadata and validates direct PDFs before offeri
   const papers=parseArxiv('<feed><entry><id>http://arxiv.org/abs/1706.03762v7</id><title>Attention &amp; learning</title><author><name>A. Author</name></author><summary>Observed abstract</summary><published>2017-06-12</published></entry></feed>');
   assert.equal(papers[0].title,'Attention & learning');assert.equal(papers[0].year,'2017');
   assert.equal(directPaper('Read https://arxiv.org/abs/1706.03762').pdfUrl,'https://arxiv.org/pdf/1706.03762');
+  assert.equal(directPaper('Find Attention Is All You Need, arXiv 1706.03762v7').pdfUrl,'https://arxiv.org/pdf/1706.03762v7');
+  assert.equal(directPaper('Find paper 1512.03385').pdfUrl,'https://arxiv.org/pdf/1512.03385');
+  assert.equal(directPaper('Use reading size 1820.00001'),null);
   assert.throws(()=>directPaper('https://user:password@example.org/paper.pdf'),/public HTTPS/);
   const events=[];
   const task={text:'Read https://arxiv.org/abs/1706.03762',messages:[]};

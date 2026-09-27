@@ -51,7 +51,7 @@ struct NativeSignIn: View {
           Text("Continue with GitHub").font(.headline).frame(maxWidth: .infinity).padding()
         }.buttonStyle(.bordered).disabled(store.signingIn)
         Text("Use the same sign-in method to return to your account. Apple and GitHub accounts are separate.").font(.footnote).foregroundColor(.secondary)
-        Link("Privacy", destination: URL(string: "https://agent.onlyideas.art/privacy.html")!)
+        Link("Privacy", destination: URL(string: "https://lachlan.lazying.art/OnlyIdeasApp/privacy.html")!)
         Spacer()
       }.padding(28).toolbar { Button("Cancel") { dismiss() } }
     }
@@ -411,9 +411,9 @@ struct NativeProfile: View {
         Text(
           "Read papers with their equations and figures. Use the connected paper agent to find your next read. Conversations and personal uploads stay in your account."
         ).font(.body).foregroundColor(.secondary)
-        Link("Support", destination: URL(string: "https://agent.onlyideas.art/support.html")!)
-        Link("Privacy", destination: URL(string: "https://agent.onlyideas.art/privacy.html")!)
-        Link("Community Terms", destination: URL(string: "https://agent.onlyideas.art/terms.html")!)
+        Link("Support", destination: URL(string: "https://lachlan.lazying.art/OnlyIdeasApp/support.html")!)
+        Link("Privacy", destination: URL(string: "https://lachlan.lazying.art/OnlyIdeasApp/privacy.html")!)
+        Link("Community Terms", destination: URL(string: "https://lachlan.lazying.art/OnlyIdeasApp/terms.html")!)
       }
       if store.account != nil {
         Section {
@@ -750,7 +750,7 @@ struct NativeDiscussion: View {
           }
           if paper.visibility == "public" {
             Toggle("I accept the Community Terms", isOn: $acceptedTerms)
-            Link("Read Community Terms", destination: URL(string: "https://agent.onlyideas.art/terms.html")!)
+            Link("Read Community Terms", destination: URL(string: "https://lachlan.lazying.art/OnlyIdeasApp/terms.html")!)
             Text("Public comments are reviewed before other readers can see them.").font(.footnote).foregroundColor(.secondary)
           }
           TextEditor(text: $draft).font(.title3).frame(height: 130)
