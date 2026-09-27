@@ -7,6 +7,8 @@ import { providerJSON } from './network.mjs';
 import { startWorker } from './providers.mjs';
 import { nativeOrigins, nativeFlow, startNative, finishNative, redeemNative } from './native-auth.mjs';
 import { createChats } from './chat.mjs';
+import { deleteAccount, visibleComments, acceptTerms, blocks } from './community.mjs';
+import { createAppleAuth } from './apple-auth.mjs';
 const uuid = /^[a-f0-9-]{36}$/;
 const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif', '.woff2': 'font/woff2', '.ttf': 'font/ttf', '.json': 'application/json' };
 export function createApp(store, config, { worker = true, provider = providerJSON } = {}) {
@@ -18,6 +20,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
   const cookie = (name, value, seconds) => `${name}=${value}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${seconds}${secure ? '; Secure' : ''}`;
   const stopWorker = worker ? startWorker(store, config) : () => {};
   const chats = createChats(store, config);
+  const apple = createAppleAuth(store, config, provider);
   const limits = new Map();
   const response = (res, data, code = 200) => { res.writeHead(code, { 'Content-Type': 'application/json; charset=utf-8' }); res.end(JSON.stringify(data)); };
   const readBody = async (req, max = 100_000) => {
@@ -25,7 +28,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
     for await (const chunk of req) { size += chunk.length; requireValue(size <= max, 'Upload is too large.', 413); chunks.push(chunk); }
     return Buffer.concat(chunks);
   };
-  const json = async req => { try { return JSON.parse((await readBody(req, 2_100_000)).toString()); } catch (e) { if (e instanceof AppError) throw e; throw new AppError('The request could not be read.'); } };
+  const json = async req => { try { const data = JSON.parse((await readBody(req, 2_100_000)).toString()); if (req.onlyideasUser) store.requireActive(req.onlyideasUser.id); return data; } catch (e) { if (e instanceof AppError) throw e; throw new AppError('The request could not be read.'); } };
   const limit = (key, max = 40) => {
     const now = Date.now(); const entry = limits.get(key);
     const value = !entry || entry.until < now ? { count: 0, until: now + 60_000 } : entry;
@@ -66,6 +69,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
       const cookies = Object.fromEntries(String(req.headers.cookie || '').split(';').map(x => x.trim().split('=')));
       const token = native ? String(req.headers.authorization || '').match(/^Bearer ([a-f0-9-]{72})$/)?.[1] : nativeOrigin ? null : cookies[cookieName];
       const user = store.session(token);
+      req.onlyideasUser = user;
       if (user && !native) res.setHeader('Set-Cookie', cookie(cookieName, token, 90 * 86400));
       const requireUser = () => { requireValue(user, 'Sign in to save papers and join the conversation.', 401); return user; };
       if (path === '/api/chats' || path.startsWith('/api/chats/')) {
@@ -73,9 +77,17 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         const result = await chats.client(path, method, user, method === 'POST' ? await json(req) : {}, enqueue);
         requireValue(result, 'Not found.', 404); return response(res, result);
       }
-      const paperFor = id => { const p = store.paper(id); requireValue(p && (p.visibility === 'public' || p.owner === user?.id), 'Paper not found.', 404); return p; };
+      const paperFor = id => { const p = store.paper(id); requireValue(p && store.active(p.owner) && !store.blocked(user?.id, p.owner) && (p.visibility === 'public' || p.owner === user?.id), 'Paper not found.', 404); return p; };
       if (path.startsWith('/api/')) limit(user?.id || req.socket.remoteAddress, 240);
-      if (path === '/api/health' && method === 'GET') return response(res, { service: 'onlyideas', version: '0.3.0', ok: true });
+      if (path === '/api/health' && method === 'GET') return response(res, { service: 'onlyideas', version: '1.0.0', ok: true });
+      if (path === '/api/auth/apple/start' && method === 'POST') {
+        requireValue(native, 'Open sign-in from the app.', 403); limit(`apple:${req.socket.remoteAddress}`, 20);
+        return response(res, apple.start((await json(req)).challenge));
+      }
+      if (path === '/api/auth/apple/complete' && method === 'POST') {
+        requireValue(native, 'Open sign-in from the app.', 403); limit(`apple:${req.socket.remoteAddress}`, 20);
+        return response(res, await apple.complete(await json(req)));
+      }
       if (path === '/api/auth/native/start' && method === 'POST') {
         requireValue(native, 'Open sign-in from the app.', 403);
         requireValue(config.github?.clientId && config.github?.clientSecret, 'GitHub sign-in is unavailable.', 503);
@@ -86,11 +98,36 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         requireValue(native, 'Open sign-in from the app.', 403);
         const b = await json(req); return response(res, redeemNative(store, b.flow, b.verifier));
       }
-      if (path === '/api/session' && method === 'GET') return response(res, { user, development: !!config.development, capabilities: { login: !!config.github?.clientId, pdf: !!config.mathpix?.appKey, assistant: !!config.model?.url, publishing: !!(config.github?.contentToken || config.github?.checkout) }, languages, maxPages: config.maxPages || 30 });
+      if (path === '/api/session' && method === 'GET') return response(res, { user, development: !!config.development, capabilities: { login: !!config.github?.clientId, apple: apple.enabled, pdf: !!config.mathpix?.appKey, assistant: !!config.model?.url, publishing: !!(config.github?.contentToken || config.github?.checkout) }, languages, maxPages: config.maxPages || 30 });
       if (path === '/api/auth/local' && method === 'POST') {
         requireValue(config.development && ['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(req.socket.remoteAddress), 'Not available.', 404);
         const local = { id: 'local-reader', name: 'Local reader', login: 'local-reader' };
         res.setHeader('Set-Cookie', cookie(cookieName, store.createSession(local), 90 * 86400)); return response(res, { user: local });
+      }
+      if (path === '/api/account' && method === 'DELETE') {
+        requireUser(); const b = await json(req);
+        requireValue(b.confirm === 'DELETE', 'Confirm permanent account deletion.');
+        await apple.revoke(user);
+        await deleteAccount(store, user);
+        if (!native) res.setHeader('Set-Cookie', cookie(cookieName, '', 0));
+        return response(res, { ok: true });
+      }
+      if (path === '/api/blocks' && method === 'GET') { requireUser(); return response(res, { blocks: blocks(store, user) }); }
+      if (path === '/api/reports' && method === 'POST') {
+        requireUser(); limit(`report:${user.id}`, 5); const b = await json(req);
+        requireValue(typeof b.reason === 'string' && b.reason.trim().length >= 3 && b.reason.length <= 5000, 'Describe the issue in 3–5,000 characters.');
+        const context = String(b.context || '').slice(0, 1000);
+        const id = randomUUID();
+        store.db.prepare('INSERT INTO reports VALUES(?,?,?)').run(id, user.id, JSON.stringify({ context, reason: b.reason.trim(), createdAt: new Date().toISOString() }));
+        return response(res, { ok: true }, 201);
+      }
+      const unblock = path.match(/^\/api\/blocks\/([a-f0-9]{64})$/);
+      if (unblock && method === 'DELETE') {
+        requireUser();
+        for (const b of store.db.prepare('SELECT blocked FROM blocks WHERE owner=?').all(user.id)) {
+          if (hash(b.blocked) === unblock[1]) store.db.prepare('DELETE FROM blocks WHERE owner=? AND blocked=?').run(user.id, b.blocked);
+        }
+        return response(res, { ok: true });
       }
       if (path === '/api/auth/logout' && method === 'POST') {
         store.db.prepare('DELETE FROM sessions WHERE id=?').run(hash(token || ''));
@@ -120,7 +157,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         requireValue(result.access_token, 'GitHub did not complete sign-in. Please try again.', 502);
         const account = await provider('https://api.github.com/user', { headers: { Authorization: `Bearer ${result.access_token}`, Accept: 'application/vnd.github+json' } });
         requireValue(account.id && account.login, 'GitHub account details are unavailable.', 502);
-        const u = { id: `github-${account.id}`, name: account.name || account.login, login: account.login };
+        const u = { id: store.identity(`github-${account.id}`), name: account.name || account.login, login: account.login };
         if (data.flow) {
           finishNative(store, data.flow, u);
           res.setHeader('Set-Cookie', cookie(`${cookieName}-oauth`, '', 0));
@@ -131,7 +168,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         res.setHeader('Set-Cookie', [cookie(cookieName, store.createSession(u), 90 * 86400), cookie(`${cookieName}-oauth`, '', 0)]);
         res.writeHead(303, { Location: '/' }); return res.end();
       }
-      if (path === '/api/papers' && method === 'GET') return response(res, { papers: store.papers(user?.id).map(publicPaper) });
+      if (path === '/api/papers' && method === 'GET') return response(res, { papers: store.papers(user?.id).filter(p => store.active(p.owner) && !store.blocked(user?.id, p.owner)).map(publicPaper) });
       if (path === '/api/papers/markdown' && method === 'POST') {
         requireUser(); const data = await json(req); limit(`import:${user.id}`, 10);
         requireValue(uuid.test(data.requestId || ''), 'A request ID is required.');
@@ -168,15 +205,16 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         const p = paperFor(matchPaper[1]), action = matchPaper[2];
         if (!action && method === 'GET') return response(res, { paper: { ...p, isOwner: p.owner === user?.id, owner: undefined } });
         if (action === 'export' && method === 'GET') { res.writeHead(200, { 'Content-Type': 'text/markdown; charset=utf-8', 'Content-Disposition': `attachment; filename="${p.id}.mmd"` }); return res.end(p.mmd); }
-        if (action === 'comments' && method === 'GET') return response(res, { comments: store.db.prepare('SELECT body FROM comments WHERE paper=? ORDER BY created LIMIT 200').all(p.id).map(r => JSON.parse(r.body)).filter(c => c.visibility === 'public' || c.owner === user?.id).map(c => ({ ...c, canDelete: c.owner === user?.id, owner: undefined })) });
+        if (action === 'comments' && method === 'GET') return response(res, { comments: visibleComments(store, p.id, user) });
         if (action === 'comments' && method === 'POST') {
           requireUser(); limit(`comment:${user.id}`, 10); const b = await json(req);
+          if (p.visibility === 'public') acceptTerms(store, user, b.acceptTerms);
           requireValue(uuid.test(b.id || '') && typeof b.text === 'string' && b.text.trim().length > 0 && b.text.length <= 5000, 'Write a comment of up to 5,000 characters.');
           requireValue(!b.sectionId || p.sections.some(s => s.id === b.sectionId), 'Select a passage from this paper.');
           requireValue(b.revision === p.revision, 'The paper changed. Reload before commenting.');
           const prior = store.db.prepare('SELECT * FROM comments WHERE id=?').get(b.id);
           if (prior) { requireValue(prior.owner === user.id && prior.paper === p.id, 'Comment ID unavailable.', 409); return response(res, { ok: true }); }
-          const c = { id: b.id, paperId: p.id, owner: user.id, visibility: p.visibility, author: user.name, login: user.login, text: b.text.trim(), sectionId: b.sectionId || null, quote: String(b.quote || '').slice(0, 1200), revision: p.revision, createdAt: new Date().toISOString() };
+          const c = { id: b.id, paperId: p.id, owner: user.id, visibility: p.visibility === 'public' ? 'pending' : 'private', moderation: p.visibility === 'public' ? 'pending' : 'private', author: user.name, login: user.login, text: b.text.trim(), sectionId: b.sectionId || null, quote: String(b.quote || '').slice(0, 1200), revision: p.revision, createdAt: new Date().toISOString() };
           store.db.prepare('INSERT INTO comments VALUES(?,?,?,?,?)').run(c.id, p.id, user.id, JSON.stringify(c), Date.now()); return response(res, { ok: true }, 201);
         }
         if (action === 'notes') {
@@ -195,20 +233,31 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         if (action === 'publish' && method === 'POST') {
           requireUser(); requireValue(p.owner === user.id, 'Only the owner can publish.', 403); const b = await json(req);
           requireValue(config.github?.contentToken || config.github?.checkout, 'The public library connection is not configured yet.', 503);
+          acceptTerms(store, user, b.acceptTerms);
           p.license = b.license; p.source = String(b.source || ''); mayPublish(p, b.attestation); store.savePaper(p);
-          const job = enqueue(user, { kind: 'publish', paperId: p.id, dedupe: `publish:${p.id}:${p.revision}` }); return response(res, { job }, 202);
+          const job = enqueue(user, { kind: 'publish', paperId: p.id, dedupe: `publish:${p.id}:${p.revision}` });
+          if (job.state === 'queued') { job.state = 'awaiting_review'; job.message = 'Waiting for a community review before public sharing'; store.saveJob(job); }
+          return response(res, { job }, 202);
         }
       }
-      const comment = path.match(/^\/api\/comments\/([a-f0-9-]{36})(?:\/(report))?$/);
+      const comment = path.match(/^\/api\/comments\/([a-f0-9-]{36})(?:\/(report|block))?$/);
       if (comment) {
         requireUser(); const c = store.db.prepare('SELECT * FROM comments WHERE id=?').get(comment[1]); requireValue(c, 'Comment not found.', 404); paperFor(c.paper);
         if (!comment[2] && method === 'DELETE') { requireValue(c.owner === user.id, 'Only the author can delete this comment.', 403); store.db.prepare('DELETE FROM comments WHERE id=?').run(c.id); return response(res, { ok: true }); }
-        if (comment[2] && method === 'POST') { const b = await json(req); requireValue(typeof b.reason === 'string' && b.reason.trim() && b.reason.length <= 1000, 'Please describe the issue.'); store.db.prepare('INSERT OR REPLACE INTO reports VALUES(?,?,?)').run(`${user.id}:${c.id}`, user.id, JSON.stringify({ commentId: c.id, reason: b.reason, createdAt: new Date().toISOString() })); return response(res, { ok: true }); }
+        if (comment[2] === 'block' && method === 'POST') {
+          requireValue(c.owner !== user.id, 'You cannot block yourself.');
+          const data = JSON.parse(c.body);
+          requireValue(data.visibility === 'public' && data.moderation === 'approved', 'Comment not found.', 404);
+          store.db.prepare('INSERT OR REPLACE INTO blocks VALUES(?,?,?)').run(user.id, c.owner, String(data.author));
+          return response(res, { ok: true });
+        }
+        if (comment[2] === 'report' && method === 'POST') { const b = await json(req); requireValue(typeof b.reason === 'string' && b.reason.trim() && b.reason.length <= 1000, 'Please describe the issue.'); store.db.prepare('INSERT OR REPLACE INTO reports VALUES(?,?,?)').run(`${user.id}:${c.id}`, user.id, JSON.stringify({ commentId: c.id, reason: b.reason, createdAt: new Date().toISOString() })); return response(res, { ok: true }); }
       }
       const retry = path.match(/^\/api\/jobs\/([a-f0-9-]{36})\/retry$/);
       if (retry && method === 'POST') {
         requireUser(); limit(`retry:${user.id}`, 3);
         const j = store.job(retry[1]); requireValue(j?.owner === user.id, 'Request not found.', 404);
+        requireValue(j.kind !== 'publish', 'Publication decisions must be reviewed by support.', 403);
         requireValue(j.state === 'failed', 'This request is already running or complete.', 409);
         requireValue(!(j.kind === 'import' && j.submittedAt && !j.pdfId), 'The conversion receipt is uncertain. Contact support before retrying to avoid another charge.', 409);
         requireValue((j.retries || 0) < 3, 'Please contact support before retrying again.', 429);

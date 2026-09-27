@@ -9,9 +9,9 @@ let ready=false,pending:DocumentData|undefined
 host.OnlyIdeasRender=p=>{
   if(!ready){pending=p;return}
   host.OnlyIdeasStyle(p.fontSize||22,!!p.dark)
-  const html=host.markdownToHTML(p.mmd,{htmlTags:false,width:Math.max(280,root.clientWidth),linkify:false,accessibility:{assistiveMml:true},outMath:{include_svg:true}})
+  const html=host.markdownToHTML(p.mmd,{htmlTags:false,width:Math.max(280,root.clientWidth),linkify:false,typographer:false,accessibility:{assistiveMml:true},outMath:{include_svg:true}})
   root.innerHTML=DOMPurify.sanitize(html,{USE_PROFILES:{html:true,svg:true,mathMl:true},ADD_TAGS:['mjx-container','mjx-assistive-mml'],ADD_ATTR:['jax','focusable','viewBox'],FORBID_TAGS:['style','script','iframe','object','embed','form','input','button'],FORBID_ATTR:['srcdoc','srcset']})
-  for(const img of root.querySelectorAll('img')) {const path=img.getAttribute('src')?.replace(/^\.\//,'')||'';const data=p.figures?.[path];if(data&&/^data:image\/(?:png|jpeg|gif|webp|svg\+xml);base64,/.test(data))img.src=data;else img.replaceWith(document.createTextNode('[Figure not downloaded]'))}
+  for(const img of root.querySelectorAll('img')) {img.removeAttribute('style');img.removeAttribute('width');img.removeAttribute('height');const path=img.getAttribute('src')?.replace(/^\.\//,'')||'';const data=p.figures?.[path];if(data&&/^data:image\/(?:png|jpeg|gif|webp|svg\+xml);base64,/.test(data))img.src=data;else img.replaceWith(document.createTextNode('[Figure not downloaded]'))}
   for(const a of root.querySelectorAll('a')) {const href=a.getAttribute('href')||'';if(!href.startsWith('#'))a.removeAttribute('href')}
   root.dataset.ready='true'
 }

@@ -1,6 +1,6 @@
 {
   "name": "onlyideas-app",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -11,9 +11,12 @@
     "server": "node server/main.mjs",
     "build": "tsc --noEmit && vite build && node tools/native/build-reader.mjs",
     "test": "node --test tests/*.test.mjs",
-    "check": "npm test && npm run build",
+    "check": "npm test && npm run test:renderer && npm run build",
     "native:sync": "npm run build && cap sync",
-    "android:debug": "npm run native:sync && cd android && ./gradlew --no-daemon --max-workers=2 :app:assembleDebug"
+    "android:debug": "npm run native:sync && cd android && ./gradlew --no-daemon --max-workers=2 :app:assembleDebug",
+    "predev": "node tools/build-document-renderer.mjs",
+    "prebuild": "node tools/build-document-renderer.mjs",
+    "test:renderer": "node tools/build-document-renderer.mjs && node tools/check-document-renderer.mjs"
   },
   "dependencies": {
     "@aparajita/capacitor-secure-storage": "8.0.0",
@@ -39,6 +42,17 @@
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react": "5.1.1",
     "typescript": "5.9.3",
-    "vite": "7.2.4"
+    "vite": "7.2.4",
+    "esbuild": "0.27.4",
+    "path-browserify": "1.0.1",
+    "jsdom": "27.0.0"
+  },
+  "overrides": {
+    "mathpix-markdown-it": {
+      "markdown-it": "12.3.2"
+    },
+    "postcss": "8.5.28",
+    "uuid": "11.1.1",
+    "linkify-it": "5.0.2"
   }
 }

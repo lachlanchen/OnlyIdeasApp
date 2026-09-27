@@ -563,14 +563,26 @@ public class MainActivity extends AppCompatActivity {
     library.addView(button("Your agent conversations", false, this::showAgent));
     addCard(c, library);
     LinearLayout about = card();
-    title(about, "OnlyIdeas 0.3", 22);
+    title(about, "OnlyIdeas 1.0", 22);
     gap(about, 12);
     caption(
         about,
         "Read papers with their equations and figures. Search with the connected paper agent. Your"
             + " conversations and personal papers stay in your account.");
+    for (String policy : new String[]{"Support", "Privacy", "Terms"}) {
+      about.addView(button(policy.equals("Terms") ? "Community Terms" : policy, false,
+          () -> startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://agent.onlyideas.art/" + policy.toLowerCase(java.util.Locale.ROOT) + ".html")))));
+    }
     addCard(c, about);
     if (account != null) {
+      c.addView(button("Report content", false, () -> reportContent("")));
+      c.addView(button("Blocked readers", false, this::blockedReaders));
+      c.addView(button("Delete account", false, () -> new AlertDialog.Builder(this)
+        .setTitle("Permanently delete your account?")
+        .setMessage("Your account, cloud papers, notes, comments, chats and private downloads will be deleted and all sessions signed out. Previously published GitHub copies and others’ copies may remain under their public license. This cannot be undone.")
+        .setNegativeButton("Cancel", null)
+        .setPositiveButton("Delete account", (d,w) -> job(() -> api.json("/api/account", "DELETE", object("confirm", "DELETE")), r -> signOut()))
+        .show()));
       gap(c, 12);
       Button signout =
           button(
@@ -685,6 +697,7 @@ public class MainActivity extends AppCompatActivity {
       TextView body = text(m.optString("text"), 19, false);
       body.setTextIsSelectable(true);
       bubble.addView(body);
+      if (!user) bubble.addView(button("Report response", false, () -> reportContent("Agent message " + m.optString("id") + " in conversation " + chatId)));
       JSONArray found = m.optJSONArray("papers");
       if (found != null)
         for (int j = 0; j < found.length(); j++) {
@@ -846,6 +859,30 @@ public class MainActivity extends AppCompatActivity {
               .setNegativeButton("Done", null)
               .show();
         });
+  }
+
+  void reportContent(String context) {
+    if (account == null) { signIn(); return; }
+    EditText reason = new EditText(this); reason.setHint("Which paper or AI response concerns you, and why?"); reason.setTextSize(18); reason.setMinLines(4);
+    AlertDialog dialog = new AlertDialog.Builder(this).setTitle("Report content").setView(reason)
+      .setNegativeButton("Cancel", null).setPositiveButton("Send report", null).create();
+    dialog.setOnShowListener(v -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(w -> {
+      if (reason.getText().toString().trim().length() < 3) { reason.setError("Please describe the issue."); return; }
+      job(() -> api.json("/api/reports", "POST", new JSONObject().put("context",context).put("reason",reason.getText().toString())), r -> { dialog.dismiss(); toast("Report sent for review."); });
+    }));
+    dialog.show();
+  }
+
+  void blockedReaders() {
+    job(() -> api.json("/api/blocks", "GET", null), result -> {
+      JSONArray blocks = result.optJSONArray("blocks");
+      if (blocks == null || blocks.length() == 0) { alert("You have no blocked readers."); return; }
+      String[] names = new String[blocks.length()];
+      for (int i=0; i<names.length; i++) names[i] = "Unblock " + blocks.optJSONObject(i).optString("name");
+      new AlertDialog.Builder(this).setTitle("Blocked readers").setItems(names, (d,n) ->
+        job(() -> api.json("/api/blocks/" + blocks.optJSONObject(n).optString("id"), "DELETE", null), r -> blockedReaders()))
+        .setNegativeButton("Done", null).show();
+    });
   }
 
   void signIn() {
@@ -1281,10 +1318,35 @@ public class MainActivity extends AppCompatActivity {
               title(c, m.optString("author"), 17);
               gap(c, 5);
               c.addView(text(m.optString("text"), 19, false));
+              if (m.optBoolean("pending")) caption(c, "Waiting for community review");
+              if (account != null) {
+                if (m.optBoolean("canDelete")) c.addView(button("Delete comment", false, () ->
+                  new AlertDialog.Builder(this).setTitle("Delete your comment?").setNegativeButton("Cancel", null)
+                    .setPositiveButton("Delete", (d,w) -> job(() -> api.json("/api/comments/" + m.optString("id"), "DELETE", null), x -> { toast("Comment deleted. Reopen discussion to refresh."); }))
+                    .show()));
+                else {
+                  c.addView(button("Report", false, () -> {
+                    EditText reason = new EditText(this); reason.setHint("What should we review?"); reason.setTextSize(18);
+                    new AlertDialog.Builder(this).setTitle("Report comment").setView(reason).setNegativeButton("Cancel", null)
+                      .setPositiveButton("Send report", (d,w) -> job(() -> api.json("/api/comments/" + m.optString("id") + "/report", "POST", object("reason", reason.getText().toString())), x -> toast("Report sent."))).show();
+                  }));
+                  c.addView(button("Block reader", false, () -> job(() -> api.json("/api/comments/" + m.optString("id") + "/block", "POST", new JSONObject()), x -> {
+                    toast("Reader blocked. Reopen discussion to refresh.");
+                  })));
+                }
+              }
               gap(c, 18);
             }
           if (comments == null || comments.length() == 0)
             caption(c, "What caught your attention? Leave the first thought.");
+          boolean isPublic = "public".equals(document.optJSONObject("paper").optString("visibility"));
+          android.widget.CheckBox terms = new android.widget.CheckBox(this);
+          terms.setText("I accept the Community Terms"); terms.setTextSize(18); terms.setTextColor(ink);
+          if (isPublic) {
+            c.addView(terms);
+            c.addView(button("Read Community Terms", false, () -> startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://agent.onlyideas.art/terms.html")))));
+            caption(c, "Public comments are reviewed before other readers can see them.");
+          }
           EditText draft = new EditText(this);
           draft.setHint("Your thought…");
           draft.setTextSize(19);
@@ -1311,6 +1373,7 @@ public class MainActivity extends AppCompatActivity {
                               return;
                             }
                             if (draft.getText().toString().trim().isEmpty()) return;
+                            if (isPublic && !terms.isChecked()) { toast("Please read and accept the Community Terms."); return; }
                             job(
                                 () ->
                                     api.json(
@@ -1318,6 +1381,7 @@ public class MainActivity extends AppCompatActivity {
                                         "POST",
                                         new JSONObject()
                                             .put("text", draft.getText().toString())
+                                            .put("acceptTerms", terms.isChecked())
                                             .put("quote", quote)
                                             .put("id", UUID.randomUUID().toString())
                                             .put(

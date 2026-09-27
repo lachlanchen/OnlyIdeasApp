@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import DOMPurify from 'dompurify'
 import type { Paper } from './api'
-import bundleUrl from 'mathpix-markdown-it/es5/bundle.js?url'
+import bundleUrl from '../.generated/document-math.js?url'
 import { request, native } from './native'
 import { downloadedPaper, offlineSession } from './offline'
 
@@ -25,7 +25,7 @@ export function ReaderContent({ paper, onSelection, onSection }: { paper: Paper;
       if (!active || !ref.current) return
       const render = (window as RendererWindow).markdownToHTML
       if (!render) throw new Error('Renderer unavailable')
-      const rendered = render(paper.mmd || '', { htmlTags: false, width: Math.max(280, ref.current.clientWidth), linkify: false, openLinkInNewWindow: true, accessibility: { assistiveMml: true }, outMath: { include_svg: true } })
+      const rendered = render(paper.mmd || '', { htmlTags: false, width: Math.max(280, ref.current.clientWidth), linkify: false, typographer: false, openLinkInNewWindow: true, accessibility: { assistiveMml: true }, outMath: { include_svg: true } })
       const clean = DOMPurify.sanitize(rendered, { USE_PROFILES: { html: true, svg: true, mathMl: true }, ADD_TAGS: ['mjx-container', 'mjx-assistive-mml'], ADD_ATTR: ['jax', 'focusable', 'viewBox'], FORBID_TAGS: ['style', 'script', 'iframe', 'object', 'embed', 'form', 'input', 'button'], FORBID_ATTR: ['srcdoc', 'srcset'] })
       const template = document.createElement('template'); template.innerHTML = clean
       const saved = await downloadedPaper(paper.id, (await offlineSession())?.user?.id)
@@ -41,6 +41,7 @@ export function ReaderContent({ paper, onSelection, onSection }: { paper: Paper;
             const url = URL.createObjectURL(blob); objectURLs.push(url); img.src = url
           } catch { img.replaceWith(document.createTextNode('[Figure unavailable. Connect and reopen this paper.]')); continue }
         } else img.src = `/content/${paper.id}/${path}`
+        img.removeAttribute('style'); img.removeAttribute('width'); img.removeAttribute('height')
         img.loading = 'lazy'; img.decoding = 'async'
       }
       if (!active || !ref.current) return

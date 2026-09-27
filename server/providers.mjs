@@ -63,11 +63,13 @@ export async function mathpix(job, config, store) {
     await pause(3000);
   }
   requireValue(archive, 'The converted figures are still being prepared. Resume later.', 502);
+  store.requireActive(job.owner);
   const { mmd, assets } = unpackMMD(archive);
   const paperId = job.id;
   for (const asset of assets) {
     const target = join(store.directory, 'papers', paperId, asset.path);
     await mkdir(join(store.directory, 'papers', paperId, 'figures'), { recursive: true, mode: 0o700 });
+    store.requireActive(job.owner);
     await writeFile(target, asset.data, { mode: 0o600 });
   }
   const paper = makePaper({ ...job.metadata, id: paperId, mmd, owner: job.owner, source: job.url || job.metadata.source || '', assets: assets.map(({ path, bytes }) => ({ path, bytes })) });
@@ -101,11 +103,14 @@ export async function generateArtifact(job, config, store) {
   const output = choice?.message?.content;
   requireValue(typeof output === 'string' && output.trim() && output.length <= 100_000, 'The assistant returned no usable text.', 502);
   const artifact = { id: job.id, paperId: p.id, revision: p.revision, kind: job.kind, sectionId: job.sectionId || null, language: job.language, text: output, model: model.name, createdAt: new Date().toISOString(), generated: true };
+  store.requireActive(job.owner);
   store.db.prepare('INSERT OR REPLACE INTO artifacts VALUES(?,?,?)').run(job.id, job.owner, JSON.stringify(artifact));
   return { artifactId: artifact.id };
 }
 
 export async function publishPaper(job, config, store) {
+  store.requireActive(job.owner);
+  requireValue(job.reviewed === true, 'Public papers require community review.', 403);
   const p = store.paper(job.paperId);
   requireValue(p?.owner === job.owner, 'Only the owner can publish this paper.', 403);
   const repo = config.github?.repository, token = config.github?.contentToken;
@@ -172,7 +177,15 @@ export function startWorker(store, config) {
     } catch (error) {
       job.state = 'failed'; job.message = error instanceof AppError ? error.message : 'Connection failed. Your request is saved; try again when the service returns.';
       job.finishedAt = Date.now();
-    } finally { store.saveJob(job); busy = false; }
+    } finally {
+      try {
+        if (store.active(job.owner)) store.saveJob(job);
+        else if (store.db.prepare('SELECT id FROM deleted_accounts WHERE id=?').get(job.owner)) {
+          await rm(join(store.directory, 'jobs', job.id), { recursive: true, force: true });
+          if (job.kind === 'import') await rm(join(store.directory, 'papers', job.id), { recursive: true, force: true });
+        }
+      } finally { busy = false; }
+    }
   };
   const timer = setInterval(tick, 1000); timer.unref(); void tick();
   return () => { stopped = true; clearInterval(timer); };

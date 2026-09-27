@@ -36,7 +36,7 @@ El código, el contenido público y los datos privados se guardan por separado. 
 
 ## Estado
 
-El servicio en la nube está activo. Las pruebas se distribuyen a los grupos internos del propietario en TestFlight y Google Play; el registro de la actualización nativa indica el estado confirmado de cada compilación. La revisión pública sigue pendiente de la eliminación de cuentas, una moderación más completa, el cumplimiento del inicio de sesión de iOS y la preparación de la ficha. La cobertura en dispositivos físicos y las pruebas completas de inicio de sesión de iOS siguen siendo limitadas.
+El servicio en la nube está disponible. La versión candidata 1.0.0 (5) añade eliminación de cuentas, colas de moderación, bloqueo, denuncias en la app e inicio de sesión con Apple en iOS. Pasaron las comprobaciones automáticas y las pruebas nativas de lectura y uso sin conexión. Siguen pendientes la revisión formal, los recursos finales de las fichas y la verificación real del acceso con Apple. Las pruebas continúan en los grupos internos existentes.
 
 La versión 0.3 incorpora pantallas SwiftUI en iOS y controles nativos en Android, texto de lectura más grande y ajustable, una página de perfil y conversaciones persistentes con el agente. Un agente en la estación de trabajo busca en índices de investigación abierta y descarga PDF usando un modelo local mediante LazyEdge. Elige convertir y añadir para crear una copia privada con Mathpix que conserve ecuaciones y figuras. El registro de la actualización nativa detalla las compilaciones y pruebas.
 

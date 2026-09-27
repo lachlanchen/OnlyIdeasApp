@@ -36,7 +36,7 @@ App code, content and private account data have separate homes. MMD preserves Te
 
 ## Status
 
-The cloud service is live. Test distribution uses the owner’s internal TestFlight and Google Play groups; the native update record gives the confirmed build status. Public review remains pending account deletion, fuller moderation, iOS sign-in compliance and listing preparation. Physical-device coverage and iOS sign-in end-to-end QA remain limited.
+The cloud service is live. Candidate 1.0.0 (5) adds account deletion, moderation queues, blocking, in-app reports and Sign in with Apple on iOS. Automated checks and native reader/offline tests passed. Formal store review, final listing assets and live Apple sign-in verification are still pending. Existing internal groups remain the testing channel.
 
 Version 0.3 introduces SwiftUI screens on iOS and native Android controls, larger adjustable reading text, a dedicated Profile page, and persistent agent conversations. A workstation agent searches open research indexes and downloads PDFs, using a local model through LazyEdge. Choose Convert & add to create a private Mathpix reading copy with equations and figures. See the native update record for build and test status.
 

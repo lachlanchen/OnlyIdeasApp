@@ -36,7 +36,7 @@ Mã ứng dụng, nội dung công khai và dữ liệu riêng được lưu tá
 
 ## Trạng thái
 
-Dịch vụ đám mây đang hoạt động. Bản thử nghiệm được phân phối qua các nhóm nội bộ của chủ sở hữu trên TestFlight và Google Play; bản ghi cập nhật ứng dụng gốc nêu trạng thái bản dựng đã xác nhận. Việc gửi xét duyệt công khai vẫn cần hoàn thiện xóa tài khoản, kiểm duyệt, tuân thủ yêu cầu đăng nhập iOS và thông tin cửa hàng. Phạm vi thử nghiệm trên thiết bị thật và toàn bộ quy trình đăng nhập iOS còn hạn chế.
+Dịch vụ đám mây đang hoạt động. Bản ứng viên 1.0.0 (5) bổ sung xóa tài khoản, hàng đợi kiểm duyệt, chặn, báo cáo trong ứng dụng và đăng nhập bằng Apple trên iOS. Các kiểm tra tự động cùng thử nghiệm đọc gốc và ngoại tuyến đã đạt. Việc gửi duyệt chính thức, hình ảnh cuối cùng cho cửa hàng và xác minh đăng nhập Apple thực tế vẫn chưa hoàn tất. Các nhóm nội bộ hiện có tiếp tục dùng để thử nghiệm.
 
 Phiên bản 0.3 có màn hình SwiftUI trên iOS và giao diện gốc Android, chữ đọc lớn hơn có thể điều chỉnh, trang hồ sơ riêng và hội thoại với tác nhân được lưu lại. Tác nhân trên máy trạm tìm trong các chỉ mục nghiên cứu mở và tải PDF, dùng mô hình cục bộ qua LazyEdge. Chọn chuyển đổi và thêm để tạo bản đọc Mathpix riêng tư, giữ nguyên phương trình và hình ảnh. Xem bản ghi cập nhật ứng dụng gốc để biết trạng thái bản dựng và kiểm thử.
 

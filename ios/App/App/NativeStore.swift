@@ -70,11 +70,12 @@ struct PaperComment: Codable, Identifiable {
   var text: String
   var quote: String?
   var canDelete: Bool?
+  var pending: Bool?
 }
 
 @MainActor
 final class ReadingStore: NSObject, ObservableObject,
-  ASWebAuthenticationPresentationContextProviding
+  ASWebAuthenticationPresentationContextProviding, ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding
 {
   @Published var papers: [ResearchPaper] = []
   @Published var account: ReadingAccount?
@@ -87,6 +88,11 @@ final class ReadingStore: NSObject, ObservableObject,
   @Published var busy = false
   @Published var offline = false
   @Published var signingIn = false
+  @Published var showSignIn = false
+  @Published var showReport = false
+  var reportContext = ""
+  private var appleFlow: (id: String, verifier: String)?
+  private var appleController: ASAuthorizationController?
   @AppStorage("onlyideas.native.font") var readingSize: Double = 22
   @AppStorage("onlyideas.native.appearance") var appearance = "system"
   private var token: String?
@@ -229,7 +235,54 @@ final class ReadingStore: NSObject, ObservableObject,
       }
     }
   }
-  func signIn() async {
+  func signIn() async { showSignIn = true }
+  func signInWithApple() async {
+    guard !signingIn else { return }
+    signingIn = true
+    do {
+      let verifier = Data((0..<32).map { _ in UInt8.random(in: 0...255) }).base64URLEncoded
+      let challenge = Data(SHA256.hash(data: Data(verifier.utf8))).base64URLEncoded
+      let result = try await json("/api/auth/apple/start", method: "POST", body: ["challenge": challenge])
+      guard let flow = result["flow"] as? String, let nonce = result["nonce"] as? String else { throw failure("Could not start Apple sign-in.") }
+      appleFlow = (flow, verifier)
+      let request = ASAuthorizationAppleIDProvider().createRequest()
+      request.requestedScopes = [.fullName]
+      request.nonce = nonce
+      let controller = ASAuthorizationController(authorizationRequests: [request])
+      controller.delegate = self
+      controller.presentationContextProvider = self
+      appleController = controller
+      controller.performRequests()
+    } catch { self.error = error.localizedDescription; signingIn = false }
+  }
+  func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
+    UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.flatMap(\.windows)
+      .first(where: \.isKeyWindow) ?? ASPresentationAnchor()
+  }
+  func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
+    Task { @MainActor in
+      defer { signingIn = false; appleFlow = nil; appleController = nil }
+      do {
+        guard let flow = appleFlow, let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
+          let identityData = credential.identityToken, let identity = String(data: identityData, encoding: .utf8),
+          let codeData = credential.authorizationCode, let code = String(data: codeData, encoding: .utf8)
+        else { throw failure("Apple did not finish sign-in. Please try again.") }
+        let name = credential.fullName.map { PersonNameComponentsFormatter().string(from: $0) } ?? ""
+        let result = try await json("/api/auth/apple/complete", method: "POST", body: ["flow": flow.id, "verifier": flow.verifier, "identityToken": identity, "code": code, "name": name])
+        guard let token = result["token"] as? String else { throw failure("Could not save sign-in.") }
+        try saveToken(token)
+        UserDefaults.standard.set(credential.user, forKey: "onlyideas.apple.user")
+        showSignIn = false
+        await refresh()
+      } catch { self.error = error.localizedDescription }
+    }
+  }
+  func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
+    signingIn = false; appleFlow = nil; appleController = nil
+    if (error as NSError).code != ASAuthorizationError.canceled.rawValue { self.error = error.localizedDescription }
+  }
+  func signInWithGitHub() async {
+    showSignIn = false
     guard !signingIn else { return }
     signingIn = true
     do {
@@ -278,6 +331,12 @@ final class ReadingStore: NSObject, ObservableObject,
     UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.flatMap(\.windows)
       .first(where: \.isKeyWindow) ?? ASPresentationAnchor()
   }
+  func deleteAccount() async {
+    do {
+      _ = try await json("/api/account", method: "DELETE", body: ["confirm": "DELETE"])
+      await signOut()
+    } catch { self.error = error.localizedDescription }
+  }
   func signOut() async {
     _ = try? await json("/api/auth/logout", method: "POST", body: [:])
     try? saveToken(nil)
@@ -293,6 +352,7 @@ final class ReadingStore: NSObject, ObservableObject,
       ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(),
       modifiedSince: Date(timeIntervalSince1970: 0))
     UserDefaults.standard.removeObject(forKey: "onlyideas.native.account")
+    UserDefaults.standard.removeObject(forKey: "onlyideas.apple.user")
     await refresh()
   }
   private func metadataURL(_ url: URL) -> URL { url.appendingPathExtension("meta") }

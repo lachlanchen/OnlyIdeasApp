@@ -1,1 +1,7 @@
 :root{color-scheme:light;--size:22px;--ink:#182c27;--bg:#fcfcfa;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--ink)}:root[data-theme=dark]{color-scheme:dark;--ink:#edf2ed;--bg:#151d1a}*{box-sizing:border-box}body{margin:0;padding:24px 22px 80px}article{font-size:var(--size);line-height:1.7;overflow-wrap:break-word;max-width:780px;margin:auto}p{margin:0 0 1.2em}h1{font-size:1.55em;line-height:1.22}h2{font-size:1.3em;line-height:1.3;margin-top:1.65em}h3{font-size:1.15em}img,svg{max-width:100%;height:auto}mjx-container[display=true],.table_tabular,pre{display:block;max-width:100%;overflow-x:auto;padding:12px 0}table{border-collapse:collapse;font-size:.9em;display:block;overflow-x:auto;max-width:100%}td,th{border:1px solid #81958955;padding:8px}blockquote{margin:16px 0;border-left:3px solid #3c7866;padding-left:18px;color:#647c71}code{font-size:.9em}a{color:#2a6b58}::selection{background:#f2d885;color:#172820}
+
+/* Keep accessible MathML available without drawing a second equation. */
+mjx-container[jax="SVG"] { direction: ltr; display: inline-block; }
+mjx-container[jax="SVG"] > svg { overflow: visible; max-width: none; min-width: 0; }
+mjx-container[display="true"] { display: block; text-align: center; }
+mjx-assistive-mml { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; border: 0 !important; overflow: hidden !important; clip: rect(1px, 1px, 1px, 1px) !important; white-space: nowrap !important; }

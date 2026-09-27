@@ -1,4 +1,5 @@
 import SwiftUI
+import AuthenticationServices
 import UniformTypeIdentifiers
 import WebKit
 
@@ -21,6 +22,8 @@ struct NativeReadingApp: View {
     }.environmentObject(store).tint(accent).preferredColorScheme(
       store.appearance == "system" ? nil : store.appearance == "dark" ? .dark : .light
     )
+    .sheet(isPresented: $store.showSignIn) { NativeSignIn().environmentObject(store) }
+    .sheet(isPresented: $store.showReport) { ReportContent().environmentObject(store) }
     .task { await store.refresh() }
     .alert(
       "OnlyIdeas",
@@ -29,6 +32,28 @@ struct NativeReadingApp: View {
       Button("OK") { store.error = nil }
     } message: {
       Text(store.error ?? "")
+    }
+  }
+}
+struct NativeSignIn: View {
+  @EnvironmentObject var store: ReadingStore
+  @Environment(\.dismiss) var dismiss
+  var body: some View {
+    NavigationView {
+      VStack(alignment: .leading, spacing: 24) {
+        Image(systemName: "books.vertical").font(.system(size: 48)).foregroundColor(accent)
+        Text("Your reading space").font(.largeTitle.bold())
+        Text("Keep your papers and conversations together. Choose an account to continue.").font(.title3)
+        Button { Task { await store.signInWithApple() } } label: {
+          Label("Continue with Apple", systemImage: "apple.logo").font(.headline).frame(maxWidth: .infinity).padding()
+        }.buttonStyle(.borderedProminent).tint(.primary).disabled(store.signingIn)
+        Button { Task { await store.signInWithGitHub() } } label: {
+          Text("Continue with GitHub").font(.headline).frame(maxWidth: .infinity).padding()
+        }.buttonStyle(.bordered).disabled(store.signingIn)
+        Text("Use the same sign-in method to return to your account. Apple and GitHub accounts are separate.").font(.footnote).foregroundColor(.secondary)
+        Link("Privacy", destination: URL(string: "https://agent.onlyideas.art/privacy.html")!)
+        Spacer()
+      }.padding(28).toolbar { Button("Cancel") { dismiss() } }
     }
   }
 }
@@ -158,7 +183,11 @@ struct NativeAgent: View {
           LazyVStack(alignment: .leading, spacing: 22) {
             if store.messages.isEmpty { welcome }
             ForEach(store.messages) { message in
-              AgentBubble(message: message, requests: $requests)
+              AgentBubble(message: message, requests: $requests).contextMenu {
+                if message.role == "assistant" {
+                  Button("Report AI response") { store.reportContext = "Agent message \(message.id) in conversation \(store.conversationID ?? "")"; store.showReport = true }
+                }
+              }
             }
             if !store.agentStatus.isEmpty {
               HStack(alignment: .top) {
@@ -316,6 +345,7 @@ struct AgentBubble: View {
 struct NativeProfile: View {
   @EnvironmentObject var store: ReadingStore
   @State private var confirm = false
+  @State private var deleteConfirm = false
   var body: some View {
     Form {
       Section {
@@ -332,7 +362,7 @@ struct NativeProfile: View {
             Task { await store.signIn() }
           } label: {
             Label(
-              store.signingIn ? "Signing in…" : "Continue with GitHub",
+              store.signingIn ? "Signing in…" : "Sign in",
               systemImage: "person.badge.key"
             ).font(.headline).padding(.vertical, 8)
           }.disabled(store.signingIn)
@@ -377,19 +407,29 @@ struct NativeProfile: View {
         Label("\(store.downloads().count) offline downloads", systemImage: "arrow.down.circle")
       }
       Section("About") {
-        Text("OnlyIdeas 0.3").font(.headline)
+        Text("OnlyIdeas 1.0").font(.headline)
         Text(
           "Read papers with their equations and figures. Use the connected paper agent to find your next read. Conversations and personal uploads stay in your account."
         ).font(.body).foregroundColor(.secondary)
-        Link("Support", destination: URL(string: "https://onlyideas.art")!)
+        Link("Support", destination: URL(string: "https://agent.onlyideas.art/support.html")!)
+        Link("Privacy", destination: URL(string: "https://agent.onlyideas.art/privacy.html")!)
+        Link("Community Terms", destination: URL(string: "https://agent.onlyideas.art/terms.html")!)
       }
       if store.account != nil {
         Section {
+          Button("Report content") { store.reportContext = ""; store.showReport = true }
+          NavigationLink("Blocked readers") { BlockedReaders() }
+          Button("Delete account", role: .destructive) { deleteConfirm = true }
           Button("Sign out", role: .destructive) { confirm = true }.font(.body).padding(
             .vertical, 8)
         }
       }
-    }.navigationTitle("Profile").confirmationDialog(
+    }.navigationTitle("Profile").alert("Permanently delete your account?", isPresented: $deleteConfirm) {
+      Button("Cancel", role: .cancel) {}
+      Button("Delete account", role: .destructive) { Task { await store.deleteAccount() } }
+    } message: {
+      Text("Your account, cloud papers, notes, comments, chats and private downloads will be deleted and all sessions signed out. Previously published GitHub copies and others’ copies may remain under their public license. This cannot be undone.")
+    }.confirmationDialog(
       "Sign out on this device?", isPresented: $confirm, titleVisibility: .visible
     ) {
       Button("Sign out", role: .destructive) { Task { await store.signOut() } }
@@ -398,6 +438,51 @@ struct NativeProfile: View {
         "Private offline downloads will be removed. Your cloud library and conversations will remain."
       )
     }
+  }
+}
+struct ReportContent: View {
+  @EnvironmentObject var store: ReadingStore
+  @Environment(\.dismiss) var dismiss
+  @State private var reason = ""
+  @State private var sending = false
+  @State private var error = ""
+  var body: some View {
+    NavigationView {
+      Form {
+        Text("Tell us which paper or AI response concerns you and why. Reports are private and reviewed by our team.")
+        TextEditor(text: $reason).frame(minHeight: 160).accessibilityLabel("Report details")
+        if !error.isEmpty { Text(error).foregroundColor(.red) }
+        Button(sending ? "Sending…" : "Send report") { Task {
+          sending = true
+          do { _ = try await store.json("/api/reports", method: "POST", body: ["context": store.reportContext, "reason": reason]); dismiss() }
+          catch { self.error = error.localizedDescription }
+          sending = false
+        } }.disabled(sending || reason.trimmingCharacters(in: .whitespacesAndNewlines).count < 3)
+      }.navigationTitle("Report content").toolbar { Button("Cancel") { dismiss() } }
+    }
+  }
+}
+struct BlockedReaders: View {
+  @EnvironmentObject var store: ReadingStore
+  @State private var readers: [[String: String]] = []
+  func load() async {
+    do { let result = try await store.json("/api/blocks"); readers = result["blocks"] as? [[String: String]] ?? [] }
+    catch { store.error = error.localizedDescription }
+  }
+  var body: some View {
+    List {
+      if readers.isEmpty { Text("You have no blocked readers.") }
+      ForEach(readers, id: \.self) { reader in
+        HStack {
+          Text(reader["name"] ?? "Reader")
+          Spacer()
+          Button("Unblock") { Task {
+            do { _ = try await store.json("/api/blocks/\(reader["id"] ?? "")", method: "DELETE"); await load() }
+            catch { store.error = error.localizedDescription }
+          } }
+        }
+      }
+    }.navigationTitle("Blocked readers").task { await load() }
   }
 }
 struct NativeRequests: View {
@@ -619,6 +704,7 @@ struct NativeDiscussion: View {
   @State private var sending = false
   @State private var report: PaperComment?
   @State private var reason = ""
+  @State private var acceptedTerms = false
   func load() async {
     do {
       let r = try await store.json("/api/papers/\(paper.id)/comments")
@@ -639,6 +725,7 @@ struct NativeDiscussion: View {
                 Text(q).font(.body).foregroundColor(.secondary)
               }
               Text(comment.text).font(.title3)
+              if comment.pending == true { Text("Waiting for community review").font(.caption).foregroundColor(.secondary) }
               if comment.canDelete == true {
                 Button("Delete", role: .destructive) {
                   Task {
@@ -650,12 +737,21 @@ struct NativeDiscussion: View {
                 }
               } else {
                 Button("Report") { report = comment }
+                Button("Block reader", role: .destructive) { Task {
+                  do { _ = try await store.json("/api/comments/\(comment.id)/block", method: "POST", body: [:]); await load() }
+                  catch { store.error = error.localizedDescription }
+                } }
               }
             }.padding(.vertical, 8)
           }
           if comments.isEmpty {
             Text("What caught your attention? Leave the first thought.").font(.title3)
               .foregroundColor(.secondary)
+          }
+          if paper.visibility == "public" {
+            Toggle("I accept the Community Terms", isOn: $acceptedTerms)
+            Link("Read Community Terms", destination: URL(string: "https://agent.onlyideas.art/terms.html")!)
+            Text("Public comments are reviewed before other readers can see them.").font(.footnote).foregroundColor(.secondary)
           }
           TextEditor(text: $draft).font(.title3).frame(height: 130)
             .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.secondary.opacity(0.2)))
@@ -666,7 +762,7 @@ struct NativeDiscussion: View {
             Label("Post thought", systemImage: "paperplane").font(.headline).padding(.vertical, 8)
               .frame(maxWidth: .infinity)
           }.buttonStyle(.borderedProminent).disabled(
-            draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || sending)
+            draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || sending || (paper.visibility == "public" && !acceptedTerms))
         }.padding(22)
       }.navigationTitle("Discussion").toolbar { Button("Done") { dismiss() } }.task { await load() }
         .sheet(item: $report) { comment in
@@ -702,7 +798,7 @@ struct NativeDiscussion: View {
         "/api/papers/\(paper.id)/comments", method: "POST",
         body: [
           "text": draft, "quote": quote, "id": UUID().uuidString.lowercased(),
-          "revision": paper.revision ?? "",
+          "revision": paper.revision ?? "", "acceptTerms": acceptedTerms,
         ])
       draft = ""
       await load()

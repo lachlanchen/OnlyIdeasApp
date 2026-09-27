@@ -36,3 +36,9 @@ dialog{border:1px solid var(--line);border-radius:14px;background:var(--surface)
 @media(max-width:640px){input,textarea,select{font-size:16px!important}:root[data-native] .app-header{gap:4px;padding-left:16px;padding-right:16px}:root[data-native] .brand{font-size:21px}:root[data-native] .account{max-width:90px}}
 
 .recovery{max-width:540px;margin:15vh auto;padding:24px}.recovery h1{font-family:var(--serif);font-weight:400;font-size:32px;margin:25px 0 12px}
+
+/* Keep accessible MathML available without drawing a second equation. */
+mjx-container[jax="SVG"] { direction: ltr; display: inline-block; }
+mjx-container[jax="SVG"] > svg { overflow: visible; max-width: none; min-width: 0; }
+mjx-container[display="true"] { display: block; text-align: center; }
+mjx-assistive-mml { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; border: 0 !important; overflow: hidden !important; clip: rect(1px, 1px, 1px, 1px) !important; white-space: nowrap !important; }

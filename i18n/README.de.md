@@ -36,7 +36,7 @@ App-Code, öffentliche Inhalte und private Kontodaten liegen getrennt. MMD erhä
 
 ## Stand
 
-Der Cloud-Dienst ist verfügbar. Testversionen werden über die internen TestFlight- und Google-Play-Gruppen des Eigentümers verteilt; der Bericht zur nativen Aktualisierung nennt den bestätigten Build-Status. Für die öffentliche Prüfung fehlen noch Kontolöschung, umfassendere Moderation, die Einhaltung der iOS-Anmeldevorgaben und die Store-Einträge. Tests auf echten Geräten und vollständige iOS-Anmeldetests sind weiterhin begrenzt.
+Der Cloud-Dienst ist verfügbar. Kandidat 1.0.0 (5) ergänzt Kontolöschung, Moderationswarteschlangen, Blockieren, Meldungen in der App und Anmeldung mit Apple auf iOS. Automatisierte Prüfungen sowie native Lese- und Offline-Tests bestanden. Die formelle Store-Prüfung, endgültige Abbildungen und die praktische Prüfung der Apple-Anmeldung stehen noch aus. Tests erfolgen weiterhin in den bestehenden internen Gruppen.
 
 Version 0.3 bietet SwiftUI-Ansichten auf iOS und native Android-Bedienelemente, größere einstellbare Leseschrift, eine eigene Profilseite und gespeicherte Agentengespräche. Ein Agent auf der Workstation durchsucht offene Forschungsindizes und lädt PDFs herunter; ein lokales Modell wird über LazyEdge angebunden. Mit Konvertieren und hinzufügen erstellt Mathpix eine private Lesefassung mit Gleichungen und Abbildungen. Der Bericht zur nativen Aktualisierung enthält den Stand der Builds und Tests.
 
