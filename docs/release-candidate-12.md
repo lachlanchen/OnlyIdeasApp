@@ -50,9 +50,11 @@ before its Streamlined Purchasing setting can be disabled.
 
 Build 11 is available in existing internal TestFlight and Google Play testing.
 Build 12 is also available in both existing internal groups (Apple VALID /
-IN_BETA_TESTING, Google Available to internal testers). Public review remains on
+IN_BETA_TESTING, Google Available to internal testers). At that handoff, public review remained on
 build 10; these records do not claim build 12 public submission, approval, or
-general paid activation.
+general paid activation. On 28 September, [build 13](release-candidate-13.md)
+replaced the pending Apple submission and added Mac/Watch. Google production
+review remains on build 10.
 
 Apple’s published privacy label includes purchase history for app functionality,
 linked to the account and not used for tracking. Google’s matching declaration

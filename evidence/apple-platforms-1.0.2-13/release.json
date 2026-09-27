@@ -1,0 +1,61 @@
+{
+  "app": "OnlyIdeas",
+  "appStoreId": "6816392935",
+  "version": "1.0.2",
+  "build": 13,
+  "sourceCommit": "ad0365c",
+  "macSigningFixCommit": "8aa0b27592ee5b0f811e3987afa16da028cfb4a7",
+  "sha256": {
+    "ios-watch-ipa": "1386168bca380d6b9ffce15f8ffe41921be74e81defa90a821a4fd77a99a24b5",
+    "mac-universal-pkg": "fa786608603040eabb9e7a84a2b3d5bf979353a70230fa7e43689d1da316a706"
+  },
+  "minimumOS": {
+    "ios": "15.0",
+    "watchOS": "11.0",
+    "macOS": "13.0"
+  },
+  "macArchitectures": [
+    "arm64",
+    "x86_64"
+  ],
+  "review": {
+    "IOS": {
+      "versionId": "2d1f64a6-4865-4e3c-bece-c28a74b6af9e",
+      "buildId": "b948341f-a56b-40be-8b31-32bb06ac78c2",
+      "reviewId": "69a253e7-8c06-4deb-a9b9-a79ad7e85b9a",
+      "reviewState": "WAITING_FOR_REVIEW",
+      "versionState": "WAITING_FOR_REVIEW",
+      "submittedAt": "2026-09-27T21:07:12.244Z",
+      "releaseType": "AFTER_APPROVAL"
+    },
+    "MAC_OS": {
+      "versionId": "bdda5b63-93cb-4321-bf88-e979f6cec6ca",
+      "buildId": "2cb69b77-22ac-43e3-97a0-a2973ef1be80",
+      "reviewId": "c209684b-6845-4f83-9785-0389622c3e5f",
+      "reviewState": "WAITING_FOR_REVIEW",
+      "versionState": "WAITING_FOR_REVIEW",
+      "submittedAt": "2026-09-27T21:07:28.529Z",
+      "releaseType": "AFTER_APPROVAL"
+    }
+  },
+  "testFlight": [
+    {
+      "platform": "MAC_OS",
+      "id": "2cb69b77-22ac-43e3-97a0-a2973ef1be80",
+      "version": "1.0.2",
+      "build": "13",
+      "processing": "VALID",
+      "internal": "IN_BETA_TESTING"
+    },
+    {
+      "platform": "IOS",
+      "id": "b948341f-a56b-40be-8b31-32bb06ac78c2",
+      "version": "1.0.2",
+      "build": "13",
+      "processing": "VALID",
+      "internal": "IN_BETA_TESTING"
+    }
+  ],
+  "productionDataReset": false,
+  "generalSubscriptionsEnabled": false
+}

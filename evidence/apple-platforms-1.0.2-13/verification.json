@@ -1,0 +1,101 @@
+{
+  "automatedTests": 51,
+  "renderer": [
+    "equations",
+    "tables",
+    "figures",
+    "HTML escaping",
+    "Watch prose excludes paragraph button SVG and author metadata",
+    "formula and image boundaries",
+    "UTF8 byte and paragraph bounds"
+  ],
+  "swiftModel": [
+    "private paper rejection",
+    "exact selection",
+    "math boundary",
+    "Markdown links",
+    "Unicode limits",
+    "schema",
+    "duplicate rejection"
+  ],
+  "nativeIOS": [
+    "automatic paper cache",
+    "offline cold launch",
+    "paragraph discussion",
+    "translation menu",
+    "attachment menu",
+    "real public excerpt through Reading options > Send excerpt to Watch"
+  ],
+  "mac": {
+    "device": "Mac mini (M5 Pro)",
+    "os": "macOS 27",
+    "online": {
+      "checks": [
+        "QA preserves signed-in accounts",
+        "Live or previously cached public library",
+        "Real public paper and figures cached",
+        "Equations rendered as SVG",
+        "Downloaded figures rendered",
+        "Reader fits window without horizontal page scroll",
+        "Native text size and dark appearance update renderer",
+        "Offline cold launch uses durable cached paper"
+      ],
+      "offline": false,
+      "ok": true,
+      "reader": {
+        "equations": 186,
+        "figures": 3,
+        "fits": true,
+        "paragraphs": 67,
+        "size": 18
+      },
+      "titles": [
+        "Measuring holographic entanglement entropy on a quantum simulator",
+        "OpenAlex: A fully-open index of scholarly works, authors, venues, institutions, and concepts",
+        "A place for questions"
+      ]
+    },
+    "offlineColdLaunch": {
+      "checks": [
+        "QA preserves signed-in accounts",
+        "Live or previously cached public library",
+        "Real public paper and figures cached",
+        "Equations rendered as SVG",
+        "Downloaded figures rendered",
+        "Reader fits window without horizontal page scroll",
+        "Native text size and dark appearance update renderer",
+        "Offline cold launch uses durable cached paper"
+      ],
+      "offline": true,
+      "ok": true,
+      "reader": {
+        "equations": 186,
+        "figures": 3,
+        "fits": true,
+        "paragraphs": 67,
+        "size": 18
+      },
+      "titles": [
+        "A place for questions",
+        "OpenAlex: A fully-open index of scholarly works, authors, venues, institutions, and concepts",
+        "Measuring holographic entanglement entropy on a quantum simulator"
+      ]
+    },
+    "networkNote": "Online requests used a Debug-only loopback CONNECT proxy scoped to the app because direct DNS was unavailable. Offline run rejected all app API requests."
+  },
+  "watch": {
+    "device": "Apple Watch Series 11 (46mm) simulator",
+    "os": "watchOS 26.2",
+    "phone": "iOS 26.3 simulator",
+    "transport": "WatchConnectivity application context",
+    "publicPaperId": "1075aa33-5c53-442c-99b8-4678be1c40de",
+    "cachedProseBlocks": 1,
+    "phoneShutdownThenWatchRelaunch": true,
+    "fixtureInjected": false,
+    "physicalWatchTested": false
+  },
+  "limits": [
+    "New Mac OAuth completion not separately tested with a real signed-in account.",
+    "Monthly sandbox purchase/restore/renewal/refund qualification remains pending; ordinary-reader billing is disabled."
+  ]
+}
