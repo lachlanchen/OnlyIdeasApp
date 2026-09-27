@@ -441,7 +441,7 @@ struct NativeProfile: View {
         Label(T("{count} papers cached on this device",["count":String(store.downloads().count)]), systemImage: "arrow.down.circle")
       }
       Section(T("About")) {
-        Text("OnlyIdeas 1.0").font(.headline)
+        Text("OnlyIdeas \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "") (\(Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? ""))").font(.headline)
         Text(
           T("Read papers with their equations and figures. Use the connected paper agent to find your next read. Conversations and personal uploads stay in your account.")
         ).font(.body).foregroundColor(.secondary)

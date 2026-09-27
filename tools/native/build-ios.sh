@@ -12,9 +12,9 @@ if [[ ${ONLYIDEAS_MANAGED_KEYCHAIN:-1} == 1 ]]; then
   security set-key-partition-list -S apple-tool:,apple:,codesign: -k "$onlyideas_password" "$onlyideas_keychain" >/dev/null
 fi
 cd "$onlyideas_root/ios/App"
-xcodebuild -project App.xcodeproj -scheme App -configuration Release -destination generic/platform=iOS -archivePath "$onlyideas_root/release/OnlyIdeas-1.0.1-11.xcarchive" -derivedDataPath "$onlyideas_root/release/DerivedData" -jobs 1 archive SWIFT_ENABLE_EXPLICIT_MODULES=NO COMPILER_INDEX_STORE_ENABLE=NO "OTHER_CODE_SIGN_FLAGS=--keychain $onlyideas_keychain"
-onlyideas_app="$onlyideas_root/release/OnlyIdeas-1.0.1-11.xcarchive/Products/Applications/App.app"
+xcodebuild -project App.xcodeproj -scheme App -configuration Release -destination generic/platform=iOS -archivePath "$onlyideas_root/release/OnlyIdeas-1.0.1-12.xcarchive" -derivedDataPath "$onlyideas_root/release/DerivedData" -jobs 1 archive SWIFT_ENABLE_EXPLICIT_MODULES=NO COMPILER_INDEX_STORE_ENABLE=NO "OTHER_CODE_SIGN_FLAGS=--keychain $onlyideas_keychain"
+onlyideas_app="$onlyideas_root/release/OnlyIdeas-1.0.1-12.xcarchive/Products/Applications/App.app"
 [[ $(plutil -extract CFBundleShortVersionString raw -o - "$onlyideas_app/Info.plist") == 1.0.1 ]]
-[[ $(plutil -extract CFBundleVersion raw -o - "$onlyideas_app/Info.plist") == 11 ]]
+[[ $(plutil -extract CFBundleVersion raw -o - "$onlyideas_app/Info.plist") == 12 ]]
 codesign --verify --deep --strict "$onlyideas_app"
-xcodebuild -exportArchive -archivePath "$onlyideas_root/release/OnlyIdeas-1.0.1-11.xcarchive" -exportOptionsPlist ExportOptions.plist -exportPath "$onlyideas_root/release/export-1.0.1-11"
+xcodebuild -exportArchive -archivePath "$onlyideas_root/release/OnlyIdeas-1.0.1-12.xcarchive" -exportOptionsPlist ExportOptions.plist -exportPath "$onlyideas_root/release/export-1.0.1-12"

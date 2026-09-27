@@ -307,7 +307,7 @@ final class ReadingStore: NSObject, ObservableObject,
       offline = false
       if account != nil {
         await loadConversations()
-        await loadJobs()
+        await loadJobs(refreshLibrary: false)
       }
     } catch {
       offline = true
@@ -627,11 +627,17 @@ final class ReadingStore: NSObject, ObservableObject,
       if !draftAttachments.contains(where:{$0.id==item.id}) { draftAttachments.append(item) }
     } catch { self.error=error.localizedDescription }
   }
-  func loadJobs() async {
+  func loadJobs(refreshLibrary: Bool = true) async {
     guard account != nil else { return }
+    let identity=token
     do {
       let r = try await json("/api/jobs")
-      jobs = try decoded([ReadingJob].self, r["jobs"] ?? [])
+      guard identity==token else {return}
+      let next=try decoded([ReadingJob].self, r["jobs"] ?? [])
+      let previous=Dictionary(jobs.map {($0.id,$0.state)},uniquingKeysWith:{_,new in new})
+      let finished=next.contains {($0.state=="completed" || $0.state=="failed") && previous[$0.id] != $0.state}
+      jobs=next
+      if refreshLibrary && finished {await refresh();await loadCredits()}
     } catch {}
   }
   func loadConversations() async {

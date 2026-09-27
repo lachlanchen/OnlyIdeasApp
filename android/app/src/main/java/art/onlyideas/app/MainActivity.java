@@ -47,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
   private JSONObject billingCatalog;
   private List<ProductDetails> billingProducts=List.of();
   private LinearLayout subscriptionContainer;
+  private LinearLayout creditContainer;
   private String purchaseNotice="";
   private LinearLayout root, header, content, bottom, messages;
   private ScrollView chatScroll;
@@ -425,6 +426,7 @@ public class MainActivity extends AppCompatActivity {
     });button.setText(t(shareUpload?"Shared":"Private"));return button;
   }
   void renderCredits(LinearLayout container,JSONObject credits) {
+    container.removeAllViews();
     LinearLayout card=card();title(card,t("Reading credits"),22);gap(card,12);
     title(card,String.valueOf(credits.optInt("balance")),36);caption(card,t("Available credits"));
     if(credits.optInt("held")>0)caption(card,t("Reserved for imports")+": "+credits.optInt("held"));
@@ -609,7 +611,7 @@ public class MainActivity extends AppCompatActivity {
               io.execute(()->{
                 try {
                   JSONObject result=api.json("/api/billing/google","POST",object("purchaseToken",token));
-                  handler.post(()->{complete.run();if(identity!=authEpoch||isFinishing())return;billingCatalog=result;purchaseNotice=t("Your purchases are up to date.");renderSubscriptions();});
+                  handler.post(()->{complete.run();if(identity!=authEpoch||isFinishing())return;billingCatalog=result;purchaseNotice=t("Your purchases are up to date.");if(page.equals("profile")&&creditContainer!=null&&result.optJSONObject("credits")!=null)renderCredits(creditContainer,result.optJSONObject("credits"));renderSubscriptions();});
                 }catch(Exception error){handler.post(()->{complete.run();if(identity!=authEpoch||isFinishing())return;purchaseNotice=error.getMessage();renderSubscriptions();});}
               });
             }
@@ -641,7 +643,7 @@ public class MainActivity extends AppCompatActivity {
       Button buy=button(t(active.equals(plan.optString("id"))?"Current plan":"Subscribe"),true,()->billing.purchase(product,billingCatalog.optString("accountToken")));
       buy.setEnabled(billingCatalog.optBoolean("canSubscribe"));card.addView(buy);
     }
-    if(billingProducts.isEmpty())caption(card,t("Plans are currently unavailable in this store."));
+    if(billingProducts.isEmpty()&&!purchaseNotice.equals(t("Plans are currently unavailable in this store.")))caption(card,t("Plans are currently unavailable in this store."));
     if(!purchaseNotice.isEmpty())caption(card,purchaseNotice);
     gap(card,12);card.addView(button("Restore purchases",false,()->{if(billing!=null)billing.restore();}));
     card.addView(button("Manage subscription",false,()->startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse("https://play.google.com/store/account/subscriptions?package=art.onlyideas.app")))));
@@ -675,7 +677,7 @@ public class MainActivity extends AppCompatActivity {
       gap(c, 12);
     }
     if(account!=null) {
-      LinearLayout wallet=column();c.addView(wallet);
+      LinearLayout wallet=column();creditContainer=wallet;c.addView(wallet);
       job(()->api.json("/api/credits","GET",null),r->{if(page.equals("profile")&&r.optBoolean("enabled"))renderCredits(wallet,r);});
     }
     subscriptionContainer=column();c.addView(subscriptionContainer);renderSubscriptions();loadSubscriptions();
@@ -733,7 +735,7 @@ public class MainActivity extends AppCompatActivity {
     library.addView(button(t("Your agent conversations"), false, this::showAgent));
     addCard(c, library);
     LinearLayout about = card();
-    title(about, "OnlyIdeas 1.0", 22);
+    title(about, "OnlyIdeas " + BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")", 22);
     gap(about, 12);
     caption(
         about,
@@ -1843,6 +1845,19 @@ public class MainActivity extends AppCompatActivity {
         });
   }
 
+  void acceptJobs(JSONArray next) {
+    Map<String,String> previous=new HashMap<>();
+    for(int i=0;i<jobs.length();i++) {JSONObject j=jobs.optJSONObject(i);if(j!=null)previous.put(j.optString("id"),j.optString("state"));}
+    jobs=next==null?new JSONArray():next;
+    boolean finished=false;
+    for(int i=0;i<jobs.length();i++) {
+      JSONObject j=jobs.optJSONObject(i);if(j==null)continue;
+      String state=j.optString("state");
+      if((state.equals("completed")||state.equals("failed"))&&!state.equals(previous.get(j.optString("id"))))finished=true;
+    }
+    if(finished)refresh();
+  }
+
   void loadJobs(boolean show) {
     if (account == null) return;
     if (!show) {
@@ -1853,7 +1868,7 @@ public class MainActivity extends AppCompatActivity {
               JSONObject r = api.json("/api/jobs", "GET", null);
               handler.post(
                   () -> {
-                    if (epoch == authEpoch) jobs = r.optJSONArray("jobs");
+                    if (epoch == authEpoch) acceptJobs(r.optJSONArray("jobs"));
                   });
             } catch (Exception ignored) {
             }
@@ -1863,7 +1878,7 @@ public class MainActivity extends AppCompatActivity {
     job(
         () -> api.json("/api/jobs", "GET", null),
         r -> {
-          jobs = r.optJSONArray("jobs");
+          acceptJobs(r.optJSONArray("jobs"));
           if (!show) return;
           String[] items = new String[jobs == null ? 0 : jobs.length()];
           for (int i = 0; i < items.length; i++) {
