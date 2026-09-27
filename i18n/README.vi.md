@@ -36,11 +36,11 @@ Mã ứng dụng, nội dung công khai và dữ liệu riêng được lưu tá
 
 ## Trạng thái
 
-Bản gốc 1.0.0 (9) tận dụng màn hình tốt hơn: điều khiển gọn, phần tóm tắt dùng toàn bộ chiều rộng, cỡ chữ đọc mặc định 18 và trang không trượt ngang. Bài nghiên cứu cùng hình ảnh được lưu tự động, mở từ thiết bị trước rồi cập nhật từ đám mây; Giữ ngoại tuyến ghim một bản sao. Biểu tượng O/i dùng dải màu xanh ngọc, xanh lam, tím và chấm vàng gọn gàng. Việc gửi Apple xét duyệt công khai còn cần ảnh chụp cuối cùng và kiểm tra đăng nhập Apple thực tế.
+Bản gốc 1.0.0 (10) có giao diện xanh ngọc–xanh lam–tím sống động, giao diện theo hệ thống, sáng và tối, cùng 11 ngôn ngữ mặc định theo thiết bị. Trợ lý nhận tệp PDF, Word, ảnh và văn bản riêng tư. Bạn có thể bình luận từng đoạn hoặc tiếp tục chọn văn bản để bình luận. Các yêu cầu dịch đồng thời dùng chung tác vụ và kết quả của cùng phiên bản bài báo, giữ nguyên công thức và hình ảnh. Biểu tượng đã được duyệt và bộ nhớ đệm cục bộ được giữ lại. Xem ghi chú phát hành để biết kết quả kiểm thử và trạng thái cửa hàng.
 
 Phòng đọc công khai hiện có hai bài nghiên cứu thật: OpenAlex (CC0-1.0) và Measuring holographic entanglement entropy on a quantum simulator (CC-BY-4.0), cùng ví dụ gốc được ghi rõ. Bốn hình gốc được giữ lại. Cả hai bài đã đi qua quy trình chuyển đổi thật và được kiểm tra không cần đăng nhập trong trình đọc có chiều rộng điện thoại.
 
-[1.0.0 (9)](../docs/release-candidate-9.md) · [0.3](../docs/native-0.3.md) · [docs/native.md](../docs/native.md)
+[1.0.0 (10)](../docs/release-candidate-10.md) · [0.3](../docs/native-0.3.md) · [docs/native.md](../docs/native.md)
 
 ## Ủng hộ
 

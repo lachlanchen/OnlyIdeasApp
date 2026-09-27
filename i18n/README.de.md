@@ -36,11 +36,11 @@ App-Code, öffentliche Inhalte und private Kontodaten liegen getrennt. MMD erhä
 
 ## Stand
 
-Die native Version 1.0.0 (9) nutzt den Platz besser: kompakte Bedienelemente, Abstracts in voller Breite, standardmäßig 18 Punkt Leseschrift und kein seitliches Verschieben der Seite. Arbeiten und Abbildungen werden automatisch gespeichert, zuerst lokal geöffnet und anschließend aus der Cloud aktualisiert. Offline behalten sichert eine feste Kopie. Das O/i-Symbol kombiniert einen Verlauf von Türkis über Blau zu Violett mit einem goldenen Punkt. Für Apples öffentliche Prüfung fehlen noch finale Screenshots und eine Prüfung der tatsächlichen Apple-Anmeldung.
+Die native Version 1.0.0 (10) bietet eine lebendige Oberfläche in Türkis, Blau und Violett, System-, Hell- und Dunkeldesign sowie 11 App-Sprachen mit der Gerätesprache als Standard. Der Agent nimmt private PDF-, Word-, Bild- und Textanhänge an. Kommentare sind über Absatzschaltflächen und weiterhin über die Textauswahl möglich. Gleichzeitige Übersetzungsanfragen verwenden denselben Auftrag und das Ergebnis derselben Papierfassung; Formeln und Abbildungen bleiben erhalten. Das bestätigte Symbol und der lokale Cache bleiben bestehen. Tests und Store-Status stehen in den Versionshinweisen.
 
 Der öffentliche Leseraum enthält zwei echte Arbeiten: OpenAlex (CC0-1.0) und Measuring holographic entanglement entropy on a quantum simulator (CC-BY-4.0), zusätzlich zum klar gekennzeichneten Originalbeispiel. Vier Originalabbildungen bleiben erhalten. Beide Arbeiten wurden über den echten Konvertierungsablauf importiert und ohne Anmeldung bei Smartphone-Breite geprüft.
 
-[1.0.0 (9)](../docs/release-candidate-9.md) · [0.3](../docs/native-0.3.md) · [docs/native.md](../docs/native.md)
+[1.0.0 (10)](../docs/release-candidate-10.md) · [0.3](../docs/native-0.3.md) · [docs/native.md](../docs/native.md)
 
 ## Unterstützung
 

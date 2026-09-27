@@ -36,11 +36,11 @@ App code, content and private account data have separate homes. MMD preserves Te
 
 ## Status
 
-Native 1.0.0 (9) uses space more carefully: compact controls, full-width abstracts, an 18-point reading default and no sideways page movement. Papers and figures cache automatically, open locally first and refresh from the cloud; Keep offline pins a copy. The O/i icon now has a clean teal–blue–violet gradient and gold dot. Apple public review still needs final screenshots and live Apple sign-in verification.
+Native 1.0.0 (10) adds a vivid teal–blue–violet interface, system/light/dark themes and 11 app languages, selected from your device by default. The agent accepts private PDF, Word, image and text attachments. Discuss a paragraph or keep selecting a passage. Fetch a paper translation in any supported language: simultaneous readers share the same revision-specific job and completed result. Equations and figures remain intact, and the accepted icon and local paper cache are retained. See the release note for verified testing and current store status.
 
 The public reading room now includes two real papers: OpenAlex (CC0-1.0) and Measuring holographic entanglement entropy on a quantum simulator (CC-BY-4.0), alongside the clearly labeled original sample. Four original figures are retained. Both papers were imported through the real conversion workflow and checked in a phone-width reader without signing in.
 
-[1.0.0 (9)](docs/release-candidate-9.md) · [0.3](docs/native-0.3.md) · [docs/native.md](docs/native.md)
+[1.0.0 (10)](docs/release-candidate-10.md) · [0.3](docs/native-0.3.md) · [docs/native.md](docs/native.md)
 
 ## Support
 

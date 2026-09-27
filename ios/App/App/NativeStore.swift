@@ -18,6 +18,7 @@ struct ResearchPaper: Codable, Identifiable {
   var sections: [PaperSection]?
 }
 struct ReadingArtifact: Codable, Identifiable {
+  var sectionId:String?
   var id: String
   var text: String
   var kind: String
@@ -45,10 +46,17 @@ struct FoundPaper: Codable, Identifiable {
   var summary: String
   var year: String?
 }
+struct AgentAttachment: Codable, Identifiable {
+  var id:String
+  var name:String
+  var state:String
+  var paperId:String?
+}
 struct AgentMessage: Codable, Identifiable {
   var id: String
   var role: String
   var text: String
+  var attachments:[AgentAttachment]?
   var papers: [FoundPaper]?
   var jobId: String?
 }
@@ -73,6 +81,7 @@ struct PaperComment: Codable, Identifiable {
   var quote: String?
   var canDelete: Bool?
   var pending: Bool?
+  var paragraphId:String?
 }
 
 @MainActor
@@ -88,6 +97,8 @@ final class ReadingStore: NSObject, ObservableObject,
   @Published var agentStatus = ""
   @Published var error: String?
   @Published var busy = false
+  @Published var attachmentBusy = false
+  @Published var draftAttachments:[AgentAttachment] = []
   @Published var offline = false
   @Published var signingIn = false
   @Published var showSignIn = false
@@ -97,6 +108,7 @@ final class ReadingStore: NSObject, ObservableObject,
   private var appleController: ASAuthorizationController?
   @AppStorage("onlyideas.native.font") var readingSize: Double = 18
   private var warming: Task<Void, Never>?
+  @AppStorage("onlyideas.native.language") var language = "system"
   @AppStorage("onlyideas.native.appearance") var appearance = "system"
   private var token: String?
   private var authentication: ASWebAuthenticationSession?
@@ -153,10 +165,10 @@ final class ReadingStore: NSObject, ObservableObject,
         insert[kSecValueData as String] = data
         insert[kSecAttrAccessible as String] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
         guard SecItemAdd(insert as CFDictionary, nil) == errSecSuccess else {
-          throw failure("Could not save your secure session.")
+          throw failure(T("Could not save your secure session."))
         }
       } else if status != errSecSuccess {
-        throw failure("Could not update your secure session.")
+        throw failure(T("Could not update your secure session."))
       }
     } else {
       SecItemDelete(q as CFDictionary)
@@ -181,10 +193,10 @@ final class ReadingStore: NSObject, ObservableObject,
   ) async throws -> Data {
     #if DEBUG
       if ProcessInfo.processInfo.arguments.contains("--onlyideas-native-offline") {
-        throw failure("Offline test")
+        throw failure(T("Offline test"))
       }
     #endif
-    guard let url = URL(string: origin + path) else { throw failure("Invalid request.") }
+    guard let url = URL(string: origin + path) else { throw failure(T("Invalid request.")) }
     var request = URLRequest(url: url)
     request.httpMethod = method
     request.timeoutInterval = 65
@@ -274,7 +286,7 @@ final class ReadingStore: NSObject, ObservableObject,
       let verifier = Data((0..<32).map { _ in UInt8.random(in: 0...255) }).base64URLEncoded
       let challenge = Data(SHA256.hash(data: Data(verifier.utf8))).base64URLEncoded
       let result = try await json("/api/auth/apple/start", method: "POST", body: ["challenge": challenge])
-      guard let flow = result["flow"] as? String, let nonce = result["nonce"] as? String else { throw failure("Could not start Apple sign-in.") }
+      guard let flow = result["flow"] as? String, let nonce = result["nonce"] as? String else { throw failure(T("Could not start Apple sign-in.")) }
       appleFlow = (flow, verifier)
       let request = ASAuthorizationAppleIDProvider().createRequest()
       request.requestedScopes = [.fullName]
@@ -297,10 +309,10 @@ final class ReadingStore: NSObject, ObservableObject,
         guard let flow = appleFlow, let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
           let identityData = credential.identityToken, let identity = String(data: identityData, encoding: .utf8),
           let codeData = credential.authorizationCode, let code = String(data: codeData, encoding: .utf8)
-        else { throw failure("Apple did not finish sign-in. Please try again.") }
+        else { throw failure(T("Apple did not finish sign-in. Please try again.")) }
         let name = credential.fullName.map { PersonNameComponentsFormatter().string(from: $0) } ?? ""
         let result = try await json("/api/auth/apple/complete", method: "POST", body: ["flow": flow.id, "verifier": flow.verifier, "identityToken": identity, "code": code, "name": name])
-        guard let token = result["token"] as? String else { throw failure("Could not save sign-in.") }
+        guard let token = result["token"] as? String else { throw failure(T("Could not save sign-in.")) }
         try saveToken(token)
         UserDefaults.standard.set(credential.user, forKey: "onlyideas.apple.user")
         showSignIn = false
@@ -323,7 +335,7 @@ final class ReadingStore: NSObject, ObservableObject,
         "/api/auth/native/start", method: "POST", body: ["challenge": challenge])
       guard let urlText = flow["url"] as? String, let url = URL(string: urlText),
         url.host == "agent.onlyideas.art", let id = flow["flow"] as? String
-      else { throw failure("Could not start sign-in.") }
+      else { throw failure(T("Could not start sign-in.")) }
       authentication = ASWebAuthenticationSession(url: url, callbackURLScheme: "art.onlyideas.app")
       { [weak self] url, error in
         Task { @MainActor in
@@ -344,7 +356,7 @@ final class ReadingStore: NSObject, ObservableObject,
             let result = try await self.json(
               "/api/auth/native/complete", method: "POST", body: ["flow": id, "verifier": verifier])
             guard let token = result["token"] as? String else {
-              throw self.failure("Sign-in is not complete. Please try again.")
+              throw self.failure(T("Sign-in is not complete. Please try again."))
             }
             try self.saveToken(token)
             await self.refresh()
@@ -352,7 +364,7 @@ final class ReadingStore: NSObject, ObservableObject,
         }
       }
       authentication?.presentationContextProvider = self
-      if authentication?.start() != true { throw failure("Could not open secure sign-in.") }
+      if authentication?.start() != true { throw failure(T("Could not open secure sign-in.")) }
     } catch {
       self.error = error.localizedDescription
       signingIn = false
@@ -372,6 +384,7 @@ final class ReadingStore: NSObject, ObservableObject,
     _ = try? await json("/api/auth/logout", method: "POST", body: [:])
     try? saveToken(nil)
     account = nil
+    draftAttachments = []
     messages = []
     conversations = []
     conversationID = nil
@@ -482,7 +495,7 @@ final class ReadingStore: NSObject, ObservableObject,
         try Task.checkCancellation()
         guard token == identity else { throw CancellationError() }
         total += bytes.count
-        guard total <= 50_000_000 else { throw failure("This paper is too large to download.") }
+        guard total <= 50_000_000 else { throw failure(T("This paper is too large to download.")) }
         let ext = (asset.path as NSString).pathExtension.lowercased()
         let mime = ext == "svg" ? "image/svg+xml" : ext == "jpg" ? "image/jpeg" : "image/\(ext)"
         figures[asset.path] = "data:\(mime);base64,\(bytes.base64EncodedString())"
@@ -505,7 +518,7 @@ final class ReadingStore: NSObject, ObservableObject,
   func toggleDownload(_ document: ReaderDocument) throws {
     var saved = cachedPaper(document.paper.id) ?? document
     let pin = !isDownloaded(document.paper.id)
-    if pin && downloads().filter({ $0.pinned ?? true }).count >= 30 { throw failure("Unpin a download before saving another paper.") }
+    if pin && downloads().filter({ $0.pinned ?? true }).count >= 30 { throw failure(T("Unpin a download before saving another paper.")) }
     saved.pinned = pin
     saved.accessed = Date().timeIntervalSince1970
     try saveCached(saved)
@@ -522,9 +535,9 @@ final class ReadingStore: NSObject, ObservableObject,
     defer { if access { url.stopAccessingSecurityScopedResource() } }
     do {
       let length = try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0
-      guard length <= 20_000_000 else { throw failure("Choose a PDF smaller than 20 MB.") }
+      guard length <= 20_000_000 else { throw failure(T("Choose a PDF smaller than 20 MB.")) }
       let bytes = try Data(contentsOf: url)
-      guard bytes.count <= 20_000_000 else { throw failure("Choose a PDF smaller than 20 MB.") }
+      guard bytes.count <= 20_000_000 else { throw failure(T("Choose a PDF smaller than 20 MB.")) }
       let title =
         url.deletingPathExtension().lastPathComponent.addingPercentEncoding(
           withAllowedCharacters: .urlQueryAllowed) ?? "Paper"
@@ -536,6 +549,36 @@ final class ReadingStore: NSObject, ObservableObject,
         ])
       await loadJobs()
     } catch { self.error = error.localizedDescription }
+  }
+  func attach(_ urls:[URL]) async {
+    guard urls.count + draftAttachments.count <= 3 else { error = T("Attach up to three files."); return }
+    for url in urls {
+      let access = url.startAccessingSecurityScopedResource()
+      do {
+        let size = try url.resourceValues(forKeys:[.fileSizeKey]).fileSize ?? 0
+        guard size <= 20_000_000 else { throw failure(T("Choose a file smaller than 20 MB.")) }
+        var bytes = try Data(contentsOf:url), name = url.lastPathComponent
+        if ["heic","heif"].contains(url.pathExtension.lowercased()), let image = UIImage(data:bytes), let jpeg = image.jpegData(compressionQuality:0.9) { bytes=jpeg;name=url.deletingPathExtension().lastPathComponent+".jpg" }
+        await attachData(bytes,name:name)
+      } catch { self.error = error.localizedDescription }
+      if access { url.stopAccessingSecurityScopedResource() }
+    }
+  }
+  func attachData(_ bytes:Data, name:String) async {
+    guard account != nil else { await signIn(); return }
+    guard !attachmentBusy, draftAttachments.count < 3 else { error=T("Attach up to three files.");return }
+    guard bytes.count <= 20_000_000 else { error=T("Choose a file smaller than 20 MB.");return }
+    let identity=token
+    attachmentBusy=true
+    defer { attachmentBusy=false }
+    do {
+      let encoded=name.addingPercentEncoding(withAllowedCharacters:.alphanumerics) ?? "file"
+      let data=try await request("/api/attachments",method:"POST",data:bytes,headers:["Content-Type":"application/octet-stream","X-File-Name":encoded])
+      guard identity==token else { return }
+      let response=try JSONSerialization.jsonObject(with:data) as? [String:Any] ?? [:]
+      let item=try decoded(AgentAttachment.self,response["attachment"] ?? [:])
+      if !draftAttachments.contains(where:{$0.id==item.id}) { draftAttachments.append(item) }
+    } catch { self.error=error.localizedDescription }
   }
   func loadJobs() async {
     guard account != nil else { return }
@@ -567,6 +610,7 @@ final class ReadingStore: NSObject, ObservableObject,
     } catch { agentStatus = "Connection interrupted. Your conversation is saved." }
   }
   func newConversation() {
+    draftAttachments = []
     conversationID = nil
     messages = []
     agentStatus = ""
@@ -580,7 +624,7 @@ final class ReadingStore: NSObject, ObservableObject,
       await signIn()
       return
     }
-    guard !busy, agentStatus.isEmpty, !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    guard !busy, !attachmentBusy, agentStatus.isEmpty, (!text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || !draftAttachments.isEmpty)
     else { return }
     busy = true
     defer { busy = false }
@@ -589,8 +633,9 @@ final class ReadingStore: NSObject, ObservableObject,
         let r = try await json("/api/chats", method: "POST", body: [:])
         conversationID = (r["chat"] as? [String: Any])?["id"] as? String
       }
-      guard let id = conversationID else { throw failure("Could not start the conversation.") }
-      _ = try await json("/api/chats/\(id)/messages", method: "POST", body: ["text": text])
+      guard let id = conversationID else { throw failure(T("Could not start the conversation.")) }
+      _ = try await json("/api/chats/\(id)/messages", method: "POST", body: ["text": text, "attachments":draftAttachments.map(\.id), "language":UILanguage.current])
+      draftAttachments = []
       await loadConversation(id)
       await loadConversations()
     } catch { self.error = error.localizedDescription }
@@ -617,4 +662,26 @@ extension Data {
       of: "/", with: "_"
     ).replacingOccurrences(of: "=", with: "")
   }
+}
+
+// A single catalog is shipped with web and both native apps; paper content stays in its original language.
+enum UILanguage {
+  static let choices = [("en","English"),("zh-Hans","简体中文"),("zh-Hant","繁體中文"),("ja","日本語"),("ko","한국어"),("ar","العربية"),("es","Español"),("fr","Français"),("de","Deutsch"),("ru","Русский"),("vi","Tiếng Việt")]
+  static var current: String {
+    let choice = UserDefaults.standard.string(forKey:"onlyideas.native.language") ?? "system"
+    let value = (choice == "system" ? Locale.preferredLanguages.first ?? "en" : choice).lowercased()
+    if value.hasPrefix("zh") { return ["hant","tw","hk","mo"].contains(where:value.contains) ? "zh-Hant" : "zh-Hans" }
+    return choices.first { value == $0.0 || value.hasPrefix($0.0 + "-") }?.0 ?? "en"
+  }
+  static let catalog: [String:[String:String]] = {
+    guard let root = Bundle.main.url(forResource:"public",withExtension:nil), let data = try? Data(contentsOf:root.appendingPathComponent("locales.json")), let value = try? JSONDecoder().decode([String:[String:String]].self,from:data) else { return [:] }
+    return value
+  }()
+}
+func T(_ key:String, _ values:[String:String] = [:]) -> String {
+  var lookup=key, substitutions=values
+  if key.hasPrefix("Translating ") { let parts=key.dropFirst(12).split(separator:"/");if parts.count==2 && parts.allSatisfy({Int($0) != nil}) { lookup="Translating {current}/{total}";substitutions=["current":String(parts[0]),"total":String(parts[1])] } }
+  var text = UILanguage.catalog[UILanguage.current]?[lookup] ?? lookup
+  for (name,value) in substitutions { text = text.replacingOccurrences(of:"{"+name+"}",with:value) }
+  return text
 }

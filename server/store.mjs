@@ -15,6 +15,9 @@ export class Store {
       CREATE TABLE IF NOT EXISTS jobs(id TEXT PRIMARY KEY, owner TEXT NOT NULL, dedupe TEXT NOT NULL, state TEXT NOT NULL, body TEXT NOT NULL, created INTEGER NOT NULL, UNIQUE(owner,dedupe));
       CREATE TABLE IF NOT EXISTS comments(id TEXT PRIMARY KEY, paper TEXT NOT NULL, owner TEXT NOT NULL, body TEXT NOT NULL, created INTEGER NOT NULL);
       CREATE TABLE IF NOT EXISTS notes(owner TEXT NOT NULL, paper TEXT NOT NULL, body TEXT NOT NULL, PRIMARY KEY(owner,paper));
+      CREATE TABLE IF NOT EXISTS artifact_requests(key TEXT PRIMARY KEY, paper TEXT NOT NULL, revision TEXT NOT NULL, job TEXT NOT NULL);
+      CREATE TABLE IF NOT EXISTS job_subscriptions(owner TEXT NOT NULL, job TEXT NOT NULL, PRIMARY KEY(owner,job));
+      CREATE TABLE IF NOT EXISTS attachments(id TEXT PRIMARY KEY, owner TEXT NOT NULL, digest TEXT NOT NULL, body TEXT NOT NULL, UNIQUE(owner,digest));
       CREATE TABLE IF NOT EXISTS artifacts(id TEXT PRIMARY KEY, owner TEXT NOT NULL, body TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS reports(id TEXT PRIMARY KEY, owner TEXT NOT NULL, body TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS deleted_accounts(id TEXT PRIMARY KEY);
@@ -52,8 +55,17 @@ export class Store {
   createSession(user) { this.requireActive(user.id); const token = randomUUID() + randomUUID(); this.db.prepare('INSERT INTO sessions VALUES(?,?,?)').run(hash(token), JSON.stringify(user), Date.now() + 90 * 86400_000); return token; }
   job(id) { const r = this.db.prepare('SELECT body FROM jobs WHERE id=?').get(id); return r ? JSON.parse(r.body) : null; }
   saveJob(j) { this.requireActive(j.owner); this.db.prepare('INSERT OR REPLACE INTO jobs VALUES(?,?,?,?,?,?)').run(j.id, j.owner, j.dedupe, j.state, JSON.stringify(j), j.created); return j; }
-  jobs(owner) { return this.db.prepare('SELECT body FROM jobs WHERE owner=? ORDER BY created DESC LIMIT 40').all(owner).map(r => JSON.parse(r.body)); }
+  jobs(owner) { return this.db.prepare('SELECT body FROM jobs WHERE owner=? OR id IN (SELECT job FROM job_subscriptions WHERE owner=?) ORDER BY created DESC LIMIT 80').all(owner,owner).map(r => JSON.parse(r.body)); }
   existing(owner, dedupe) { const r = this.db.prepare('SELECT body FROM jobs WHERE owner=? AND dedupe=?').get(owner, dedupe); return r ? JSON.parse(r.body) : null; }
   pending() { return this.db.prepare("SELECT body FROM jobs WHERE state IN ('queued','running') AND owner NOT IN (SELECT id FROM suspensions) AND owner NOT IN (SELECT id FROM deleted_accounts) ORDER BY created LIMIT 1").all().map(r => JSON.parse(r.body))[0]; }
+  claimJob() {
+    this.db.exec('BEGIN IMMEDIATE');
+    try {
+      const row=this.db.prepare("SELECT body FROM jobs WHERE (state='queued' OR (state='running' AND coalesce(json_extract(body,'$.leaseUntil'),0)<?)) AND owner NOT IN (SELECT id FROM suspensions) AND owner NOT IN (SELECT id FROM deleted_accounts) ORDER BY created LIMIT 1").get(Date.now());
+      let job=row?JSON.parse(row.body):null;
+      if(job){job={...job,state:'running',lease:randomUUID(),leaseUntil:Date.now()+180_000};this.saveJob(job);}
+      this.db.exec('COMMIT');return job;
+    }catch(e){this.db.exec('ROLLBACK');throw e;}
+  }
   close() { this.db.close(); }
 }

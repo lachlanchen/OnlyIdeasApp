@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
+import { paragraphActions } from './paragraphs'
+import { t } from './i18n'
 import DOMPurify from 'dompurify'
 import type { Paper } from './api'
 import bundleUrl from '../.generated/document-math.js?url'
@@ -14,7 +16,7 @@ function loadRenderer() {
     document.head.append(script)
   })
 }
-export function ReaderContent({ paper, onSelection, onSection }: { paper: Paper; onSelection?: (quote: string, section: string) => void; onSection?: (section: string) => void }) {
+export function ReaderContent({ paper, onSelection, onSection, onParagraph }: { paper: Paper; onSelection?: (quote: string, section: string) => void; onSection?: (section: string) => void; onParagraph?:(quote:string,id:string)=>void }) {
   const ref = useRef<HTMLDivElement>(null)
   const [error, setError] = useState('')
   useEffect(() => {
@@ -67,8 +69,9 @@ export function ReaderContent({ paper, onSelection, onSection }: { paper: Paper;
       }
       const firstHeading = wrapper.querySelector('h1,h2,h3')
       if (firstHeading?.textContent?.trim().toLowerCase() === paper.title.trim().toLowerCase()) firstHeading.remove()
+      if(onParagraph)paragraphActions(wrapper,t('Discuss paragraph'),onParagraph)
       ref.current.replaceChildren(wrapper)
-    }).catch(() => { if (active) setError('The equation renderer could not load. Reload to try again; the original text is below.') })
+    }).catch(() => { if (active) setError(t("The equation renderer could not load. Reload to try again; the original text is below.")) })
     return () => { active = false; objectURLs.forEach(url => URL.revokeObjectURL(url)) }
   }, [paper])
   function select() {
@@ -76,7 +79,7 @@ export function ReaderContent({ paper, onSelection, onSection }: { paper: Paper;
     const element = selection?.anchorNode?.parentElement
     if (text && ref.current?.contains(element || null)) onSelection?.(text.slice(0, 1200), element?.closest<HTMLElement>('[data-section]')?.dataset.section || paper.sections?.[0]?.id || '')
   }
-  return <div className="paper-content" onPointerUp={select} onKeyUp={select} onClick={e => { const element = e.target as HTMLElement; const id = element.closest<HTMLElement>('[data-section]')?.dataset.section; if (id) onSection?.(id) }}>
-    {error ? <><p role="alert">{error}</p><pre>{paper.mmd}</pre></> : <div ref={ref} aria-label="Paper text"><p className="muted">Preparing the reading view…</p></div>}
+  return <div className="paper-content" dir={paper.language==='ar'?'rtl':'ltr'} onPointerUp={select} onKeyUp={select} onClick={e => { const element = e.target as HTMLElement; const id = element.closest<HTMLElement>('[data-section]')?.dataset.section; if (id) onSection?.(id) }}>
+    {error ? <><p role="alert">{error}</p><pre>{paper.mmd}</pre></> : <div ref={ref} aria-label={t("Paper text")}><p className="muted">{t("Preparing the reading view…")}</p></div>}
   </div>
 }

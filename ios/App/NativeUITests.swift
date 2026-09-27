@@ -1,6 +1,63 @@
 import XCTest
 
 final class NativeUITests: XCTestCase {
+  func testElevenLanguagesAndThemes() {
+    continueAfterFailure = false
+    let names = [("en","Library","Agent","Profile"),("zh-Hans","文库","智能助手","个人资料"),("zh-Hant","文庫","智慧助手","個人檔案"),("ja","ライブラリ","エージェント","プロフィール"),("ko","라이브러리","에이전트","프로필"),("ar","المكتبة","المساعد","الملف الشخصي"),("es","Biblioteca","Agente","Perfil"),("fr","Bibliothèque","Agent","Profil"),("de","Bibliothek","Agent","Profil"),("ru","Библиотека","Агент","Профиль"),("vi","Thư viện","Trợ lý","Hồ sơ")]
+    let app = XCUIApplication()
+    for (code,library,agent,profile) in names {
+      for theme in ["light","dark"] {
+        app.launchArguments = ["-onlyideas.native.language",code,"-onlyideas.native.appearance",theme]
+        app.launch()
+        XCTAssertTrue(app.tabBars.buttons[library].waitForExistence(timeout:20),code)
+        app.tabBars.buttons[profile].tap()
+        XCTAssertTrue(app.navigationBars[profile].waitForExistence(timeout:5),code)
+        shot("Profile-"+code+"-"+theme)
+        app.tabBars.buttons[agent].tap()
+        shot("Agent-"+code+"-"+theme)
+        app.terminate()
+      }
+    }
+  }
+  func testParagraphDiscussionAndTranslationMenu() {
+    continueAfterFailure = false
+    let app = XCUIApplication()
+    app.launchArguments = ["-onlyideas.native.language","en","-onlyideas.native.appearance","light"]
+    app.launch()
+    let row=app.buttons.matching(NSPredicate(format:"label CONTAINS %@","Measuring holographic entanglement entropy on a quantum simulator")).firstMatch
+    XCTAssertTrue(row.waitForExistence(timeout:30));shot("Store10-library");row.tap()
+    let paragraph=app.webViews.buttons["Discuss paragraph"].firstMatch
+    XCTAssertTrue(paragraph.waitForExistence(timeout:45));paragraph.tap()
+    XCTAssertTrue(app.navigationBars["Discussion"].waitForExistence(timeout:10));shot("Store10-paragraph-discussion")
+    app.buttons["Done"].firstMatch.tap()
+    app.buttons["Reading options"].tap();app.buttons["Read in another language"].tap()
+    XCTAssertTrue(app.navigationBars["Read in another language"].waitForExistence(timeout:10));shot("Store10-paper-languages")
+    app.buttons["Done"].firstMatch.tap();shot("Store10-reader")
+    app.tabBars.buttons["Agent"].tap();app.buttons["Attach files"].tap()
+    XCTAssertTrue(app.buttons["Choose files"].waitForExistence(timeout:5));XCTAssertTrue(app.buttons["Choose photo"].exists);shot("Store10-attachment-menu")
+  }
+
+  func testFinalStoreScreens() {
+    continueAfterFailure = false
+    let app = XCUIApplication()
+    app.launchArguments = ["-onlyideas.native.language","en","-onlyideas.native.appearance","light"]
+    app.launch()
+    let title = "Measuring holographic entanglement entropy on a quantum simulator"
+    let row = app.buttons.matching(NSPredicate(format:"label CONTAINS %@",title)).firstMatch
+    XCTAssertTrue(row.waitForExistence(timeout:30))
+    shot("Final10-01-library")
+    app.buttons["Agent"].firstMatch.tap()
+    XCTAssertTrue(app.buttons["Attach files"].waitForExistence(timeout:10))
+    shot("Final10-02-agent")
+    app.buttons["Profile"].firstMatch.tap()
+    XCTAssertTrue(app.navigationBars["Profile"].waitForExistence(timeout:10))
+    shot("Final10-03-profile")
+    app.buttons["Library"].firstMatch.tap();row.tap()
+    XCTAssertTrue(app.webViews.staticTexts[title].waitForExistence(timeout:45))
+    shot("Final10-04-reader")
+    app.swipeUp();shot("Final10-05-equations")
+  }
+
   func testAutomaticCacheAndCompactReader() {
     continueAfterFailure = false
     let app = XCUIApplication()

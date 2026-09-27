@@ -36,11 +36,11 @@ El código, el contenido público y los datos privados se guardan por separado. 
 
 ## Estado
 
-La versión nativa 1.0.0 (9) aprovecha mejor el espacio: controles compactos, resúmenes a todo el ancho, texto de lectura de 18 puntos por defecto y sin desplazamiento lateral de la página. Los artículos y sus figuras se guardan automáticamente, se abren desde el dispositivo y se actualizan desde la nube; Conservar sin conexión fija una copia. El icono O/i combina un degradado turquesa, azul y violeta con un punto dorado. La revisión pública de Apple aún necesita capturas finales y verificar el inicio de sesión con Apple.
+La versión nativa 1.0.0 (10) añade una interfaz viva en turquesa, azul y violeta, temas del sistema, claro y oscuro, y 11 idiomas según el dispositivo por defecto. El agente acepta archivos privados PDF, Word, imágenes y texto. Comenta un párrafo o sigue seleccionando un pasaje. Las solicitudes simultáneas de traducción reutilizan el trabajo y el resultado de la misma revisión, conservando ecuaciones y figuras. Se mantienen el icono aprobado y la caché local. Consulta las pruebas y el estado de las tiendas en las notas de versión.
 
 La sala pública incluye dos artículos reales: OpenAlex (CC0-1.0) y Measuring holographic entanglement entropy on a quantum simulator (CC-BY-4.0), además del ejemplo original identificado como tal. Conserva cuatro figuras originales. Ambos artículos se importaron mediante el flujo real de conversión y se verificaron sin iniciar sesión en un lector del ancho de un teléfono.
 
-[1.0.0 (9)](../docs/release-candidate-9.md) · [0.3](../docs/native-0.3.md) · [docs/native.md](../docs/native.md)
+[1.0.0 (10)](../docs/release-candidate-10.md) · [0.3](../docs/native-0.3.md) · [docs/native.md](../docs/native.md)
 
 ## Apoyo
 

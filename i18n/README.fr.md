@@ -36,11 +36,11 @@ Le code, les contenus publics et les données privées sont séparés. MMD prés
 
 ## État
 
-La version native 1.0.0 (9) utilise mieux l’espace : commandes compactes, résumés sur toute la largeur, texte de lecture de 18 points par défaut et page sans déplacement latéral. Les articles et leurs figures sont mis en cache automatiquement, ouverts depuis l’appareil puis actualisés depuis le cloud ; Conserver hors ligne épingle une copie. L’icône O/i associe un dégradé turquoise, bleu et violet à un point doré. La soumission publique à Apple attend encore les captures finales et une vérification réelle de la connexion Apple.
+La version native 1.0.0 (10) propose une interface vive turquoise, bleue et violette, des thèmes système, clair et sombre, et 11 langues suivant celle de l’appareil par défaut. L’agent accepte des pièces jointes privées PDF, Word, images et texte. Commentez un paragraphe ou continuez à sélectionner un passage. Les demandes simultanées de traduction réutilisent le travail et le résultat de la même révision, en préservant équations et figures. L’icône approuvée et le cache local sont conservés. Consultez les notes de version pour les tests et l’état des boutiques.
 
 La salle publique contient deux véritables articles : OpenAlex (CC0-1.0) et Measuring holographic entanglement entropy on a quantum simulator (CC-BY-4.0), ainsi que l’exemple original clairement signalé. Quatre figures originales sont conservées. Les deux articles ont suivi le véritable parcours de conversion et ont été vérifiés sans connexion dans un lecteur de largeur mobile.
 
-[1.0.0 (9)](../docs/release-candidate-9.md) · [0.3](../docs/native-0.3.md) · [docs/native.md](../docs/native.md)
+[1.0.0 (10)](../docs/release-candidate-10.md) · [0.3](../docs/native-0.3.md) · [docs/native.md](../docs/native.md)
 
 ## Soutenir
 

@@ -9,6 +9,8 @@ import { startWorker } from './providers.mjs';
 import { nativeOrigins, nativeFlow, startNative, finishNative, redeemNative } from './native-auth.mjs';
 import { createChats } from './chat.mjs';
 import { deleteAccount, visibleComments, acceptTerms, blocks } from './community.mjs';
+import { requestArtifact, visibleArtifacts, safeJob } from './artifacts.mjs';
+import { attachment, uploadAttachment } from './attachments.mjs';
 import { createAppleAuth } from './apple-auth.mjs';
 const uuid = /^[a-f0-9-]{36}$/;
 const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif', '.woff2': 'font/woff2', '.ttf': 'font/ttf', '.json': 'application/json' };
@@ -61,7 +63,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
         res.setHeader('Vary', 'Origin');
         res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, POST, PUT, DELETE, OPTIONS');
-        res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type, X-OnlyIdeas-Client, X-Request-Id, X-Paper-Title, X-Paper-Language');
+        res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type, X-OnlyIdeas-Client, X-Request-Id, X-Paper-Title, X-Paper-Language, X-Paper-Sharing, X-File-Name');
       }
       if (method === 'OPTIONS') { requireValue(nativeOrigin, 'Origin not allowed.', 403); res.writeHead(204); return res.end(); }
       const native = nativeOrigin && req.headers['x-onlyideas-client'] === 'native';
@@ -73,6 +75,14 @@ export function createApp(store, config, { worker = true, provider = providerJSO
       req.onlyideasUser = user;
       if (user && !native) res.setHeader('Set-Cookie', cookie(cookieName, token, 90 * 86400));
       const requireUser = () => { requireValue(user, 'Sign in to save papers and join the conversation.', 401); return user; };
+      if (path === '/api/attachments' && method === 'POST') {
+        requireUser();limit(`attachment:${user.id}`,10);
+        const name=decodeURIComponent(req.headers['x-file-name']||'file');
+        const bytes=await readBody(req,20_000_000);
+        return response(res,{attachment:await uploadAttachment(store,config,user,bytes,name,enqueue)},202);
+      }
+      const attached=path.match(/^\/api\/attachments\/([a-f0-9-]{36})$/);
+      if(attached&&method==='GET'){requireUser();return response(res,{attachment:attachment(store,attached[1],user.id)});}
       if (path === '/api/chats' || path.startsWith('/api/chats/')) {
         limit(`chat:${user?.id || req.socket.remoteAddress}`, 60);
         const result = await chats.client(path, method, user, method === 'POST' ? await json(req) : {}, enqueue);
@@ -201,7 +211,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         catch (error) { if (bytes) await rm(join(store.directory, 'jobs', requestId), { recursive: true, force: true }); throw error; }
         return response(res, { job }, 202);
       }
-      if (path === '/api/jobs' && method === 'GET') { requireUser(); return response(res, { jobs: store.jobs(user.id).map(j => { const { metadata, url, pdfId, dedupe, ...safe } = j; return safe; }) }); }
+      if (path === '/api/jobs' && method === 'GET') { requireUser(); return response(res, { jobs: store.jobs(user.id).filter(j=>{const p=j.paperId?store.paper(j.paperId):null;return j.owner===user.id||(p&&store.active(p.owner)&&!store.blocked(user.id,p.owner)&&(p.owner===user.id||p.visibility==='public'));}).map(safeJob) }); }
       const matchPaper = path.match(/^\/api\/papers\/([\w-]+)(?:\/(comments|notes|assist|publish|artifacts|export))?$/);
       if (matchPaper) {
         const p = paperFor(matchPaper[1]), action = matchPaper[2];
@@ -213,10 +223,11 @@ export function createApp(store, config, { worker = true, provider = providerJSO
           if (p.visibility === 'public') acceptTerms(store, user, b.acceptTerms);
           requireValue(uuid.test(b.id || '') && typeof b.text === 'string' && b.text.trim().length > 0 && b.text.length <= 5000, 'Write a comment of up to 5,000 characters.');
           requireValue(!b.sectionId || p.sections.some(s => s.id === b.sectionId), 'Select a passage from this paper.');
+          requireValue(!b.paragraphId || /^p-[a-f0-9]{1,8}-[1-9][0-9]{0,5}$/.test(b.paragraphId),'Select a paragraph from this paper.');
           requireValue(b.revision === p.revision, 'The paper changed. Reload before commenting.');
           const prior = store.db.prepare('SELECT * FROM comments WHERE id=?').get(b.id);
           if (prior) { requireValue(prior.owner === user.id && prior.paper === p.id, 'Comment ID unavailable.', 409); return response(res, { ok: true }); }
-          const c = { id: b.id, paperId: p.id, owner: user.id, visibility: p.visibility === 'public' ? 'pending' : 'private', moderation: p.visibility === 'public' ? 'pending' : 'private', author: user.name, login: user.login, text: b.text.trim(), sectionId: b.sectionId || null, quote: String(b.quote || '').slice(0, 1200), revision: p.revision, createdAt: new Date().toISOString() };
+          const c = { id: b.id, paperId: p.id, owner: user.id, visibility: p.visibility === 'public' ? 'pending' : 'private', moderation: p.visibility === 'public' ? 'pending' : 'private', author: user.name, login: user.login, text: b.text.trim(), sectionId: b.sectionId || null, paragraphId:b.paragraphId||null, quote: String(b.quote || '').slice(0, 1200), revision: p.revision, createdAt: new Date().toISOString() };
           store.db.prepare('INSERT INTO comments VALUES(?,?,?,?,?)').run(c.id, p.id, user.id, JSON.stringify(c), Date.now()); return response(res, { ok: true }, 201);
         }
         if (action === 'notes') {
@@ -228,10 +239,9 @@ export function createApp(store, config, { worker = true, provider = providerJSO
           requireUser(); requireValue(config.model?.url, 'The reading assistant is not connected yet.', 503); const b = await json(req);
           requireValue(['digest', 'translation'].includes(b.kind) && Object.hasOwn(languages, b.language), 'Choose a reading action and language.');
           requireValue(!b.sectionId || p.sections.some(s => s.id === b.sectionId), 'Choose a section in this paper.');
-          const dedupe = hash(JSON.stringify([p.id, p.revision, b.kind, b.language, b.sectionId || '', config.model.name]));
-          const job = enqueue(user, { dedupe, paperId: p.id, revision: p.revision, kind: b.kind, language: b.language, sectionId: b.sectionId || null }); return response(res, { job }, 202);
+          const job = requestArtifact(store, config, user, p, { kind:b.kind, language:b.language, sectionId:b.sectionId||null }); return response(res, { job:safeJob(job) }, job.state==='completed'?200:202);
         }
-        if (action === 'artifacts' && method === 'GET') { requireUser(); return response(res, { artifacts: store.db.prepare('SELECT body FROM artifacts WHERE owner=?').all(user.id).map(r => JSON.parse(r.body)).filter(a => a.paperId === p.id && a.revision === p.revision) }); }
+        if (action === 'artifacts' && method === 'GET') return response(res, { artifacts: visibleArtifacts(store,p,user) });
         if (action === 'publish' && method === 'POST') {
           requireUser(); requireValue(p.owner === user.id, 'Only the owner can publish.', 403); const b = await json(req);
           requireValue(config.github?.contentToken || config.github?.checkout, 'The public library connection is not configured yet.', 503);
@@ -258,10 +268,11 @@ export function createApp(store, config, { worker = true, provider = providerJSO
       const retry = path.match(/^\/api\/jobs\/([a-f0-9-]{36})\/retry$/);
       if (retry && method === 'POST') {
         requireUser(); limit(`retry:${user.id}`, 3);
-        const j = store.job(retry[1]); requireValue(j?.owner === user.id, 'Request not found.', 404);
+        const j = store.job(retry[1]); requireValue(j && (j.owner===user.id || store.db.prepare('SELECT 1 FROM job_subscriptions WHERE owner=? AND job=?').get(user.id,j.id)), 'Request not found.', 404); if(j.paperId)paperFor(j.paperId);
         requireValue(j.kind !== 'publish', 'Publication decisions must be reviewed by support.', 403);
         requireValue(j.state === 'failed', 'This request is already running or complete.', 409);
-        requireValue(!(j.kind === 'import' && j.submittedAt && !j.pdfId), 'The conversion receipt is uncertain. Contact support before retrying to avoid another charge.', 409);
+        requireValue(!((j.kind === 'import' || j.kind==='attachment') && j.submittedAt && !j.pdfId), 'The conversion receipt is uncertain. Contact support before retrying to avoid another charge.', 409);
+        requireValue(!j.ocrSubmittedAt || j.ocrText!==undefined || j.ocrResult, 'The image conversion receipt is uncertain. Contact support before retrying to avoid another charge.',409);
         requireValue((j.retries || 0) < 3, 'Please contact support before retrying again.', 429);
         j.state = 'queued'; j.message = 'Waiting to resume'; j.retries = (j.retries || 0) + 1; store.saveJob(j);
         return response(res, { ok: true }, 202);
