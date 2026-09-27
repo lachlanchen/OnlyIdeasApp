@@ -1,3 +1,6 @@
+import { createPaperSocial } from './paper-social.mjs';
+import { createDiscovery } from './discovery.mjs';
+import { paperMetadata } from './paper-metadata.mjs';
 import { createServer } from 'node:http';
 import { randomUUID, randomBytes } from 'node:crypto';
 import { readFile, writeFile, mkdir, rm } from 'node:fs/promises';
@@ -17,7 +20,7 @@ import { sourceKey, reusedImport, reusablePaper } from './import-reuse.mjs';
 import { creditTransaction, creditSummary, reserveImport, retryImportCredits, finishImportCredits, seedCreditPublications } from './credits.mjs';
 const uuid = /^[a-f0-9-]{36}$/;
 const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif', '.woff2': 'font/woff2', '.ttf': 'font/ttf', '.json': 'application/json' };
-export function createApp(store, config, { worker = true, provider = providerJSON, billingOptions = {} } = {}) {
+export function createApp(store, config, { worker = true, provider = providerJSON, billingOptions = {}, discoveryOptions = {} } = {}) {
   const origin = config.origin || 'http://127.0.0.1:4182';
   const secure = origin.startsWith('https://');
   requireValue(secure || /^http:\/\/(127\.0\.0\.1|localhost):\d+$/.test(origin), 'Only HTTPS or explicit loopback origins are permitted.');
@@ -27,6 +30,8 @@ export function createApp(store, config, { worker = true, provider = providerJSO
   seedCreditPublications(store, config);
   const stopWorker = worker ? startWorker(store, config) : () => {};
   const chats = createChats(store, config);
+  const discovery = createDiscovery(store,discoveryOptions);
+  const social = createPaperSocial(store,discovery);
   const apple = createAppleAuth(store, config, provider);
   const billing = createBilling(store,config,billingOptions);
   const limits = new Map();
@@ -109,6 +114,25 @@ export function createApp(store, config, { worker = true, provider = providerJSO
       }
       const paperFor = id => { const p = store.paper(id); requireValue(p && store.active(p.owner) && !store.blocked(user?.id, p.owner) && (p.visibility === 'public' || p.owner === user?.id), 'Paper not found.', 404); return p; };
       if (path.startsWith('/api/')) limit(user?.id || req.socket.remoteAddress, 240);
+      if (path === '/api/saved' && method === 'GET') { requireUser();return response(res,{papers:social.saved(user)}); }
+      const socialMatch=path.match(/^\/api\/items\/([\w-]+)(?:\/(comments))?$/);
+      if(socialMatch){const ref=socialMatch[1];if(method==='GET')return response(res,socialMatch[2]?social.comments(ref,user):social.state(ref,user));requireUser();limit(`social:${user.id}`,40);const body=await json(req);if(method==='PUT'&&!socialMatch[2])return response(res,social.update(ref,user,body));if(method==='POST'&&socialMatch[2])return response(res,social.post(ref,user,body),201);requireValue(false,'Method not allowed.',405);}
+      if (path.startsWith('/api/discovery/item/') && method==='GET') return response(res,{paper:discovery.item(path.split('/').at(-1),user)});
+      if (path === '/api/discovery/taxonomy' && method === 'GET') return response(res, discovery.taxonomy);
+      if (path === '/api/discovery' && method === 'GET') {
+        limit(`discovery:${user?.id||req.socket.remoteAddress}`,40);
+        return response(res,await discovery.find(Object.fromEntries(url.searchParams),user));
+      }
+      if (path === '/api/discovery/import' && method === 'POST') {
+        requireUser();limit(`import:${user.id}`,10);
+        const body=await json(req),card=discovery.item(body.id,user);
+        if(card.paperId)return response(res,{paperId:card.paperId,reused:true});
+        requireValue(card.pdfUrl,'This source has no direct open PDF. Open its source page or upload your copy.');
+        requireValue(config.mathpix?.appKey,'PDF conversion is not connected yet.',503);
+        const sharing=body.sharing==='private'?'private':'shared';
+        const job=enqueue(user,{kind:'import',sharing,creditLimit:body.creditLimit,url:card.pdfUrl,dedupe:`import:${hash(card.pdfUrl)}`,metadata:{...paperMetadata(card),title:card.title,authors:card.authors,language:'en',category:card.discipline||'Research',license:'private'}});
+        return response(res,{job:safeJob(job),paperId:job.paperId},202);
+      }
       if (path === '/api/billing' && method === 'GET') {requireUser();return response(res,billing.catalog(user));}
       const purchase=path.match(/^\/api\/billing\/(apple|google)$/);
       if(purchase&&method==='POST') {requireUser();limit(`purchase:${user.id}`,20);return response(res,await billing.purchase(purchase[1],await json(req),user));}
@@ -242,7 +266,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
           const cached = reusablePaper(store,user.id,{url:link,sourceDigest:bytes?hash(bytes):undefined});
           if (!cached) requireValue(config.mathpix?.appKey, 'PDF conversion is not connected yet. Import Markdown in the meantime.', 503);
           if (!cached && bytes && config.credits?.enabled === true && sharing !== 'shared') pages = await inspectPDF(join(store.directory,'jobs',requestId,'source.pdf'),config.maxPages || 30);
-          job = enqueue(user, { id: requestId, dedupe, kind: 'import', sharing, url: link, creditLimit, pages, sourceDigest:bytes?hash(bytes):undefined, metadata: { title: metadata.title, authors: String(metadata.authors || ''), language: metadata.language || 'en', license: 'private', category: String(metadata.category || 'Research') } });
+          job = enqueue(user, { id: requestId, dedupe, kind: 'import', sharing, url: link, creditLimit, pages, sourceDigest:bytes?hash(bytes):undefined, metadata: { ...paperMetadata(metadata), title: metadata.title, authors: String(metadata.authors || ''), language: metadata.language || 'en', license: 'private', category: String(metadata.category || 'Research') } });
         }
         catch (error) { if (bytes) await rm(join(store.directory, 'jobs', requestId), { recursive: true, force: true }); throw error; }
         if (bytes && (job.reused || job.id !== requestId)) await rm(join(store.directory,'jobs',requestId),{recursive:true,force:true});
@@ -292,7 +316,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
       }
       const comment = path.match(/^\/api\/comments\/([a-f0-9-]{36})(?:\/(report|block))?$/);
       if (comment) {
-        requireUser(); const c = store.db.prepare('SELECT * FROM comments WHERE id=?').get(comment[1]); requireValue(c, 'Comment not found.', 404); paperFor(c.paper);
+        requireUser(); const c = store.db.prepare('SELECT * FROM comments WHERE id=?').get(comment[1]); requireValue(c, 'Comment not found.', 404); if(c.paper.startsWith('item-'))social.check(c.paper,user);else paperFor(c.paper);
         if (!comment[2] && method === 'DELETE') { requireValue(c.owner === user.id, 'Only the author can delete this comment.', 403); store.db.prepare('DELETE FROM comments WHERE id=?').run(c.id); return response(res, { ok: true }); }
         if (comment[2] === 'block' && method === 'POST') {
           requireValue(c.owner !== user.id, 'You cannot block yourself.');

@@ -53,7 +53,7 @@ Subscription plans remain gated on the separate purchase qualification work.
 Signed 1.0.2 (14) is available to the existing internal testers. The previous
 internal build 12 was replaced without clearing the on-device account or library.
 
-Google production build 14 was sent for review at 2026-09-27 23:49 UTC, replacing
+Google production build 14 was sent for review at 2026-09-27 23:35 UTC, replacing
 the pending build 10. Full rollout retains 176 selected countries plus the rest
-of world. Google lists it under Changes in review while automatic quick checks
-finish. Purchase History data safety changes are included; billing stays gated.
+of world. Google lists it under Changes in review; automatic quick checks have
+completed. Purchase History data safety changes are included; billing stays gated.

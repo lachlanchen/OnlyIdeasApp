@@ -106,18 +106,19 @@ struct NativeLibrary: View {
   @EnvironmentObject var store: ReadingStore
   var profile: () -> Void
   @State private var query = ""
+  @State private var browseResearch=true
   @State private var options = false
   @State private var picker = false
   @State private var requests = false
   @State private var selectedPaper: String?
   var visible: [ResearchPaper] {
     store.papers.filter {
-      query.isEmpty || ($0.title + " " + ($0.authors ?? "")).localizedCaseInsensitiveContains(query)
+      query.isEmpty || researchMatches(query,[$0.title,$0.authors ?? "",$0.discipline ?? "",$0.subdiscipline ?? "",$0.journal ?? "",$0.year ?? "",$0.doi ?? ""].joined(separator:" "))
     }
   }
   var body: some View {
     ScrollView {
-      VStack(alignment: .leading, spacing: 12) {
+      LazyVStack(alignment: .leading, spacing: 12) {
         HStack {
           VStack(alignment: .leading, spacing: 8) {
             Text(T("Your reading room")).foregroundStyle(ideaGradient).font(
@@ -137,6 +138,10 @@ struct NativeLibrary: View {
           Label(T("Offline · cached papers"), systemImage: "arrow.down.circle.fill").font(.body)
             .foregroundColor(.secondary)
         }
+        Picker(T("Library"),selection:$browseResearch){Text(T("Latest open research")).tag(true);Text(T("Reading library")).tag(false)}.pickerStyle(.segmented)
+        if browseResearch && !query.isEmpty {ForEach(Array(visible.prefix(3))){paper in NavigationLink(destination:NativePaper(paper:paper)){PaperRow(paper:paper,downloaded:store.isDownloaded(paper.id))}.buttonStyle(.plain)}}
+        if browseResearch {ResearchDiscovery(query:$query,requests:{requests=true})}
+        if !browseResearch {
         HStack {
           Text(T("Reading library")).font(.title2.weight(.semibold))
           Spacer()
@@ -146,6 +151,7 @@ struct NativeLibrary: View {
           NavigationLink(destination: NativePaper(paper: paper), tag: paper.id, selection: $selectedPaper) {
             PaperRow(paper: paper, downloaded: store.isDownloaded(paper.id))
           }.buttonStyle(.plain)
+          NativePaperActions(reference:paper.id,title:paper.title)
         }
         if visible.isEmpty {
           Text(
@@ -153,6 +159,7 @@ struct NativeLibrary: View {
               ? "Add a PDF or ask the agent to find your next paper."
               : "No papers here yet. Add a paper or try another search.")
           ).font(.title3).foregroundColor(.secondary).padding(.vertical, 20)
+        }
         }
         if !store.jobs.isEmpty {
           Button {
@@ -166,10 +173,10 @@ struct NativeLibrary: View {
     }.background(Color(.systemGroupedBackground)).navigationTitle("OnlyIdeas").navigationBarTitleDisplayMode(.inline)
       #if DEBUG
       .onReceive(NotificationCenter.default.publisher(for: Notification.Name("OnlyIdeas.QA.Paper"))) { event in
-        if let id = event.object as? String, store.papers.contains(where: { $0.id == id }) { selectedPaper = id }
+        if let id = event.object as? String, store.papers.contains(where: { $0.id == id }) { browseResearch=false;selectedPaper = id }
       }
       #endif
-      .searchable(text: $query, prompt:T("Search your papers"))
+      .searchable(text: $query, prompt:T("Search all research"))
       .toolbar {
         ToolbarItem(placement:.navigationBarLeading) {
           Button {options=true} label: {Text(T(store.sharedImports ? "Shared":"Only me")).font(.subheadline.weight(.semibold)).frame(minHeight:44)}.accessibilityLabel(T("Sharing & credits"))
@@ -207,6 +214,7 @@ struct PaperRow: View {
         if downloaded { Image(systemName: "pin.fill").font(.caption) }
         Image(systemName: "chevron.right").font(.caption)
       }.foregroundColor(.secondary)
+      Text([paper.discipline,paper.subdiscipline,paper.year,paper.journal].compactMap{$0}.filter{!$0.isEmpty}.joined(separator:" · ")).font(.caption).foregroundColor(.secondary)
       Text(paper.title).font(.headline).foregroundColor(.primary).fixedSize(horizontal: false, vertical: true)
       if let authors = paper.authors, !authors.isEmpty {
         Text(authors).font(.subheadline).foregroundColor(.secondary).lineLimit(2)
@@ -867,6 +875,8 @@ struct NativeDiscussion: View {
   let quote: String
   var paragraphId:String = ""
   @State private var comments: [PaperComment] = []
+  var itemReference:String? = nil
+  var commentsPath:String {itemReference.map{"/api/items/\($0)/comments"} ?? "/api/papers/\(paper.id)/comments"}
   @State private var draft = ""
   @State private var sending = false
   @State private var report: PaperComment?
@@ -875,7 +885,7 @@ struct NativeDiscussion: View {
   @State private var scrollRequest = 0
   func load(scrollToBottom: Bool = false) async {
     do {
-      let r = try await store.json("/api/papers/\(paper.id)/comments")
+      let r = try await store.json(commentsPath)
       comments = try store.decoded([PaperComment].self, r["comments"] ?? []).filter { paragraphId.isEmpty || $0.paragraphId == paragraphId }
     } catch { store.error = error.localizedDescription }
     if scrollToBottom { scrollRequest += 1 }
@@ -968,7 +978,7 @@ struct NativeDiscussion: View {
     defer { sending = false }
     do {
       _ = try await store.json(
-        "/api/papers/\(paper.id)/comments", method: "POST",
+        commentsPath, method: "POST",
         body: [
           "text": draft, "quote": quote, "paragraphId":paragraphId, "id": UUID().uuidString.lowercased(),
           "revision": paper.revision ?? "", "acceptTerms": acceptedTerms,
@@ -1187,4 +1197,108 @@ struct NativeSubscriptionSection:View {
       }
     }.task {await store.loadSubscriptions()}
   }
+}
+
+
+struct ResearchDiscovery: View {
+  @EnvironmentObject var store: ReadingStore
+  @Binding var query:String
+  var requests:()->Void
+  @State private var source="all"
+  @State private var discipline=""
+  @State private var subdiscipline=""
+  @State private var from=""
+  @State private var to=""
+  @State private var journal=""
+  @State private var sort="latest"
+  @State private var filters=false
+  @State private var saved=false
+  @State private var busy=false
+  @State private var nextPage:Int?
+  @State private var notice=""
+  @State private var generation=UUID()
+  @State private var taxonomy:[String:[ResearchDiscipline]]=[:]
+  @State private var hits:[DiscoveryPaper]=[]
+  @State private var selected:ResearchPaper?
+  @State private var showPaper=false
+  @State private var importing=""
+  var parameters:[String:String] { ["source":source,"discipline":discipline,"subdiscipline":subdiscipline,"from":from,"to":to,"journal":journal,"sort":query.isEmpty ? "latest":sort,"q":query] }
+  var signature:String { parameters.sorted{$0.key<$1.key}.map{$0.key+"="+$0.value}.joined(separator:"&") + String(saved) + (store.account?.id ?? "visitor") }
+  var fields:[ResearchDiscipline] {taxonomy[source == "arxiv" ? "arxiv":"openalex"] ?? []}
+  var children:[ResearchCategory] {fields.first{$0.id==discipline}?.children ?? []}
+  var body:some View {
+    VStack(alignment:.leading,spacing:12) {
+      HStack {Text(T(query.isEmpty ? "Latest open research":"Search research")).font(.title2.bold());Spacer();Button {filters.toggle()}label:{Image(systemName:"slider.horizontal.3").frame(width:44,height:44)}.accessibilityLabel(T("Filters"));Button {if store.account==nil {Task{await store.signIn()}}else{saved.toggle()}} label:{Image(systemName:saved ? "star.fill":"star").frame(width:44,height:44)}.accessibilityLabel(T("Saved"))}
+      if filters {filterControls}
+      Text(T("Tap a paper to fetch and convert it. Existing papers open immediately. Shared imports enter publication review.")).font(.caption).foregroundColor(.secondary)
+      ForEach(hits) { hit in
+        VStack(alignment:.leading,spacing:8) {
+          Text(hit.metadata).font(.caption).foregroundColor(.secondary)
+          Button {Task{await choose(hit)}}label:{Text(hit.title).font(.headline).multilineTextAlignment(.leading).foregroundColor(.primary).frame(maxWidth:.infinity,alignment:.leading)}.disabled(importing==hit.id)
+          Text(hit.authors).font(.caption).foregroundColor(.secondary).lineLimit(2)
+          if let summary=hit.summary,!summary.isEmpty {Text(summary).font(.subheadline).lineLimit(3)}
+          HStack {Text(hit.doi.map{"DOI "+$0} ?? hit.index ?? "").font(.caption2).foregroundColor(.secondary).lineLimit(1);Spacer();if let source=URL(string:hit.source) {Link(T("Source"),destination:source).font(.caption)}}
+          Button {Task{await choose(hit)}}label:{Label(T(importing==hit.id ? "Adding your paper…":hit.paperId != nil ? "Open paper":"Fetch & read"),systemImage:"arrow.right")}.disabled(importing==hit.id)
+          NativePaperActions(reference:hit.ref ?? "r-"+hit.id,title:hit.title)
+        }.padding(14).background(Color(.secondarySystemGroupedBackground)).cornerRadius(14)
+      }
+      if !notice.isEmpty {Text(T(notice)).font(.subheadline).foregroundColor(.secondary);Button(T("Try again")){Task{await reset()}}}
+      if busy {ProgressView(T("Finding research…")).padding(.vertical,8)}
+      if let next=nextPage {Button(T("Load more")){Task{await load(next,generation)}}.disabled(busy).onAppear{if !busy&&notice.isEmpty {Task{await load(next,generation)}}}}
+      if !busy&&hits.isEmpty&&notice.isEmpty {Text(T("No papers found. Try broader keywords or fewer filters.")).font(.subheadline).foregroundColor(.secondary)}
+    }.task {if taxonomy.isEmpty {do{taxonomy=try store.decoded([String:[ResearchDiscipline]].self,await store.json("/api/discovery/taxonomy"))}catch{}}}
+      .task(id:signature){await reset()}
+      .background(NavigationLink(destination:NativePaper(paper:selected ?? ResearchPaper(id:"",title:"")),isActive:$showPaper){EmptyView()}.hidden())
+  }
+  var filterControls:some View {
+    VStack(alignment:.leading,spacing:8) {
+      Picker(T("Source"),selection:$source){Text(T("All research")).tag("all");Text("OpenAlex").tag("openalex");Text("arXiv").tag("arxiv")}.onChange(of:source){_ in discipline="";subdiscipline=""}
+      Picker(T("Primary discipline"),selection:$discipline){Text(T("All disciplines")).tag("");ForEach(fields){Text($0.name).tag($0.id)}}.onChange(of:discipline){_ in subdiscipline=""}
+      Picker(T("Secondary discipline"),selection:$subdiscipline){Text(T("All disciplines")).tag("");ForEach(children){Text($0.name).tag($0.id)}}.disabled(children.isEmpty)
+      HStack {TextField(T("From year"),text:$from).keyboardType(.numberPad);TextField(T("To year"),text:$to).keyboardType(.numberPad)}.textFieldStyle(.roundedBorder)
+      TextField(T("Journal"),text:$journal).textFieldStyle(.roundedBorder)
+      Picker(T("Sort"),selection:$sort){Text(T("Relevance")).tag("relevance");Text(T("Newest first")).tag("latest")}
+      Button(T("Clear filters")){source="all";discipline="";subdiscipline="";from="";to="";journal=""}
+    }.font(.subheadline).padding(10).background(Color(.secondarySystemGroupedBackground)).cornerRadius(12)
+  }
+  func reset() async {let id=UUID();generation=id;busy=false;nextPage=nil;notice="";hits=[];if !query.isEmpty {try? await Task.sleep(nanoseconds:450_000_000)};guard !Task.isCancelled,generation==id else{return};await load(1,id)}
+  func load(_ page:Int,_ id:UUID) async {
+    guard !busy,generation==id else{return};busy=true
+    defer{if generation==id {busy=false}}
+    do {var params=parameters;params["page"]=String(page);var u=URLComponents();u.queryItems=params.map{URLQueryItem(name:$0.key,value:$0.value)}
+      let r=try await store.json(saved ? "/api/saved":"/api/discovery?"+(u.percentEncodedQuery ?? ""));guard generation==id,!Task.isCancelled else{return}
+      let incoming=try store.decoded([DiscoveryPaper].self,r["papers"] ?? []);if page==1 {hits=incoming}else{hits+=incoming.filter{p in !hits.contains{$0.id==p.id}}};nextPage=r["nextPage"] as? Int
+      if let missing=r["unavailable"]as?[String],!missing.isEmpty {notice="Some research indexes are temporarily unavailable."}else if r["stale"]as?Bool==true {notice="Showing cached research results."}
+    }catch{if generation==id && !Task.isCancelled {notice=error.localizedDescription}}
+  }
+  func choose(_ hit:DiscoveryPaper) async {
+    if let id=hit.paperId ?? (hit.ref?.hasPrefix("r-")==false ? hit.ref:nil){selected=ResearchPaper(id:id,title:hit.title);showPaper=true;return}
+    guard store.account != nil else {await store.signIn();return}
+    guard let pdf=hit.pdfUrl,!pdf.isEmpty else {store.error=T("No direct PDF. Open the source or upload your copy.");return}
+    importing=hit.id;defer{importing=""}
+    do{let r=try await store.json("/api/discovery/import",method:"POST",body:["id":hit.id,"sharing":"shared"]);if let id=r["paperId"]as?String {selected=ResearchPaper(id:id,title:hit.title);showPaper=true}else{await store.loadJobs();requests()}}catch{store.error=error.localizedDescription}
+  }
+}
+struct NativePaperActions:View {
+ @EnvironmentObject var store:ReadingStore
+ let reference:String;let title:String
+ @State private var saved=false
+ @State private var liked=false
+ @State private var likes=0
+ @State private var comments=0
+ @State private var shareURL:URL?
+ @State private var sharing=false
+ @State private var discussion=false
+ @State private var busy=false
+ @State private var isPrivate=false
+ var body:some View {
+  HStack(spacing:4){action(saved ? "Saved":"Save",saved ? "star.fill":"star"){Task{await toggle("saved",!saved)}};action("Like",liked ? "heart.fill":"heart"){Task{await toggle("liked",!liked)}};action("Comment","bubble.right"){discussion=true};action("Share","square.and.arrow.up"){if shareURL != nil {sharing=true}else{store.error=T("Private papers can only be opened by their owner.")}}}.font(.caption).buttonStyle(.plain).disabled(busy)
+   .task(id:reference+(store.account?.id ?? "")){await load()}
+   .sheet(isPresented:$discussion,onDismiss:{Task{await load()}}){NativeDiscussion(paper:ResearchPaper(id:reference,title:title,visibility:isPrivate ? "private":"public"),quote:"",itemReference:reference)}
+   .sheet(isPresented:$sharing){if let url=shareURL {NativeShare(items:[title,url])}}
+ }
+ func action(_ name:String,_ image:String,run:@escaping()->Void)->some View {Button(action:run){VStack(spacing:3){Image(systemName:image);Text(T(name)+(name=="Like" && likes>0 ? " \(likes)":name=="Comment" && comments>0 ? " \(comments)":"")).lineLimit(1).minimumScaleFactor(0.8)}.frame(maxWidth:.infinity,minHeight:44)}.accessibilityLabel(T(name))}
+ func apply(_ r:[String:Any]){saved=r["saved"]as?Bool ?? false;liked=r["liked"]as?Bool ?? false;likes=r["likes"]as?Int ?? 0;comments=r["commentCount"]as?Int ?? 0;shareURL=(r["shareUrl"]as?String).flatMap(URL.init(string:));isPrivate=r["private"]as?Bool ?? false}
+ func load()async {do{apply(try await store.json("/api/items/"+reference))}catch{}}
+ func toggle(_ key:String,_ value:Bool)async {guard store.account != nil else{await store.signIn();return};busy=true;defer{busy=false};do{apply(try await store.json("/api/items/"+reference,method:"PUT",body:[key:value]))}catch{store.error=error.localizedDescription}}
 }

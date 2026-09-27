@@ -1,3 +1,4 @@
+import { paperMetadata } from './paper-metadata.mjs';
 import { randomUUID, timingSafeEqual } from 'node:crypto';
 import { requestSharing } from './sharing.mjs';
 import { attachment } from './attachments.mjs';
@@ -54,7 +55,7 @@ export function createChats(store, config) {
         const card = messages(id).flatMap(m=>m.papers || []).find(p=>p.id === body.paperId);
         requireValue(card?.pdfUrl, 'Choose an available PDF from this conversation.');
         // Existing queue enforces deduplication, account quotas and Mathpix page caps.
-        const job = enqueue(user,{ kind:'import', sharing:body.sharing === 'shared' ? 'shared' : 'private', creditLimit:body.creditLimit, url:card.pdfUrl, metadata:{title:card.title,authors:card.authors,language:'en',license:'private',category:'Research'}, dedupe:`import:${hash(card.pdfUrl)}` });
+        const job = enqueue(user,{ kind:'import', sharing:body.sharing === 'shared' ? 'shared' : 'private', creditLimit:body.creditLimit, url:card.pdfUrl, metadata:{...paperMetadata(card),title:card.title,authors:card.authors,language:'en',license:'private',category:'Research'}, dedupe:`import:${hash(card.pdfUrl)}` });
         if (job.paperId && body.sharing === 'shared') { const p=store.paper(job.paperId); if(p)requestSharing(store,p,'shared'); }
         add(id,'assistant',{text:job.reused ? 'This paper is already available. Open the existing paper; its text, figures and available translations are reused. Your chat and notes stay private.' : body.sharing !== 'shared' ? 'The paper is saved to your private library after conversion.' : 'The paper will be added to the shared reading room after source and community review. Your chat and notes stay private.',jobId:job.id});
         return { job };
@@ -87,7 +88,7 @@ export function createChats(store, config) {
       const data=JSON.parse(row.body);
       if(body.status && !body.result) { data.status=String(body.status).slice(0,160);data.leaseUntil=Date.now()+180_000;db.prepare('UPDATE chat_tasks SET body=? WHERE id=?').run(JSON.stringify(data),row.id);return {ok:true}; }
       const result=body.result;requireValue(result && typeof result.text==='string' && result.text.length<=16000,'Invalid response.');
-      const papers=(result.papers || []).slice(0,8).map(p=>{const u=new URL(p.pdfUrl);requireValue(u.protocol==='https:'&&!u.username&&!u.password&&!u.port,'Invalid paper URL.');return {id:hash(u.href).slice(0,24),title:String(p.title).slice(0,400),authors:String(p.authors||'').slice(0,600),summary:String(p.summary||'').slice(0,1800),pdfUrl:u.href,source:String(p.source||u.href),year:String(p.year||'').slice(0,4)};});
+      const papers=(result.papers || []).slice(0,8).map(p=>{const u=new URL(p.pdfUrl);requireValue(u.protocol==='https:'&&!u.username&&!u.password&&!u.port,'Invalid paper URL.');return {...paperMetadata(p),id:hash(u.href).slice(0,24),title:String(p.title).slice(0,400),authors:String(p.authors||'').slice(0,600),summary:String(p.summary||'').slice(0,1800),pdfUrl:u.href,source:String(p.source||u.href),year:String(p.year||'').slice(0,4)};});
       db.exec('BEGIN');try { add(row.chat,'assistant',{text:result.text,papers},row.id);db.prepare("UPDATE chat_tasks SET state='completed' WHERE id=?").run(row.id);db.exec('COMMIT'); }catch(e){db.exec('ROLLBACK');throw e;}
       return {ok:true};
     }

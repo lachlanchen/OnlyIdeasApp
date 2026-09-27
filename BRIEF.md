@@ -132,3 +132,19 @@ across readers before downloading or converting again. Use source identities and
 exact file hashes; preserve explicit paper revisions and private-content isolation.
 Existing work must not incur another conversion charge. Open discussion panels
 at the latest replies and composer after loading, without opening the keyboard.
+
+## Research discovery and paper cards · 2026-09-28
+
+The first page lazy-loads latest open-access research, with immediate local fuzzy
+matches and wider OpenAlex/arXiv search. Provide primary/secondary disciplines,
+publication year/date, journal and DOI when supplied by the source index. Advanced
+filters select hierarchy, year range, journal, source and sort order. A tap opens
+an existing accessible paper or explicitly starts a bounded shared import, saving
+its progress and reusing prior conversions/translations. Public publication review
+and private-content isolation remain. Show partial/index outages honestly.
+
+Each paper item has account-synced Save, Like, whole-paper Comment and Share.
+Preserve paragraph comments in the reader. Private paper links are not shareable;
+public comments retain moderation, report/block and deletion. Provide an EchoMind
+mini-app adapter handoff; forwarding to friends is deferred. Do not enable central
+auth for OnlyIdeas until that dedicated adapter is separately registered/qualified.

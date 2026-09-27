@@ -96,10 +96,10 @@
   "google": {
     "build": 14,
     "internal": "Available to internal testers",
-    "production": "Changes in review; automatic quick checks pending",
+    "production": "In review; automatic quick checks completed",
     "rollout": 1,
     "countries": 176,
     "restOfWorld": true,
-    "observedAt": "2026-09-27T23:49:00Z"
+    "observedAt": "2026-09-27T23:35:00Z"
   }
 }

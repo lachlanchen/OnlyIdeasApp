@@ -7,7 +7,7 @@ export function isPublicIP(value) {
   try { return ipaddr.process(value).range() === 'unicast'; } catch { return false; }
 }
 // Pin the vetted DNS address in the socket. Revalidate every redirect.
-export async function downloadPublic(input, { maxBytes = 20_000_000, redirects = 4, resolver = lookup } = {}) {
+export async function downloadPublic(input, { maxBytes = 20_000_000, redirects = 4, resolver = lookup, timeout = 45_000 } = {}) {
   let url;
   try { url = new URL(input); } catch { throw new AppError('Enter a complete HTTPS PDF link.'); }
   requireValue(url.protocol === 'https:' && !url.username && !url.password && (!url.port || url.port === '443'), 'Use a public HTTPS URL without credentials or a custom port.');
@@ -19,7 +19,7 @@ export async function downloadPublic(input, { maxBytes = 20_000_000, redirects =
       if ([301, 302, 303, 307, 308].includes(res.statusCode)) {
         res.resume();
         if (!redirects || !res.headers.location) return reject(new AppError('Too many redirects from this source.'));
-        downloadPublic(new URL(res.headers.location, url).href, { maxBytes, redirects: redirects - 1, resolver }).then(resolve, reject); return;
+        downloadPublic(new URL(res.headers.location, url).href, { maxBytes, redirects: redirects - 1, resolver, timeout }).then(resolve, reject); return;
       }
       if (res.statusCode !== 200) { res.resume(); reject(new AppError(`The source returned HTTP ${res.statusCode}. Try uploading your copy.`)); return; }
       const chunks = []; let size = 0;
@@ -28,7 +28,7 @@ export async function downloadPublic(input, { maxBytes = 20_000_000, redirects =
       res.on('end', () => resolve(Buffer.concat(chunks)));
       res.on('error', reject);
     });
-    const timer = setTimeout(() => req.destroy(new AppError('The source took too long to respond.')), 45_000);
+    const timer = setTimeout(() => req.destroy(new AppError('The source took too long to respond.')), timeout);
     req.on('close', () => clearTimeout(timer)); req.on('error', reject);
   });
 }

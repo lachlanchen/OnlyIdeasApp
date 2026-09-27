@@ -12,11 +12,29 @@ struct ResearchPaper: Codable, Identifiable {
   var authors: String?
   var language: String?
   var category: String?
+  var discipline:String?
+  var subdiscipline:String?
+  var year:String?
+  var journal:String?
+  var doi:String?
   var visibility: String?
   var mmd: String?
   var revision: String?
   var assets: [PaperAsset]?
   var sections: [PaperSection]?
+}
+struct ResearchCategory:Codable,Identifiable {var id:String;var name:String}
+struct ResearchDiscipline:Codable,Identifiable {var id:String;var name:String;var children:[ResearchCategory]}
+struct DiscoveryPaper:Codable,Identifiable {
+ var id:String;var title:String;var authors:String;var source:String
+ var summary:String?;var pdfUrl:String?;var paperId:String?;var year:String?;var journal:String?;var doi:String?;var discipline:String?;var subdiscipline:String?;var index:String?;var ref:String?
+ var metadata:String {[discipline,subdiscipline,year,journal].compactMap{$0}.filter{!$0.isEmpty}.joined(separator:" · ")}
+}
+func researchMatches(_ query:String,_ text:String)->Bool {
+ let words=text.folding(options:[.diacriticInsensitive,.caseInsensitive],locale:.current).components(separatedBy:CharacterSet.alphanumerics.inverted).filter{!$0.isEmpty}
+ return query.folding(options:[.diacriticInsensitive,.caseInsensitive],locale:.current).split(separator:" ").allSatisfy{term in
+   let q=String(term);return words.contains{w in if w.contains(q){return true};guard q.count>=5,abs(q.count-w.count)<=1 else{return false};let a=Array(q),b=Array(w);var i=0,j=0,n=0;while i<a.count && j<b.count {if a[i]==b[j]{i+=1;j+=1}else{n+=1;if n>1{return false};if a.count>=b.count{i+=1};if b.count>=a.count{j+=1}}};return n+a.count-i+b.count-j<=1}
+ }
 }
 struct ReadingArtifact: Codable, Identifiable {
   var sectionId:String?

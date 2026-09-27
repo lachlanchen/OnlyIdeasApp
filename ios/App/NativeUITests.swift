@@ -42,6 +42,7 @@ final class NativeUITests: XCTestCase {
     let app = XCUIApplication()
     app.launchArguments = ["-onlyideas.native.language","en","-onlyideas.native.appearance","light"]
     app.launch()
+    XCTAssertTrue(app.buttons["Reading library"].waitForExistence(timeout:15));app.buttons["Reading library"].tap()
     let row=app.buttons.matching(NSPredicate(format:"label CONTAINS %@","Measuring holographic entanglement entropy on a quantum simulator")).firstMatch
     XCTAssertTrue(row.waitForExistence(timeout:30));shot("Store10-library");row.tap()
     let paragraph=app.webViews.buttons["Discuss paragraph"].firstMatch

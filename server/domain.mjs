@@ -1,3 +1,4 @@
+import { paperMetadata } from './paper-metadata.mjs';
 import { createHash } from 'node:crypto';
 export const hash = value => createHash('sha256').update(value).digest('hex');
 export class AppError extends Error {
@@ -15,11 +16,11 @@ export function sections(mmd) {
     return { id: `s-${digest}-${n}`, title: title?.[1] || title?.[2] || 'Opening', text: text.trim() };
   });
 }
-export function makePaper({ id, title, mmd, owner, source = '', authors = '', license = 'private', category = 'Research', assets = [], language = 'en' }) {
+export function makePaper({ id, title, mmd, owner, source = '', authors = '', license = 'private', category = 'Research', assets = [], language = 'en', ...metadata }) {
   requireValue(typeof mmd === 'string' && mmd.trim() && Buffer.byteLength(mmd) <= 2_000_000, 'Readable text must be between 1 byte and 2 MB.');
   requireValue(typeof title === 'string' && title.trim().length <= 300 && title.trim(), 'Please add a title (up to 300 characters).');
   requireValue(Object.hasOwn(languages, language), 'Choose a supported language.');
-  return { id, title: title.trim(), authors: String(authors).slice(0, 500), source: String(source).slice(0, 2000), license, category: String(category).slice(0, 60), language, owner, visibility: 'private', createdAt: new Date().toISOString(), revision: hash(mmd), mmd, assets, sections: sections(mmd) };
+  return { ...paperMetadata(metadata), id, title: title.trim(), authors: String(authors).slice(0, 500), source: String(source).slice(0, 2000), license, category: String(category).slice(0, 60), language, owner, visibility: 'private', createdAt: new Date().toISOString(), revision: hash(mmd), mmd, assets, sections: sections(mmd) };
 }
 export function mayPublish(paper, attestation) {
   requireValue(attestation === true, 'Confirm that you have the right to publish this paper and its figures.');
