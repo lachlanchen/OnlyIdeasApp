@@ -27,6 +27,9 @@ struct NativeReadingApp: View {
     )
     .sheet(isPresented: $store.showSignIn) { NativeSignIn().environmentObject(store) }
     .sheet(isPresented: $store.showReport) { ReportContent().environmentObject(store) }
+    .onReceive(store.$requestedPlanID) { value in
+      if value != nil {tab=2;if store.account==nil {store.showSignIn=true}}
+    }
     .task { await store.refresh() }
     .alert(
       "OnlyIdeas",
@@ -1099,7 +1102,7 @@ struct NativeSubscriptionSection:View {
               VStack(alignment:.leading,spacing:8) {
                 HStack {Text(T(plan.name)).font(.headline);Spacer();Text(T("{price} / month",["price":product.displayPrice])).font(.headline)}
                 Text(T("{credits} credits each month · {messages} agent messages daily",["credits":String(plan.credits),"messages":String(plan.agentTurns)])).font(.subheadline)
-                Button(T(catalog.plan==plan.id ? "Current plan":"Subscribe")) {Task {await store.purchase(product)}}
+                Button(T(catalog.plan==plan.id ? "Current plan":store.requestedPlanID==product.id ? "Continue":"Subscribe")) {Task {await store.purchase(product)}}
                   .buttonStyle(.borderedProminent).disabled(store.purchaseBusy || !catalog.canSubscribe)
               }.padding(.vertical,6)
             }

@@ -123,6 +123,8 @@ final class ReadingStore: NSObject, ObservableObject,
   @Published var purchaseBusy=false
   @Published var purchaseNotice:String?
   private var purchaseUpdates:Task<Void,Never>?
+  private var purchaseIntents:Task<Void,Never>?
+  @Published var requestedPlanID:String?
   @Published var creditPrompt:String?
   private var creditDecision:CheckedContinuation<Bool,Never>?
   var reportContext = ""
@@ -157,6 +159,16 @@ final class ReadingStore: NSObject, ObservableObject,
       account = try? JSONDecoder().decode(ReadingAccount.self, from: data)
     }
     restoreLibrary()
+    if #available(iOS 16.4, *) {
+      purchaseIntents=Task { [weak self] in
+        for await intent in PurchaseIntent.intents {
+          guard !Task.isCancelled else {break}
+          // A store request opens the signed-in plan screen. Checkout still
+          // requires the reader's tap and the current app account binding.
+          self?.requestedPlanID=intent.product.id
+        }
+      }
+    }
     purchaseUpdates=Task { [weak self] in
       for await result in StoreKit.Transaction.updates {
         guard !Task.isCancelled else {break}
@@ -164,7 +176,7 @@ final class ReadingStore: NSObject, ObservableObject,
       }
     }
   }
-  deinit {purchaseUpdates?.cancel()}
+  deinit {purchaseUpdates?.cancel();purchaseIntents?.cancel()}
   private var scope: String { account?.id ?? "public" }
   private var libraryURL: URL { folder.appendingPathComponent("library-" + Data(SHA256.hash(data: Data(scope.utf8))).map { String(format: "%02x", $0) }.joined() + ".index") }
   private func restoreLibrary() {
@@ -768,12 +780,13 @@ extension ReadingStore {
     _=try await request("/api/billing/apple",method:"POST",body:["signedTransaction":result.jwsRepresentation])
     guard identity==token else {return}
     await transaction.finish()
+    requestedPlanID=nil
     await loadCredits()
     await loadSubscriptions()
     purchaseNotice=T("Your purchases are up to date.")
   }
   func purchase(_ product:Product) async {
-    guard !purchaseBusy,let catalog=subscriptionCatalog,catalog.enabled,catalog.providers.apple,
+    guard !purchaseBusy,let catalog=subscriptionCatalog,catalog.enabled,catalog.providers.apple,catalog.canSubscribe,
       let binding=catalog.accountToken.flatMap(UUID.init(uuidString:)),account != nil else {return}
     let identity=token;purchaseBusy=true;purchaseNotice=nil
     defer {purchaseBusy=false}
@@ -781,7 +794,7 @@ extension ReadingStore {
       switch try await product.purchase(options:[.appAccountToken(binding)]) {
       case .success(let result): if identity==token {try await deliverPurchase(result)}
       case .pending: purchaseNotice=T("Payment is pending. Benefits will appear after the store confirms payment.")
-      case .userCancelled: break
+      case .userCancelled: requestedPlanID=nil
       @unknown default: purchaseNotice=T("Please try restoring purchases.")
       }
     } catch {purchaseNotice=error.localizedDescription}
