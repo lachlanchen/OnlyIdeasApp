@@ -44,6 +44,10 @@ npm run dev
 
 下一階段已準備：原生每月訂閱顯示商店價格，支援回復購買，並驗證續費與退款。讀者、研究者、工作室三個方案分別包含每月 200/1,200/2,600 點數與每日 40/80/160 則代理訊息。完成商店與裝置驗證之前，購買功能保持關閉。
 
+1.0.2（13）新增原生 Mac 應用程式（macOS 13 以上，支援 Intel 與 Apple 晶片），提供側欄導覽及鍵盤快捷鍵，並加入 Apple Watch 伴侶（watchOS 11 以上）。在 iPhone 的閱讀選項中主動傳送公開論文選段，最近三份可在手錶離線閱讀並調整字級。完整公式與插圖保留在 iPhone 和 Mac；私人論文、聊天及帳戶憑證不會傳送至手錶。審核狀態見發布紀錄。訂閱啟用仍限營運者測試。
+
+[macOS · Apple Watch](../docs/apple-platforms.md) · [1.0.2 (13)](../docs/release-candidate-13.md)
+
 [Reading credits](../docs/reading-credits.md)
 
 [1.0.0 (10)](../docs/release-candidate-10.md) · [0.3](../docs/native-0.3.md) · [docs/native.md](../docs/native.md)

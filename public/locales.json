@@ -564,7 +564,11 @@
     "The store is unavailable. Please try again.": "The store is unavailable. Please try again.",
     "Deleting your account does not cancel store subscriptions. Cancel your plan in subscription settings first.": "Deleting your account does not cancel store subscriptions. Cancel your plan in subscription settings first.",
     "Monthly plan credits": "Monthly plan credits",
-    "Purchase refund": "Purchase refund"
+    "Purchase refund": "Purchase refund",
+    "Send excerpt to Watch": "Send excerpt to Watch",
+    "Install OnlyIdeas on your paired Apple Watch first.": "Install OnlyIdeas on your paired Apple Watch first.",
+    "Select a short text passage to send. Equations and figures stay in the full reader.": "Select a short text passage to send. Equations and figures stay in the full reader.",
+    "Excerpt queued. Open OnlyIdeas on your paired Apple Watch to read it offline.": "Excerpt queued. Open OnlyIdeas on your paired Apple Watch to read it offline."
   },
   "zh-Hans": {
     "Choose a valid PDF.": "请选择有效的 PDF。",
@@ -1131,7 +1135,11 @@
     "The store is unavailable. Please try again.": "商店暂不可用，请重试。",
     "Deleting your account does not cancel store subscriptions. Cancel your plan in subscription settings first.": "删除账户不会取消商店订阅。请先在订阅设置中取消方案。",
     "Monthly plan credits": "月度订阅积分",
-    "Purchase refund": "购买退款"
+    "Purchase refund": "购买退款",
+    "Send excerpt to Watch": "发送选段到手表",
+    "Install OnlyIdeas on your paired Apple Watch first.": "请先在配对的 Apple Watch 上安装 OnlyIdeas。",
+    "Select a short text passage to send. Equations and figures stay in the full reader.": "请选择一小段文字发送。公式与插图保留在完整阅读器中。",
+    "Excerpt queued. Open OnlyIdeas on your paired Apple Watch to read it offline.": "选段已排队。在配对的 Apple Watch 上打开 OnlyIdeas，即可离线阅读。"
   },
   "zh-Hant": {
     ". Public comments are reviewed.": "公開評論會經過審核。",
@@ -1698,7 +1706,11 @@
     "The store is unavailable. Please try again.": "商店暫時無法使用，請再試一次。",
     "Deleting your account does not cancel store subscriptions. Cancel your plan in subscription settings first.": "刪除帳號不會取消商店訂閱。請先在訂閱設定中取消方案。",
     "Monthly plan credits": "每月訂閱點數",
-    "Purchase refund": "購買退款"
+    "Purchase refund": "購買退款",
+    "Send excerpt to Watch": "傳送選段到手錶",
+    "Install OnlyIdeas on your paired Apple Watch first.": "請先在配對的 Apple Watch 上安裝 OnlyIdeas。",
+    "Select a short text passage to send. Equations and figures stay in the full reader.": "請選擇一小段文字傳送。公式與插圖保留在完整閱讀器中。",
+    "Excerpt queued. Open OnlyIdeas on your paired Apple Watch to read it offline.": "選段已排隊。在配對的 Apple Watch 上開啟 OnlyIdeas，即可離線閱讀。"
   },
   "ja": {
     ". Public comments are reviewed.": "公開コメントは審査されます。",
@@ -2265,7 +2277,11 @@
     "The store is unavailable. Please try again.": "ストアを利用できません。もう一度お試しください。",
     "Deleting your account does not cancel store subscriptions. Cancel your plan in subscription settings first.": "アカウントを削除してもストアのサブスクリプションは解約されません。先にサブスクリプション設定で解約してください。",
     "Monthly plan credits": "月額プランのクレジット",
-    "Purchase refund": "購入の返金"
+    "Purchase refund": "購入の返金",
+    "Send excerpt to Watch": "抜粋をWatchへ送る",
+    "Install OnlyIdeas on your paired Apple Watch first.": "ペアリングしたApple WatchにOnlyIdeasをインストールしてください。",
+    "Select a short text passage to send. Equations and figures stay in the full reader.": "送る短い文章を選択してください。数式や図は完全版リーダーで表示します。",
+    "Excerpt queued. Open OnlyIdeas on your paired Apple Watch to read it offline.": "抜粋を送信待ちにしました。Apple WatchのOnlyIdeasでオフライン閲覧できます。"
   },
   "ko": {
     ". Public comments are reviewed.": "공개 댓글은 검토됩니다.",
@@ -2832,7 +2848,11 @@
     "The store is unavailable. Please try again.": "스토어를 이용할 수 없습니다. 다시 시도해 주세요.",
     "Deleting your account does not cancel store subscriptions. Cancel your plan in subscription settings first.": "계정을 삭제해도 스토어 구독은 취소되지 않습니다. 먼저 구독 설정에서 요금제를 취소하세요.",
     "Monthly plan credits": "월간 요금제 크레딧",
-    "Purchase refund": "구매 환불"
+    "Purchase refund": "구매 환불",
+    "Send excerpt to Watch": "시계로 발췌문 보내기",
+    "Install OnlyIdeas on your paired Apple Watch first.": "먼저 페어링된 Apple Watch에 OnlyIdeas를 설치하세요.",
+    "Select a short text passage to send. Equations and figures stay in the full reader.": "보낼 짧은 글을 선택하세요. 수식과 그림은 전체 리더에 남습니다.",
+    "Excerpt queued. Open OnlyIdeas on your paired Apple Watch to read it offline.": "발췌문을 대기열에 넣었습니다. Apple Watch의 OnlyIdeas에서 오프라인으로 읽으세요."
   },
   "ar": {
     ". Public comments are reviewed.": "التعليقات العامة تخضع للمراجعة.",
@@ -3399,7 +3419,11 @@
     "The store is unavailable. Please try again.": "المتجر غير متاح. يرجى المحاولة مجددًا.",
     "Deleting your account does not cancel store subscriptions. Cancel your plan in subscription settings first.": "حذف حسابك لا يلغي اشتراكات المتجر. ألغِ خطتك أولًا من إعدادات الاشتراك.",
     "Monthly plan credits": "رصيد الخطة الشهرية",
-    "Purchase refund": "استرداد قيمة الشراء"
+    "Purchase refund": "استرداد قيمة الشراء",
+    "Send excerpt to Watch": "إرسال مقتطف إلى الساعة",
+    "Install OnlyIdeas on your paired Apple Watch first.": "ثبّت OnlyIdeas أولًا على Apple Watch المقترنة.",
+    "Select a short text passage to send. Equations and figures stay in the full reader.": "حدد مقطعًا نصيًا قصيرًا لإرساله. تبقى المعادلات والرسوم في القارئ الكامل.",
+    "Excerpt queued. Open OnlyIdeas on your paired Apple Watch to read it offline.": "أُضيف المقتطف إلى قائمة الإرسال. افتح OnlyIdeas على Apple Watch لقراءته دون اتصال."
   },
   "fr": {
     ". Public comments are reviewed.": ". Les commentaires publics sont examinés.",
@@ -3966,7 +3990,11 @@
     "The store is unavailable. Please try again.": "La boutique est indisponible. Réessayez.",
     "Deleting your account does not cancel store subscriptions. Cancel your plan in subscription settings first.": "Supprimer votre compte n’annule pas les abonnements de la boutique. Annulez d’abord votre abonnement dans ses réglages.",
     "Monthly plan credits": "Crédits de l’abonnement mensuel",
-    "Purchase refund": "Remboursement d’achat"
+    "Purchase refund": "Remboursement d’achat",
+    "Send excerpt to Watch": "Envoyer un extrait à la Watch",
+    "Install OnlyIdeas on your paired Apple Watch first.": "Installez d’abord OnlyIdeas sur votre Apple Watch jumelée.",
+    "Select a short text passage to send. Equations and figures stay in the full reader.": "Sélectionnez un court passage à envoyer. Les équations et figures restent dans le lecteur complet.",
+    "Excerpt queued. Open OnlyIdeas on your paired Apple Watch to read it offline.": "Extrait en attente d’envoi. Ouvrez OnlyIdeas sur l’Apple Watch pour le lire hors ligne."
   },
   "de": {
     ". Public comments are reviewed.": "Öffentliche Kommentare werden geprüft.",
@@ -4533,7 +4561,11 @@
     "The store is unavailable. Please try again.": "Der Store ist nicht verfügbar. Bitte versuchen Sie es erneut.",
     "Deleting your account does not cancel store subscriptions. Cancel your plan in subscription settings first.": "Das Löschen Ihres Kontos kündigt keine Store-Abos. Kündigen Sie Ihr Abo zuerst in den Abo-Einstellungen.",
     "Monthly plan credits": "Credits des monatlichen Abos",
-    "Purchase refund": "Kauferstattung"
+    "Purchase refund": "Kauferstattung",
+    "Send excerpt to Watch": "Auszug an Watch senden",
+    "Install OnlyIdeas on your paired Apple Watch first.": "Installiere OnlyIdeas zuerst auf deiner gekoppelten Apple Watch.",
+    "Select a short text passage to send. Equations and figures stay in the full reader.": "Wähle einen kurzen Text zum Senden aus. Formeln und Abbildungen bleiben im vollständigen Leser.",
+    "Excerpt queued. Open OnlyIdeas on your paired Apple Watch to read it offline.": "Auszug zum Senden vorgemerkt. Öffne OnlyIdeas auf der Apple Watch, um ihn offline zu lesen."
   },
   "es": {
     ". Public comments are reviewed.": "Los comentarios públicos se revisan.",
@@ -5100,7 +5132,11 @@
     "The store is unavailable. Please try again.": "La tienda no está disponible. Inténtalo de nuevo.",
     "Deleting your account does not cancel store subscriptions. Cancel your plan in subscription settings first.": "Eliminar tu cuenta no cancela las suscripciones de la tienda. Cancela primero tu plan en los ajustes de suscripción.",
     "Monthly plan credits": "Créditos del plan mensual",
-    "Purchase refund": "Reembolso de compra"
+    "Purchase refund": "Reembolso de compra",
+    "Send excerpt to Watch": "Enviar fragmento al Watch",
+    "Install OnlyIdeas on your paired Apple Watch first.": "Primero instala OnlyIdeas en el Apple Watch enlazado.",
+    "Select a short text passage to send. Equations and figures stay in the full reader.": "Selecciona un texto breve para enviar. Las ecuaciones y figuras permanecen en el lector completo.",
+    "Excerpt queued. Open OnlyIdeas on your paired Apple Watch to read it offline.": "Fragmento en cola. Abre OnlyIdeas en el Apple Watch para leerlo sin conexión."
   },
   "ru": {
     ". Public comments are reviewed.": "Публичные комментарии проходят проверку.",
@@ -5667,7 +5703,11 @@
     "The store is unavailable. Please try again.": "Магазин недоступен. Повторите попытку.",
     "Deleting your account does not cancel store subscriptions. Cancel your plan in subscription settings first.": "Удаление аккаунта не отменяет подписки магазина. Сначала отмените план в настройках подписок.",
     "Monthly plan credits": "Кредиты месячного плана",
-    "Purchase refund": "Возврат за покупку"
+    "Purchase refund": "Возврат за покупку",
+    "Send excerpt to Watch": "Отправить отрывок на Watch",
+    "Install OnlyIdeas on your paired Apple Watch first.": "Сначала установите OnlyIdeas на связанные Apple Watch.",
+    "Select a short text passage to send. Equations and figures stay in the full reader.": "Выберите небольшой текстовый отрывок. Формулы и рисунки остаются в полной читалке.",
+    "Excerpt queued. Open OnlyIdeas on your paired Apple Watch to read it offline.": "Отрывок поставлен в очередь. Откройте OnlyIdeas на Apple Watch, чтобы читать без сети."
   },
   "vi": {
     ". Public comments are reviewed.": "Bình luận công khai sẽ được kiểm duyệt.",
@@ -6234,6 +6274,10 @@
     "The store is unavailable. Please try again.": "Cửa hàng không khả dụng. Vui lòng thử lại.",
     "Deleting your account does not cancel store subscriptions. Cancel your plan in subscription settings first.": "Xóa tài khoản không hủy đăng ký tại cửa hàng. Hãy hủy gói trong cài đặt đăng ký trước.",
     "Monthly plan credits": "Tín dụng gói hằng tháng",
-    "Purchase refund": "Hoàn tiền giao dịch"
+    "Purchase refund": "Hoàn tiền giao dịch",
+    "Send excerpt to Watch": "Gửi trích đoạn tới Watch",
+    "Install OnlyIdeas on your paired Apple Watch first.": "Hãy cài OnlyIdeas trên Apple Watch đã ghép đôi trước.",
+    "Select a short text passage to send. Equations and figures stay in the full reader.": "Chọn một đoạn văn ngắn để gửi. Công thức và hình ảnh vẫn ở trình đọc đầy đủ.",
+    "Excerpt queued. Open OnlyIdeas on your paired Apple Watch to read it offline.": "Đã xếp hàng trích đoạn. Mở OnlyIdeas trên Apple Watch để đọc ngoại tuyến."
   }
 }

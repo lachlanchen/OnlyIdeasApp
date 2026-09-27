@@ -44,6 +44,10 @@ In development: database reading credits with atomic reservations, refunds and d
 
 Staged next: native monthly plans with store prices, purchase restoration, verified renewals and refunds. Reader, Researcher and Studio include 200/1,200/2,600 monthly credits and 40/80/160 daily agent messages. Purchases remain disabled pending store and device qualification.
 
+Version 1.0.2 (13) adds a native Mac app (macOS 13+, Intel and Apple silicon) with sidebar navigation and keyboard shortcuts, plus an Apple Watch companion (watchOS 11+). On iPhone, explicitly send a public paper excerpt from Reading options; the latest three remain readable offline with adjustable text. Full equations and figures stay on iPhone and Mac. Private papers, chats and account credentials never transfer to Watch. See the release record for review status. Subscription activation remains limited to operator testing.
+
+[macOS · Apple Watch](docs/apple-platforms.md) · [1.0.2 (13)](docs/release-candidate-13.md)
+
 [Reading credits](docs/reading-credits.md)
 
 [1.0.0 (10)](docs/release-candidate-10.md) · [0.3](docs/native-0.3.md) · [docs/native.md](docs/native.md)

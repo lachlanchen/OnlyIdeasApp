@@ -1,5 +1,7 @@
 import UIKit
+#if !targetEnvironment(macCatalyst)
 import Capacitor
+#endif
 import SwiftUI
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
@@ -7,28 +9,45 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = scene as? UIWindowScene else { return }
+        #if targetEnvironment(macCatalyst)
+        windowScene.sizeRestrictions?.minimumSize = CGSize(width: 820, height: 600)
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("--onlyideas-mac-qa") {
+            windowScene.sizeRestrictions?.minimumSize = CGSize(width: 1280, height: 800)
+            windowScene.sizeRestrictions?.maximumSize = CGSize(width: 1280, height: 800)
+        }
+        #endif
+        #endif
 
         window = UIWindow(windowScene: windowScene)
-        #if DEBUG
+        #if DEBUG && targetEnvironment(macCatalyst)
+        window?.rootViewController = ProcessInfo.processInfo.arguments.contains("--onlyideas-mac-qa") ? OnlyIdeasMacQAController() : UIHostingController(rootView: NativeReadingApp())
+        #elseif DEBUG
         window?.rootViewController = ProcessInfo.processInfo.arguments.contains("--onlyideas-smoke") ? OnlyIdeasSmokeController() : UIHostingController(rootView: NativeReadingApp())
         #else
         window?.rootViewController = UIHostingController(rootView: NativeReadingApp())
         #endif
         window?.makeKeyAndVisible()
 
+        #if !targetEnvironment(macCatalyst)
         SceneDelegateProxy.shared.scene(scene, willConnectTo: session, options: connectionOptions)
+        #endif
     }
 
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+        #if !targetEnvironment(macCatalyst)
         SceneDelegateProxy.shared.scene(scene, openURLContexts: URLContexts)
+        #endif
     }
 
     func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
+        #if !targetEnvironment(macCatalyst)
         SceneDelegateProxy.shared.scene(scene, continue: userActivity)
+        #endif
     }
 }
 
-#if DEBUG
+#if DEBUG && !targetEnvironment(macCatalyst)
 import WebKit
 final class OnlyIdeasSmokeController: CAPBridgeViewController {
     private var smokeStarted = false
@@ -95,6 +114,99 @@ final class OnlyIdeasSmokeController: CAPBridgeViewController {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) { self.pollSmoke(remaining: remaining - 1) }
             }
         }
+    }
+}
+#endif
+
+#if DEBUG && targetEnvironment(macCatalyst)
+import WebKit
+/// Exercises the real native UI and production public library; never signs in or writes server data.
+@MainActor final class OnlyIdeasMacQAController: UIHostingController<NativeReadingApp> {
+    private let store: ReadingStore
+    private var started = false
+    private var checks: [String] = []
+    private var result: [String: Any] = [:]
+    private let output = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("MacQA", isDirectory: true)
+    init() { let store = ReadingStore(); self.store = store; super.init(rootView: NativeReadingApp(qaStore: store)) }
+    @MainActor required dynamic init?(coder: NSCoder) { fatalError("QA has no storyboard") }
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        guard !started else { return }; started = true
+        Task { await run() }
+    }
+    private func pause(_ seconds: Double = 1) async { try? await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000)) }
+    private func check(_ label: String, _ ok: Bool) throws {
+        guard ok else { throw NSError(domain: "OnlyIdeasMacQA", code: 1, userInfo: [NSLocalizedDescriptionKey: label]) }
+        checks.append(label)
+    }
+    private func snapshot(_ name: String) throws {
+        guard let window = view.window else { throw store.failure("No native window") }
+        let format = UIGraphicsImageRendererFormat(); format.scale = 1; format.opaque = true
+        let data = UIGraphicsImageRenderer(bounds: window.bounds, format: format).pngData { _ in window.drawHierarchy(in: window.bounds, afterScreenUpdates: false) }
+        try data.write(to: output.appendingPathComponent(name + ".png"))
+    }
+    private func webView(_ view: UIView) -> WKWebView? {
+        if let web = view as? WKWebView { return web }
+        return view.subviews.lazy.compactMap { self.webView($0) }.first
+    }
+    private func wait(_ condition: () -> Bool) async throws {
+        for _ in 0..<180 { if condition() { return }; await pause(0.5) }
+        throw store.failure("Native UI wait timed out")
+    }
+    private func run() async {
+        do {
+            try FileManager.default.createDirectory(at: output, withIntermediateDirectories: true)
+            try check("QA preserves signed-in accounts", store.account == nil)
+            try await wait { !self.store.papers.isEmpty }
+            await pause(2)
+            try check("Live or previously cached public library", store.papers.allSatisfy { $0.visibility == "public" })
+            result["offline"] = store.offline
+            result["titles"] = store.papers.map(\.title)
+            try snapshot("library")
+            NotificationCenter.default.post(name: Notification.Name("OnlyIdeas.QA.Tab"), object: 1)
+            await pause(); try snapshot("agent")
+            NotificationCenter.default.post(name: Notification.Name("OnlyIdeas.QA.Tab"), object: 2)
+            await pause(); try snapshot("profile")
+            store.showSignIn = true; await pause(); try snapshot("sign-in")
+            store.showSignIn = false
+            NotificationCenter.default.post(name: Notification.Name("OnlyIdeas.QA.Tab"), object: 0)
+            await pause()
+            let paper = store.papers.first { $0.title.localizedCaseInsensitiveContains("holographic") } ?? store.papers[0]
+            let document = try await store.loadPaper(paper)
+            try check("Real public paper and figures cached", document.owner == "public" && !document.figures.isEmpty && store.cachedPaper(paper.id) != nil)
+            NotificationCenter.default.post(name: Notification.Name("OnlyIdeas.QA.Paper"), object: paper.id)
+            try await wait { self.webView(self.view) != nil }
+            guard let web = webView(view) else { throw store.failure("Missing reader") }
+            for _ in 0..<120 {
+                if (try? await web.evaluateJavaScript("document.querySelector('#paper')?.dataset.ready === 'true'")) as? Bool == true { break }
+                await pause(0.5)
+            }
+            let script = "({equations:document.querySelectorAll('mjx-container svg').length, figures:[...document.querySelectorAll('#paper img')].filter(i=>i.complete&&i.naturalWidth>0).length, fits:document.documentElement.scrollWidth<=innerWidth+1, size:parseFloat(getComputedStyle(document.getElementById('paper')).fontSize), paragraphs:document.querySelectorAll('[data-paragraph]').length})"
+            for _ in 0..<40 {
+                if (try? await web.evaluateJavaScript("[...document.querySelectorAll('#paper img')].some(i=>i.complete&&i.naturalWidth>0)")) as? Bool == true { break }
+                await pause(0.5)
+            }
+            let metrics = try await web.evaluateJavaScript(script) as? [String:Any] ?? [:]
+            result["reader"] = metrics
+            try check("Equations rendered as SVG", (metrics["equations"] as? Int ?? 0) > 0)
+            try check("Downloaded figures rendered", (metrics["figures"] as? Int ?? 0) > 0)
+            try check("Reader fits window without horizontal page scroll", metrics["fits"] as? Bool == true)
+            try snapshot("reader")
+            _ = try? await web.evaluateJavaScript("document.querySelector('mjx-container[display=true]')?.scrollIntoView({block:'start'})")
+            await pause(); try snapshot("equations")
+            _ = try? await web.evaluateJavaScript("document.querySelector('#paper img')?.scrollIntoView({block:'start'})")
+            await pause(); try snapshot("figures")
+            let oldSize=store.readingSize, oldAppearance=store.appearance
+            defer { store.readingSize=oldSize; store.appearance=oldAppearance }
+            store.readingSize=22; store.appearance="dark"; store.objectWillChange.send(); await pause()
+            let style = try await web.evaluateJavaScript("({size:parseFloat(getComputedStyle(document.getElementById('paper')).fontSize),dark:document.documentElement.dataset.theme==='dark'})") as? [String:Any] ?? [:]
+            try check("Native text size and dark appearance update renderer", style["size"] as? Double == 22 && style["dark"] as? Bool == true)
+            try snapshot("reader-dark")
+            try check("Offline cold launch uses durable cached paper", !ProcessInfo.processInfo.arguments.contains("--onlyideas-native-offline") || store.offline)
+            result["ok"] = true
+        } catch { result["ok"] = false; result["error"] = error.localizedDescription }
+        result["checks"] = checks
+        if let data = try? JSONSerialization.data(withJSONObject: result, options: [.prettyPrinted, .sortedKeys]) { try? data.write(to: output.appendingPathComponent("result.json"), options: .atomic) }
     }
 }
 #endif

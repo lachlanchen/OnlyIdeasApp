@@ -10,7 +10,33 @@ private let accent = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? U
 struct NativeReadingApp: View {
   @StateObject private var store = ReadingStore()
   @State private var tab = 0
-  var body: some View {
+  init() {}
+  #if DEBUG
+  init(qaStore: ReadingStore) { _store = StateObject(wrappedValue: qaStore) }
+  #endif
+  @ViewBuilder private var navigation: some View {
+    #if targetEnvironment(macCatalyst)
+    HStack(spacing: 0) {
+      VStack(alignment: .leading, spacing: 16) {
+        Text("OnlyIdeas").font(.title.bold()).foregroundStyle(ideaGradient).padding(.bottom, 12)
+        Button { tab = 0 } label: { Label(T("Library"), systemImage: "books.vertical").frame(maxWidth: .infinity, alignment: .leading) }.keyboardShortcut("1", modifiers: .command)
+        Button { tab = 1 } label: { Label(T("Agent"), systemImage: "bubble.left.and.bubble.right").frame(maxWidth: .infinity, alignment: .leading) }.keyboardShortcut("2", modifiers: .command)
+        Button { tab = 2 } label: { Label(T("Profile"), systemImage: "person.crop.circle").frame(maxWidth: .infinity, alignment: .leading) }.keyboardShortcut("3", modifiers: .command)
+        Spacer()
+        Button { tab = 2 } label: { Label(T("Settings"), systemImage: "gearshape").frame(maxWidth: .infinity, alignment: .leading) }.keyboardShortcut(",", modifiers: .command)
+      }.buttonStyle(.bordered).padding(20).frame(width: 210).background(Color(.secondarySystemGroupedBackground))
+      Divider()
+      // Keep each navigation history and in-progress composer while changing sections.
+      TabView(selection: $tab) {
+        NavigationView { NativeLibrary(profile: { tab = 2 }) }.id(store.account?.id ?? "public")
+          .navigationViewStyle(.stack).toolbar(.hidden, for: .tabBar).tag(0)
+        NavigationView { NativeAgent() }.navigationViewStyle(.stack)
+          .toolbar(.hidden, for: .tabBar).tag(1)
+        NavigationView { NativeProfile() }.navigationViewStyle(.stack)
+          .toolbar(.hidden, for: .tabBar).tag(2)
+      }
+    }
+    #else
     TabView(selection: $tab) {
       NavigationView { NativeLibrary(profile: { tab = 2 }) }.id(store.account?.id ?? "public")
         .navigationViewStyle(.stack).tabItem {
@@ -22,7 +48,11 @@ struct NativeReadingApp: View {
       NavigationView { NativeProfile() }.navigationViewStyle(.stack).tabItem {
         Label(T("Profile"), systemImage: "person.crop.circle")
       }.tag(2)
-    }.id(store.language).environment(\.locale,Locale(identifier:UILanguage.current)).environment(\.layoutDirection,UILanguage.current == "ar" ? .rightToLeft : .leftToRight).environmentObject(store).tint(accent).preferredColorScheme(
+    }
+    #endif
+  }
+  var body: some View {
+    navigation.id(store.language).environment(\.locale,Locale(identifier:UILanguage.current)).environment(\.layoutDirection,UILanguage.current == "ar" ? .rightToLeft : .leftToRight).environmentObject(store).tint(accent).preferredColorScheme(
       store.appearance == "system" ? nil : store.appearance == "dark" ? .dark : .light
     )
     .sheet(isPresented: $store.showSignIn) { NativeSignIn().environmentObject(store) }
@@ -31,6 +61,11 @@ struct NativeReadingApp: View {
       if value != nil {tab=2;if store.account==nil {store.showSignIn=true}}
     }
     .task { await store.refresh() }
+    #if DEBUG
+    .onReceive(NotificationCenter.default.publisher(for: Notification.Name("OnlyIdeas.QA.Tab"))) { event in
+      if let value = event.object as? Int, (0...2).contains(value) { tab = value }
+    }
+    #endif
     .alert(
       "OnlyIdeas",
       isPresented: Binding(get: { store.error != nil }, set: { if !$0 { store.error = nil } })
@@ -74,6 +109,7 @@ struct NativeLibrary: View {
   @State private var options = false
   @State private var picker = false
   @State private var requests = false
+  @State private var selectedPaper: String?
   var visible: [ResearchPaper] {
     store.papers.filter {
       query.isEmpty || ($0.title + " " + ($0.authors ?? "")).localizedCaseInsensitiveContains(query)
@@ -107,7 +143,7 @@ struct NativeLibrary: View {
           Text("\(visible.count)").font(.title3).foregroundColor(.secondary)
         }
         ForEach(visible) { paper in
-          NavigationLink(destination: NativePaper(paper: paper)) {
+          NavigationLink(destination: NativePaper(paper: paper), tag: paper.id, selection: $selectedPaper) {
             PaperRow(paper: paper, downloaded: store.isDownloaded(paper.id))
           }.buttonStyle(.plain)
         }
@@ -128,6 +164,11 @@ struct NativeLibrary: View {
         }
       }.padding(14)
     }.background(Color(.systemGroupedBackground)).navigationTitle("OnlyIdeas").navigationBarTitleDisplayMode(.inline)
+      #if DEBUG
+      .onReceive(NotificationCenter.default.publisher(for: Notification.Name("OnlyIdeas.QA.Paper"))) { event in
+        if let id = event.object as? String, store.papers.contains(where: { $0.id == id }) { selectedPaper = id }
+      }
+      #endif
       .searchable(text: $query, prompt:T("Search your papers"))
       .toolbar {
         ToolbarItem(placement:.navigationBarLeading) {
@@ -626,12 +667,14 @@ struct NativePaper: View {
   @State private var sharing = false
   @State private var readingTools = false
   @State private var languages = false
+  @State private var watchNotice: String?
+  @State private var watchProse = ""
   var body: some View {
     VStack(spacing: 0) {
       if let document = document {
         NativeDocument(
           document: document, size: store.readingSize * readingScale, dark: scheme == .dark,
-          quote: $quote, onParagraph:{q,id in quote=q;paragraph=id;discussion=true},onSelection:{_ in paragraph=""})
+          quote: $quote, onParagraph:{q,id in quote=q;paragraph=id;discussion=true},onSelection:{_ in paragraph=""}, onWatchProse:{watchProse=$0})
       } else {
         ProgressView(T("Opening your paper…")).font(.title3).frame(
           maxWidth: .infinity, maxHeight: .infinity)
@@ -669,6 +712,22 @@ struct NativePaper: View {
             } catch { store.error = error.localizedDescription }
           }
           Button(T("Read in another language")) { languages = true }
+          #if !targetEnvironment(macCatalyst)
+          if UIDevice.current.userInterfaceIdiom == .phone, let document, document.owner == "public", document.paper.visibility == "public" {
+            Button {
+              guard let excerpt = PaperWatchExcerpt.make(id: paper.id, title: document.paper.title,
+                authors: document.paper.authors ?? "", markdown: "",
+                selection: quote.isEmpty ? watchProse : quote, isPublic: true) else {
+                watchNotice = "Select a short text passage to send. Equations and figures stay in the full reader."
+                return
+              }
+              do {
+                try WatchSender.shared.save(excerpt)
+                watchNotice = "Excerpt queued. Open OnlyIdeas on your paired Apple Watch to read it offline."
+              } catch { watchNotice = error.localizedDescription }
+            } label: { Label(T("Send excerpt to Watch"), systemImage: "applewatch") }
+          }
+          #endif
           Button(T("Notes, guides & translation")) { readingTools = true }
           Button(T("Discuss this paper")) { paragraph="";quote="";discussion = true }
         } label: {
@@ -702,6 +761,9 @@ struct NativePaper: View {
       NativeDiscussion(paper: document?.paper ?? paper, quote: quote, paragraphId:paragraph)
     }
     .sheet(isPresented: $sharing) { if let shareURL = shareURL { NativeShare(items: [shareURL]) } }
+    .alert("Apple Watch", isPresented: Binding(get: { watchNotice != nil }, set: { if !$0 { watchNotice = nil } })) {
+      Button(T("OK")) { watchNotice = nil }
+    } message: { Text(T(watchNotice ?? "")) }
   }
 }
 struct NativeDocument: UIViewRepresentable {
@@ -711,6 +773,7 @@ struct NativeDocument: UIViewRepresentable {
   @Binding var quote: String
   var onParagraph:((String,String)->Void)? = nil
   var onSelection:((String)->Void)? = nil
+  var onWatchProse:((String)->Void)? = nil
   func makeCoordinator() -> Coordinator { Coordinator(self) }
   func makeUIView(context: Context) -> WKWebView {
     let c = WKWebViewConfiguration()
@@ -769,6 +832,7 @@ struct NativeDocument: UIViewRepresentable {
     func userContentController(
       _ userContentController: WKUserContentController, didReceive message: WKScriptMessage
     ) {
+      if let data = message.body as? [String: Any], let prose = data["watchProse"] as? String { parent.onWatchProse?(prose) }
       if let data = message.body as? [String: Any], let quote = data["quote"] as? String {
         parent.quote = quote
         if data["action"] as? String == "paragraph", let id = data["paragraphId"] as? String { parent.onParagraph?(quote,id) } else { parent.onSelection?(quote) }

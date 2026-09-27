@@ -1,6 +1,24 @@
 import XCTest
 
 final class NativeUITests: XCTestCase {
+  func testWatchTransfer() {
+    continueAfterFailure=false
+    let app=XCUIApplication()
+    app.launchArguments=["-onlyideas.native.language","en","-onlyideas.native.appearance","light"]
+    app.launch()
+    let row=app.buttons.matching(NSPredicate(format:"label CONTAINS %@","Measuring holographic entanglement entropy on a quantum simulator")).firstMatch
+    XCTAssertTrue(row.waitForExistence(timeout:30));row.tap()
+    XCTAssertTrue(app.webViews.buttons["Discuss paragraph"].firstMatch.waitForExistence(timeout:45))
+    app.buttons["Reading options"].tap()
+    XCTAssertTrue(app.buttons["Send excerpt to Watch"].waitForExistence(timeout:5))
+    app.buttons["Send excerpt to Watch"].tap()
+    XCTAssertTrue(app.alerts.firstMatch.waitForExistence(timeout:10))
+    print("WATCH ALERT",app.alerts.firstMatch.debugDescription)
+    shot("Watch13-transfer-alert")
+    XCTAssertTrue(app.alerts.staticTexts["Excerpt queued. Open OnlyIdeas on your paired Apple Watch to read it offline."].waitForExistence(timeout:10))
+    shot("Watch13-transfer-confirmed")
+    app.alerts.buttons["OK"].tap()
+  }
   func testElevenLanguagesAndThemes() {
     continueAfterFailure = false
     let names = [("en","Library","Agent","Profile"),("zh-Hans","文库","智能助手","个人资料"),("zh-Hant","文庫","智慧助手","個人檔案"),("ja","ライブラリ","エージェント","プロフィール"),("ko","라이브러리","에이전트","프로필"),("ar","المكتبة","المساعد","الملف الشخصي"),("es","Biblioteca","Agente","Perfil"),("fr","Bibliothèque","Agent","Profil"),("de","Bibliothek","Agent","Profil"),("ru","Библиотека","Агент","Профиль"),("vi","Thư viện","Trợ lý","Hồ sơ")]

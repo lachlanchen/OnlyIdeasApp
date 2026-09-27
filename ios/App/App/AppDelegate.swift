@@ -1,5 +1,7 @@
 import UIKit
+#if !targetEnvironment(macCatalyst)
 import Capacitor
+#endif
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -7,7 +9,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        #if !targetEnvironment(macCatalyst)
+        WatchSender.shared.activate()
+        #endif
         return true
     }
 

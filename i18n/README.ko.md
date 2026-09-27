@@ -44,6 +44,10 @@ npm run dev
 
 다음 단계 준비: 스토어 가격, 구매 복원, 갱신 및 환불 검증을 갖춘 네이티브 월간 요금제입니다. 리더·리서처·스튜디오에는 매월 200/1,200/2,600 크레딧과 하루 40/80/160개의 에이전트 메시지가 포함됩니다. 스토어와 기기 검증이 끝날 때까지 구매는 비활성화됩니다.
 
+1.0.2 (13)은 사이드바와 키보드 단축키를 갖춘 네이티브 Mac 앱(macOS 13 이상, Intel 및 Apple Silicon)과 Apple Watch 동반 앱(watchOS 11 이상)을 추가합니다. iPhone 읽기 메뉴에서 공개 논문의 발췌문을 직접 보내면 최근 세 개를 시계에서 글자 크기를 조절하며 오프라인으로 읽을 수 있습니다. 전체 수식과 그림은 iPhone과 Mac에 남으며 비공개 논문, 채팅, 계정 인증 정보는 시계로 전송하지 않습니다. 심사 상태는 릴리스 기록을 참조하세요. 구독 활성화는 운영자 테스트에 한정됩니다.
+
+[macOS · Apple Watch](../docs/apple-platforms.md) · [1.0.2 (13)](../docs/release-candidate-13.md)
+
 [Reading credits](../docs/reading-credits.md)
 
 [1.0.0 (10)](../docs/release-candidate-10.md) · [0.3](../docs/native-0.3.md) · [docs/native.md](../docs/native.md)

@@ -44,6 +44,10 @@ In Entwicklung: Leseguthaben in der Datenbank mit atomaren Reservierungen, Ersta
 
 Nächster Schritt vorbereitet: native monatliche Abos mit Store-Preisen, Wiederherstellung sowie geprüften Verlängerungen und Erstattungen. Leser, Forscher und Studio enthalten 200/1.200/2.600 monatliche Credits und 40/80/160 tägliche Nachrichten an den Assistenten. Käufe bleiben bis zum Abschluss der Store- und Gerätetests deaktiviert.
 
+Version 1.0.2 (13) ergänzt eine native Mac-App (macOS 13+, Intel und Apple Silicon) mit Seitenleiste und Tastaturkürzeln sowie eine Apple-Watch-Begleitapp (watchOS 11+). Sende einen Auszug eines öffentlichen Artikels ausdrücklich über die Leseoptionen am iPhone. Die letzten drei bleiben mit anpassbarer Schrift offline lesbar. Vollständige Formeln und Abbildungen bleiben auf iPhone und Mac. Private Artikel, Chats und Zugangsdaten werden niemals zur Watch übertragen. Der Freigabestatus steht im Versionsbericht. Abonnements sind weiterhin auf Betreibertests beschränkt.
+
+[macOS · Apple Watch](../docs/apple-platforms.md) · [1.0.2 (13)](../docs/release-candidate-13.md)
+
 [Reading credits](../docs/reading-credits.md)
 
 [1.0.0 (10)](../docs/release-candidate-10.md) · [0.3](../docs/native-0.3.md) · [docs/native.md](../docs/native.md)

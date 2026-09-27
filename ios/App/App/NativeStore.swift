@@ -137,6 +137,16 @@ final class ReadingStore: NSObject, ObservableObject,
   private var token: String?
   private var authentication: ASWebAuthenticationSession?
   private let origin = "https://agent.onlyideas.art"
+  private lazy var network: URLSession = {
+    #if DEBUG && targetEnvironment(macCatalyst)
+    if let port = Int(ProcessInfo.processInfo.environment["ONLYIDEAS_QA_PROXY_PORT"] ?? ""), (1024...65535).contains(port) {
+      let config=URLSessionConfiguration.default
+      config.connectionProxyDictionary=["HTTPEnable":1,"HTTPProxy":"127.0.0.1","HTTPPort":port,"HTTPSEnable":1,"HTTPSProxy":"127.0.0.1","HTTPSPort":port]
+      return URLSession(configuration:config)
+    }
+    #endif
+    return .shared
+  }()
   private let tokenAccount = "capacitor-storage_onlyideas.session.v1"
   private var folder: URL {
     var u = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
@@ -252,7 +262,7 @@ final class ReadingStore: NSObject, ObservableObject,
     }
     if let data = data { request.httpBody = data }
     for (k, v) in headers { request.setValue(v, forHTTPHeaderField: k) }
-    let (bytes, response) = try await URLSession.shared.data(for: request)
+    let (bytes, response) = try await network.data(for: request)
     guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
       let value = (try? JSONSerialization.jsonObject(with: bytes)) as? [String: Any]
       throw NSError(domain: "OnlyIdeasHTTP", code: (response as? HTTPURLResponse)?.statusCode ?? 0,
@@ -290,6 +300,9 @@ final class ReadingStore: NSObject, ObservableObject,
       let result = try await json("/api/papers")
       guard paperIdentity == token else { return }
       papers = try decoded([ResearchPaper].self, result["papers"] ?? [])
+      #if !targetEnvironment(macCatalyst)
+      WatchSender.shared.reconcile(publicIDs: Set(papers.filter { $0.visibility == "public" }.map(\.id)))
+      #endif
       persistLibrary()
       let available = Dictionary(papers.map { ($0.id, $0.visibility) }, uniquingKeysWith: { _, new in new })
       for saved in downloads() where available[saved.paper.id] != saved.paper.visibility { removeCached(saved.paper.id) }

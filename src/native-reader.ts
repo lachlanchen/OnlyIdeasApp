@@ -1,3 +1,4 @@
+import { watchProse } from './watch-prose'
 import { paragraphActions } from './paragraphs'
 import DOMPurify from 'dompurify'
 import './native-reader.css'
@@ -16,6 +17,7 @@ host.OnlyIdeasRender=p=>{
   for(const a of root.querySelectorAll('a')) {const href=a.getAttribute('href')||'';if(!href.startsWith('#'))a.removeAttribute('href')}
   root.dir=p.language==='ar'?'rtl':'ltr'
   if(p.comments)paragraphActions(root,p.commentLabel||'Discuss paragraph',(quote,paragraphId)=>{host.webkit?.messageHandlers.onlyideas.postMessage({action:'paragraph',quote,paragraphId});host.NativeReader?.paragraph?.(quote,paragraphId)})
+  host.webkit?.messageHandlers.onlyideas.postMessage({watchProse:watchProse(root)})
   root.dataset.ready='true'
 }
 const script=document.createElement('script');script.src=rendererUrl;script.onload=()=>{ready=true;if(pending)host.OnlyIdeasRender(pending);host.NativeReader?.ready?.();host.webkit?.messageHandlers.onlyideas.postMessage({ready:true})};script.onerror=()=>{root.textContent='The equation renderer could not load. Reopen this paper to try again.'};document.head.append(script)

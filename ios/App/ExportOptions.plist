@@ -10,6 +10,8 @@
 	<dict>
 		<key>art.onlyideas.app</key>
 		<string>OnlyIdeas App Store Apple Login 20260927</string>
+		<key>art.onlyideas.app.watchkitapp</key>
+		<string>OnlyIdeas Watch App Store</string>
 	</dict>
 	<key>signingCertificate</key>
 	<string>Apple Distribution</string>

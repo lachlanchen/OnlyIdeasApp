@@ -108,3 +108,19 @@ copy and give conversations/composers more space. Monthly subscription targets
 are approximately CNY20/100/200; show actual native-store localized prices, grant
 credits only from verified purchases, and support restoration. Subscription
 purchase integration and store configuration must be tested before activation.
+
+## Apple platforms amendment · 2026-09-28
+
+The owner requested macOS and Apple Watch for both Bunko and OnlyIdeas, including
+formal production review. OnlyIdeas adds a native SwiftUI Mac Catalyst app with
+a sidebar, keyboard navigation, the existing account, agent, file import,
+illustrated reader and durable offline cache. The Mac app uses the same bundle
+and server account system; it never resets the existing library or database.
+
+Apple Watch is a focused offline excerpt companion to the iPhone app. A reader
+explicitly sends selected text or an initial run of rendered prose from a public
+paper. Keep at most three bounded excerpts, adjustable type and reading position.
+Keep equations/figures in the full reader. Never transfer private papers, account
+tokens, chats or notes. Reconcile withdrawn public papers when the phone connects.
+The Watch app itself needs no login or network access. All 11 UI languages remain.
+Paid subscription activation remains separately gated on purchase qualification.

@@ -44,6 +44,10 @@ En desarrollo: créditos de lectura en la base de datos, con reservas atómicas,
 
 Próxima etapa preparada: planes mensuales nativos con precios de la tienda, restauración de compras y verificación de renovaciones y reembolsos. Lector, Investigador y Estudio incluyen 200/1.200/2.600 créditos mensuales y 40/80/160 mensajes diarios al agente. Las compras siguen desactivadas hasta completar las pruebas de tienda y dispositivo.
 
+La versión 1.0.2 (13) añade una app nativa para Mac (macOS 13+, Intel y Apple Silicon) con barra lateral y atajos, y una app complementaria para Apple Watch (watchOS 11+). Envía explícitamente un fragmento de un artículo público desde las opciones de lectura del iPhone: los tres últimos quedan disponibles sin conexión y con texto ajustable. Las ecuaciones y figuras completas permanecen en el iPhone y Mac. Los artículos privados, chats y credenciales nunca pasan al Watch. Consulta el registro de versión para el estado de revisión. Las suscripciones siguen limitadas a pruebas del operador.
+
+[macOS · Apple Watch](../docs/apple-platforms.md) · [1.0.2 (13)](../docs/release-candidate-13.md)
+
 [Reading credits](../docs/reading-credits.md)
 
 [1.0.0 (10)](../docs/release-candidate-10.md) · [0.3](../docs/native-0.3.md) · [docs/native.md](../docs/native.md)
