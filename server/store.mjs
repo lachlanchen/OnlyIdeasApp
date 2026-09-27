@@ -3,8 +3,9 @@ import { mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { hash, sections, requireValue } from './domain.mjs';
-import { initCredits } from './credits.mjs';
+import { initCredits, creditTransaction } from './credits.mjs';
 import { initBilling } from './billing-ledger.mjs';
+import { initImportReuse, indexPaper } from './import-reuse.mjs';
 export class Store {
   constructor(directory) {
     mkdirSync(directory, { recursive: true, mode: 0o700 });
@@ -31,6 +32,7 @@ export class Store {
       CREATE INDEX IF NOT EXISTS job_state ON jobs(state);`);
     initCredits(this);
     initBilling(this);
+    creditTransaction(this, () => initImportReuse(this));
   }
   active(id) { return !this.db.prepare('SELECT id FROM deleted_accounts WHERE id=?').get(id) && !this.db.prepare('SELECT id FROM suspensions WHERE id=?').get(id); }
   requireActive(id) { requireValue(this.active(id), 'This account is no longer available.', 403); }
@@ -45,7 +47,7 @@ export class Store {
     this.requireActive(previous); return previous;
   }
   blocked(owner, other) { return !!owner && !!this.db.prepare('SELECT 1 FROM blocks WHERE (owner=? AND blocked=?) OR (owner=? AND blocked=?)').get(owner,other,other,owner); }
-  savePaper(p) { this.requireActive(p.owner); const { sections: derived, ...record } = p; this.db.prepare('INSERT OR REPLACE INTO papers VALUES(?,?,?,?)').run(p.id, p.owner, p.visibility, JSON.stringify(record)); return p; }
+  savePaper(p) { return creditTransaction(this, () => { this.requireActive(p.owner); const { sections: derived, ...record } = p; this.db.prepare('INSERT OR REPLACE INTO papers VALUES(?,?,?,?)').run(p.id, p.owner, p.visibility, JSON.stringify(record)); indexPaper(this,p); return p; }); }
   parsePaper(body) { const p = JSON.parse(body); return { ...p, sections: sections(p.mmd) }; }
   paper(id) { const r = this.db.prepare('SELECT body FROM papers WHERE id=?').get(id); return r ? this.parsePaper(r.body) : null; }
   papers(user) { return this.db.prepare('SELECT body FROM papers WHERE visibility=? OR owner=? ORDER BY rowid DESC').all('public', user || '').map(r => this.parsePaper(r.body)); }

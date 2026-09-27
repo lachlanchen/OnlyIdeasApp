@@ -8,6 +8,7 @@ import { requestSharing } from './sharing.mjs';
 import { unpackMMD } from './archive.mjs';
 import { convertAttachment } from './attachments.mjs';
 import { translationChunks } from './artifacts.mjs';
+import { reusablePaper } from './import-reuse.mjs';
 import { creditTransaction, finishImportCredits, rewardPublication } from './credits.mjs';
 const exec = promisify(execFile);
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -23,6 +24,8 @@ export async function inspectPDF(file, maxPages = 30) {
 export async function mathpix(job, config, store) {
   const completed=store.paper(job.id);
   if(completed?.owner===job.owner) { requestSharing(store,completed,job.sharing); return {paperId:completed.id}; }
+  const cached = reusablePaper(store,job.owner,job,job.id);
+  if (cached) { await rm(join(store.directory,'jobs',job.id,'source.pdf'),{force:true}); return {paperId:cached.id,reused:true}; }
   requireValue(config.mathpix?.appId && config.mathpix?.appKey, 'PDF conversion is not connected yet. You can import Markdown now.', 503);
   const directory = join(store.directory, 'jobs', job.id);
   await mkdir(directory, { recursive: true, mode: 0o700 });
@@ -35,8 +38,12 @@ export async function mathpix(job, config, store) {
       const bytes = await downloadPublic(job.url);
       requireValue(bytes.subarray(0, 5).toString() === '%PDF-', 'This URL did not return a PDF. Try the direct PDF link or upload.');
       await writeFile(pdfFile, bytes, { mode: 0o600 });
+      job.sourceDigest = hash(bytes); store.saveJob(job);
       store.db.prepare('UPDATE credit_candidates SET digest=? WHERE paper=? AND owner=?').run(hash(bytes),job.id,job.owner);
     }
+    job.sourceDigest ||= hash(await readFile(pdfFile)); store.saveJob(job);
+    const sameFile = reusablePaper(store,job.owner,{sourceDigest:job.sourceDigest},job.id);
+    if (sameFile) { await rm(pdfFile,{force:true}); return {paperId:sameFile.id,reused:true}; }
     job.pages = await inspectPDF(pdfFile, config.maxPages || 30);
     const used = store.db.prepare('SELECT body FROM jobs WHERE created>?').all(Date.now() - 86400_000).map(r => JSON.parse(r.body)).filter(j => j.id !== job.id && j.submittedAt).reduce((n, j) => n + (j.pages || 0), 0);
     requireValue(used + job.pages <= (config.maxPagesPerDay || 100), 'Today’s shared conversion allowance is full. Try tomorrow.', 429);

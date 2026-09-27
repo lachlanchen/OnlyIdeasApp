@@ -81,7 +81,7 @@ export function finishImportCredits(store, job, success) {
   if (!job.credit?.amount) return;
   const id = `${job.id}:${job.credit.attempt}`, saved = store.db.prepare('SELECT * FROM credit_holds WHERE id=?').get(id);
   if (!saved || saved.state !== 'held') return;
-  const spent = success ? (job.kind === 'import' || job.ext === 'pdf' ? job.pages : 1) : 0;
+  const spent = success && !job.reused ? (job.kind === 'import' || job.ext === 'pdf' ? job.pages : 1) : 0;
   requireValue(Number.isSafeInteger(spent) && spent >= 0 && spent <= saved.amount, 'The credit receipt needs reconciliation.', 409);
   const refund = saved.amount - spent;
   if (refund) entry(store, `refund:${id}`, job.owner, refund, success ? 'unused_reservation' : 'failed_import', job.id);

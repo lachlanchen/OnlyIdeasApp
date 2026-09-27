@@ -872,14 +872,17 @@ struct NativeDiscussion: View {
   @State private var report: PaperComment?
   @State private var reason = ""
   @State private var acceptedTerms = false
-  func load() async {
+  @State private var scrollRequest = 0
+  func load(scrollToBottom: Bool = false) async {
     do {
       let r = try await store.json("/api/papers/\(paper.id)/comments")
       comments = try store.decoded([PaperComment].self, r["comments"] ?? []).filter { paragraphId.isEmpty || $0.paragraphId == paragraphId }
     } catch { store.error = error.localizedDescription }
+    if scrollToBottom { scrollRequest += 1 }
   }
   var body: some View {
     NavigationView {
+      ScrollViewReader { proxy in
       ScrollView {
         VStack(alignment: .leading, spacing: 20) {
           if !quote.isEmpty {
@@ -930,8 +933,10 @@ struct NativeDiscussion: View {
               .frame(maxWidth: .infinity)
           }.buttonStyle(.borderedProminent).disabled(
             draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || sending || (paper.visibility == "public" && !acceptedTerms))
+          Color.clear.frame(height: 1).id("discussion-bottom")
         }.padding(14)
-      }.navigationTitle(T("Discussion")).toolbar { Button(T("Done")) { dismiss() } }.task { await load() }
+      }.onChange(of: scrollRequest) { _ in proxy.scrollTo("discussion-bottom", anchor: .bottom) }
+        .navigationTitle(T("Discussion")).toolbar { Button(T("Done")) { dismiss() } }.task { await load(scrollToBottom: true) }
         .sheet(item: $report) { comment in
           NavigationView {
             Form {
@@ -951,6 +956,7 @@ struct NativeDiscussion: View {
             }.navigationTitle(T("Report comment")).toolbar { Button(T("Cancel")) { report = nil } }
           }
         }
+      }
     }
   }
   func post() async {
@@ -968,7 +974,7 @@ struct NativeDiscussion: View {
           "revision": paper.revision ?? "", "acceptTerms": acceptedTerms,
         ])
       draft = ""
-      await load()
+      await load(scrollToBottom: true)
     } catch { store.error = error.localizedDescription }
   }
 }

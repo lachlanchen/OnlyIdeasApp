@@ -47,6 +47,8 @@ final class NativeUITests: XCTestCase {
     let paragraph=app.webViews.buttons["Discuss paragraph"].firstMatch
     XCTAssertTrue(paragraph.waitForExistence(timeout:45));paragraph.tap()
     XCTAssertTrue(app.navigationBars["Discussion"].waitForExistence(timeout:10));shot("Store10-paragraph-discussion")
+    XCTAssertTrue(app.buttons["Post thought"].isHittable, "Discussion must open at the bottom after loading")
+    XCTAssertTrue(app.textViews["Your comment"].isHittable, "Composer should be visible without scrolling")
     app.buttons["Done"].firstMatch.tap()
     app.buttons["Reading options"].tap();app.buttons["Read in another language"].tap()
     XCTAssertTrue(app.navigationBars["Read in another language"].waitForExistence(timeout:10));shot("Store10-paper-languages")

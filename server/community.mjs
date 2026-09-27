@@ -22,6 +22,7 @@ export async function deleteAccount(store, user) {
       db.prepare(`DELETE FROM ${table} WHERE owner=?`).run(user.id);
     }
     for (const paper of papers) {
+      db.prepare('DELETE FROM paper_import_keys WHERE paper=?').run(paper.id);
       db.prepare('DELETE FROM artifact_requests WHERE paper=?').run(paper.id);
       db.prepare('DELETE FROM comments WHERE paper=?').run(paper.id);
       db.prepare('DELETE FROM notes WHERE paper=?').run(paper.id);
@@ -38,7 +39,11 @@ export async function deleteAccount(store, user) {
 }
 
 export function visibleComments(store, paper, user) {
-  return store.db.prepare('SELECT body FROM comments WHERE paper=? ORDER BY created LIMIT 200').all(paper)
+  return store.db.prepare(`SELECT body FROM comments c WHERE paper=?
+    AND (owner=? OR (json_extract(body,'$.visibility')='public' AND json_extract(body,'$.moderation')='approved'))
+    AND owner NOT IN (SELECT id FROM suspensions) AND owner NOT IN (SELECT id FROM deleted_accounts)
+    AND NOT EXISTS (SELECT 1 FROM blocks b WHERE (b.owner=? AND b.blocked=c.owner) OR (b.owner=c.owner AND b.blocked=?))
+    ORDER BY created DESC,rowid DESC LIMIT 200`).all(paper,user?.id||'',user?.id||'',user?.id||'').reverse()
     .map(r => JSON.parse(r.body))
     .filter(c => store.active(c.owner) && !store.blocked(user?.id, c.owner)
       && (c.owner === user?.id || (c.visibility === 'public' && c.moderation === 'approved')))

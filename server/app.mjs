@@ -13,6 +13,7 @@ import { requestArtifact, visibleArtifacts, safeJob } from './artifacts.mjs';
 import { attachment, uploadAttachment } from './attachments.mjs';
 import { createBilling } from './billing.mjs';
 import { createAppleAuth } from './apple-auth.mjs';
+import { sourceKey, reusedImport, reusablePaper } from './import-reuse.mjs';
 import { creditTransaction, creditSummary, reserveImport, retryImportCredits, finishImportCredits, seedCreditPublications } from './credits.mjs';
 const uuid = /^[a-f0-9-]{36}$/;
 const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif', '.woff2': 'font/woff2', '.ttf': 'font/ttf', '.json': 'application/json' };
@@ -43,7 +44,13 @@ export function createApp(store, config, { worker = true, provider = providerJSO
     if (limits.size > 5000) for (const [k, v] of limits) if (v.until < now) limits.delete(k);
   };
   const enqueue = (user, fields) => creditTransaction(store, () => {
-    const existing = store.existing(user.id, fields.dedupe); if (existing) return existing;
+    store.requireActive(user.id);
+    const reused = reusedImport(store,user,fields); if (reused) return reused;
+    const legacyDedupe = fields.dedupe;
+    if (fields.kind === 'import' && fields.url) fields = { ...fields, dedupe: `import:${hash(sourceKey(fields.url) || fields.url)}` };
+    const existing = store.existing(user.id, fields.dedupe) || store.existing(user.id,legacyDedupe)
+      || (fields.kind==='import' && sourceKey(fields.url) && store.db.prepare("SELECT body FROM jobs WHERE owner=? AND json_extract(body,'$.kind')='import'").all(user.id).map(r=>JSON.parse(r.body)).find(j=>j.url && sourceKey(j.url)===sourceKey(fields.url)));
+    if (existing) return existing;
     const today = store.jobs(user.id).filter(j => j.created > Date.now() - 86400_000);
     requireValue(today.length < (config.maxJobsPerUserPerDay || 20), 'Today’s request allowance is full. Try tomorrow.', 429);
     const { creditLimit, ...data } = fields;
@@ -203,6 +210,8 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         if (existing) { requireValue(existing.owner === user.id, 'Request ID unavailable.', 409); return response(res, { paper: existing }); }
         requireValue(!/!\[[^\]]*\]\(|\\includegraphics|<img\b/i.test(data.mmd || ''), 'For papers with figures, upload the PDF so the figures are preserved. Text-only Markdown can be imported here.');
         const p = makePaper({ ...data, id: data.requestId, owner: user.id, license: 'private', assets: [] });
+        const reusable = reusablePaper(store,user.id,{mmd:p.mmd});
+        if (reusable) { requestSharing(store,reusable,data.sharing); return response(res,{paper:{...reusable,owner:undefined,isOwner:reusable.owner===user.id},reused:true}); }
         creditTransaction(store, () => {
           const receipt={id:p.id,owner:user.id,kind:'markdown',sharing:data.sharing};
           reserveImport(store,config,receipt,data.creditLimit);
@@ -212,7 +221,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         return response(res, { paper: p }, 201);
       }
       if (path === '/api/import' && method === 'POST') {
-        requireUser(); requireValue(config.mathpix?.appKey, 'PDF conversion is not connected yet. Import Markdown in the meantime.', 503);
+        requireUser();
         limit(`import:${user.id}`, 5);
         const requestId = req.headers['x-request-id']; requireValue(uuid.test(requestId || ''), 'A request ID is required.');
         const previousRequest = store.job(requestId); if (previousRequest) { requireValue(previousRequest.owner === user.id, 'Request ID unavailable.', 409); return response(res, { job: previousRequest }, 202); }
@@ -227,14 +236,17 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         requireValue(typeof metadata.title === 'string' && metadata.title.trim() && metadata.title.length <= 300, 'Add a paper title.');
         requireValue(Object.hasOwn(languages, metadata.language || 'en'), 'Choose a supported language.');
         const dedupe = `import:${hash(bytes || link)}`;
-        const previousContent = store.existing(user.id, dedupe); if (previousContent) { if (previousContent.paperId) requestSharing(store,store.paper(previousContent.paperId),sharing); return response(res, { job: previousContent }, 202); }
         if (bytes) { const dir = join(store.directory, 'jobs', requestId); await mkdir(dir, { recursive: true, mode: 0o700 }); await writeFile(join(dir, 'source.pdf'), bytes, { mode: 0o600 }); }
         let job;
         try {
-          if (bytes && config.credits?.enabled === true && sharing !== 'shared') pages = await inspectPDF(join(store.directory,'jobs',requestId,'source.pdf'),config.maxPages || 30);
+          const cached = reusablePaper(store,user.id,{url:link,sourceDigest:bytes?hash(bytes):undefined});
+          if (!cached) requireValue(config.mathpix?.appKey, 'PDF conversion is not connected yet. Import Markdown in the meantime.', 503);
+          if (!cached && bytes && config.credits?.enabled === true && sharing !== 'shared') pages = await inspectPDF(join(store.directory,'jobs',requestId,'source.pdf'),config.maxPages || 30);
           job = enqueue(user, { id: requestId, dedupe, kind: 'import', sharing, url: link, creditLimit, pages, sourceDigest:bytes?hash(bytes):undefined, metadata: { title: metadata.title, authors: String(metadata.authors || ''), language: metadata.language || 'en', license: 'private', category: String(metadata.category || 'Research') } });
         }
         catch (error) { if (bytes) await rm(join(store.directory, 'jobs', requestId), { recursive: true, force: true }); throw error; }
+        if (bytes && (job.reused || job.id !== requestId)) await rm(join(store.directory,'jobs',requestId),{recursive:true,force:true});
+        if (job.paperId) requestSharing(store,store.paper(job.paperId),sharing);
         return response(res, { job }, 202);
       }
       if (path === '/api/jobs' && method === 'GET') { requireUser(); return response(res, { jobs: store.jobs(user.id).filter(j=>{const p=j.paperId?store.paper(j.paperId):null;return j.owner===user.id||(p&&store.active(p.owner)&&!store.blocked(user.id,p.owner)&&(p.owner===user.id||p.visibility==='public'));}).map(safeJob) }); }

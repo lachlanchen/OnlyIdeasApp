@@ -11,17 +11,20 @@ export function visibleArtifacts(store, paper, user) {
 // translation has one job across accounts and processes; private text never shares.
 export function requestArtifact(store, config, user, paper, fields) {
   const db=store.db;
-  const key=hash(JSON.stringify(['artifact-v2',paper.id,paper.revision,fields.kind,fields.language,fields.sectionId||'',config.model.name,paper.visibility==='public'?'public':user.id]));
+  const key=hash(JSON.stringify(['artifact-v3',paper.id,paper.revision,fields.kind,fields.language,fields.sectionId||'',paper.visibility==='public'?'public':user.id]));
   db.exec('BEGIN IMMEDIATE');
   try {
+    const previous=visibleArtifacts(store,paper,user).find(a=>a.visibility===paper.visibility&&a.kind===fields.kind&&a.language===fields.language&&(a.sectionId||'')===(fields.sectionId||''));
     let job=store.job(db.prepare('SELECT job FROM artifact_requests WHERE key=?').get(key)?.job || '');
+    // Also join in-flight jobs created before v3 or a model configuration change.
+    if (!job) job=db.prepare('SELECT j.body FROM artifact_requests r JOIN jobs j ON j.id=r.job WHERE r.paper=? AND r.revision=?').all(paper.id,paper.revision)
+      .map(r=>JSON.parse(r.body)).find(j=>j.kind===fields.kind&&j.language===fields.language&&(j.sectionId||'')===(fields.sectionId||'')&&j.visibility===paper.visibility&&(paper.visibility==='public'||j.owner===user.id));
     if(!job) {
       requireValue(store.jobs(user.id).filter(j=>j.created>Date.now()-86400_000).length < (config.maxJobsPerUserPerDay||20), 'Today’s request allowance is full. Try tomorrow.',429);
-      const previous=visibleArtifacts(store,paper,user).find(a=>a.kind===fields.kind&&a.language===fields.language&&(a.sectionId||'')===(fields.sectionId||'')&&a.model===config.model.name);
       job={id:randomUUID(),owner:paper.visibility==='public'?paper.owner:user.id,dedupe:key,created:Date.now(),state:previous?'completed':'queued',message:previous?'Ready':'Waiting to start',paperId:paper.id,revision:paper.revision,visibility:paper.visibility,...fields,...(previous?{artifactId:previous.id}:{})};
       store.saveJob(job);
-      db.prepare('INSERT OR REPLACE INTO artifact_requests VALUES(?,?,?,?)').run(key,paper.id,paper.revision,job.id);
     }
+    db.prepare('INSERT OR REPLACE INTO artifact_requests VALUES(?,?,?,?)').run(key,paper.id,paper.revision,job.id);
     db.prepare('INSERT OR IGNORE INTO job_subscriptions VALUES(?,?)').run(user.id,job.id);
     db.exec('COMMIT');return job;
   } catch(e){db.exec('ROLLBACK');throw e;}

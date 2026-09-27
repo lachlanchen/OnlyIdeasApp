@@ -1566,6 +1566,7 @@ public class MainActivity extends AppCompatActivity {
         r -> {
           ScrollView scroll = new ScrollView(this);
           LinearLayout c = column();
+          c.setFocusableInTouchMode(true);
           c.setPadding(dp(22), dp(16), dp(22), dp(20));
           scroll.addView(c);
           if (!quote.isEmpty()) {
@@ -1657,6 +1658,10 @@ public class MainActivity extends AppCompatActivity {
                                 });
                           }));
           dialog.show();
+          // Wait until the dialog is laid out; opening a thread should show its
+          // newest replies and composer without focusing it or opening the keyboard.
+          c.requestFocus();
+          scroll.post(() -> scroll.fullScroll(View.FOCUS_DOWN));
         });
   }
 

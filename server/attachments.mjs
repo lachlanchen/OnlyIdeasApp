@@ -8,6 +8,7 @@ import sharp from 'sharp';
 import { hash, requireValue, makePaper } from './domain.mjs';
 import { providerJSON } from './network.mjs';
 import { requestSharing } from './sharing.mjs';
+import { canReusePaper, reusablePaper } from './import-reuse.mjs';
 const exec=promisify(execFile);
 const types={pdf:'application/pdf',png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',webp:'image/webp',docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',txt:'text/plain',md:'text/markdown',mmd:'text/markdown',csv:'text/csv',json:'application/json',tex:'text/plain'};
 export function inspectAttachment(bytes, name) {
@@ -31,29 +32,34 @@ export function attachment(store,id,owner) {
   const row=store.db.prepare('SELECT body FROM attachments WHERE id=? AND owner=?').get(id,owner);
   requireValue(row,'Attachment not found.',404);
   const data=JSON.parse(row.body),job=store.job(data.jobId);
+  if (job?.paperId && !canReusePaper(store,store.paper(job.paperId),owner)) return {...data,state:'failed',message:'Attachment unavailable'};
   return {...data,state:job?.state==='completed'?'ready':job?.state||'failed',message:job?.message||'Attachment unavailable',paperId:job?.paperId};
 }
 export async function uploadAttachment(store,config,user,bytes,name,enqueue,{sharing='private',creditLimit,inspectPDF}={}) {
   const {ext,mime}=inspectAttachment(bytes,name),digest=hash(bytes),old=store.db.prepare('SELECT id FROM attachments WHERE owner=? AND digest=?').get(user.id,digest);
   if(old)return attachment(store,old.id,user.id);
-  if(ext==='pdf'||mime.startsWith('image/'))requireValue(config.mathpix?.appKey,'Document recognition is not connected yet.',503);
+  const cached = reusablePaper(store,user.id,{sourceDigest:digest});
+  if(!cached && (ext==='pdf'||mime.startsWith('image/')))requireValue(config.mathpix?.appKey,'Document recognition is not connected yet.',503);
   const id=randomUUID(),directory=join(store.directory,'jobs',id);await mkdir(directory,{recursive:true,mode:0o700});
   await writeFile(join(directory,'source.'+ext),bytes,{mode:0o600});
   let committed=false,transaction=false;
   try {
-    const pages=ext==='pdf'&&sharing!=='shared'&&config.credits?.enabled===true?await inspectPDF(join(directory,'source.pdf'),config.maxPages||30):undefined;
+    const pages=!cached&&ext==='pdf'&&sharing!=='shared'&&config.credits?.enabled===true?await inspectPDF(join(directory,'source.pdf'),config.maxPages||30):undefined;
     store.requireActive(user.id);store.db.exec('BEGIN IMMEDIATE');transaction=true;
     const previous=store.db.prepare('SELECT id FROM attachments WHERE owner=? AND digest=?').get(user.id,digest);
     if(previous){store.db.exec('COMMIT');committed=true;await rm(directory,{recursive:true,force:true});return attachment(store,previous.id,user.id);}
     const job=enqueue(user,{id,kind:'attachment',dedupe:'attachment:'+digest,ext,mime,sharing,creditLimit,pages,sourceDigest:digest,metadata:{title:name.replace(/\.[^.]+$/,''),language:'en',license:'private',category:'Uploads'}});
     const data={id,name,mime,bytes:bytes.length,jobId:job.id};
     store.db.prepare('INSERT INTO attachments VALUES(?,?,?,?)').run(id,user.id,digest,JSON.stringify(data));store.db.exec('COMMIT');committed=true;
+    if(job.reused || job.id!==id) await rm(directory,{recursive:true,force:true});
     return attachment(store,id,user.id);
   }catch(e){if(transaction&&!committed)store.db.exec('ROLLBACK');await rm(directory,{recursive:true,force:true});throw e;}
 }
 export async function convertAttachment(job,config,store,{mathpix,provider=providerJSON}={}) {
   const completed=store.paper(job.id);
   if(completed?.owner===job.owner) { requestSharing(store,completed,job.sharing); return {paperId:completed.id}; }
+  const cached = reusablePaper(store,job.owner,job,job.id);
+  if(cached) { await rm(join(store.directory,'jobs',job.id,'source.'+job.ext),{force:true});return {paperId:cached.id,reused:true}; }
   if(job.ext==='pdf')return mathpix(job,config,store);
   const directory=join(store.directory,'jobs',job.id),file=join(directory,'source.'+job.ext),bytes=await readFile(file);
   const inspected=inspectAttachment(bytes,'file.'+job.ext);let mmd='',assets=[];

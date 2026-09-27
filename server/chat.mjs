@@ -3,6 +3,7 @@ import { requestSharing } from './sharing.mjs';
 import { attachment } from './attachments.mjs';
 import { requireValue, hash, languages } from './domain.mjs';
 import { activePlan } from './billing-ledger.mjs';
+import { canReusePaper } from './import-reuse.mjs';
 
 export function createChats(store, config) {
   const db = store.db;
@@ -55,7 +56,7 @@ export function createChats(store, config) {
         // Existing queue enforces deduplication, account quotas and Mathpix page caps.
         const job = enqueue(user,{ kind:'import', sharing:body.sharing === 'shared' ? 'shared' : 'private', creditLimit:body.creditLimit, url:card.pdfUrl, metadata:{title:card.title,authors:card.authors,language:'en',license:'private',category:'Research'}, dedupe:`import:${hash(card.pdfUrl)}` });
         if (job.paperId && body.sharing === 'shared') { const p=store.paper(job.paperId); if(p)requestSharing(store,p,'shared'); }
-        add(id,'assistant',{text:body.sharing !== 'shared' ? 'The paper is saved to your private library after conversion.' : 'The paper will be added to the shared reading room after source and community review. Your chat and notes stay private.',jobId:job.id});
+        add(id,'assistant',{text:job.reused ? 'This paper is already available. Open the existing paper; its text, figures and available translations are reused. Your chat and notes stay private.' : body.sharing !== 'shared' ? 'The paper is saved to your private library after conversion.' : 'The paper will be added to the shared reading room after source and community review. Your chat and notes stay private.',jobId:job.id});
         return { job };
       }
       requireValue(false,'Method not allowed.',405);
@@ -74,7 +75,7 @@ export function createChats(store, config) {
         db.prepare("UPDATE chat_tasks SET state='running',body=? WHERE id=?").run(JSON.stringify(body),row.id);
         const history=messages(row.chat).slice(-16), ids=[...new Set(history.flatMap(m=>(m.attachments||[]).filter(a=>a.state==='ready').map(a=>a.id)))].slice(-6);
         let budget=60_000;
-        const documents=ids.map(id=>{const a=attachment(store,id,row.owner),p=store.paper(a.paperId);if(!p||p.owner!==row.owner)return null;const text=p.mmd.slice(0,Math.min(20_000,budget));budget-=text.length;return {name:a.name,text,truncated:text.length<p.mmd.length};}).filter(Boolean);
+        const documents=ids.map(id=>{const a=attachment(store,id,row.owner),p=store.paper(a.paperId);if(!canReusePaper(store,p,row.owner))return null;const text=p.mmd.slice(0,Math.min(20_000,budget));budget-=text.length;return {name:a.name,text,truncated:text.length<p.mmd.length};}).filter(Boolean);
         db.exec('COMMIT');return {task:{id:row.id,lease:body.lease,text:body.text,language:body.language,documents,messages:history.map(m=>({role:m.role,text:m.text,papers:m.papers}))}};
       }
       db.exec('COMMIT');return {task:null};

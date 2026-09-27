@@ -124,3 +124,11 @@ Keep equations/figures in the full reader. Never transfer private papers, accoun
 tokens, chats or notes. Reconcile withdrawn public papers when the phone connects.
 The Watch app itself needs no login or network access. All 11 UI languages remain.
 Paid subscription activation remains separately gated on purchase qualification.
+
+## Paper reuse and discussion amendment · 2026-09-28
+
+Reuse an accessible paper's stored transcript, figures and available translations
+across readers before downloading or converting again. Use source identities and
+exact file hashes; preserve explicit paper revisions and private-content isolation.
+Existing work must not incur another conversion charge. Open discussion panels
+at the latest replies and composer after loading, without opening the keyboard.
