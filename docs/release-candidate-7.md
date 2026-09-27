@@ -42,3 +42,12 @@ No private paper or database is committed or publicly republished.
 TypeScript/web/native-reader builds before packaging. The signed iOS archive,
 export, Apple validation and upload succeeded. Install the TestFlight update over
 the existing app; the server library does not require a reset or fresh import.
+
+## Subsequent web correction
+
+Opening a completed request while on the Agent or Profile page now switches to
+the reader immediately, including its offline fallback. This is a web navigation
+correction made after the iOS 7 archive; native SwiftUI navigation is separate.
+Generated figure backups now follow the same 30-day retention policy as SQLite
+snapshots. Cleanup never targets the live library. The retention boundary test
+and the full application check passed.

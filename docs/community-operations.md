@@ -40,3 +40,12 @@ snapshot without merging current deletion identifiers and reapplying deletions;
 never restore deleted private files. Record restoration privately and run the
 deletion/isolation tests before opening ingress. Existing releases can be rolled
 back without rolling back account data.
+
+Generated figure backups named `papers.retained.tar.gz` and their
+`manifest.retained.json` expire alongside database snapshots after 30 days.
+The live `/var/lib/onlyideas` database and paper directory are outside this cleanup.
+Owner-requested real-paper verification results remain in the live private library;
+“test result” is not permission to reset the database or remove a paper.
+Run `python3 -m unittest discover -s tests -p test_backup_retention.py` when changing
+retention rules; it verifies recent backups, live data, credentials and symlinks
+are preserved.

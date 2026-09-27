@@ -68,8 +68,8 @@ function App() {
     } catch (e) { notify((e as Error).message) }
   }
   async function open(p: Paper) {
-    try { const result = await api<{ paper: Paper }>(`/papers/${p.id}`); setPaper(result.paper); window.scrollTo(0, 0) }
-    catch (e) { const saved = await downloadedPaper(p.id, session?.user?.id); if (saved) { setPaper(saved.paper); window.scrollTo(0, 0); notify('Reading your downloaded copy. Discussions need a connection.') } else notify((e as Error).message) }
+    try { const result = await api<{ paper: Paper }>(`/papers/${p.id}`); setPaper(result.paper); setPage('library'); window.scrollTo(0, 0) }
+    catch (e) { const saved = await downloadedPaper(p.id, session?.user?.id); if (saved) { setPaper(saved.paper); setPage('library'); window.scrollTo(0, 0); notify('Reading your downloaded copy. Discussions need a connection.') } else notify((e as Error).message) }
   }
   function save(id: string) { const next = bookmarks.includes(id) ? bookmarks.filter(x => x !== id) : [...bookmarks, id]; setBookmarks(next); localStorage.setItem('onlyideas-bookmarks', JSON.stringify(next)) }
   const needLogin = () => { if (!session?.user) { setLogin(true); return true } return false }
