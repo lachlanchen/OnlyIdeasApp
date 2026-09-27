@@ -8,6 +8,7 @@ import { requestSharing } from './sharing.mjs';
 import { unpackMMD } from './archive.mjs';
 import { convertAttachment } from './attachments.mjs';
 import { translationChunks } from './artifacts.mjs';
+import { creditTransaction, finishImportCredits, rewardPublication } from './credits.mjs';
 const exec = promisify(execFile);
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
 export async function inspectPDF(file, maxPages = 30) {
@@ -20,6 +21,8 @@ export async function inspectPDF(file, maxPages = 30) {
   return pages;
 }
 export async function mathpix(job, config, store) {
+  const completed=store.paper(job.id);
+  if(completed?.owner===job.owner) { requestSharing(store,completed,job.sharing); return {paperId:completed.id}; }
   requireValue(config.mathpix?.appId && config.mathpix?.appKey, 'PDF conversion is not connected yet. You can import Markdown now.', 503);
   const directory = join(store.directory, 'jobs', job.id);
   await mkdir(directory, { recursive: true, mode: 0o700 });
@@ -32,6 +35,7 @@ export async function mathpix(job, config, store) {
       const bytes = await downloadPublic(job.url);
       requireValue(bytes.subarray(0, 5).toString() === '%PDF-', 'This URL did not return a PDF. Try the direct PDF link or upload.');
       await writeFile(pdfFile, bytes, { mode: 0o600 });
+      store.db.prepare('UPDATE credit_candidates SET digest=? WHERE paper=? AND owner=?').run(hash(bytes),job.id,job.owner);
     }
     job.pages = await inspectPDF(pdfFile, config.maxPages || 30);
     const used = store.db.prepare('SELECT body FROM jobs WHERE created>?').all(Date.now() - 86400_000).map(r => JSON.parse(r.body)).filter(j => j.id !== job.id && j.submittedAt).reduce((n, j) => n + (j.pages || 0), 0);
@@ -196,7 +200,12 @@ export function startWorker(store, config) {
     } finally {
       clearInterval(heartbeat);
       try {
-        if (store.active(job.owner) && store.job(job.id)?.lease===job.lease) store.saveJob(job);
+        if (store.active(job.owner) && store.job(job.id)?.lease===job.lease) creditTransaction(store, () => {
+          requireValue(store.job(job.id)?.lease===job.lease,'The request moved to another worker.',409);
+          finishImportCredits(store,job,job.state==='completed');
+          if(job.kind==='publish'&&job.state==='completed') rewardPublication(store,job);
+          store.saveJob(job);
+        });
         else if (store.db.prepare('SELECT id FROM deleted_accounts WHERE id=?').get(job.owner)) {
           await rm(join(store.directory, 'jobs', job.id), { recursive: true, force: true });
           if (job.kind === 'import') await rm(join(store.directory, 'papers', job.id), { recursive: true, force: true });

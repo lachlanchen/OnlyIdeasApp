@@ -3,6 +3,7 @@ import { mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { hash, sections, requireValue } from './domain.mjs';
+import { initCredits } from './credits.mjs';
 export class Store {
   constructor(directory) {
     mkdirSync(directory, { recursive: true, mode: 0o700 });
@@ -27,6 +28,7 @@ export class Store {
       CREATE TABLE IF NOT EXISTS terms(owner TEXT PRIMARY KEY, version TEXT NOT NULL);
       CREATE INDEX IF NOT EXISTS paper_visibility ON papers(visibility,owner);
       CREATE INDEX IF NOT EXISTS job_state ON jobs(state);`);
+    initCredits(this);
   }
   active(id) { return !this.db.prepare('SELECT id FROM deleted_accounts WHERE id=?').get(id) && !this.db.prepare('SELECT id FROM suspensions WHERE id=?').get(id); }
   requireActive(id) { requireValue(this.active(id), 'This account is no longer available.', 403); }

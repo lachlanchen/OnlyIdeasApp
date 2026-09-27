@@ -97,6 +97,9 @@ test('image OCR keeps the original image, reuses its saved result and blocks unc
   const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a/eYAAAAASUVORK5CYII=','base64');const a=await uploadAttachment(f.store,config,{id:'alice'},png,'equation.png',enqueue(f.store));const j=f.store.job(a.id);let calls=0;
   const result=await convertAttachment(j,config,f.store,{provider:async(u,o)=>{calls++;const b=JSON.parse(o.body);assert.equal(b.improve_mathpix,false);assert.match(b.src,/^data:image\/jpeg;base64,/);return {text:'Equation: $E=mc^2$'}}});assert.equal(calls,1);const p=f.store.paper(result.paperId);assert.equal(p.assets.length,1);assert.match(p.mmd,/Original image/);
   writeFileSync(join(f.dir,'jobs',j.id,'source.png'),png);await convertAttachment(f.store.job(j.id),config,f.store,{provider:async()=>{calls++;throw Error('must not call')}});assert.equal(calls,1);
+  // A durable paper is sufficient to resume. Without it or an OCR receipt,
+  // an uncertain provider submission must still never be sent a second time.
+  f.store.db.prepare('DELETE FROM papers WHERE id=?').run(j.id);
   writeFileSync(join(f.dir,'jobs',j.id,'source.png'),png);const ambiguous={...j,ocrText:undefined,ocrResult:undefined};await assert.rejects(convertAttachment(ambiguous,config,f.store),/receipt is uncertain/);
  }finally{f.close()}
 });

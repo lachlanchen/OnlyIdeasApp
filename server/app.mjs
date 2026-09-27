@@ -5,13 +5,14 @@ import { join, extname, resolve } from 'node:path';
 import { AppError, requireValue, hash, makePaper, publicPaper, mayPublish, languages } from './domain.mjs';
 import { providerJSON } from './network.mjs';
 import { requestSharing } from './sharing.mjs';
-import { startWorker } from './providers.mjs';
+import { startWorker, inspectPDF } from './providers.mjs';
 import { nativeOrigins, nativeFlow, startNative, finishNative, redeemNative } from './native-auth.mjs';
 import { createChats } from './chat.mjs';
 import { deleteAccount, visibleComments, acceptTerms, blocks } from './community.mjs';
 import { requestArtifact, visibleArtifacts, safeJob } from './artifacts.mjs';
 import { attachment, uploadAttachment } from './attachments.mjs';
 import { createAppleAuth } from './apple-auth.mjs';
+import { creditTransaction, creditSummary, reserveImport, retryImportCredits, finishImportCredits, seedCreditPublications } from './credits.mjs';
 const uuid = /^[a-f0-9-]{36}$/;
 const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif', '.woff2': 'font/woff2', '.ttf': 'font/ttf', '.json': 'application/json' };
 export function createApp(store, config, { worker = true, provider = providerJSON } = {}) {
@@ -21,6 +22,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
   requireValue(!config.development || !secure, 'Development login cannot be enabled in production.');
   const cookieName = secure ? '__Host-onlyideas' : 'onlyideas-local';
   const cookie = (name, value, seconds) => `${name}=${value}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${seconds}${secure ? '; Secure' : ''}`;
+  seedCreditPublications(store, config);
   const stopWorker = worker ? startWorker(store, config) : () => {};
   const chats = createChats(store, config);
   const apple = createAppleAuth(store, config, provider);
@@ -38,12 +40,15 @@ export function createApp(store, config, { worker = true, provider = providerJSO
     requireValue(++value.count <= max, 'Please wait a moment before trying again.', 429); limits.set(key, value);
     if (limits.size > 5000) for (const [k, v] of limits) if (v.until < now) limits.delete(k);
   };
-  const enqueue = (user, fields) => {
+  const enqueue = (user, fields) => creditTransaction(store, () => {
     const existing = store.existing(user.id, fields.dedupe); if (existing) return existing;
     const today = store.jobs(user.id).filter(j => j.created > Date.now() - 86400_000);
     requireValue(today.length < (config.maxJobsPerUserPerDay || 20), 'Today’s request allowance is full. Try tomorrow.', 429);
-    return store.saveJob({ ...fields, id: fields.id || randomUUID(), owner: user.id, created: Date.now(), state: 'queued', message: 'Waiting to start' });
-  };
+    const { creditLimit, ...data } = fields;
+    const job = { ...data, id: fields.id || randomUUID(), owner: user.id, created: Date.now(), state: 'queued', message: 'Waiting to start' };
+    reserveImport(store, config, job, creditLimit);
+    return store.saveJob(job);
+  });
   const server = createServer(async (req, res) => {
     res.setHeader('X-Content-Type-Options', 'nosniff'); res.setHeader('Referrer-Policy', 'no-referrer');
     res.setHeader('X-Frame-Options', 'DENY'); res.setHeader('Cache-Control', 'no-store');
@@ -63,7 +68,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
         res.setHeader('Vary', 'Origin');
         res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, POST, PUT, DELETE, OPTIONS');
-        res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type, X-OnlyIdeas-Client, X-Request-Id, X-Paper-Title, X-Paper-Language, X-Paper-Sharing, X-File-Name');
+        res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type, X-OnlyIdeas-Client, X-Request-Id, X-Paper-Title, X-Paper-Language, X-Paper-Sharing, X-File-Name, X-Credit-Limit');
       }
       if (method === 'OPTIONS') { requireValue(nativeOrigin, 'Origin not allowed.', 403); res.writeHead(204); return res.end(); }
       const native = nativeOrigin && req.headers['x-onlyideas-client'] === 'native';
@@ -79,7 +84,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         requireUser();limit(`attachment:${user.id}`,10);
         const name=decodeURIComponent(req.headers['x-file-name']||'file');
         const bytes=await readBody(req,20_000_000);
-        return response(res,{attachment:await uploadAttachment(store,config,user,bytes,name,enqueue)},202);
+        return response(res,{attachment:await uploadAttachment(store,config,user,bytes,name,enqueue,{sharing:req.headers['x-paper-sharing']==='shared'?'shared':'private',creditLimit:Number(req.headers['x-credit-limit']),inspectPDF})},202);
       }
       const attached=path.match(/^\/api\/attachments\/([a-f0-9-]{36})$/);
       if(attached&&method==='GET'){requireUser();return response(res,{attachment:attachment(store,attached[1],user.id)});}
@@ -90,6 +95,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
       }
       const paperFor = id => { const p = store.paper(id); requireValue(p && store.active(p.owner) && !store.blocked(user?.id, p.owner) && (p.visibility === 'public' || p.owner === user?.id), 'Paper not found.', 404); return p; };
       if (path.startsWith('/api/')) limit(user?.id || req.socket.remoteAddress, 240);
+      if (path === '/api/credits' && method === 'GET') { requireUser(); return response(res, creditSummary(store,user.id,config)); }
       if (path === '/api/health' && method === 'GET') return response(res, { service: 'onlyideas', version: '1.0.0', ok: true });
       if (path === '/api/auth/apple/start' && method === 'POST') {
         requireValue(native, 'Open sign-in from the app.', 403); limit(`apple:${req.socket.remoteAddress}`, 20);
@@ -187,7 +193,13 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         if (existing) { requireValue(existing.owner === user.id, 'Request ID unavailable.', 409); return response(res, { paper: existing }); }
         requireValue(!/!\[[^\]]*\]\(|\\includegraphics|<img\b/i.test(data.mmd || ''), 'For papers with figures, upload the PDF so the figures are preserved. Text-only Markdown can be imported here.');
         const p = makePaper({ ...data, id: data.requestId, owner: user.id, license: 'private', assets: [] });
-        store.savePaper(p); requestSharing(store,p,data.sharing); return response(res, { paper: p }, 201);
+        creditTransaction(store, () => {
+          const receipt={id:p.id,owner:user.id,kind:'markdown',sharing:data.sharing};
+          reserveImport(store,config,receipt,data.creditLimit);
+          store.savePaper(p); requestSharing(store,p,data.sharing);
+          finishImportCredits(store,receipt,true);
+        });
+        return response(res, { paper: p }, 201);
       }
       if (path === '/api/import' && method === 'POST') {
         requireUser(); requireValue(config.mathpix?.appKey, 'PDF conversion is not connected yet. Import Markdown in the meantime.', 503);
@@ -195,19 +207,23 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         const requestId = req.headers['x-request-id']; requireValue(uuid.test(requestId || ''), 'A request ID is required.');
         const previousRequest = store.job(requestId); if (previousRequest) { requireValue(previousRequest.owner === user.id, 'Request ID unavailable.', 409); return response(res, { job: previousRequest }, 202); }
         const isPDF = req.headers['content-type'] === 'application/pdf';
-        let metadata, link = null, bytes, sharing = 'private';
+        let metadata, link = null, bytes, sharing = 'private', creditLimit, pages;
         if (isPDF) {
           bytes = await readBody(req, 20_000_000); requireValue(bytes.subarray(0, 5).toString() === '%PDF-', 'Choose a valid PDF.');
           sharing = req.headers['x-paper-sharing'] === 'shared' ? 'shared' : 'private';
+          creditLimit = Number(req.headers['x-credit-limit']);
           metadata = { title: decodeURIComponent(req.headers['x-paper-title'] || 'My paper'), language: req.headers['x-paper-language'] || 'en' };
-        } else { const body = await json(req); metadata = body; sharing = body.sharing === 'shared' ? 'shared' : 'private'; link = body.url; requireValue(typeof link === 'string' && link.length <= 2000 && link.startsWith('https://'), 'Enter a direct HTTPS PDF link.'); }
+        } else { const body = await json(req); metadata = body; sharing = body.sharing === 'shared' ? 'shared' : 'private'; creditLimit=body.creditLimit; link = body.url; requireValue(typeof link === 'string' && link.length <= 2000 && link.startsWith('https://'), 'Enter a direct HTTPS PDF link.'); }
         requireValue(typeof metadata.title === 'string' && metadata.title.trim() && metadata.title.length <= 300, 'Add a paper title.');
         requireValue(Object.hasOwn(languages, metadata.language || 'en'), 'Choose a supported language.');
         const dedupe = `import:${hash(bytes || link)}`;
         const previousContent = store.existing(user.id, dedupe); if (previousContent) { if (previousContent.paperId) requestSharing(store,store.paper(previousContent.paperId),sharing); return response(res, { job: previousContent }, 202); }
         if (bytes) { const dir = join(store.directory, 'jobs', requestId); await mkdir(dir, { recursive: true, mode: 0o700 }); await writeFile(join(dir, 'source.pdf'), bytes, { mode: 0o600 }); }
         let job;
-        try { job = enqueue(user, { id: requestId, dedupe, kind: 'import', sharing, url: link, metadata: { title: metadata.title, authors: String(metadata.authors || ''), language: metadata.language || 'en', license: 'private', category: String(metadata.category || 'Research') } }); }
+        try {
+          if (bytes && config.credits?.enabled === true && sharing !== 'shared') pages = await inspectPDF(join(store.directory,'jobs',requestId,'source.pdf'),config.maxPages || 30);
+          job = enqueue(user, { id: requestId, dedupe, kind: 'import', sharing, url: link, creditLimit, pages, sourceDigest:bytes?hash(bytes):undefined, metadata: { title: metadata.title, authors: String(metadata.authors || ''), language: metadata.language || 'en', license: 'private', category: String(metadata.category || 'Research') } });
+        }
         catch (error) { if (bytes) await rm(join(store.directory, 'jobs', requestId), { recursive: true, force: true }); throw error; }
         return response(res, { job }, 202);
       }
@@ -274,7 +290,12 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         requireValue(!((j.kind === 'import' || j.kind==='attachment') && j.submittedAt && !j.pdfId), 'The conversion receipt is uncertain. Contact support before retrying to avoid another charge.', 409);
         requireValue(!j.ocrSubmittedAt || j.ocrText!==undefined || j.ocrResult, 'The image conversion receipt is uncertain. Contact support before retrying to avoid another charge.',409);
         requireValue((j.retries || 0) < 3, 'Please contact support before retrying again.', 429);
-        j.state = 'queued'; j.message = 'Waiting to resume'; j.retries = (j.retries || 0) + 1; store.saveJob(j);
+        const consent = await json(req);
+        creditTransaction(store, () => {
+          const current=store.job(j.id);requireValue(current?.state==='failed','This request is already running or complete.',409);
+          retryImportCredits(store,current,consent.creditLimit);
+          current.state = 'queued'; current.message = 'Waiting to resume'; current.retries = (current.retries || 0) + 1; store.saveJob(current);
+        });
         return response(res, { ok: true }, 202);
       }
       const asset = path.match(/^\/content\/([\w-]+)\/(figures\/[\w.-]+)$/);

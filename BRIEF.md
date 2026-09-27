@@ -85,3 +85,26 @@ withdrawn papers and visibility changes online; clear private cache on sign-out.
 Cloud notes and discussions still require a connection. Preserve the live database.
 The existing O/i icon receives a teal–blue–violet gradient and warm gold dot;
 remove the overlapping upper-right idea stroke.
+
+## Database credits amendment · 2026-09-28
+
+The owner chose ordinary database reading credits, like EchoMind. Credits are
+non-transferable, have no cash value, and are only used inside OnlyIdeas. Real
+LazyingArt coins are a possible later project; no wallet or blockchain integration
+is part of this release. Preserve the current library and account database.
+
+Finish work in order: credit accounting, interface/sharing controls, monthly
+subscriptions, release qualification. New Shared imports cost no credits and earn
+10 credits after rights/community review and successful publication, once per
+unique paper across all accounts, with a maximum of 50 earned credits per UTC day.
+Private imports cost one credit per PDF page or other file. Welcome grant: 30.
+Show costs before submission, reserve atomically, refund failures and unused PDF
+reservations, and never double-charge a retry. Credits do not expire. Existing
+papers/jobs are not charged or rewarded retrospectively.
+
+Sharing controls belong in import options and an agent toolbar control, defaulting
+to Shared. Chats and personal notes remain private. Reduce repeated agent help
+copy and give conversations/composers more space. Monthly subscription targets
+are approximately CNY20/100/200; show actual native-store localized prices, grant
+credits only from verified purchases, and support restoration. Subscription
+purchase integration and store configuration must be tested before activation.

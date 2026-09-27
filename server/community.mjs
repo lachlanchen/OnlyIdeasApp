@@ -1,6 +1,7 @@
 import { rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { hash, requireValue, mayPublish } from './domain.mjs';
+import { deleteCredits } from './credits.mjs';
 
 export const termsVersion = '2026-09-27';
 
@@ -26,6 +27,7 @@ export async function deleteAccount(store, user) {
       db.prepare("DELETE FROM artifacts WHERE json_extract(body,'$.paperId')=?").run(paper.id);
     }
     db.prepare('DELETE FROM papers WHERE owner=?').run(user.id);
+    deleteCredits(store,user.id);
     db.prepare('DELETE FROM blocks WHERE owner=? OR blocked=?').run(user.id, user.id);
     db.exec('COMMIT');
   } catch (error) { db.exec('ROLLBACK'); throw error; }

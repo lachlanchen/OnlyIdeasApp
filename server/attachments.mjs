@@ -7,6 +7,7 @@ import { unzipSync } from 'fflate';
 import sharp from 'sharp';
 import { hash, requireValue, makePaper } from './domain.mjs';
 import { providerJSON } from './network.mjs';
+import { requestSharing } from './sharing.mjs';
 const exec=promisify(execFile);
 const types={pdf:'application/pdf',png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',webp:'image/webp',docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',txt:'text/plain',md:'text/markdown',mmd:'text/markdown',csv:'text/csv',json:'application/json',tex:'text/plain'};
 export function inspectAttachment(bytes, name) {
@@ -32,7 +33,7 @@ export function attachment(store,id,owner) {
   const data=JSON.parse(row.body),job=store.job(data.jobId);
   return {...data,state:job?.state==='completed'?'ready':job?.state||'failed',message:job?.message||'Attachment unavailable',paperId:job?.paperId};
 }
-export async function uploadAttachment(store,config,user,bytes,name,enqueue) {
+export async function uploadAttachment(store,config,user,bytes,name,enqueue,{sharing='private',creditLimit,inspectPDF}={}) {
   const {ext,mime}=inspectAttachment(bytes,name),digest=hash(bytes),old=store.db.prepare('SELECT id FROM attachments WHERE owner=? AND digest=?').get(user.id,digest);
   if(old)return attachment(store,old.id,user.id);
   if(ext==='pdf'||mime.startsWith('image/'))requireValue(config.mathpix?.appKey,'Document recognition is not connected yet.',503);
@@ -40,16 +41,19 @@ export async function uploadAttachment(store,config,user,bytes,name,enqueue) {
   await writeFile(join(directory,'source.'+ext),bytes,{mode:0o600});
   let committed=false,transaction=false;
   try {
+    const pages=ext==='pdf'&&sharing!=='shared'&&config.credits?.enabled===true?await inspectPDF(join(directory,'source.pdf'),config.maxPages||30):undefined;
     store.requireActive(user.id);store.db.exec('BEGIN IMMEDIATE');transaction=true;
     const previous=store.db.prepare('SELECT id FROM attachments WHERE owner=? AND digest=?').get(user.id,digest);
     if(previous){store.db.exec('COMMIT');committed=true;await rm(directory,{recursive:true,force:true});return attachment(store,previous.id,user.id);}
-    const job=enqueue(user,{id,kind:'attachment',dedupe:'attachment:'+digest,ext,mime,sharing:'private',metadata:{title:name.replace(/\.[^.]+$/,''),language:'en',license:'private',category:'Uploads'}});
+    const job=enqueue(user,{id,kind:'attachment',dedupe:'attachment:'+digest,ext,mime,sharing,creditLimit,pages,sourceDigest:digest,metadata:{title:name.replace(/\.[^.]+$/,''),language:'en',license:'private',category:'Uploads'}});
     const data={id,name,mime,bytes:bytes.length,jobId:job.id};
     store.db.prepare('INSERT INTO attachments VALUES(?,?,?,?)').run(id,user.id,digest,JSON.stringify(data));store.db.exec('COMMIT');committed=true;
     return attachment(store,id,user.id);
   }catch(e){if(transaction&&!committed)store.db.exec('ROLLBACK');await rm(directory,{recursive:true,force:true});throw e;}
 }
 export async function convertAttachment(job,config,store,{mathpix,provider=providerJSON}={}) {
+  const completed=store.paper(job.id);
+  if(completed?.owner===job.owner) { requestSharing(store,completed,job.sharing); return {paperId:completed.id}; }
   if(job.ext==='pdf')return mathpix(job,config,store);
   const directory=join(store.directory,'jobs',job.id),file=join(directory,'source.'+job.ext),bytes=await readFile(file);
   const inspected=inspectAttachment(bytes,'file.'+job.ext);let mmd='',assets=[];
@@ -90,5 +94,6 @@ export async function convertAttachment(job,config,store,{mathpix,provider=provi
   store.requireActive(job.owner);
   for(const a of assets){await mkdir(join(store.directory,'papers',job.id,'figures'),{recursive:true,mode:0o700});await writeFile(join(store.directory,'papers',job.id,a.path),a.data,{mode:0o600});}
   const paper=makePaper({...job.metadata,id:job.id,owner:job.owner,mmd,assets:assets.map(({path,bytes})=>({path,bytes}))});store.savePaper(paper);await rm(file,{force:true});
+  requestSharing(store,paper,job.sharing);
   return {paperId:paper.id};
 }
