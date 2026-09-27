@@ -40,6 +40,10 @@ npm run dev
 
 공개 열람실에는 명확히 표시된 원본 예제와 함께 실제 논문 두 편인 OpenAlex (CC0-1.0), Measuring holographic entanglement entropy on a quantum simulator (CC-BY-4.0)가 있습니다. 원본 그림 네 개를 보존했습니다. 두 논문 모두 실제 변환 과정을 거쳤으며 로그인 없이 휴대폰 너비의 리더에서 확인했습니다.
 
+개발 중: 데이터베이스 읽기 크레딧은 원자적 예약, 환불, 중복을 방지하는 승인된 공개 논문 보상을 지원합니다. 프로필에 잔액과 내역을 표시하고 공유 설정은 대화 위로 옮겼으며, 비공개 가져오기 전에 비용을 확인합니다. 새 기능은 11개 언어를 모두 지원합니다. 운영 서비스에서는 크레딧 차감과 월간 구독 구매를 아직 활성화하지 않았습니다.
+
+[Reading credits](../docs/reading-credits.md)
+
 [1.0.0 (10)](../docs/release-candidate-10.md) · [0.3](../docs/native-0.3.md) · [docs/native.md](../docs/native.md)
 
 ## 후원

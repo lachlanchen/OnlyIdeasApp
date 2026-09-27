@@ -40,6 +40,10 @@ Native 1.0.0 (10) adds a vivid teal–blue–violet interface, system/light/dark
 
 The public reading room now includes two real papers: OpenAlex (CC0-1.0) and Measuring holographic entanglement entropy on a quantum simulator (CC-BY-4.0), alongside the clearly labeled original sample. Four original figures are retained. Both papers were imported through the real conversion workflow and checked in a phone-width reader without signing in.
 
+In development: database reading credits with atomic reservations, refunds and duplicate-safe rewards for approved public papers. Profile shows the balance and history; sharing options move above the agent conversation and private imports ask for cost confirmation. The new controls support all 11 languages. Credit charging and monthly purchases are not enabled in production yet.
+
+[Reading credits](docs/reading-credits.md)
+
 [1.0.0 (10)](docs/release-candidate-10.md) · [0.3](docs/native-0.3.md) · [docs/native.md](docs/native.md)
 
 ## Support

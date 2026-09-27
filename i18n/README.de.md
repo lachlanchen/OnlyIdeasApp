@@ -40,6 +40,10 @@ Die native Version 1.0.0 (10) bietet eine lebendige Oberfläche in Türkis, Blau
 
 Der öffentliche Leseraum enthält zwei echte Arbeiten: OpenAlex (CC0-1.0) und Measuring holographic entanglement entropy on a quantum simulator (CC-BY-4.0), zusätzlich zum klar gekennzeichneten Originalbeispiel. Vier Originalabbildungen bleiben erhalten. Beide Arbeiten wurden über den echten Konvertierungsablauf importiert und ohne Anmeldung bei Smartphone-Breite geprüft.
 
+In Entwicklung: Leseguthaben in der Datenbank mit atomaren Reservierungen, Erstattungen und einmaligen Belohnungen für genehmigte öffentliche Paper. Das Profil zeigt Guthaben und Verlauf; die Freigabeoptionen stehen über dem Chat, und private Importe erfordern eine Kostenbestätigung. Die neuen Bedienelemente unterstützen alle 11 Sprachen. Guthabenabbuchungen und monatliche Käufe sind im Produktivbetrieb noch nicht aktiviert.
+
+[Reading credits](../docs/reading-credits.md)
+
 [1.0.0 (10)](../docs/release-candidate-10.md) · [0.3](../docs/native-0.3.md) · [docs/native.md](../docs/native.md)
 
 ## Unterstützung

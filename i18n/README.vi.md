@@ -40,6 +40,10 @@ Bản gốc 1.0.0 (10) có giao diện xanh ngọc–xanh lam–tím sống đ�
 
 Phòng đọc công khai hiện có hai bài nghiên cứu thật: OpenAlex (CC0-1.0) và Measuring holographic entanglement entropy on a quantum simulator (CC-BY-4.0), cùng ví dụ gốc được ghi rõ. Bốn hình gốc được giữ lại. Cả hai bài đã đi qua quy trình chuyển đổi thật và được kiểm tra không cần đăng nhập trong trình đọc có chiều rộng điện thoại.
 
+Đang phát triển: điểm đọc trong cơ sở dữ liệu với giữ điểm nguyên tử, hoàn điểm và thưởng không trùng lặp cho bài báo công khai đã duyệt. Hồ sơ hiển thị số dư và lịch sử; tùy chọn chia sẻ chuyển lên trên cuộc trò chuyện và lượt nhập riêng tư cần xác nhận chi phí. Các điều khiển mới hỗ trợ đủ 11 ngôn ngữ. Dịch vụ chính thức chưa bật trừ điểm hoặc mua gói hằng tháng.
+
+[Reading credits](../docs/reading-credits.md)
+
 [1.0.0 (10)](../docs/release-candidate-10.md) · [0.3](../docs/native-0.3.md) · [docs/native.md](../docs/native.md)
 
 ## Ủng hộ

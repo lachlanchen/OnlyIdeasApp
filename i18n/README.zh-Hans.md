@@ -40,6 +40,10 @@ npm run dev
 
 公共阅读室现有两篇真实论文：OpenAlex（CC0-1.0）和 Measuring holographic entanglement entropy on a quantum simulator（CC-BY-4.0），另保留明确标注的原创示例。四幅原始插图完整保留。两篇均通过真实转换流程导入，并在未登录的手机宽度阅读器中验证。
 
+开发中：数据库阅读积分支持原子预留、退款，以及审核通过的公开论文奖励，避免重复发放。个人页面显示余额和记录；分享选项移到对话上方，私人导入会先确认积分费用。新控件支持全部 11 种语言。线上服务尚未启用积分扣费和月度订阅购买。
+
+[Reading credits](../docs/reading-credits.md)
+
 [1.0.0 (10)](../docs/release-candidate-10.md) · [0.3](../docs/native-0.3.md) · [docs/native.md](../docs/native.md)
 
 ## 支持

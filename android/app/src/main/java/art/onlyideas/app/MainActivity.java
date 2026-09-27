@@ -381,6 +381,54 @@ public class MainActivity extends AppCompatActivity {
         .show();
   }
 
+  void authorizeImport(boolean shared,boolean pdf,int retryCost,Consumer<Integer> done) {
+    if(shared){done.accept(0);return;}
+    final int epoch=authEpoch;
+    job(()->api.json("/api/credits","GET",null),credits->{
+      if(!credits.optBoolean("enabled")){done.accept(0);return;}
+      int cost=retryCost>0?retryCost:pdf?credits.optInt("maxPDF",30):1;
+      new AlertDialog.Builder(this).setTitle(t("Use reading credits?"))
+        .setMessage(t("Use up to {count} credits? Failed imports and unused credits are refunded.").replace("{count}",String.valueOf(cost)))
+        .setNegativeButton(t("Cancel"),null).setPositiveButton(t("Continue"),(d,w)->{if(epoch==authEpoch)done.accept(cost);}).show();
+    });
+  }
+  String creditRules(JSONObject credits) {
+    JSONObject policy=credits.optJSONObject("policy");
+    return t("Shared papers earn {reward} credits once approved and published. Duplicate papers earn no extra credits. Up to {limit} credits per day.")
+      .replace("{reward}",String.valueOf(policy==null?10:policy.optInt("publication")))
+      .replace("{limit}",String.valueOf(policy==null?50:policy.optInt("rewardPerDay")))+"\n\n"+
+      t("Private PDFs cost 1 credit per page; other files cost 1 credit. Credits never expire.");
+  }
+  Button sharingButton() {
+    Button button=button("◎",false,()->{});button.setContentDescription(t("Sharing & credits"));
+    button.setOnClickListener(v->{
+      LinearLayout options=column();options.setPadding(dp(20),dp(12),dp(20),dp(12));
+      RadioGroup choices=new RadioGroup(this);final int sharedID=View.generateViewId(),privateID=View.generateViewId();
+      for(int i=0;i<2;i++){RadioButton choice=new RadioButton(this);choice.setId(i==0?sharedID:privateID);choice.setText(t(i==0?"Shared reading room":"Only me"));choice.setTextColor(ink);choice.setTextSize(17);choices.addView(choice);}
+      choices.check(shareUpload?sharedID:privateID);options.addView(choices);
+      caption(options,t("Shared after source and community review."));gap(options,12);
+      caption(options,t("Share your own work or papers you have permission to publish."));gap(options,12);
+      TextView rules=text("",15,false);options.addView(rules);
+      caption(options,t("Your chats and notes stay private."));gap(options,12);
+      caption(options,t("PDF and image recognition uses Mathpix. Word and text files are converted on the server."));
+      ScrollView scroll=new ScrollView(this);scroll.addView(options);
+      new AlertDialog.Builder(this).setTitle(t("Sharing & credits")).setView(scroll).setPositiveButton(t("Done"),(d,w)->{shareUpload=choices.getCheckedRadioButtonId()==sharedID;button.setText(t(shareUpload?"Shared":"Private"));if(page.equals("agent"))renderMessages();}).setNegativeButton(t("Cancel"),null).show();
+      if(account!=null)job(()->api.json("/api/credits","GET",null),credits->{if(credits.optBoolean("enabled"))rules.setText(creditRules(credits)+"\n");});
+    });button.setText(t(shareUpload?"Shared":"Private"));return button;
+  }
+  void renderCredits(LinearLayout container,JSONObject credits) {
+    LinearLayout card=card();title(card,t("Reading credits"),22);gap(card,12);
+    title(card,String.valueOf(credits.optInt("balance")),36);caption(card,t("Available credits"));
+    if(credits.optInt("held")>0)caption(card,t("Reserved for imports")+": "+credits.optInt("held"));
+    gap(card,12);caption(card,creditRules(credits));
+    card.addView(button(t("Credit history"),false,()->{
+      JSONArray entries=credits.optJSONArray("history");ArrayList<String> lines=new ArrayList<>();
+      Map<String,String> labels=Map.of("welcome","Welcome credits","private_import","Private import","unused_reservation","Unused reservation","failed_import","Import refund","public_reward","Public contribution");
+      if(entries!=null)for(int i=0;i<entries.length();i++){JSONObject e=entries.optJSONObject(i);if(e!=null)lines.add(t(labels.getOrDefault(e.optString("kind"),e.optString("kind")))+" · "+(e.optInt("delta")>0?"+":"")+e.optInt("delta")+"\n"+java.text.DateFormat.getDateInstance().format(new Date(e.optLong("created"))));}
+      new AlertDialog.Builder(this).setTitle(t("Credit history")).setItems(lines.toArray(new String[0]),null).setPositiveButton(t("Done"),null).show();
+    }));container.addView(card);gap(container,16);
+  }
+
   void toast(String message) {
     Toast.makeText(this, t(message), Toast.LENGTH_LONG).show();
   }
@@ -449,7 +497,9 @@ public class MainActivity extends AppCompatActivity {
   void showLibrary() {
     clear("library");
     LinearLayout c = scrollContent();
-    title(c, t("Your reading room"), 20);
+    LinearLayout libraryTop=row();
+    TextView heading=text(t("Your reading room"),20,true);libraryTop.addView(heading,new LinearLayout.LayoutParams(0,-2,1));
+    libraryTop.addView(sharingButton());c.addView(libraryTop);
     gap(c, 10);
     caption(c, t("Read, ask, and make connections."));
     gap(c, 12);
@@ -467,10 +517,6 @@ public class MainActivity extends AppCompatActivity {
               pick.addCategory(Intent.CATEGORY_OPENABLE);
               startActivityForResult(pick, 42);
             }));
-    android.widget.Switch sharing = new android.widget.Switch(this);
-    sharing.setText(t("Share new papers")); sharing.setChecked(shareUpload);
-    sharing.setOnCheckedChangeListener((v, checked) -> shareUpload = checked); c.addView(sharing);
-    caption(c, t("Shared after source and community review. Turn off for Only me."));
     gap(c, 14);
     if (offline) {
       caption(c, t("Offline · cached papers"));
@@ -559,6 +605,10 @@ public class MainActivity extends AppCompatActivity {
     if (account == null) {
       c.addView(button(t("Continue with GitHub"), true, this::signIn));
       gap(c, 12);
+    }
+    if(account!=null) {
+      LinearLayout wallet=column();c.addView(wallet);
+      job(()->api.json("/api/credits","GET",null),r->{if(page.equals("profile")&&r.optBoolean("enabled"))renderCredits(wallet,r);});
     }
     LinearLayout reading = card();
     title(reading, t("Reading preferences"), 22);
@@ -658,7 +708,7 @@ public class MainActivity extends AppCompatActivity {
   void showAgent() {
     clear("agent");
     LinearLayout actions = row();
-    actions.setPadding(dp(18), dp(6), dp(18), dp(10));
+    actions.setPadding(dp(12), dp(2), dp(12), dp(6));
     Button history = button(t("History"), false, this::showHistory);
     actions.addView(history, new LinearLayout.LayoutParams(0, dp(48), 1));
     View space = new View(this);
@@ -674,11 +724,12 @@ public class MainActivity extends AppCompatActivity {
               showAgent();
             }),
         new LinearLayout.LayoutParams(0, dp(48), 1));
+    actions.addView(sharingButton());
     content.addView(actions);
     chatScroll = new ScrollView(this);
     chatScroll.setFillViewport(true);
     messages = column();
-    messages.setPadding(dp(22), dp(18), dp(22), dp(20));
+    messages.setPadding(dp(14), dp(12), dp(14), dp(14));
     chatScroll.addView(messages);
     content.addView(chatScroll, new LinearLayout.LayoutParams(-1, 0, 1));
     progress = text(agentStatus, 16, false);
@@ -698,7 +749,7 @@ public class MainActivity extends AppCompatActivity {
       Intent pick=new Intent(Intent.ACTION_OPEN_DOCUMENT);pick.addCategory(Intent.CATEGORY_OPENABLE);pick.setType("*/*");pick.putExtra(Intent.EXTRA_MIME_TYPES,new String[]{"application/pdf","image/png","image/jpeg","image/webp","text/*","application/json","application/vnd.openxmlformats-officedocument.wordprocessingml.document"});startActivityForResult(pick,43);
     });attach.setContentDescription(t("Attach files"));compose.addView(attach,new LinearLayout.LayoutParams(dp(44),dp(48)));
     composer = new EditText(this);
-    composer.setTextSize(19);
+    composer.setTextSize(17);
     composer.setTextColor(ink);
     composer.setHintTextColor(muted);
     composer.setHint(t("Ask or paste a paper link…"));
@@ -715,7 +766,7 @@ public class MainActivity extends AppCompatActivity {
     sendButton.setTextSize(26);
     sendButton.setContentDescription(t("Send message"));
     compose.addView(sendButton, new LinearLayout.LayoutParams(dp(52), dp(52)));
-    caption(content,t("Attachments are private. PDF and image recognition uses your conversion allowance. Text and Word files are converted locally."));
+    TextView privacy=text(t("Your chats and notes stay private."),12,false);privacy.setGravity(Gravity.CENTER);privacy.setTextColor(muted);content.addView(privacy);
     renderMessages();
     if (!chatId.isEmpty()) loadChat(false);
   }
@@ -729,12 +780,12 @@ public class MainActivity extends AppCompatActivity {
     if (!page.equals("agent") || messages == null) return;
     messages.removeAllViews();
     if (chatMessages.length() == 0) {
-      title(messages, t("What are you\ncurious about?"), 31);
+      title(messages, t("What are you curious about?"), 27);
       gap(messages, 16);
       caption(
           messages,
-          t("Find open papers, follow a question, and bring the useful ones into your library."));
-      gap(messages, 24);
+          t("Find a paper. Ask about your files. Follow an idea."));
+      gap(messages, 16);
       for (String topic :
           new String[] {
             "Find open papers about quantum entanglement", "Help me find research on language learning"
@@ -754,7 +805,7 @@ public class MainActivity extends AppCompatActivity {
       if (user) bubble.setBackground(rounded(soft, 20));
       caption(bubble, user ? t("You") : "OnlyIdeas");
       gap(bubble, 8);
-      TextView body = text(user ? m.optString("text") : t(m.optString("text")), 19, false);
+      TextView body = text(user ? m.optString("text") : t(m.optString("text")), 17, false);
       body.setTextIsSelectable(true);
       bubble.addView(body);
       if (!user) bubble.addView(button(t("Report response"), false, () -> reportContent("Agent message " + m.optString("id") + " in conversation " + chatId)));
@@ -767,7 +818,7 @@ public class MainActivity extends AppCompatActivity {
           LinearLayout card = card();
           caption(card, p.optString("year") + " · " + t("Open paper"));
           gap(card, 6);
-          title(card, p.optString("title"), 22);
+          title(card, p.optString("title"), 20);
           gap(card, 6);
           caption(card, p.optString("authors"));
           gap(card, 6);
@@ -782,25 +833,11 @@ public class MainActivity extends AppCompatActivity {
                           .setPositiveButton(t("Done"), null)
                           .show()));
           gap(card, 6);
-          android.widget.Switch sharing = new android.widget.Switch(this);
-          sharing.setText(t("Share with the reading room")); sharing.setChecked(true); card.addView(sharing);
-          caption(card, t("Shared after source and community review. Turn off for Only me."));
-          card.addView(
-              button(
-                  t("Convert & add"),
-                  true,
-                  () ->
-                      job(
-                          () ->
-                              api.json(
-                                  "/api/chats/" + chatId + "/import",
-                                  "POST",
-                                  object("paperId", p.optString("id")).put("sharing", sharing.isChecked() ? "shared" : "private")),
-                          r -> {
-                            toast(t("Paper queued for conversion."));
-                            loadChat(true);
-                            loadJobs(true);
-                          })));
+          caption(card,t(shareUpload ? "Shared after review":"Only me"));
+          card.addView(button(t("Convert & add"),true,()->{
+            final String conversation=chatId;final boolean shared=shareUpload;
+            authorizeImport(shared,true,0,limit->job(()->api.json("/api/chats/"+conversation+"/import","POST",object("paperId",p.optString("id")).put("sharing",shared?"shared":"private").put("creditLimit",limit)),r->{toast(t("Paper queued for conversion."));loadChat(true);loadJobs(true);}));
+          }));
           bubble.addView(card);
         }
       JSONArray attached=m.optJSONArray("attachments");
@@ -1782,14 +1819,14 @@ public class MainActivity extends AppCompatActivity {
                           .setNegativeButton(t("Close"), null)
                           .setPositiveButton(
                               t("Try again"),
-                              (x, y) ->
+                              (x, y) -> authorizeImport(j.optInt("creditCost")==0,false,j.optInt("creditCost"),limit ->
                                   job(
                                       () ->
                                           api.json(
                                               "/api/jobs/" + j.optString("id") + "/retry",
                                               "POST",
-                                              new JSONObject()),
-                                      v -> loadJobs(true)))
+                                              object("creditLimit",limit)),
+                                      v -> loadJobs(true))))
                           .show();
                     }
                   })
@@ -1804,6 +1841,13 @@ public class MainActivity extends AppCompatActivity {
     super.onActivityResult(request, result, data);
     if ((request != 42 && request != 43) || result != RESULT_OK || data == null || data.getData() == null) return;
     Uri uri = data.getData();
+    String name="";
+    try(var cursor=getContentResolver().query(uri,null,null,null,null)){if(cursor!=null&&cursor.moveToFirst()){int col=cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME);if(col>=0)name=cursor.getString(col);}}catch(Exception ignored){}
+    final boolean shared=shareUpload;
+    authorizeImport(shared,request==42||name.toLowerCase(Locale.ROOT).endsWith(".pdf")||"application/pdf".equals(getContentResolver().getType(uri)),0,limit->uploadPicked(uri,request,shared,limit));
+  }
+
+  void uploadPicked(Uri uri,int request,boolean shared,int creditLimit) {
     busy = true;
     job(
         () -> {
@@ -1826,12 +1870,13 @@ public class MainActivity extends AppCompatActivity {
             }
           }
           Map<String, String> headers = new HashMap<>();
+          headers.put("X-Paper-Sharing",shared?"shared":"private");headers.put("X-Credit-Limit",String.valueOf(creditLimit));
           if(request==43){headers.put("X-File-Name",java.net.URLEncoder.encode(title,"UTF-8").replace("+","%20"));return api.bytes("/api/attachments","POST",out.toByteArray(),"application/octet-stream",headers);}
           headers.put("X-Request-Id", UUID.randomUUID().toString());
           headers.put(
               "X-Paper-Title", java.net.URLEncoder.encode(title, "UTF-8").replace("+", "%20"));
           headers.put("X-Paper-Language", "en");
-          headers.put("X-Paper-Sharing", shareUpload ? "shared" : "private");
+          headers.put("X-Paper-Sharing", shared ? "shared" : "private");
           return api.bytes("/api/import", "POST", out.toByteArray(), "application/pdf", headers);
         },
         r -> {

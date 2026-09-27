@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { hash, requireValue } from './domain.mjs';
 
-export const safeJob = j => ({ id:j.id, kind:j.kind, state:j.state, message:j.message, created:j.created, paperId:j.paperId, artifactId:j.artifactId });
+export const safeJob = j => ({ id:j.id, kind:j.kind, state:j.state, message:j.message, created:j.created, paperId:j.paperId, artifactId:j.artifactId, creditCost:j.credit?.amount || 0 });
 export function visibleArtifacts(store, paper, user) {
   return store.db.prepare("SELECT owner,body FROM artifacts WHERE json_extract(body,'$.paperId')=?").all(paper.id)
     .filter(r => paper.visibility === 'public' || r.owner === user?.id)

@@ -66,7 +66,7 @@ export function reserveImport(store, config, job, limit) {
 function hold(store, job) {
   const { amount, attempt } = job.credit, id = `${job.id}:${attempt}`;
   if (!amount || store.db.prepare('SELECT 1 FROM credit_holds WHERE id=?').get(id)) return;
-  requireValue(balance(store, job.owner) >= amount, 'Not enough credits for this private import. Share a paper or add credits in Profile.', 402);
+  requireValue(balance(store, job.owner) >= amount, 'Not enough credits for this private import. Earn credits by sharing an approved paper.', 402);
   entry(store, `hold:${id}`, job.owner, -amount, 'private_import', job.id);
   store.db.prepare("INSERT INTO credit_holds VALUES(?,?,?,'held',0)").run(id, job.owner, amount);
 }

@@ -4,7 +4,7 @@ export type Session = { user: User | null; development: boolean; capabilities: {
 export type Section = { id: string; title: string; text: string }
 export type Paper = { id: string; title: string; authors: string; category: string; language: string; license: string; source: string; visibility: string; revision: string; createdAt: string; mmd?: string; sections?: Section[]; sectionCount?: number; words?: number; sample?: boolean; isOwner?: boolean; assets: { path: string; bytes?: number }[] }
 export type Comment = { id: string; author: string; login: string; text: string; quote: string; sectionId: string | null; paragraphId?:string; createdAt: string; canDelete: boolean; pending?: boolean }
-export type Job = { id: string; kind: string; state: string; message: string; created: number; paperId?: string; artifactId?: string }
+export type Job = { id: string; kind: string; state: string; message: string; created: number; paperId?: string; artifactId?: string; creditCost?:number }
 export type Artifact = { id: string; kind: string; language: string; text: string; model: string; sectionId?: string }
 export class APIError extends Error { constructor(message: string, public status: number) { super(message) } }
 export async function api<T>(path: string, options: RequestInit = {}): Promise<T> {

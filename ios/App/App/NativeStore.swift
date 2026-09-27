@@ -73,6 +73,13 @@ struct ReadingJob: Codable, Identifiable {
   var state: String
   var message: String
   var paperId: String?
+  var creditCost: Int?
+}
+struct ReadingCredits: Decodable {
+  struct Policy: Decodable { var publication:Int; var rewardPerDay:Int }
+  struct Entry: Decodable { var kind:String; var delta:Int; var created:Double }
+  var enabled:Bool; var balance:Int; var held:Int; var maxPDF:Int
+  var policy:Policy; var history:[Entry]
 }
 struct PaperComment: Codable, Identifiable {
   var id: String
@@ -103,6 +110,10 @@ final class ReadingStore: NSObject, ObservableObject,
   @Published var signingIn = false
   @Published var showSignIn = false
   @Published var showReport = false
+  @Published var sharedImports = true
+  @Published var credits:ReadingCredits?
+  @Published var creditPrompt:String?
+  private var creditDecision:CheckedContinuation<Bool,Never>?
   var reportContext = ""
   private var appleFlow: (id: String, verifier: String)?
   private var appleController: ASAuthorizationController?
@@ -384,6 +395,8 @@ final class ReadingStore: NSObject, ObservableObject,
     _ = try? await json("/api/auth/logout", method: "POST", body: [:])
     try? saveToken(nil)
     account = nil
+    credits = nil
+    resolveCreditPrompt(false)
     draftAttachments = []
     messages = []
     conversations = []
@@ -534,6 +547,7 @@ final class ReadingStore: NSObject, ObservableObject,
     let access = url.startAccessingSecurityScopedResource()
     defer { if access { url.stopAccessingSecurityScopedResource() } }
     do {
+      guard let limit = try await authorizeImport(shared:shared,pdf:true) else { return }
       let length = try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0
       guard length <= 20_000_000 else { throw failure(T("Choose a PDF smaller than 20 MB.")) }
       let bytes = try Data(contentsOf: url)
@@ -545,7 +559,7 @@ final class ReadingStore: NSObject, ObservableObject,
         "/api/import", method: "POST", data: bytes,
         headers: [
           "Content-Type": "application/pdf", "X-Request-Id": UUID().uuidString.lowercased(),
-          "X-Paper-Title": title, "X-Paper-Language": "en", "X-Paper-Sharing": shared ? "shared" : "private",
+          "X-Paper-Title": title, "X-Paper-Language": "en", "X-Paper-Sharing": shared ? "shared" : "private", "X-Credit-Limit":String(limit),
         ])
       await loadJobs()
     } catch { self.error = error.localizedDescription }
@@ -572,8 +586,10 @@ final class ReadingStore: NSObject, ObservableObject,
     attachmentBusy=true
     defer { attachmentBusy=false }
     do {
+      let shared=sharedImports
+      guard let limit=try await authorizeImport(shared:shared,pdf:name.lowercased().hasSuffix(".pdf")) else {return}
       let encoded=name.addingPercentEncoding(withAllowedCharacters:.alphanumerics) ?? "file"
-      let data=try await request("/api/attachments",method:"POST",data:bytes,headers:["Content-Type":"application/octet-stream","X-File-Name":encoded])
+      let data=try await request("/api/attachments",method:"POST",data:bytes,headers:["Content-Type":"application/octet-stream","X-File-Name":encoded,"X-Paper-Sharing":shared ? "shared":"private","X-Credit-Limit":String(limit)])
       guard identity==token else { return }
       let response=try JSONSerialization.jsonObject(with:data) as? [String:Any] ?? [:]
       let item=try decoded(AgentAttachment.self,response["attachment"] ?? [:])
@@ -650,10 +666,35 @@ final class ReadingStore: NSObject, ObservableObject,
   func importFound(_ paper: FoundPaper, shared: Bool = true) async {
     guard let id = conversationID else { return }
     do {
-      _ = try await json("/api/chats/\(id)/import", method: "POST", body: ["paperId": paper.id, "sharing": shared ? "shared" : "private"])
+      guard let limit=try await authorizeImport(shared:shared,pdf:true) else {return}
+      _ = try await json("/api/chats/\(id)/import", method: "POST", body: ["paperId": paper.id, "sharing": shared ? "shared" : "private","creditLimit":limit])
       await loadConversation(id)
       await loadJobs()
     } catch { self.error = error.localizedDescription }
+  }
+  func loadCredits() async {
+    guard account != nil else {credits=nil;return}
+    let identity=token
+    do {let value=try JSONDecoder().decode(ReadingCredits.self,from:await request("/api/credits"));if identity==token {credits=value}}
+    catch {if identity==token {credits=nil;self.error=error.localizedDescription}}
+  }
+  func resolveCreditPrompt(_ allowed:Bool) {
+    let pending=creditDecision;creditDecision=nil;creditPrompt=nil;pending?.resume(returning:allowed)
+  }
+  func authorizeImport(shared:Bool,pdf:Bool,amount:Int?=nil) async throws -> Int? {
+    if shared {return 0}
+    guard creditDecision==nil else {return nil}
+    let identity=token
+    let value=try JSONDecoder().decode(ReadingCredits.self,from:await request("/api/credits"))
+    guard token==identity,account != nil else {return nil}
+    credits=value
+    if !value.enabled {return 0}
+    let cost=amount ?? (pdf ? value.maxPDF:1)
+    let allowed=await withCheckedContinuation { continuation in
+      creditDecision=continuation
+      creditPrompt=T("Use up to {count} credits? Failed imports and unused credits are refunded.",["count":String(cost)])
+    }
+    return allowed && token==identity ? cost:nil
   }
 }
 extension Data {

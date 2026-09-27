@@ -35,6 +35,10 @@ struct NativeReadingApp: View {
     } message: {
       Text(T(store.error ?? ""))
     }
+    .alert(T("Use reading credits?"),isPresented:Binding(get:{store.creditPrompt != nil},set:{if !$0 {store.resolveCreditPrompt(false)}})) {
+      Button(T("Cancel"),role:.cancel) {store.resolveCreditPrompt(false)}
+      Button(T("Continue")) {store.resolveCreditPrompt(true)}
+    } message: {Text(store.creditPrompt ?? "")}
   }
 }
 struct NativeSignIn: View {
@@ -63,7 +67,7 @@ struct NativeLibrary: View {
   @EnvironmentObject var store: ReadingStore
   var profile: () -> Void
   @State private var query = ""
-  @State private var sharePaper = true
+  @State private var options = false
   @State private var picker = false
   @State private var requests = false
   var visible: [ResearchPaper] {
@@ -89,8 +93,6 @@ struct NativeLibrary: View {
             .headline
           ).frame(maxWidth: .infinity).padding(.vertical, 9)
         }.buttonStyle(.borderedProminent).disabled(store.busy)
-        Toggle(T("Share new papers with the reading room"), isOn: $sharePaper)
-        Text(T("Shared papers appear after source and community review. Turn off for Only me.")).font(.footnote).foregroundColor(.secondary)
         if store.offline {
           Label(T("Offline · cached papers"), systemImage: "arrow.down.circle.fill").font(.body)
             .foregroundColor(.secondary)
@@ -124,6 +126,9 @@ struct NativeLibrary: View {
     }.background(Color(.systemGroupedBackground)).navigationTitle("OnlyIdeas").navigationBarTitleDisplayMode(.inline)
       .searchable(text: $query, prompt:T("Search your papers"))
       .toolbar {
+        ToolbarItem(placement:.navigationBarLeading) {
+          Button {options=true} label: {Text(T(store.sharedImports ? "Shared":"Only me")).font(.subheadline.weight(.semibold)).frame(minHeight:44)}.accessibilityLabel(T("Sharing & credits"))
+        }
         ToolbarItem(placement: .navigationBarTrailing) {
           Button(action: profile) {
             Image(systemName: "person.crop.circle").font(.title2).frame(width: 44, height: 44)
@@ -134,7 +139,7 @@ struct NativeLibrary: View {
       .fileImporter(isPresented: $picker, allowedContentTypes: [.pdf]) { result in
         if case .success(let url) = result {
           Task {
-            await store.importPDF(url, shared: sharePaper)
+            await store.importPDF(url, shared: store.sharedImports)
             requests = true
           }
         } else if case .failure(let error) = result {
@@ -142,6 +147,7 @@ struct NativeLibrary: View {
         }
       }
       .sheet(isPresented: $requests) { NativeRequests() }
+      .sheet(isPresented: $options) { NativeSharingOptions() }
   }
 }
 struct PaperRow: View {
@@ -171,6 +177,7 @@ struct NativeAgent: View {
   @State private var requests = false
   @State private var attachPicker = false
   @State private var photoPicker = false
+  @State private var options = false
   var body: some View {
     VStack(spacing: 0) {
       ScrollViewReader { proxy in
@@ -217,11 +224,14 @@ struct NativeAgent: View {
         }.accessibilityLabel(T("Conversation history"))
       }
       ToolbarItem(placement: .navigationBarTrailing) {
+        HStack(spacing:0) {
+        Button {options=true} label: {Text(T(store.sharedImports ? "Shared":"Only me")).font(.subheadline.weight(.semibold)).frame(minHeight:44)}.accessibilityLabel(T("Sharing & credits"))
         Button {
           store.newConversation()
         } label: {
           Image(systemName: "square.and.pencil").frame(width: 44, height: 44)
         }.accessibilityLabel(T("New conversation"))
+        }
       }
     }
     .sheet(isPresented: $history) {
@@ -242,6 +252,7 @@ struct NativeAgent: View {
       }
     }
     .sheet(isPresented: $requests) { NativeRequests() }
+    .sheet(isPresented: $options) { NativeSharingOptions() }
     .fileImporter(isPresented:$attachPicker,allowedContentTypes:[.data],allowsMultipleSelection:true) { result in
       if case .success(let urls)=result { Task { await store.attach(urls) } }
       else if case .failure(let error)=result { store.error=error.localizedDescription }
@@ -255,11 +266,11 @@ struct NativeAgent: View {
     }
   }
   var welcome: some View {
-    VStack(alignment: .leading, spacing: 18) {
+    VStack(alignment: .leading, spacing: 14) {
       Image(systemName: "sparkle.magnifyingglass").font(.largeTitle).foregroundStyle(ideaGradient)
-      Text(T("What are you curious about?")).font(.largeTitle.weight(.bold))
-      Text(T("Find open papers, follow a question, and bring the useful ones into your library."))
-        .font(.title3).foregroundColor(.secondary)
+      Text(T("What are you curious about?")).font(.title.weight(.bold))
+      Text(T("Find a paper. Ask about your files. Follow an idea."))
+        .font(.body).foregroundColor(.secondary)
       ForEach(
         ["Find open papers about quantum entanglement", "Help me find research on language learning"], id: \.self
       ) { text in
@@ -271,11 +282,11 @@ struct NativeAgent: View {
             Spacer()
             Image(systemName: "arrow.up.left")
           }
-          .padding(18).frame(maxWidth: .infinity, alignment: .leading)
+          .padding(14).frame(maxWidth: .infinity, alignment: .leading)
           .background(Color(.secondarySystemGroupedBackground)).cornerRadius(16)
         }.buttonStyle(.plain)
       }
-    }.padding(.vertical, 24)
+    }.padding(.vertical, 12)
   }
   var composer: some View {
     VStack(spacing: 8) {
@@ -312,13 +323,12 @@ struct NativeAgent: View {
             (draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && store.draftAttachments.isEmpty) || store.busy || store.attachmentBusy
               || !store.agentStatus.isEmpty)
       }.padding(12).background(Color(.secondarySystemGroupedBackground)).cornerRadius(22)
-      Text(T("Attachments are private. PDF and image recognition uses your conversion allowance. Text and Word files are converted locally.")).font(.footnote)
+      Text(T("Your chats and notes stay private.")).font(.caption)
         .foregroundColor(.secondary)
-    }.padding(.horizontal, 16).padding(.vertical, 12)
+    }.padding(.horizontal, 12).padding(.vertical, 8)
   }
 }
 struct AgentBubble: View {
-  @State private var shared = true
   @EnvironmentObject var store: ReadingStore
   let message: AgentMessage
   @Binding var requests: Bool
@@ -339,18 +349,17 @@ struct AgentBubble: View {
           Text(paper.title).font(.title3.weight(.semibold))
           Text(paper.authors).font(.body).foregroundColor(.secondary).lineLimit(3)
           DisclosureGroup(T("Read abstract")) { Text(paper.summary).font(.body).padding(.top, 8) }
-          Toggle(T("Share with the reading room"), isOn: $shared)
-          Text(T("Shared after source and community review. Turn off for Only me.")).font(.footnote).foregroundColor(.secondary)
+          Label(T(store.sharedImports ? "Shared after review":"Only me"),systemImage:store.sharedImports ? "globe":"lock").font(.caption).foregroundColor(.secondary)
           Button {
             Task {
-              await store.importFound(paper, shared: shared)
+              await store.importFound(paper, shared: store.sharedImports)
               requests = true
             }
           } label: {
             Label(T("Convert & add"), systemImage: "arrow.down.doc").font(.headline).padding(
               .vertical, 5)
           }.buttonStyle(.borderedProminent)
-        }.padding(18).background(Color(.secondarySystemGroupedBackground)).cornerRadius(20)
+        }.padding(14).background(Color(.secondarySystemGroupedBackground)).cornerRadius(16)
       }
       if message.jobId != nil { Button(T("View conversion")) { requests = true }.font(.headline) }
     }.padding(message.role == "user" ? 18 : 0)
@@ -384,6 +393,7 @@ struct NativeProfile: View {
           }.disabled(store.signingIn)
         }
       }
+      if store.account != nil { NativeCreditSection() }
       Section(T("Reading")) {
         Picker(T("App language"), selection:Binding(get:{store.language},set:{store.language=$0;store.objectWillChange.send()})) {
           Text(T("System")).tag("system")
@@ -505,6 +515,56 @@ struct BlockedReaders: View {
     }.navigationTitle(T("Blocked readers")).task { await load() }
   }
 }
+struct NativeCreditRules: View {
+  let credits:ReadingCredits
+  var body: some View {
+    Text(T("Shared papers earn {reward} credits once approved and published. Duplicate papers earn no extra credits. Up to {limit} credits per day.",["reward":String(credits.policy.publication),"limit":String(credits.policy.rewardPerDay)]))
+    Text(T("Private PDFs cost 1 credit per page; other files cost 1 credit. Credits never expire."))
+  }
+}
+struct NativeCreditSection: View {
+  @EnvironmentObject var store:ReadingStore
+  let names=["welcome":"Welcome credits","private_import":"Private import","unused_reservation":"Unused reservation","failed_import":"Import refund","public_reward":"Public contribution"]
+  var body: some View {
+    Group {
+      if let credits=store.credits,credits.enabled {
+        Section(T("Reading credits")) {
+          HStack(alignment:.firstTextBaseline) {Text(String(credits.balance)).font(.largeTitle.bold()).foregroundStyle(ideaGradient);Text(T("Available credits")).foregroundColor(.secondary)}
+          if credits.held>0 {Text(T("Reserved for imports")+": \(credits.held)").foregroundColor(.secondary)}
+          NativeCreditRules(credits:credits).font(.footnote)
+          DisclosureGroup(T("Credit history")) {
+            ForEach(Array(credits.history.enumerated()),id:\.offset) { _, entry in
+              HStack {VStack(alignment:.leading) {Text(T(names[entry.kind] ?? entry.kind));Text(Date(timeIntervalSince1970:entry.created/1000),style:.date).font(.caption).foregroundColor(.secondary)};Spacer();Text((entry.delta>0 ? "+":"")+String(entry.delta)).monospacedDigit()}
+            }
+          }
+        }
+      }
+    }.task {await store.loadCredits()}
+  }
+}
+struct NativeSharingOptions: View {
+  @EnvironmentObject var store:ReadingStore
+  @Environment(\.dismiss) var dismiss
+  var body: some View {
+    NavigationView {
+      Form {
+        Section(T("Paper sharing")) {
+          Picker(T("Visibility"),selection:$store.sharedImports) {
+            Text(T("Shared reading room")).tag(true)
+            Text(T("Only me")).tag(false)
+          }.pickerStyle(.segmented)
+          Text(T("Shared after source and community review."))
+          Text(T("Share your own work or papers you have permission to publish.")).foregroundColor(.secondary)
+        }
+        NativeCreditSection()
+        Section(T("Files & privacy")) {
+          Text(T("Your chats and notes stay private."))
+          Text(T("PDF and image recognition uses Mathpix. Word and text files are converted on the server."))
+        }
+      }.navigationTitle(T("Sharing & credits")).navigationBarTitleDisplayMode(.inline).toolbar {Button(T("Done")){dismiss()}}
+    }
+  }
+}
 struct NativeRequests: View {
   @EnvironmentObject var store: ReadingStore
   @Environment(\.dismiss) var dismiss
@@ -529,7 +589,9 @@ struct NativeRequests: View {
               Button(T("Try again")) {
                 Task {
                   do {
-                    _ = try await store.json("/api/jobs/\(job.id)/retry", method: "POST", body: [:])
+                    let cost=job.creditCost ?? 0
+                    guard let limit=try await store.authorizeImport(shared:cost==0,pdf:false,amount:cost) else {return}
+                    _ = try await store.json("/api/jobs/\(job.id)/retry", method: "POST", body: ["creditLimit":limit])
                     await store.loadJobs()
                   } catch { store.error = error.localizedDescription }
                 }

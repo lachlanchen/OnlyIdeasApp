@@ -40,6 +40,10 @@ La versión nativa 1.0.0 (10) añade una interfaz viva en turquesa, azul y viole
 
 La sala pública incluye dos artículos reales: OpenAlex (CC0-1.0) y Measuring holographic entanglement entropy on a quantum simulator (CC-BY-4.0), además del ejemplo original identificado como tal. Conserva cuatro figuras originales. Ambos artículos se importaron mediante el flujo real de conversión y se verificaron sin iniciar sesión en un lector del ancho de un teléfono.
 
+En desarrollo: créditos de lectura en la base de datos, con reservas atómicas, reembolsos y recompensas sin duplicados por artículos públicos aprobados. El perfil muestra el saldo y el historial; las opciones de compartir pasan a la parte superior del chat y las importaciones privadas requieren confirmar el coste. Los nuevos controles están en los 11 idiomas. El cobro de créditos y las compras mensuales aún no están activos en producción.
+
+[Reading credits](../docs/reading-credits.md)
+
 [1.0.0 (10)](../docs/release-candidate-10.md) · [0.3](../docs/native-0.3.md) · [docs/native.md](../docs/native.md)
 
 ## Apoyo

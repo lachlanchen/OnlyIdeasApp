@@ -50,10 +50,25 @@ hashed identity and contribution aliases remain for duplicate/abuse prevention;
 they contain no document text, filenames or URLs. A deleted/recreated provider
 identity receives no second welcome grant. Suspended accounts cannot use credits.
 
+## Second slice: client controls
+
+Web, SwiftUI and Android Views show available/held credits and history in Profile.
+Sharing options sit above the agent conversation or in the native toolbar, with
+Shared selected initially. The options sheet explains publication review and file
+processing; repeated instructions no longer fill each result card. Private file,
+URL, Markdown and retry actions confirm their maximum cost before sending it.
+The web requests control also sits above the conversation instead of overlapping
+the composer. New controls and explanations are translated into all 11 languages.
+
+Verified: 35 server/localization tests, renderer checks and web production build;
+Android debug compile and lint; iOS Release device compile with signing disabled;
+28 web language/theme/width cases, including cancellation, one-credit text import,
+duplicate upload and free shared import. Native purchase/device qualification is
+still part of the subsequent release gate, not implied by these compile checks.
+
 ## Subsequent slices
 
-Client balance/history and explicit private-cost consent come next, followed by
-native store subscriptions. Target tiers are roughly CNY20/100/200 per month;
+Native store subscriptions come next. Target tiers are roughly CNY20/100/200 per month;
 real localized store prices are authoritative. No purchase endpoint, paid plan,
 receipt grant or store activation is included in this accounting slice.
 
