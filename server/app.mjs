@@ -106,7 +106,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
       const purchase=path.match(/^\/api\/billing\/(apple|google)$/);
       if(purchase&&method==='POST') {requireUser();limit(`purchase:${user.id}`,20);return response(res,await billing.purchase(purchase[1],await json(req),user));}
       if (path === '/api/credits' && method === 'GET') { requireUser(); return response(res, creditSummary(store,user.id,config)); }
-      if (path === '/api/health' && method === 'GET') return response(res, { service: 'onlyideas', version: '1.0.0', ok: true });
+      if (path === '/api/health' && method === 'GET') return response(res, { service: 'onlyideas', version: '1.0.1', ok: true });
       if (path === '/api/auth/apple/start' && method === 'POST') {
         requireValue(native, 'Open sign-in from the app.', 403); limit(`apple:${req.socket.remoteAddress}`, 20);
         return response(res, apple.start((await json(req)).challenge));
