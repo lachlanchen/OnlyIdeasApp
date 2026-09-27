@@ -10,7 +10,7 @@
 
 ## Descripción
 
-OnlyIdeas es un espacio tranquilo para leer artículos científicos. Importa tu PDF o un enlace PDF de acceso abierto, conserva ecuaciones y figuras con Mathpix y comenta un pasaje dentro del lector. Los documentos personales y las notas empiezan siendo privados.
+OnlyIdeas es una sala compartida para leer artículos científicos. Importa un PDF o un enlace PDF de acceso abierto, conserva ecuaciones y figuras con Mathpix y comenta pasajes en el lector. Las importaciones nuevas usan Compartido por defecto, con la opción Solo yo. La publicación requiere revisar los permisos y las normas comunitarias; las notas y las conversaciones con el agente siguen siendo privadas.
 
 Un modelo económico configurable crea guías de lectura y traducciones cuando se solicitan. El texto generado se guarda separado del original. GitHub solo almacena artículos publicados expresamente con los derechos necesarios. La aplicación tiene su propio acceso con GitHub y sesiones persistentes.
 
@@ -36,11 +36,11 @@ El código, el contenido público y los datos privados se guardan por separado. 
 
 ## Estado
 
-El servicio en la nube está disponible. iOS 1.0.0 (7) está disponible en el grupo TestFlight existente con un icono nítido en verde esmeralda y dorado. Las pruebas internas de Google Play siguen en la compilación 6. Se solicitó la revisión de producción de Google; pueden ejecutarse comprobaciones automáticas antes. El envío público a Apple aún requiere las capturas finales de iOS y verificar el acceso real con Apple. Se comprobaron figuras, tablas y ecuaciones de artículos importados en una pantalla de tamaño móvil.
+La versión nativa 1.0.0 (8) incorpora un icono O/i propio en verde esmeralda y dorado y controles Compartido/Solo yo. Usa SwiftUI en iOS y controles nativos en Android, con tamaño de texto ajustable, perfil e historial de conversaciones. El agente de la estación de trabajo busca artículos y descarga PDF mediante LazyEdge; Mathpix conserva ecuaciones y figuras. La solicitud de revisión pública de Apple aún requiere capturas finales y verificar el inicio de sesión con Apple.
 
-La versión 0.3 incorpora pantallas SwiftUI en iOS y controles nativos en Android, texto de lectura más grande y ajustable, una página de perfil y conversaciones persistentes con el agente. Un agente en la estación de trabajo busca en índices de investigación abierta y descarga PDF usando un modelo local mediante LazyEdge. Elige convertir y añadir para crear una copia privada con Mathpix que conserve ecuaciones y figuras. El registro de la actualización nativa detalla las compilaciones y pruebas.
+La sala pública incluye dos artículos reales: OpenAlex (CC0-1.0) y Measuring holographic entanglement entropy on a quantum simulator (CC-BY-4.0), además del ejemplo original identificado como tal. Conserva cuatro figuras originales. Ambos artículos se importaron mediante el flujo real de conversión y se verificaron sin iniciar sesión en un lector del ancho de un teléfono.
 
-[0.3](../docs/native-0.3.md) · [docs/native.md](../docs/native.md)
+[1.0.0 (8)](../docs/release-candidate-8.md) · [0.3](../docs/native-0.3.md) · [docs/native.md](../docs/native.md)
 
 ## Apoyo
 

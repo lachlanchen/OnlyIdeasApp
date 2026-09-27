@@ -54,7 +54,7 @@ export async function respond(task, config, update, deps = {}) {
     await update('Downloading and checking the PDF');
     const pdf=await download(linked.pdfUrl);
     requireValue(pdf.subarray(0,5).toString()==='%PDF-','That link is not a downloadable PDF. Send its direct PDF or arXiv link, or use Upload PDF.');
-    return {text:'I found a readable PDF. Choose Convert & add to put the flowing text, equations and figures in your private library.',papers:[linked]};
+    return {text:'I found a readable PDF. Choose Convert & add to keep the flowing text, equations and figures. Shared papers enter the reading room after source and community review; choose Only me for a private copy.',papers:[linked]};
   }
   await update('Understanding your research question');
   let plan={action:'search',query:task.text,message:''};

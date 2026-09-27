@@ -452,7 +452,7 @@ final class ReadingStore: NSObject, ObservableObject,
     }
     objectWillChange.send()
   }
-  func importPDF(_ url: URL) async {
+  func importPDF(_ url: URL, shared: Bool = true) async {
     guard account != nil else {
       await signIn()
       return
@@ -473,7 +473,7 @@ final class ReadingStore: NSObject, ObservableObject,
         "/api/import", method: "POST", data: bytes,
         headers: [
           "Content-Type": "application/pdf", "X-Request-Id": UUID().uuidString.lowercased(),
-          "X-Paper-Title": title, "X-Paper-Language": "en",
+          "X-Paper-Title": title, "X-Paper-Language": "en", "X-Paper-Sharing": shared ? "shared" : "private",
         ])
       await loadJobs()
     } catch { self.error = error.localizedDescription }
@@ -543,10 +543,10 @@ final class ReadingStore: NSObject, ObservableObject,
       await loadConversations()
     } catch { self.error = error.localizedDescription }
   }
-  func importFound(_ paper: FoundPaper) async {
+  func importFound(_ paper: FoundPaper, shared: Bool = true) async {
     guard let id = conversationID else { return }
     do {
-      _ = try await json("/api/chats/\(id)/import", method: "POST", body: ["paperId": paper.id])
+      _ = try await json("/api/chats/\(id)/import", method: "POST", body: ["paperId": paper.id, "sharing": shared ? "shared" : "private"])
       await loadConversation(id)
       await loadJobs()
     } catch { self.error = error.localizedDescription }

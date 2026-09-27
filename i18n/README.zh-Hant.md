@@ -10,7 +10,7 @@
 
 ## 概覽
 
-OnlyIdeas 是一個安靜的論文閱讀與交流空間。匯入自己的 PDF 或開放取用 PDF 連結，透過 Mathpix 保留公式和插圖，並直接在閱讀器中討論段落。個人論文和筆記預設保持私密。
+OnlyIdeas 是共享的論文閱讀空間。匯入 PDF 或開放取用的 PDF 連結，透過 Mathpix 保留公式和插圖，並在閱讀器內討論段落。新匯入預設選擇「共享」，也可選擇「僅自己」。公開前須審核來源授權與社群要求；筆記和智慧代理對話始終私密。
 
 可設定的低成本模型按需產生閱讀導讀與翻譯。產生內容與原文分開保存。GitHub 只儲存明確發布且獲得授權的論文套件。應用程式使用獨立的 GitHub 登入和持續工作階段。
 
@@ -36,11 +36,11 @@ npm run dev
 
 ## 狀態
 
-雲端服務已運作。iOS 1.0.0（7）已在現有 TestFlight 群組提供，採用清晰的翡翠綠與金色圖示。Google Play 內部測試仍為建置 6。Google 正式版已申請審核，審核前可能先執行自動檢查。Apple 正式送審仍需最終 iOS 截圖和 Apple 登入的實際驗證。已使用真實論文匯入流程，在手機尺寸螢幕上檢查圖、表和公式。
+原生版本 1.0.0（8）加入翡翠綠與金色的專屬 O/i 圖示，以及「共享／僅自己」的匯入選項。iOS 使用 SwiftUI，Android 使用原生控制項，支援調整字級、個人頁面和保存代理聊天。工作站代理透過 LazyEdge 搜尋研究索引並下載 PDF，Mathpix 保留公式和插圖。Apple 正式送審仍需最終截圖和 Apple 登入的實際驗證。
 
-0.3 改用 iOS SwiftUI 介面與 Android 原生控制項，增大並支援調整閱讀字級，加入獨立個人頁面及保留歷史的智慧代理聊天。工作站上的代理透過 LazyEdge 使用本機模型，搜尋開放研究索引並下載 PDF。選擇轉換並加入後，Mathpix 會產生保留公式與插圖的私人閱讀副本。建置與測試狀態請參閱原生更新紀錄。
+公共閱讀室現有兩篇真實論文：OpenAlex（CC0-1.0）和 Measuring holographic entanglement entropy on a quantum simulator（CC-BY-4.0），另保留明確標示的原創範例。四幅原始插圖完整保留。兩篇均透過真實轉換流程匯入，並在未登入的手機寬度閱讀器中驗證。
 
-[0.3](../docs/native-0.3.md) · [docs/native.md](../docs/native.md)
+[1.0.0 (8)](../docs/release-candidate-8.md) · [0.3](../docs/native-0.3.md) · [docs/native.md](../docs/native.md)
 
 ## 支持
 

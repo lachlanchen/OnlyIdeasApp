@@ -59,3 +59,16 @@ signed-in devices. Conversion remains an explicit bounded action. The worker
 receives structured tasks through an authenticated outbound queue, never shell
 commands or browser credentials. Test updates use the existing OnlyIdeas internal
 TestFlight and Google Play groups. Formal public review remains a separate gate.
+
+## Shared reading room amendment · 2026-09-27
+
+The owner wants research papers shared by default and visible on opening the app,
+including for signed-out readers. New import controls default to Shared and offer
+Only me. Sharing requests go through source/rights and community review before
+publication; openly accessible PDFs do not automatically grant republication.
+Verified real papers, with equations, figures and attribution, populate the shared
+reading room. Existing private notes, conversations and unselected personal uploads
+stay private. Existing private libraries and accounts are preserved.
+The icon keeps emerald/gold but uses a custom O/i conversation mark instead of a
+common open-book symbol. Native builds must be uploaded before claiming an icon
+change is available to installed apps.

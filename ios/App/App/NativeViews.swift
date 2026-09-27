@@ -61,6 +61,7 @@ struct NativeLibrary: View {
   @EnvironmentObject var store: ReadingStore
   var profile: () -> Void
   @State private var query = ""
+  @State private var sharePaper = true
   @State private var picker = false
   @State private var requests = false
   var visible: [ResearchPaper] {
@@ -86,6 +87,8 @@ struct NativeLibrary: View {
             .headline
           ).frame(maxWidth: .infinity).padding(.vertical, 9)
         }.buttonStyle(.borderedProminent).disabled(store.busy)
+        Toggle("Share new papers with the reading room", isOn: $sharePaper)
+        Text("Shared papers appear after source and community review. Turn off for Only me.").font(.footnote).foregroundColor(.secondary)
         if store.offline {
           Label("Offline · downloaded papers", systemImage: "arrow.down.circle.fill").font(.body)
             .foregroundColor(.secondary)
@@ -129,7 +132,7 @@ struct NativeLibrary: View {
       .fileImporter(isPresented: $picker, allowedContentTypes: [.pdf]) { result in
         if case .success(let url) = result {
           Task {
-            await store.importPDF(url)
+            await store.importPDF(url, shared: sharePaper)
             requests = true
           }
         } else if case .failure(let error) = result {
@@ -310,6 +313,7 @@ struct NativeAgent: View {
   }
 }
 struct AgentBubble: View {
+  @State private var shared = true
   @EnvironmentObject var store: ReadingStore
   let message: AgentMessage
   @Binding var requests: Bool
@@ -325,9 +329,11 @@ struct AgentBubble: View {
           Text(paper.title).font(.title3.weight(.semibold))
           Text(paper.authors).font(.body).foregroundColor(.secondary).lineLimit(3)
           DisclosureGroup("Read abstract") { Text(paper.summary).font(.body).padding(.top, 8) }
+          Toggle("Share with the reading room", isOn: $shared)
+          Text("Shared after source and community review. Turn off for Only me.").font(.footnote).foregroundColor(.secondary)
           Button {
             Task {
-              await store.importFound(paper)
+              await store.importFound(paper, shared: shared)
               requests = true
             }
           } label: {

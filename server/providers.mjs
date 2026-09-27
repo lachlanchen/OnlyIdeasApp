@@ -4,6 +4,7 @@ import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { AppError, requireValue, makePaper, hash, languages } from './domain.mjs';
 import { downloadPublic, providerJSON } from './network.mjs';
+import { requestSharing } from './sharing.mjs';
 import { unpackMMD } from './archive.mjs';
 const exec = promisify(execFile);
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -74,6 +75,7 @@ export async function mathpix(job, config, store) {
   }
   const paper = makePaper({ ...job.metadata, id: paperId, mmd, owner: job.owner, source: job.url || job.metadata.source || '', assets: assets.map(({ path, bytes }) => ({ path, bytes })) });
   store.savePaper(paper);
+  requestSharing(store, paper, job.sharing);
   await rm(pdfFile, { force: true }); // Temporary source removed only after durable successful conversion.
   return { paperId };
 }
@@ -121,7 +123,7 @@ export async function publishPaper(job, config, store) {
   const ref = await api('/git/ref/heads/main');
   const parent = await api(`/git/commits/${ref.object.sha}`);
   const metadata = { ...p }; delete metadata.owner; delete metadata.sections; delete metadata.mmd;
-  metadata.visibility = 'public'; metadata.formatVersion = 1;
+  metadata.visibility = 'public'; metadata.sharing = 'shared'; metadata.formatVersion = 1;
   const files = [{ path: 'paper.mmd', bytes: Buffer.from(p.mmd) }, { path: 'metadata.json', bytes: Buffer.from(JSON.stringify(metadata, null, 2) + '\n') }];
   for (const asset of p.assets) files.push({ path: asset.path, bytes: await readFile(join(store.directory, 'papers', p.id, asset.path)) });
   requireValue(files.reduce((n, f) => n + f.bytes.length, 0) <= 25_000_000, 'This bundle is too large for the public library.');
@@ -134,7 +136,7 @@ export async function publishPaper(job, config, store) {
   const commit = await api('/git/commits', { message: `Publish paper ${p.id}`, tree: nextTree.sha, parents: [ref.object.sha] });
   // Non-forced update rejects races; saved content hashes make a retry identical.
   await api('/git/refs/heads/main', { sha: commit.sha, force: false }, 'PATCH');
-  p.visibility = 'public'; p.publication = { repository: repo, commit: commit.sha, publishedAt: new Date().toISOString() }; store.savePaper(p);
+  p.visibility = 'public'; p.sharing = 'shared'; p.publication = { repository: repo, commit: commit.sha, publishedAt: new Date().toISOString() }; store.savePaper(p);
   return { paperId: p.id, commit: commit.sha };
 }
 
@@ -149,7 +151,7 @@ async function publishWithGit(p, config, store) {
   await mkdir(join(folder, 'figures'), { recursive: true, mode: 0o700 });
   const { owner, sections, mmd, ...metadata } = p;
   await writeFile(join(folder, 'paper.mmd'), p.mmd, { mode: 0o600 });
-  await writeFile(join(folder, 'metadata.json'), JSON.stringify({ ...metadata, visibility: 'public', formatVersion: 1 }, null, 2) + '\n', { mode: 0o600 });
+  await writeFile(join(folder, 'metadata.json'), JSON.stringify({ ...metadata, visibility: 'public', sharing: 'shared', formatVersion: 1 }, null, 2) + '\n', { mode: 0o600 });
   let size = Buffer.byteLength(p.mmd);
   for (const a of p.assets) {
     const bytes = await readFile(join(store.directory, 'papers', p.id, a.path)); size += bytes.length;
@@ -160,7 +162,7 @@ async function publishWithGit(p, config, store) {
   if ((await git(['diff', '--cached', '--name-only'])).stdout.trim()) await git(['-c', 'user.name=OnlyIdeas Library', '-c', 'user.email=onlyideas@lazying.art', 'commit', '-m', `Publish paper ${p.id}`, '--', `papers/${p.id}`]);
   await git(['push', 'origin', 'HEAD:main']);
   const commit = (await git(['rev-parse', 'HEAD'])).stdout.trim();
-  p.visibility = 'public'; p.publication = { repository: config.github.repository, commit, publishedAt: new Date().toISOString() }; store.savePaper(p);
+  p.visibility = 'public'; p.sharing = 'shared'; p.publication = { repository: config.github.repository, commit, publishedAt: new Date().toISOString() }; store.savePaper(p);
   return { paperId: p.id, commit };
 }
 

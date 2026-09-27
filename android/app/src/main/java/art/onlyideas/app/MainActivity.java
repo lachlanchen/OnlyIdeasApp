@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
       chatMessages = new JSONArray(),
       jobs = new JSONArray();
   private String page = "library", chatId = "", agentStatus = "", quote = "", lastMessages = "";
-  private boolean busy = false, refreshingChat = false, offline = false;
+  private boolean busy = false, refreshingChat = false, offline = false, shareUpload = true;
   private int authEpoch = 0, ink, muted, bg, surface, soft, green;
   private WebView reader;
   private final OnBackPressedCallback navigateBack =
@@ -424,6 +424,10 @@ public class MainActivity extends AppCompatActivity {
               pick.addCategory(Intent.CATEGORY_OPENABLE);
               startActivityForResult(pick, 42);
             }));
+    android.widget.Switch sharing = new android.widget.Switch(this);
+    sharing.setText("Share new papers with the reading room"); sharing.setChecked(shareUpload);
+    sharing.setOnCheckedChangeListener((v, checked) -> shareUpload = checked); c.addView(sharing);
+    caption(c, "Shared after source and community review. Turn off for Only me.");
     gap(c, 24);
     if (offline) {
       caption(c, "Offline · downloaded papers");
@@ -722,6 +726,9 @@ public class MainActivity extends AppCompatActivity {
                           .setPositiveButton("Done", null)
                           .show()));
           gap(card, 10);
+          android.widget.Switch sharing = new android.widget.Switch(this);
+          sharing.setText("Share with the reading room"); sharing.setChecked(true); card.addView(sharing);
+          caption(card, "Shared after source and community review. Turn off for Only me.");
           card.addView(
               button(
                   "Convert & add",
@@ -732,7 +739,7 @@ public class MainActivity extends AppCompatActivity {
                               api.json(
                                   "/api/chats/" + chatId + "/import",
                                   "POST",
-                                  object("paperId", p.optString("id"))),
+                                  object("paperId", p.optString("id")).put("sharing", sharing.isChecked() ? "shared" : "private")),
                           r -> {
                             toast("Paper queued for conversion.");
                             loadChat(true);
@@ -1662,6 +1669,7 @@ public class MainActivity extends AppCompatActivity {
           headers.put(
               "X-Paper-Title", java.net.URLEncoder.encode(title, "UTF-8").replace("+", "%20"));
           headers.put("X-Paper-Language", "en");
+          headers.put("X-Paper-Sharing", shareUpload ? "shared" : "private");
           return api.bytes("/api/import", "POST", out.toByteArray(), "application/pdf", headers);
         },
         r -> {

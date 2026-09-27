@@ -10,7 +10,7 @@
 
 ## Tổng quan
 
-OnlyIdeas là không gian yên tĩnh để đọc bài báo nghiên cứu. Nhập PDF của bạn hoặc liên kết PDF truy cập mở, giữ nguyên phương trình và hình ảnh bằng Mathpix, rồi thảo luận từng đoạn ngay trong trình đọc. Tài liệu cá nhân và ghi chú ban đầu là riêng tư.
+OnlyIdeas là phòng đọc chung dành cho bài nghiên cứu. Nhập PDF hoặc liên kết PDF truy cập mở, giữ công thức và hình ảnh bằng Mathpix rồi thảo luận ngay trong trình đọc. Nội dung nhập mới mặc định chọn Chia sẻ, với tùy chọn Chỉ mình tôi. Việc công bố cần kiểm tra quyền sử dụng và duyệt cộng đồng; ghi chú và hội thoại với tác nhân vẫn riêng tư.
 
 Mô hình tiết kiệm có thể cấu hình sẽ tạo hướng dẫn đọc và bản dịch theo yêu cầu. Văn bản được tạo được lưu riêng với bản gốc. GitHub chỉ lưu các bài đã được chủ động công bố và có đủ quyền. Ứng dụng có đăng nhập GitHub riêng và phiên đăng nhập lâu dài.
 
@@ -36,11 +36,11 @@ Mã ứng dụng, nội dung công khai và dữ liệu riêng được lưu tá
 
 ## Trạng thái
 
-Dịch vụ đám mây đang hoạt động. iOS 1.0.0 (7) đã có trong nhóm TestFlight hiện tại với biểu tượng xanh ngọc và vàng sắc nét. Thử nghiệm nội bộ Google Play vẫn dùng bản dựng 6. Đã gửi yêu cầu duyệt bản phát hành chính thức trên Google; kiểm tra tự động có thể diễn ra trước. Việc gửi bản công khai cho Apple vẫn cần ảnh iOS cuối cùng và xác minh đăng nhập Apple thực tế. Hình, bảng và phương trình trong các bài báo nhập thật đã được kiểm tra trên màn hình cỡ điện thoại.
+Bản gốc 1.0.0 (8) bổ sung biểu tượng O/i riêng màu ngọc lục bảo và vàng cùng lựa chọn Chia sẻ/Chỉ mình tôi. Ứng dụng dùng SwiftUI trên iOS và thành phần gốc trên Android, hỗ trợ cỡ chữ, trang hồ sơ và lịch sử trò chuyện. Tác nhân trên máy trạm tìm bài và tải PDF qua LazyEdge; Mathpix giữ công thức và hình ảnh. Việc gửi Apple xét duyệt công khai còn cần ảnh chụp cuối cùng và kiểm tra đăng nhập Apple thực tế.
 
-Phiên bản 0.3 có màn hình SwiftUI trên iOS và giao diện gốc Android, chữ đọc lớn hơn có thể điều chỉnh, trang hồ sơ riêng và hội thoại với tác nhân được lưu lại. Tác nhân trên máy trạm tìm trong các chỉ mục nghiên cứu mở và tải PDF, dùng mô hình cục bộ qua LazyEdge. Chọn chuyển đổi và thêm để tạo bản đọc Mathpix riêng tư, giữ nguyên phương trình và hình ảnh. Xem bản ghi cập nhật ứng dụng gốc để biết trạng thái bản dựng và kiểm thử.
+Phòng đọc công khai hiện có hai bài nghiên cứu thật: OpenAlex (CC0-1.0) và Measuring holographic entanglement entropy on a quantum simulator (CC-BY-4.0), cùng ví dụ gốc được ghi rõ. Bốn hình gốc được giữ lại. Cả hai bài đã đi qua quy trình chuyển đổi thật và được kiểm tra không cần đăng nhập trong trình đọc có chiều rộng điện thoại.
 
-[0.3](../docs/native-0.3.md) · [docs/native.md](../docs/native.md)
+[1.0.0 (8)](../docs/release-candidate-8.md) · [0.3](../docs/native-0.3.md) · [docs/native.md](../docs/native.md)
 
 ## Ủng hộ
 

@@ -5,7 +5,7 @@ OnlyIdeasResearch, or their accounts and runtimes as a side effect.
 
 - Node 22+, React, TypeScript. `npm run check` before publishing.
 - Keep paper payloads out of this source repository. Public cleared bundles live
-  in ../OnlyIdeas-papers. Personal uploads, jobs, sessions and drafts are private.
+  in ../OnlyIdeas-papers. Imports explicitly chosen Shared enter publication review; Only me uploads, jobs, sessions, notes and drafts remain private.
 - Preserve canonical MMD, equations, figures, source URL and rights provenance.
   AI translations and digests are separate, labeled, revision-keyed artifacts.
 - Provider credentials stay in ~/.config/onlyideas/config.json (600), never git.

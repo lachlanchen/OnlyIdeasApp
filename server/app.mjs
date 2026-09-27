@@ -4,6 +4,7 @@ import { readFile, writeFile, mkdir, rm } from 'node:fs/promises';
 import { join, extname, resolve } from 'node:path';
 import { AppError, requireValue, hash, makePaper, publicPaper, mayPublish, languages } from './domain.mjs';
 import { providerJSON } from './network.mjs';
+import { requestSharing } from './sharing.mjs';
 import { startWorker } from './providers.mjs';
 import { nativeOrigins, nativeFlow, startNative, finishNative, redeemNative } from './native-auth.mjs';
 import { createChats } from './chat.mjs';
@@ -176,7 +177,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         if (existing) { requireValue(existing.owner === user.id, 'Request ID unavailable.', 409); return response(res, { paper: existing }); }
         requireValue(!/!\[[^\]]*\]\(|\\includegraphics|<img\b/i.test(data.mmd || ''), 'For papers with figures, upload the PDF so the figures are preserved. Text-only Markdown can be imported here.');
         const p = makePaper({ ...data, id: data.requestId, owner: user.id, license: 'private', assets: [] });
-        store.savePaper(p); return response(res, { paper: p }, 201);
+        store.savePaper(p); requestSharing(store,p,data.sharing); return response(res, { paper: p }, 201);
       }
       if (path === '/api/import' && method === 'POST') {
         requireUser(); requireValue(config.mathpix?.appKey, 'PDF conversion is not connected yet. Import Markdown in the meantime.', 503);
@@ -184,18 +185,19 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         const requestId = req.headers['x-request-id']; requireValue(uuid.test(requestId || ''), 'A request ID is required.');
         const previousRequest = store.job(requestId); if (previousRequest) { requireValue(previousRequest.owner === user.id, 'Request ID unavailable.', 409); return response(res, { job: previousRequest }, 202); }
         const isPDF = req.headers['content-type'] === 'application/pdf';
-        let metadata, link = null, bytes;
+        let metadata, link = null, bytes, sharing = 'private';
         if (isPDF) {
           bytes = await readBody(req, 20_000_000); requireValue(bytes.subarray(0, 5).toString() === '%PDF-', 'Choose a valid PDF.');
+          sharing = req.headers['x-paper-sharing'] === 'shared' ? 'shared' : 'private';
           metadata = { title: decodeURIComponent(req.headers['x-paper-title'] || 'My paper'), language: req.headers['x-paper-language'] || 'en' };
-        } else { const body = await json(req); metadata = body; link = body.url; requireValue(typeof link === 'string' && link.length <= 2000 && link.startsWith('https://'), 'Enter a direct HTTPS PDF link.'); }
+        } else { const body = await json(req); metadata = body; sharing = body.sharing === 'shared' ? 'shared' : 'private'; link = body.url; requireValue(typeof link === 'string' && link.length <= 2000 && link.startsWith('https://'), 'Enter a direct HTTPS PDF link.'); }
         requireValue(typeof metadata.title === 'string' && metadata.title.trim() && metadata.title.length <= 300, 'Add a paper title.');
         requireValue(Object.hasOwn(languages, metadata.language || 'en'), 'Choose a supported language.');
         const dedupe = `import:${hash(bytes || link)}`;
-        const previousContent = store.existing(user.id, dedupe); if (previousContent) return response(res, { job: previousContent }, 202);
+        const previousContent = store.existing(user.id, dedupe); if (previousContent) { if (previousContent.paperId) requestSharing(store,store.paper(previousContent.paperId),sharing); return response(res, { job: previousContent }, 202); }
         if (bytes) { const dir = join(store.directory, 'jobs', requestId); await mkdir(dir, { recursive: true, mode: 0o700 }); await writeFile(join(dir, 'source.pdf'), bytes, { mode: 0o600 }); }
         let job;
-        try { job = enqueue(user, { id: requestId, dedupe, kind: 'import', url: link, metadata: { title: metadata.title, authors: String(metadata.authors || ''), language: metadata.language || 'en', license: 'private', category: String(metadata.category || 'Research') } }); }
+        try { job = enqueue(user, { id: requestId, dedupe, kind: 'import', sharing, url: link, metadata: { title: metadata.title, authors: String(metadata.authors || ''), language: metadata.language || 'en', license: 'private', category: String(metadata.category || 'Research') } }); }
         catch (error) { if (bytes) await rm(join(store.directory, 'jobs', requestId), { recursive: true, force: true }); throw error; }
         return response(res, { job }, 202);
       }

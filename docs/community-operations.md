@@ -49,3 +49,18 @@ Owner-requested real-paper verification results remain in the live private libra
 Run `python3 -m unittest discover -s tests -p test_backup_retention.py` when changing
 retention rules; it verifies recent backups, live data, credentials and symlinks
 are preserved.
+
+## Shared-by-default imports
+
+Current clients show Shared / Only me before import and default to Shared. Each
+shared request creates one durable publication review job after conversion; the
+reader can open the personal result while review is pending. Moderation must
+verify the source license and all figures before approving the job. Unknown
+permissions remain pending; neither a public URL nor an agent message grants
+redistribution rights. The small curated registry in `server/sharing.mjs` records
+verified source metadata but does not bypass community approval.
+
+Legacy clients that omit a visibility value keep their previous private behavior.
+Choosing Shared again for an existing completed import queues review without a
+second PDF conversion. Sharing a paper does not publish its private comments,
+notes, AI artifacts or agent conversation. Public papers are readable signed out.

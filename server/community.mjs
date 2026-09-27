@@ -1,6 +1,6 @@
 import { rm } from 'node:fs/promises';
 import { join } from 'node:path';
-import { hash, requireValue } from './domain.mjs';
+import { hash, requireValue, mayPublish } from './domain.mjs';
 
 export const termsVersion = '2026-09-27';
 
@@ -66,6 +66,7 @@ export function moderate(store, action, id) {
   } else if (action === 'approve-paper' || action === 'reject-paper') {
     const j = store.job(id);
     requireValue(j?.kind === 'publish' && j.state === 'awaiting_review', 'Publication is not waiting for review.');
+    if (action === 'approve-paper') { const paper=store.paper(j.paperId); requireValue(paper, 'Paper not found.'); mayPublish(paper, true); }
     j.state = action === 'approve-paper' ? 'queued' : 'failed';
     j.reviewed = true; j.message = action === 'approve-paper' ? 'Approved for publication' : 'Publication was declined. Contact support for details.';
     store.saveJob(j);

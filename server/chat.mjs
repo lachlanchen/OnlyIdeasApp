@@ -1,4 +1,5 @@
 import { randomUUID, timingSafeEqual } from 'node:crypto';
+import { requestSharing } from './sharing.mjs';
 import { requireValue, hash } from './domain.mjs';
 
 export function createChats(store, config) {
@@ -46,8 +47,9 @@ export function createChats(store, config) {
         const card = messages(id).flatMap(m=>m.papers || []).find(p=>p.id === body.paperId);
         requireValue(card?.pdfUrl, 'Choose an available PDF from this conversation.');
         // Existing queue enforces deduplication, account quotas and Mathpix page caps.
-        const job = enqueue(user,{ kind:'import', url:card.pdfUrl, metadata:{title:card.title,authors:card.authors,language:'en',license:'private',category:'Research'}, dedupe:`import:${hash(card.pdfUrl)}` });
-        add(id,'assistant',{text:'The PDF is queued for conversion. Equations and figures will stay with the flowing text.',jobId:job.id});
+        const job = enqueue(user,{ kind:'import', sharing:body.sharing === 'shared' ? 'shared' : 'private', url:card.pdfUrl, metadata:{title:card.title,authors:card.authors,language:'en',license:'private',category:'Research'}, dedupe:`import:${hash(card.pdfUrl)}` });
+        if (job.paperId && body.sharing === 'shared') { const p=store.paper(job.paperId); if(p)requestSharing(store,p,'shared'); }
+        add(id,'assistant',{text:body.sharing !== 'shared' ? 'The paper is saved to your private library after conversion.' : 'The paper will be added to the shared reading room after source and community review. Your chat and notes stay private.',jobId:job.id});
         return { job };
       }
       requireValue(false,'Method not allowed.',405);

@@ -10,7 +10,7 @@
 
 ## Überblick
 
-OnlyIdeas ist ein ruhiger Leseraum für wissenschaftliche Artikel. Eigene PDFs oder frei zugängliche PDF-Links lassen sich importieren; Mathpix erhält Formeln und Abbildungen. Einzelne Passagen können direkt im Leser besprochen werden. Persönliche Dokumente und Notizen sind zunächst privat.
+OnlyIdeas ist ein gemeinsamer Leseraum für Forschungsarbeiten. PDF-Dateien oder frei zugängliche PDF-Links importieren, Formeln und Abbildungen mit Mathpix erhalten und Textstellen direkt im Reader besprechen. Neue Importe sind standardmäßig zum Teilen vorgesehen; Nur ich ist ebenfalls wählbar. Eine Veröffentlichung erfolgt nach Rechteprüfung und Moderation. Notizen und Agentengespräche bleiben privat.
 
 Ein konfigurierbares, kostengünstiges Modell erstellt auf Anfrage Lesehilfen und Übersetzungen. Erzeugte Texte bleiben vom Original getrennt. GitHub speichert nur ausdrücklich veröffentlichte Artikel mit geklärten Rechten. Die App hat eine eigene GitHub-Anmeldung und dauerhafte Sitzungen.
 
@@ -36,11 +36,11 @@ App-Code, öffentliche Inhalte und private Kontodaten liegen getrennt. MMD erhä
 
 ## Stand
 
-Der Cloud-Dienst ist verfügbar. iOS 1.0.0 (7) ist mit einem scharfen smaragdgrünen und goldenen Symbol in der bestehenden TestFlight-Gruppe verfügbar. Der interne Google-Play-Test bleibt bei Build 6. Die Google-Produktionsprüfung wurde angefordert; automatische Prüfungen können vorausgehen. Für die öffentliche Apple-Einreichung fehlen noch endgültige iOS-Screenshots und die praktische Prüfung der Apple-Anmeldung. Abbildungen, Tabellen und Formeln importierter Forschungsarbeiten wurden auf einem Bildschirm in Smartphone-Größe geprüft.
+Die native Version 1.0.0 (8) enthält ein eigenes smaragdgrünes und goldenes O/i-Symbol sowie die Auswahl Teilen/Nur ich. SwiftUI auf iOS und native Android-Steuerelemente bieten einstellbare Schriftgröße, Profil und Gesprächsverlauf. Der Agent auf der Workstation sucht über LazyEdge nach Arbeiten und lädt PDFs herunter; Mathpix erhält Formeln und Abbildungen. Für Apples öffentliche Prüfung fehlen noch finale Screenshots und eine Prüfung der tatsächlichen Apple-Anmeldung.
 
-Version 0.3 bietet SwiftUI-Ansichten auf iOS und native Android-Bedienelemente, größere einstellbare Leseschrift, eine eigene Profilseite und gespeicherte Agentengespräche. Ein Agent auf der Workstation durchsucht offene Forschungsindizes und lädt PDFs herunter; ein lokales Modell wird über LazyEdge angebunden. Mit Konvertieren und hinzufügen erstellt Mathpix eine private Lesefassung mit Gleichungen und Abbildungen. Der Bericht zur nativen Aktualisierung enthält den Stand der Builds und Tests.
+Der öffentliche Leseraum enthält zwei echte Arbeiten: OpenAlex (CC0-1.0) und Measuring holographic entanglement entropy on a quantum simulator (CC-BY-4.0), zusätzlich zum klar gekennzeichneten Originalbeispiel. Vier Originalabbildungen bleiben erhalten. Beide Arbeiten wurden über den echten Konvertierungsablauf importiert und ohne Anmeldung bei Smartphone-Breite geprüft.
 
-[0.3](../docs/native-0.3.md) · [docs/native.md](../docs/native.md)
+[1.0.0 (8)](../docs/release-candidate-8.md) · [0.3](../docs/native-0.3.md) · [docs/native.md](../docs/native.md)
 
 ## Unterstützung
 

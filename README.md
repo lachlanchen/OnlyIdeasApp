@@ -10,7 +10,7 @@
 
 ## Overview
 
-OnlyIdeas is a quiet reading room for research papers. Import your own PDF or an open-access PDF link, preserve equations and figures with Mathpix, and discuss a passage without leaving the reader. Personal papers and notes begin privately.
+OnlyIdeas is a shared reading room for research papers. Import a PDF or an open-access PDF link, preserve equations and figures with Mathpix, and discuss passages inside the reader. New imports default to Shared, with an Only me option. Publication follows source permission and community review; notes and agent conversations stay private.
 
 A configurable economical model creates reading guides and translations on request. Generated text stays separate from the original. GitHub stores only explicitly published, rights-cleared paper bundles. The app has its own GitHub login and a persistent session.
 
@@ -36,11 +36,11 @@ App code, content and private account data have separate homes. MMD preserves Te
 
 ## Status
 
-The cloud service is live. iOS 1.0.0 (7) is available in the existing TestFlight group with a crisp emerald-and-gold icon. Google Play internal testing remains on build 6. Google production review has been requested; automated checks may run before review. Apple public submission still needs final iOS screenshots and live Apple sign-in verification. Real paper imports verified figures, tables and equations on phone-sized screens.
+Native 1.0.0 (8) adds a custom emerald-and-gold O/i icon and Shared/Only me import controls. iOS uses SwiftUI and Android uses native controls, with adjustable reading text, a Profile page and saved agent chats. The workstation agent searches research indexes and downloads PDFs through LazyEdge; Mathpix preserves equations and figures. Apple public review still needs final screenshots and live Apple sign-in verification.
 
-Version 0.3 introduces SwiftUI screens on iOS and native Android controls, larger adjustable reading text, a dedicated Profile page, and persistent agent conversations. A workstation agent searches open research indexes and downloads PDFs, using a local model through LazyEdge. Choose Convert & add to create a private Mathpix reading copy with equations and figures. See the native update record for build and test status.
+The public reading room now includes two real papers: OpenAlex (CC0-1.0) and Measuring holographic entanglement entropy on a quantum simulator (CC-BY-4.0), alongside the clearly labeled original sample. Four original figures are retained. Both papers were imported through the real conversion workflow and checked in a phone-width reader without signing in.
 
-[0.3](docs/native-0.3.md) · [docs/native.md](docs/native.md) · [Store publication record](docs/store-release-20260926.md)
+[1.0.0 (8)](docs/release-candidate-8.md) · [0.3](docs/native-0.3.md) · [docs/native.md](docs/native.md)
 
 ## Support
 
