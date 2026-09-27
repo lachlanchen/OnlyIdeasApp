@@ -51,3 +51,15 @@ correction made after the iOS 7 archive; native SwiftUI navigation is separate.
 Generated figure backups now follow the same 30-day retention policy as SQLite
 snapshots. Cleanup never targets the live library. The retention boundary test
 and the full application check passed.
+
+The deployed web correction was verified through the authenticated agent request
+list: **Open paper** now displays the ResNet reader directly. A full page reload
+restored both imported papers and both agent conversations. The existing signed
+Android build 6 then cold-launched with the same account, displayed both new
+papers, and opened the actual ResNet article with its title and abstract. This
+confirms that new server results reach an existing native installation.
+
+ResNet was then saved using the native **Read offline** action. With emulator
+Wi-Fi and mobile data disabled, a cold launch displayed the offline library and
+reopened the actual ResNet title/abstract. Networking was restored and the owned
+emulator stopped after evidence capture. Physical iPhone testing is not claimed.
