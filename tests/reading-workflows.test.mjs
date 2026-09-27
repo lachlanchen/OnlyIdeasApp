@@ -84,7 +84,7 @@ test('simultaneous attachments dedupe per owner, text becomes a private readable
 test('DOCX conversion retains equations and embedded figure bytes without fetching links',async()=>{
  const f=fixture();try{
   const pandoc=process.env.ONLYIDEAS_TEST_PANDOC||'pandoc';
-  const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a/eYAAAAASUVORK5CYII=','base64');writeFileSync(join(f.dir,'figure.png'),png);
+  const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR4nGP4DwQACfsD/fteaysAAAAASUVORK5CYII=','base64');writeFileSync(join(f.dir,'figure.png'),png);
   writeFileSync(join(f.dir,'source.md'),'# Equation and figure\n\nA meaningful figure and formula. $E=mc^2$\n\n![Original figure]('+join(f.dir,'figure.png')+')');
   execFileSync(pandoc,[join(f.dir,'source.md'),'-o',join(f.dir,'source.docx')]);
   const a=await uploadAttachment(f.store,config,{id:'alice'},readFileSync(join(f.dir,'source.docx')),'science.docx',enqueue(f.store));const result=await convertAttachment(f.store.job(a.id),{...config,pandoc},f.store);const p=f.store.paper(result.paperId);
@@ -94,7 +94,7 @@ test('DOCX conversion retains equations and embedded figure bytes without fetchi
 
 test('image OCR keeps the original image, reuses its saved result and blocks uncertain charged retries',async()=>{
  const f=fixture();try{
-  const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a/eYAAAAASUVORK5CYII=','base64');const a=await uploadAttachment(f.store,config,{id:'alice'},png,'equation.png',enqueue(f.store));const j=f.store.job(a.id);let calls=0;
+  const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR4nGP4DwQACfsD/fteaysAAAAASUVORK5CYII=','base64');const a=await uploadAttachment(f.store,config,{id:'alice'},png,'equation.png',enqueue(f.store));const j=f.store.job(a.id);let calls=0;
   const result=await convertAttachment(j,config,f.store,{provider:async(u,o)=>{calls++;const b=JSON.parse(o.body);assert.equal(b.improve_mathpix,false);assert.match(b.src,/^data:image\/jpeg;base64,/);return {text:'Equation: $E=mc^2$'}}});assert.equal(calls,1);const p=f.store.paper(result.paperId);assert.equal(p.assets.length,1);assert.match(p.mmd,/Original image/);
   writeFileSync(join(f.dir,'jobs',j.id,'source.png'),png);await convertAttachment(f.store.job(j.id),config,f.store,{provider:async()=>{calls++;throw Error('must not call')}});assert.equal(calls,1);
   // A durable paper is sufficient to resume. Without it or an OCR receipt,

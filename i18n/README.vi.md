@@ -42,6 +42,8 @@ Phòng đọc công khai hiện có hai bài nghiên cứu thật: OpenAlex (CC0
 
 Đang phát triển: điểm đọc trong cơ sở dữ liệu với giữ điểm nguyên tử, hoàn điểm và thưởng không trùng lặp cho bài báo công khai đã duyệt. Hồ sơ hiển thị số dư và lịch sử; tùy chọn chia sẻ chuyển lên trên cuộc trò chuyện và lượt nhập riêng tư cần xác nhận chi phí. Các điều khiển mới hỗ trợ đủ 11 ngôn ngữ. Dịch vụ chính thức chưa bật trừ điểm hoặc mua gói hằng tháng.
 
+Đã chuẩn bị bước tiếp theo: gói hằng tháng trên ứng dụng gốc với giá từ cửa hàng, khôi phục giao dịch, xác minh gia hạn và hoàn tiền. Các gói Người đọc, Nhà nghiên cứu và Studio gồm 200/1.200/2.600 tín dụng mỗi tháng và 40/80/160 tin nhắn trợ lý mỗi ngày. Chức năng mua vẫn tắt cho đến khi hoàn tất kiểm thử cửa hàng và thiết bị.
+
 [Reading credits](../docs/reading-credits.md)
 
 [1.0.0 (10)](../docs/release-candidate-10.md) · [0.3](../docs/native-0.3.md) · [docs/native.md](../docs/native.md)

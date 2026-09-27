@@ -11,11 +11,12 @@ import { createChats } from './chat.mjs';
 import { deleteAccount, visibleComments, acceptTerms, blocks } from './community.mjs';
 import { requestArtifact, visibleArtifacts, safeJob } from './artifacts.mjs';
 import { attachment, uploadAttachment } from './attachments.mjs';
+import { createBilling } from './billing.mjs';
 import { createAppleAuth } from './apple-auth.mjs';
 import { creditTransaction, creditSummary, reserveImport, retryImportCredits, finishImportCredits, seedCreditPublications } from './credits.mjs';
 const uuid = /^[a-f0-9-]{36}$/;
 const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif', '.woff2': 'font/woff2', '.ttf': 'font/ttf', '.json': 'application/json' };
-export function createApp(store, config, { worker = true, provider = providerJSON } = {}) {
+export function createApp(store, config, { worker = true, provider = providerJSON, billingOptions = {} } = {}) {
   const origin = config.origin || 'http://127.0.0.1:4182';
   const secure = origin.startsWith('https://');
   requireValue(secure || /^http:\/\/(127\.0\.0\.1|localhost):\d+$/.test(origin), 'Only HTTPS or explicit loopback origins are permitted.');
@@ -26,6 +27,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
   const stopWorker = worker ? startWorker(store, config) : () => {};
   const chats = createChats(store, config);
   const apple = createAppleAuth(store, config, provider);
+  const billing = createBilling(store,config,billingOptions);
   const limits = new Map();
   const response = (res, data, code = 200) => { res.writeHead(code, { 'Content-Type': 'application/json; charset=utf-8' }); res.end(JSON.stringify(data)); };
   const readBody = async (req, max = 100_000) => {
@@ -63,6 +65,11 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         if (path === '/api/worker/result') return response(res, chats.finish(await json(req)));
         requireValue(false, 'Not found.', 404);
       }
+      const notification=path.match(/^\/api\/billing\/notifications\/(apple|google)$/);
+      if(notification&&method==='POST') {
+        limit(`billing-webhook:${req.socket.remoteAddress}`,120);
+        return response(res,await billing.notification(notification[1],req,JSON.parse((await readBody(req,150_000)).toString())));
+      }
       const nativeOrigin = nativeOrigins.has(req.headers.origin);
       if (nativeOrigin) {
         res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
@@ -95,6 +102,9 @@ export function createApp(store, config, { worker = true, provider = providerJSO
       }
       const paperFor = id => { const p = store.paper(id); requireValue(p && store.active(p.owner) && !store.blocked(user?.id, p.owner) && (p.visibility === 'public' || p.owner === user?.id), 'Paper not found.', 404); return p; };
       if (path.startsWith('/api/')) limit(user?.id || req.socket.remoteAddress, 240);
+      if (path === '/api/billing' && method === 'GET') {requireUser();return response(res,billing.catalog(user));}
+      const purchase=path.match(/^\/api\/billing\/(apple|google)$/);
+      if(purchase&&method==='POST') {requireUser();limit(`purchase:${user.id}`,20);return response(res,await billing.purchase(purchase[1],await json(req),user));}
       if (path === '/api/credits' && method === 'GET') { requireUser(); return response(res, creditSummary(store,user.id,config)); }
       if (path === '/api/health' && method === 'GET') return response(res, { service: 'onlyideas', version: '1.0.0', ok: true });
       if (path === '/api/auth/apple/start' && method === 'POST') {
@@ -316,6 +326,6 @@ export function createApp(store, config, { worker = true, provider = providerJSO
     } catch (e) { if (!res.headersSent) response(res, { error: e instanceof AppError ? e.message : 'Something went wrong. Please try again.' }, e instanceof AppError ? e.status : 500); else res.end(); }
   });
   server.requestTimeout = 60_000; server.headersTimeout = 15_000;
-  server.on('close', stopWorker);
+  server.on('close', () => {stopWorker();billing.stop();});
   return server;
 }

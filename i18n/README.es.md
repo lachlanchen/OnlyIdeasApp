@@ -42,6 +42,8 @@ La sala pública incluye dos artículos reales: OpenAlex (CC0-1.0) y Measuring h
 
 En desarrollo: créditos de lectura en la base de datos, con reservas atómicas, reembolsos y recompensas sin duplicados por artículos públicos aprobados. El perfil muestra el saldo y el historial; las opciones de compartir pasan a la parte superior del chat y las importaciones privadas requieren confirmar el coste. Los nuevos controles están en los 11 idiomas. El cobro de créditos y las compras mensuales aún no están activos en producción.
 
+Próxima etapa preparada: planes mensuales nativos con precios de la tienda, restauración de compras y verificación de renovaciones y reembolsos. Lector, Investigador y Estudio incluyen 200/1.200/2.600 créditos mensuales y 40/80/160 mensajes diarios al agente. Las compras siguen desactivadas hasta completar las pruebas de tienda y dispositivo.
+
 [Reading credits](../docs/reading-credits.md)
 
 [1.0.0 (10)](../docs/release-candidate-10.md) · [0.3](../docs/native-0.3.md) · [docs/native.md](../docs/native.md)

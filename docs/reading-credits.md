@@ -66,11 +66,10 @@ Android debug compile and lint; iOS Release device compile with signing disabled
 duplicate upload and free shared import. Native purchase/device qualification is
 still part of the subsequent release gate, not implied by these compile checks.
 
-## Subsequent slices
+## Subsequent release
 
-Native store subscriptions come next. Target tiers are roughly CNY20/100/200 per month;
-real localized store prices are authoritative. No purchase endpoint, paid plan,
-receipt grant or store activation is included in this accounting slice.
+Monthly plans target roughly CNY20/100/200. The implementation below is staged;
+store setup and purchase qualification must finish before activation.
 
 ## Evidence
 
@@ -78,3 +77,82 @@ receipt grant or store activation is included in this accounting slice.
 retry idempotency, independent-process overspend races, cross-account rewards,
 legacy content, reward caps, deletion/re-registration, API isolation and shared
 attachment conversion. Full `npm run check` remains a publishing gate.
+
+## Native monthly plans (staged, purchases disabled)
+
+| Plan | Target USD/month | Credits per paid period | Agent messages/day |
+| --- | ---: | ---: | ---: |
+| Reader | 2.99 | 200 | 40 |
+| Researcher | 14.99 | 1,200 | 80 |
+| Studio | 29.99 | 2,600 | 160 |
+
+The native store supplies the actual localized monthly price. Plans provide the
+ongoing agent allowance as well as credits; ordinary reading stays free. Existing
+file/page/job limits and aggregate service capacity still apply. Credits carry
+over after cancellation or expiry. A verified full refund reverses its grant once
+and can leave a negative balance; this blocks new private imports, not reading.
+A partial refund preserves the grant. Subscription upgrades are managed by the
+original store, with each verified paid transaction credited once.
+
+SwiftUI uses StoreKit 2 and Android uses Play Billing. Both bind purchases to an
+opaque UUID created for the signed-in OnlyIdeas account, display store prices,
+restore purchases and link to subscription management. Neither sends an amount
+to mint. Apple transactions finish only after server delivery; Play acknowledgement
+happens on the server after the credit ledger commits. Pending payment is not a
+purchase. Account deletion does not cancel a store subscription, and both apps
+say so before deletion.
+
+### Server configuration and operations
+
+Keep credentials outside Git in owner-only files. `billing.enabled` and
+`credits.enabled` both default to false. Providers also require their own configured
+verification credentials before the catalog exposes that provider. An optional
+`credits.accounts` array restricts a rollout to those account IDs; an empty array
+allows nobody. Omit it only for a qualified general rollout. This permits native
+QA without changing costs for installed older clients.
+
+- Apple: `billing.apple.keyFile`, `keyId`, `issuerId` for a dedicated In-App Purchase
+  server key. Signed transactions use Apple's official verification library and
+  public root certificates, online chain checks, exact app/bundle/environment,
+  followed by a fresh server transaction lookup.
+- Google: `billing.google.keyFile` for an OnlyIdeas-specific service account with
+  app-scoped purchase/order permissions. SubscriptionV2 and Orders responses must
+  agree on purchase token, product and account binding. No provider tokens reach
+  app clients.
+- Sandbox requires both `billing.allowSandbox: true` and an explicit
+  `billing.sandboxAccounts` allowlist. Do not let free test renewals fund ordinary
+  users' paid processing.
+- Apple V2 notification URL: `/api/billing/notifications/apple` (signed payload).
+  Turn off Streamlined Purchasing before sales: every new purchase must start
+  inside the signed-in app so it has an account binding.
+- Google authenticated Pub/Sub push URL: `/api/billing/notifications/google`;
+  configure exact `billing.google.pushAudience` and `pushServiceAccount`. Verify
+  the Google OIDC token and email before reading a notification.
+- `GET /api/billing` returns the signed-in owner's catalog, account binding and
+  status. `POST /api/billing/apple` accepts only `signedTransaction` as purchase
+  evidence; Google accepts `purchaseToken`. All other claimed amounts/owners are
+  ignored. Account-bound proof is required for delivery and restore.
+
+Provider tokens and Apple history cursors remain in the private app database.
+Reconciliation wakes each minute, claims up to 20 due sources with a durable
+15-minute lease, retries failures with bounded backoff, and checkpoints successful
+history pages. Apple history catches missed renewals and older refund changes;
+signed current subscription status preserves verified grace periods. Play checks
+current and retained renewal orders against the verified token; known renewal
+suffixes are merely lookup candidates and never proof. Expired token responses
+can fall back to verified Orders records using the saved account binding. Up to
+100 historical order references are retained per Play source. Operator follow-up
+is needed for older history or provider records that are no longer available.
+Monitor `billing_sources.failures`; provider exception text is deliberately not
+logged because it can contain purchase credentials. Back up the existing database
+before deployment. Deletion purges reconciliation credentials while retaining
+only de-identified receipt ownership needed to prevent repeated grants.
+
+### Qualification still required before activation
+
+The ledger, wrong-owner/forged HTTP input, replay, refund, independent-process race,
+restart/acknowledgement failure, sandbox and staged-rollout tests pass. Android
+compile/lint and iOS device Release compile pass. This is not a real purchase test.
+Store configuration, actual sandbox purchase/renewal/refund/restoration, device UI
+checks, purchase-history privacy declarations, and successor store builds remain
+release gates. Build 10's existing review has not been replaced by this work.

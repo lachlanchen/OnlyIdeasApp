@@ -2,6 +2,7 @@ import { randomUUID, timingSafeEqual } from 'node:crypto';
 import { requestSharing } from './sharing.mjs';
 import { attachment } from './attachments.mjs';
 import { requireValue, hash, languages } from './domain.mjs';
+import { activePlan } from './billing-ledger.mjs';
 
 export function createChats(store, config) {
   const db = store.db;
@@ -17,7 +18,8 @@ export function createChats(store, config) {
   const queue = (chat, user, data) => {
     requireValue(!db.prepare("SELECT id FROM chat_tasks WHERE chat=? AND state IN ('queued','running')").get(chat), 'Wait for the current response before sending another message.', 409);
     const count = db.prepare('SELECT count(*) AS n FROM chat_tasks WHERE owner=? AND created>?').get(user.id, Date.now() - 86400_000).n;
-    requireValue(count < (config.maxAgentTurnsPerDay || 30), 'Your daily agent allowance is full. Try tomorrow.', 429);
+    const allowance=config.billing?.enabled===true ? activePlan(store,user.id)?.agentTurns : null;
+    requireValue(count < (allowance || config.maxAgentTurnsPerDay || 30), 'Your daily agent allowance is full. Try tomorrow.', 429);
     requireValue(db.prepare('SELECT count(*) AS n FROM chat_tasks WHERE created>?').get(Date.now()-86400_000).n < (config.maxAgentTurnsGlobalPerDay || 200), 'The shared agent allowance is full. Try tomorrow.', 429);
     const id = randomUUID(); db.prepare('INSERT INTO chat_tasks VALUES(?,?,?,?,?,?)').run(id, chat, user.id, 'queued', JSON.stringify(data), Date.now()); return id;
   };

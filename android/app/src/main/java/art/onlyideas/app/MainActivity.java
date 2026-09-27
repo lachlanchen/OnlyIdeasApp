@@ -3,6 +3,7 @@ package art.onlyideas.app;
 import static androidx.appcompat.app.AppCompatDelegate.*;
 
 import android.content.Intent;
+import com.android.billingclient.api.ProductDetails;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -42,6 +43,11 @@ public class MainActivity extends AppCompatActivity {
   private final ExecutorService io = Executors.newFixedThreadPool(3);
   private final Handler handler = new Handler(Looper.getMainLooper());
   private NativeSession api;
+  private NativeBilling billing;
+  private JSONObject billingCatalog;
+  private List<ProductDetails> billingProducts=List.of();
+  private LinearLayout subscriptionContainer;
+  private String purchaseNotice="";
   private LinearLayout root, header, content, bottom, messages;
   private ScrollView chatScroll;
   private EditText composer;
@@ -121,6 +127,7 @@ public class MainActivity extends AppCompatActivity {
     handler.removeCallbacks(poll);
     handler.postDelayed(poll, 2000);
     if (api != null && api.get("onlyideas.native.flow") != null) completeLogin();
+    if(api!=null&&account!=null)loadSubscriptions();
   }
 
   @Override
@@ -133,6 +140,7 @@ public class MainActivity extends AppCompatActivity {
   protected void onDestroy() {
     handler.removeCallbacksAndMessages(null);
     if (reader != null) reader.destroy();
+    if(billing!=null)billing.close();
     io.shutdownNow();
     super.onDestroy();
   }
@@ -423,7 +431,7 @@ public class MainActivity extends AppCompatActivity {
     gap(card,12);caption(card,creditRules(credits));
     card.addView(button(t("Credit history"),false,()->{
       JSONArray entries=credits.optJSONArray("history");ArrayList<String> lines=new ArrayList<>();
-      Map<String,String> labels=Map.of("welcome","Welcome credits","private_import","Private import","unused_reservation","Unused reservation","failed_import","Import refund","public_reward","Public contribution");
+      Map<String,String> labels=Map.of("welcome","Welcome credits","private_import","Private import","unused_reservation","Unused reservation","failed_import","Import refund","public_reward","Public contribution","subscription","Monthly plan credits","purchase_refund","Purchase refund");
       if(entries!=null)for(int i=0;i<entries.length();i++){JSONObject e=entries.optJSONObject(i);if(e!=null)lines.add(t(labels.getOrDefault(e.optString("kind"),e.optString("kind")))+" · "+(e.optInt("delta")>0?"+":"")+e.optInt("delta")+"\n"+java.text.DateFormat.getDateInstance().format(new Date(e.optLong("created"))));}
       new AlertDialog.Builder(this).setTitle(t("Credit history")).setItems(lines.toArray(new String[0]),null).setPositiveButton(t("Done"),null).show();
     }));container.addView(card);gap(container,16);
@@ -583,6 +591,66 @@ public class MainActivity extends AppCompatActivity {
       caption(list, t("Add a PDF or ask the agent to find your next paper."));
   }
 
+  void loadSubscriptions() {
+    if(account==null||api==null)return;
+    int epoch=authEpoch;
+    io.execute(()->{
+      try {
+        JSONObject catalog=api.json("/api/billing","GET",null);
+        handler.post(()->{
+          if(isFinishing()||epoch!=authEpoch)return;
+          billingCatalog=catalog;
+          if(!catalog.optBoolean("enabled")||!catalog.optJSONObject("providers").optBoolean("google")){renderSubscriptions();return;}
+          if(billing==null)billing=new NativeBilling(this,new NativeBilling.Host(){
+            public void products(List<ProductDetails> products){billingProducts=products;renderSubscriptions();}
+            public void notice(String value){purchaseNotice=t(value);renderSubscriptions();}
+            public void deliver(String token,Runnable complete){
+              int identity=authEpoch;
+              io.execute(()->{
+                try {
+                  JSONObject result=api.json("/api/billing/google","POST",object("purchaseToken",token));
+                  handler.post(()->{complete.run();if(identity!=authEpoch||isFinishing())return;billingCatalog=result;purchaseNotice=t("Your purchases are up to date.");renderSubscriptions();});
+                }catch(Exception error){handler.post(()->{complete.run();if(identity!=authEpoch||isFinishing())return;purchaseNotice=error.getMessage();renderSubscriptions();});}
+              });
+            }
+          });
+          ArrayList<String> ids=new ArrayList<>();JSONArray plans=catalog.optJSONArray("plans");
+          if(plans!=null)for(int i=0;i<plans.length();i++)ids.add(plans.optJSONObject(i).optString("google"));
+          billing.load(ids);renderSubscriptions();
+        });
+      } catch(Exception ignored) { /* Older servers keep billing hidden. */ }
+    });
+  }
+  void renderSubscriptions() {
+    if(!page.equals("profile")||subscriptionContainer==null)return;
+    subscriptionContainer.removeAllViews();
+    if(account==null||billingCatalog==null||!billingCatalog.optBoolean("enabled")||!billingCatalog.optJSONObject("providers").optBoolean("google"))return;
+    LinearLayout card=card();title(card,t("Monthly plans"),22);gap(card,10);
+    caption(card,t("Shared reading stays free. Choose a plan for more private imports and daily agent messages."));
+    String active=billingCatalog.optString("plan","");
+    if(!billingCatalog.optBoolean("canSubscribe"))caption(card,t("Manage your plan in the store where you subscribed."));
+    JSONArray plans=billingCatalog.optJSONArray("plans");
+    for(ProductDetails product:billingProducts) {
+      ProductDetails.SubscriptionOfferDetails offer=NativeBilling.monthly(product);if(offer==null)continue;
+      JSONObject plan=null;for(int i=0;i<plans.length();i++)if(plans.optJSONObject(i).optString("google").equals(product.getProductId()))plan=plans.optJSONObject(i);
+      if(plan==null)continue;
+      gap(card,18);title(card,t(plan.optString("name")),20);
+      caption(card,t("{credits} credits each month · {messages} agent messages daily").replace("{credits}",String.valueOf(plan.optInt("credits"))).replace("{messages}",String.valueOf(plan.optInt("agentTurns"))));
+      String price=offer.getPricingPhases().getPricingPhaseList().get(0).getFormattedPrice();
+      caption(card,t("{price} / month").replace("{price}",price));
+      Button buy=button(t(active.equals(plan.optString("id"))?"Current plan":"Subscribe"),true,()->billing.purchase(product,billingCatalog.optString("accountToken")));
+      buy.setEnabled(billingCatalog.optBoolean("canSubscribe"));card.addView(buy);
+    }
+    if(billingProducts.isEmpty())caption(card,t("Plans are currently unavailable in this store."));
+    if(!purchaseNotice.isEmpty())caption(card,purchaseNotice);
+    gap(card,12);card.addView(button("Restore purchases",false,()->{if(billing!=null)billing.restore();}));
+    card.addView(button("Manage subscription",false,()->startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse("https://play.google.com/store/account/subscriptions?package=art.onlyideas.app")))));
+    caption(card,t("Subscriptions renew monthly until canceled in store settings. Unused credits do not expire. Service limits apply."));
+    card.addView(button("Terms",false,()->startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse("https://lachlan.lazying.art/OnlyIdeasApp/terms.html")))));
+    card.addView(button("Privacy",false,()->startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse("https://lachlan.lazying.art/OnlyIdeasApp/privacy.html")))));
+    subscriptionContainer.addView(card);
+  }
+
   void showProfile() {
     clear("profile");
     LinearLayout c = scrollContent();
@@ -610,6 +678,7 @@ public class MainActivity extends AppCompatActivity {
       LinearLayout wallet=column();c.addView(wallet);
       job(()->api.json("/api/credits","GET",null),r->{if(page.equals("profile")&&r.optBoolean("enabled"))renderCredits(wallet,r);});
     }
+    subscriptionContainer=column();c.addView(subscriptionContainer);renderSubscriptions();loadSubscriptions();
     LinearLayout reading = card();
     title(reading, t("Reading preferences"), 22);
     gap(reading, 18);
@@ -679,7 +748,7 @@ public class MainActivity extends AppCompatActivity {
       c.addView(button(t("Blocked readers"), false, this::blockedReaders));
       c.addView(button(t("Delete account"), false, () -> new AlertDialog.Builder(this)
         .setTitle(t("Permanently delete your account?"))
-        .setMessage(t("Your account, cloud papers, notes, comments, chats and private downloads will be deleted and all sessions signed out. Previously published GitHub copies and others’ copies may remain under their public license. This cannot be undone."))
+        .setMessage(t("Your account, cloud papers, notes, comments, chats and private downloads will be deleted and all sessions signed out. Previously published GitHub copies and others’ copies may remain under their public license. This cannot be undone.")+"\n\n"+t("Deleting your account does not cancel store subscriptions. Cancel your plan in subscription settings first."))
         .setNegativeButton(t("Cancel"), null)
         .setPositiveButton(t("Delete account"), (d,w) -> job(() -> api.json("/api/account", "DELETE", object("confirm", "DELETE")), r -> signOut()))
         .show()));
@@ -1064,6 +1133,7 @@ public class MainActivity extends AppCompatActivity {
         r -> {
           authEpoch++;
           account = null;
+          if(billing!=null){billing.close();billing=null;}billingCatalog=null;billingProducts=List.of();purchaseNotice="";
           chatId = "";
           chatMessages = new JSONArray();
           document = null;

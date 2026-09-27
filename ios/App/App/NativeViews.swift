@@ -1,4 +1,5 @@
 import SwiftUI
+import StoreKit
 import AuthenticationServices
 import UniformTypeIdentifiers
 import WebKit
@@ -393,7 +394,7 @@ struct NativeProfile: View {
           }.disabled(store.signingIn)
         }
       }
-      if store.account != nil { NativeCreditSection() }
+      if store.account != nil { NativeCreditSection(); NativeSubscriptionSection() }
       Section(T("Reading")) {
         Picker(T("App language"), selection:Binding(get:{store.language},set:{store.language=$0;store.objectWillChange.send()})) {
           Text(T("System")).tag("system")
@@ -458,7 +459,7 @@ struct NativeProfile: View {
       Button(T("Cancel"), role: .cancel) {}
       Button(T("Delete account"), role: .destructive) { Task { await store.deleteAccount() } }
     } message: {
-      Text(T("Your account, cloud papers, notes, comments, chats and private downloads will be deleted and all sessions signed out. Previously published GitHub copies and others’ copies may remain under their public license. This cannot be undone."))
+      Text(T("Your account, cloud papers, notes, comments, chats and private downloads will be deleted and all sessions signed out. Previously published GitHub copies and others’ copies may remain under their public license. This cannot be undone.")+"\n\n"+T("Deleting your account does not cancel store subscriptions. Cancel your plan in subscription settings first."))
     }.confirmationDialog(
       T("Sign out on this device?"), isPresented: $confirm, titleVisibility: .visible
     ) {
@@ -524,7 +525,7 @@ struct NativeCreditRules: View {
 }
 struct NativeCreditSection: View {
   @EnvironmentObject var store:ReadingStore
-  let names=["welcome":"Welcome credits","private_import":"Private import","unused_reservation":"Unused reservation","failed_import":"Import refund","public_reward":"Public contribution"]
+  let names=["welcome":"Welcome credits","private_import":"Private import","unused_reservation":"Unused reservation","failed_import":"Import refund","public_reward":"Public contribution","subscription":"Monthly plan credits","purchase_refund":"Purchase refund"]
   var body: some View {
     Group {
       if let credits=store.credits,credits.enabled {
@@ -1081,5 +1082,36 @@ struct NativeLanguages: View {
     guard store.account != nil else {signIn=true;return}
     do { let result=try await store.json("/api/papers/\(document.paper.id)/assist",method:"POST",body:["kind":"translation","language":code]);requestedJob=(result["job"] as? [String:Any])?["id"] as? String ?? "";requested=code;notice="Translation requested. Existing work is reused.";await load() }
     catch {notice=error.localizedDescription}
+  }
+}
+
+
+struct NativeSubscriptionSection:View {
+  @EnvironmentObject var store:ReadingStore
+  var body:some View {
+    Group {
+      if let catalog=store.subscriptionCatalog,catalog.enabled,catalog.providers.apple {
+        Section(T("Monthly plans")) {
+          Text(T("Shared reading stays free. Choose a plan for more private imports and daily agent messages.")).font(.subheadline).foregroundColor(.secondary)
+          if !catalog.canSubscribe {Text(T("Manage your plan in the store where you subscribed.")).font(.subheadline)}
+          ForEach(store.subscriptionProducts,id:\.id) { product in
+            if let plan=catalog.plans.first(where:{$0.apple==product.id}) {
+              VStack(alignment:.leading,spacing:8) {
+                HStack {Text(T(plan.name)).font(.headline);Spacer();Text(T("{price} / month",["price":product.displayPrice])).font(.headline)}
+                Text(T("{credits} credits each month · {messages} agent messages daily",["credits":String(plan.credits),"messages":String(plan.agentTurns)])).font(.subheadline)
+                Button(T(catalog.plan==plan.id ? "Current plan":"Subscribe")) {Task {await store.purchase(product)}}
+                  .buttonStyle(.borderedProminent).disabled(store.purchaseBusy || !catalog.canSubscribe)
+              }.padding(.vertical,6)
+            }
+          }
+          if store.subscriptionProducts.isEmpty {Text(T("Plans are currently unavailable in this store.")).foregroundColor(.secondary)}
+          if let notice=store.purchaseNotice {Text(notice).font(.subheadline).accessibilityAddTraits(.updatesFrequently)}
+          Button(T("Restore purchases")){Task {await store.restorePurchases()}}.disabled(store.purchaseBusy)
+          Link(T("Manage subscription"),destination:URL(string:"https://apps.apple.com/account/subscriptions")!)
+          Text(T("Subscriptions renew monthly until canceled in store settings. Unused credits do not expire. Service limits apply.")).font(.footnote).foregroundColor(.secondary)
+          HStack {Link(T("Privacy"),destination:URL(string:"https://lachlan.lazying.art/OnlyIdeasApp/privacy.html")!);Spacer();Link(T("Terms"),destination:URL(string:"https://lachlan.lazying.art/OnlyIdeasApp/terms.html")!)}.font(.footnote)
+        }
+      }
+    }.task {await store.loadSubscriptions()}
   }
 }

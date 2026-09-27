@@ -44,6 +44,7 @@ repositories {
 }
 
 dependencies {
+    implementation "com.android.billingclient:billing:9.1.0"
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation "androidx.webkit:webkit:$androidxWebkitVersion"
     implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"

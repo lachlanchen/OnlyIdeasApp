@@ -42,6 +42,8 @@ Der öffentliche Leseraum enthält zwei echte Arbeiten: OpenAlex (CC0-1.0) und M
 
 In Entwicklung: Leseguthaben in der Datenbank mit atomaren Reservierungen, Erstattungen und einmaligen Belohnungen für genehmigte öffentliche Paper. Das Profil zeigt Guthaben und Verlauf; die Freigabeoptionen stehen über dem Chat, und private Importe erfordern eine Kostenbestätigung. Die neuen Bedienelemente unterstützen alle 11 Sprachen. Guthabenabbuchungen und monatliche Käufe sind im Produktivbetrieb noch nicht aktiviert.
 
+Nächster Schritt vorbereitet: native monatliche Abos mit Store-Preisen, Wiederherstellung sowie geprüften Verlängerungen und Erstattungen. Leser, Forscher und Studio enthalten 200/1.200/2.600 monatliche Credits und 40/80/160 tägliche Nachrichten an den Assistenten. Käufe bleiben bis zum Abschluss der Store- und Gerätetests deaktiviert.
+
 [Reading credits](../docs/reading-credits.md)
 
 [1.0.0 (10)](../docs/release-candidate-10.md) · [0.3](../docs/native-0.3.md) · [docs/native.md](../docs/native.md)

@@ -42,6 +42,8 @@ The public reading room now includes two real papers: OpenAlex (CC0-1.0) and Mea
 
 In development: database reading credits with atomic reservations, refunds and duplicate-safe rewards for approved public papers. Profile shows the balance and history; sharing options move above the agent conversation and private imports ask for cost confirmation. The new controls support all 11 languages. Credit charging and monthly purchases are not enabled in production yet.
 
+Staged next: native monthly plans with store prices, purchase restoration, verified renewals and refunds. Reader, Researcher and Studio include 200/1,200/2,600 monthly credits and 40/80/160 daily agent messages. Purchases remain disabled pending store and device qualification.
+
 [Reading credits](docs/reading-credits.md)
 
 [1.0.0 (10)](docs/release-candidate-10.md) · [0.3](docs/native-0.3.md) · [docs/native.md](docs/native.md)

@@ -45,8 +45,9 @@ function welcome(store, owner) {
     entry(store, `welcome:${identity}`, owner, creditPolicy.welcome, 'welcome');
   }
 }
+export const creditsEnabled=(config,owner)=>config.credits?.enabled===true && (!Array.isArray(config.credits.accounts)||config.credits.accounts.includes(owner));
 export function creditSummary(store, owner, config) {
-  const enabled = config.credits?.enabled === true;
+  const enabled = creditsEnabled(config,owner);
   return creditTransaction(store, () => {
     if (enabled && owner) welcome(store, owner);
     const held = owner ? store.db.prepare("SELECT coalesce(sum(amount),0) AS n FROM credit_holds WHERE owner=? AND state='held'").get(owner).n : 0;
@@ -55,7 +56,7 @@ export function creditSummary(store, owner, config) {
   });
 }
 export function reserveImport(store, config, job, limit) {
-  if (config.credits?.enabled !== true || !['import', 'attachment', 'markdown'].includes(job.kind)) return;
+  if (!creditsEnabled(config,job.owner) || !['import', 'attachment', 'markdown'].includes(job.kind)) return;
   welcome(store, job.owner);
   const amount = job.sharing === 'shared' ? 0 : (job.kind === 'import' || job.ext === 'pdf' ? job.pages || config.maxPages || 30 : 1);
   if (amount) requireValue(Number.isSafeInteger(limit) && limit >= amount, 'Confirm the private import credit cost in the latest app.', 428);

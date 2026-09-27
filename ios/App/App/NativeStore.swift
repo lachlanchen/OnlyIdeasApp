@@ -2,6 +2,7 @@ import AuthenticationServices
 import CryptoKit
 import Foundation
 import Security
+import StoreKit
 import SwiftUI
 import WebKit
 
@@ -81,6 +82,11 @@ struct ReadingCredits: Decodable {
   var enabled:Bool; var balance:Int; var held:Int; var maxPDF:Int
   var policy:Policy; var history:[Entry]
 }
+struct SubscriptionCatalog: Decodable {
+  struct Plan: Decodable, Identifiable {var id:String;var name:String;var credits:Int;var agentTurns:Int;var apple:String;var google:String}
+  struct Providers:Decodable {var apple:Bool;var google:Bool}
+  var enabled:Bool;var accountToken:String?;var providers:Providers;var plans:[Plan];var plan:String?;var canSubscribe:Bool
+}
 struct PaperComment: Codable, Identifiable {
   var id: String
   var author: String
@@ -112,6 +118,11 @@ final class ReadingStore: NSObject, ObservableObject,
   @Published var showReport = false
   @Published var sharedImports = true
   @Published var credits:ReadingCredits?
+  @Published var subscriptionCatalog:SubscriptionCatalog?
+  @Published var subscriptionProducts:[Product]=[]
+  @Published var purchaseBusy=false
+  @Published var purchaseNotice:String?
+  private var purchaseUpdates:Task<Void,Never>?
   @Published var creditPrompt:String?
   private var creditDecision:CheckedContinuation<Bool,Never>?
   var reportContext = ""
@@ -146,7 +157,14 @@ final class ReadingStore: NSObject, ObservableObject,
       account = try? JSONDecoder().decode(ReadingAccount.self, from: data)
     }
     restoreLibrary()
+    purchaseUpdates=Task { [weak self] in
+      for await result in StoreKit.Transaction.updates {
+        guard !Task.isCancelled else {break}
+        do {try await self?.deliverPurchase(result)} catch {self?.purchaseNotice=error.localizedDescription}
+      }
+    }
   }
+  deinit {purchaseUpdates?.cancel()}
   private var scope: String { account?.id ?? "public" }
   private var libraryURL: URL { folder.appendingPathComponent("library-" + Data(SHA256.hash(data: Data(scope.utf8))).map { String(format: "%02x", $0) }.joined() + ".index") }
   private func restoreLibrary() {
@@ -396,6 +414,7 @@ final class ReadingStore: NSObject, ObservableObject,
     try? saveToken(nil)
     account = nil
     credits = nil
+    subscriptionCatalog=nil;subscriptionProducts=[];purchaseNotice=nil
     resolveCreditPrompt(false)
     draftAttachments = []
     messages = []
@@ -725,4 +744,60 @@ func T(_ key:String, _ values:[String:String] = [:]) -> String {
   var text = UILanguage.catalog[UILanguage.current]?[lookup] ?? lookup
   for (name,value) in substitutions { text = text.replacingOccurrences(of:"{"+name+"}",with:value) }
   return text
+}
+
+
+extension ReadingStore {
+  func loadSubscriptions() async {
+    guard account != nil else {subscriptionCatalog=nil;subscriptionProducts=[];return}
+    let identity=token
+    do {
+      let catalog=try JSONDecoder().decode(SubscriptionCatalog.self,from:await request("/api/billing"))
+      guard identity==token else {return}
+      subscriptionCatalog=catalog
+      guard catalog.enabled && catalog.providers.apple else {subscriptionProducts=[];return}
+      let products=try await Product.products(for:catalog.plans.map(\.apple))
+      guard identity==token else {return}
+      subscriptionProducts=products.sorted {$0.price<$1.price}
+    } catch {if identity==token {subscriptionCatalog=nil;subscriptionProducts=[]}}
+  }
+  private func deliverPurchase(_ result:VerificationResult<StoreKit.Transaction>) async throws {
+    guard case .verified(let transaction)=result else {throw failure(T("The store could not verify this purchase."))}
+    guard transaction.productID.hasPrefix("art.onlyideas."),account != nil else {return}
+    let identity=token
+    _=try await request("/api/billing/apple",method:"POST",body:["signedTransaction":result.jwsRepresentation])
+    guard identity==token else {return}
+    await transaction.finish()
+    await loadCredits()
+    await loadSubscriptions()
+    purchaseNotice=T("Your purchases are up to date.")
+  }
+  func purchase(_ product:Product) async {
+    guard !purchaseBusy,let catalog=subscriptionCatalog,catalog.enabled,catalog.providers.apple,
+      let binding=catalog.accountToken.flatMap(UUID.init(uuidString:)),account != nil else {return}
+    let identity=token;purchaseBusy=true;purchaseNotice=nil
+    defer {purchaseBusy=false}
+    do {
+      switch try await product.purchase(options:[.appAccountToken(binding)]) {
+      case .success(let result): if identity==token {try await deliverPurchase(result)}
+      case .pending: purchaseNotice=T("Payment is pending. Benefits will appear after the store confirms payment.")
+      case .userCancelled: break
+      @unknown default: purchaseNotice=T("Please try restoring purchases.")
+      }
+    } catch {purchaseNotice=error.localizedDescription}
+  }
+  func restorePurchases() async {
+    guard !purchaseBusy,account != nil else {return}
+    purchaseBusy=true;purchaseNotice=nil;let identity=token
+    defer {purchaseBusy=false}
+    do {
+      try await AppStore.sync()
+      for await result in StoreKit.Transaction.currentEntitlements {
+        guard identity==token else {return}
+        try await deliverPurchase(result)
+      }
+      await loadSubscriptions();await loadCredits()
+      purchaseNotice=T("Your purchases are up to date.")
+    } catch {purchaseNotice=error.localizedDescription}
+  }
 }

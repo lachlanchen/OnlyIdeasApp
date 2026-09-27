@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { hash, sections, requireValue } from './domain.mjs';
 import { initCredits } from './credits.mjs';
+import { initBilling } from './billing-ledger.mjs';
 export class Store {
   constructor(directory) {
     mkdirSync(directory, { recursive: true, mode: 0o700 });
@@ -29,6 +30,7 @@ export class Store {
       CREATE INDEX IF NOT EXISTS paper_visibility ON papers(visibility,owner);
       CREATE INDEX IF NOT EXISTS job_state ON jobs(state);`);
     initCredits(this);
+    initBilling(this);
   }
   active(id) { return !this.db.prepare('SELECT id FROM deleted_accounts WHERE id=?').get(id) && !this.db.prepare('SELECT id FROM suspensions WHERE id=?').get(id); }
   requireActive(id) { requireValue(this.active(id), 'This account is no longer available.', 403); }

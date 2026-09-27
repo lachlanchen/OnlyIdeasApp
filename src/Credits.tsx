@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { api } from './api'
 import { t } from './i18n'
 export type Credits = { enabled:boolean; balance:number; held:number; maxPDF:number; policy:{publication:number;rewardPerDay:number}; history:{kind:string;delta:number;created:number}[] }
-export const creditLabels:Record<string,string>={welcome:'Welcome credits',private_import:'Private import',unused_reservation:'Unused reservation',failed_import:'Import refund',public_reward:'Public contribution'}
+export const creditLabels:Record<string,string>={welcome:'Welcome credits',private_import:'Private import',unused_reservation:'Unused reservation',failed_import:'Import refund',public_reward:'Public contribution',subscription:'Monthly plan credits',purchase_refund:'Purchase refund'}
 export async function authorizeImport(shared:boolean, pdfs=0, others=0, retryCost=0):Promise<number|null> {
   if(shared) return 0
   const credits=await api<Credits>('/credits')
