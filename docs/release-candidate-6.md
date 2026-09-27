@@ -48,4 +48,23 @@ screen. No imported paper or private conversation is included in store screensho
 All Google content declarations, reviewer access, English listing and 176 countries
 plus the remaining world region have been saved. Apple privacy declarations,
 reviewer access, free pricing and all 175 available territories have been saved.
-Formal review is not claimed by this candidate record.
+The store confirmation below records the subsequent submission outcome.
+
+## Store confirmation · 27 September 2026
+
+Apple build `3bbea323-4e3d-463d-86ee-b88ecdd24fef` processed as **VALID** and
+**IN_BETA_TESTING**, was added to the existing internal TestFlight group, and is
+selected for the draft App Store version. What to Test notes were saved. App Store
+public review remains **PREPARE_FOR_SUBMISSION** while the screenshot and live
+Apple authorization checks above remain outstanding.
+
+Google accepted build 6 for internal publication. The unsubmitted production
+build 5 was discarded and replaced with build 6. Play Console confirmed
+**“11 changes sent for review”** for build 6, its listing and declarations, and
+176 countries plus the remaining world region. This is a submission receipt,
+not approval or public availability; Google may run pre-review checks first.
+
+The live worker now uses the tested source, and the ordinary review account's
+exact-ID request returned the PDF for arXiv 1706.03762. No duplicate conversion was
+requested. Temporary emulator, Bunko QA desktop and owned Mac build processes
+were stopped; the production paper worker and model tunnel remain active.
