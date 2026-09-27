@@ -36,11 +36,11 @@ Mã ứng dụng, nội dung công khai và dữ liệu riêng được lưu tá
 
 ## Trạng thái
 
-Bản gốc 1.0.0 (8) bổ sung biểu tượng O/i riêng màu ngọc lục bảo và vàng cùng lựa chọn Chia sẻ/Chỉ mình tôi. Ứng dụng dùng SwiftUI trên iOS và thành phần gốc trên Android, hỗ trợ cỡ chữ, trang hồ sơ và lịch sử trò chuyện. Tác nhân trên máy trạm tìm bài và tải PDF qua LazyEdge; Mathpix giữ công thức và hình ảnh. Việc gửi Apple xét duyệt công khai còn cần ảnh chụp cuối cùng và kiểm tra đăng nhập Apple thực tế.
+Bản gốc 1.0.0 (9) tận dụng màn hình tốt hơn: điều khiển gọn, phần tóm tắt dùng toàn bộ chiều rộng, cỡ chữ đọc mặc định 18 và trang không trượt ngang. Bài nghiên cứu cùng hình ảnh được lưu tự động, mở từ thiết bị trước rồi cập nhật từ đám mây; Giữ ngoại tuyến ghim một bản sao. Biểu tượng O/i dùng dải màu xanh ngọc, xanh lam, tím và chấm vàng gọn gàng. Việc gửi Apple xét duyệt công khai còn cần ảnh chụp cuối cùng và kiểm tra đăng nhập Apple thực tế.
 
 Phòng đọc công khai hiện có hai bài nghiên cứu thật: OpenAlex (CC0-1.0) và Measuring holographic entanglement entropy on a quantum simulator (CC-BY-4.0), cùng ví dụ gốc được ghi rõ. Bốn hình gốc được giữ lại. Cả hai bài đã đi qua quy trình chuyển đổi thật và được kiểm tra không cần đăng nhập trong trình đọc có chiều rộng điện thoại.
 
-[1.0.0 (8)](../docs/release-candidate-8.md) · [0.3](../docs/native-0.3.md) · [docs/native.md](../docs/native.md)
+[1.0.0 (9)](../docs/release-candidate-9.md) · [0.3](../docs/native-0.3.md) · [docs/native.md](../docs/native.md)
 
 ## Ủng hộ
 

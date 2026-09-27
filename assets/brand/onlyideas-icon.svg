@@ -1,14 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
   <defs>
-    <linearGradient id="emerald" x1="0" y1="0" x2="1" y2="1">
-      <stop stop-color="#17af83"/><stop offset="1" stop-color="#064f46"/>
+    <linearGradient id="spectrum" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#0dc9b8"/><stop offset=".48" stop-color="#347fe4"/><stop offset="1" stop-color="#7949d8"/>
     </linearGradient>
   </defs>
-  <rect width="1024" height="1024" fill="url(#emerald)"/>
+  <rect width="1024" height="1024" fill="url(#spectrum)"/>
   <g id="mark">
     <path d="M737 320C677 251 598 214 509 214C337 214 202 350 202 515C202 681 337 816 509 816C579 816 644 793 696 754L808 792L782 674C804 629 816 579 816 528" fill="none" stroke="#fff9e9" stroke-width="94" stroke-linecap="round"/>
     <path d="M498 471L472 656C468 684 492 703 519 693L590 665" fill="none" stroke="#fff9e9" stroke-width="76" stroke-linecap="round"/>
-    <path d="M510 323C546 323 574 351 574 387C574 423 546 451 510 451C474 451 446 423 446 387C446 351 474 323 510 323Z" fill="#ffcc69"/>
-    <path d="M797 226L738 425L675 369Z" fill="#ffcc69"/>
+    <path d="M510 323C546 323 574 351 574 387C574 423 546 451 510 451C474 451 446 423 446 387C446 351 474 323 510 323Z" fill="#ffb95a"/>
   </g>
 </svg>

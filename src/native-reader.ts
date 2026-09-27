@@ -4,11 +4,11 @@ const rendererUrl = './native-math.js'
 type DocumentData = { mmd: string; figures?: Record<string,string>; fontSize?: number; dark?: boolean }
 const host = window as unknown as { markdownToHTML: (s: string,o: object)=>string; OnlyIdeasRender:(p:DocumentData)=>void; OnlyIdeasStyle:(size:number,dark:boolean)=>void; webkit?: {messageHandlers:{onlyideas:{postMessage:(s:object)=>void}}}; NativeReader?:{selection:(s:string)=>void;ready?:()=>void} }
 const root=document.getElementById('paper')!
-host.OnlyIdeasStyle=(size,dark)=>{document.documentElement.style.setProperty('--size',`${Math.max(18,Math.min(72,size))}px`);document.documentElement.dataset.theme=dark?'dark':'light'}
+host.OnlyIdeasStyle=(size,dark)=>{document.documentElement.style.setProperty('--size',`${Math.max(15,Math.min(72,size))}px`);document.documentElement.dataset.theme=dark?'dark':'light'}
 let ready=false,pending:DocumentData|undefined
 host.OnlyIdeasRender=p=>{
   if(!ready){pending=p;return}
-  host.OnlyIdeasStyle(p.fontSize||22,!!p.dark)
+  host.OnlyIdeasStyle(p.fontSize||18,!!p.dark)
   const html=host.markdownToHTML(p.mmd,{htmlTags:false,width:Math.max(280,root.clientWidth),linkify:false,typographer:false,accessibility:{assistiveMml:true},outMath:{include_svg:true}})
   root.innerHTML=DOMPurify.sanitize(html,{USE_PROFILES:{html:true,svg:true,mathMl:true},ADD_TAGS:['mjx-container','mjx-assistive-mml'],ADD_ATTR:['jax','focusable','viewBox'],FORBID_TAGS:['style','script','iframe','object','embed','form','input','button'],FORBID_ATTR:['srcdoc','srcset']})
   for(const img of root.querySelectorAll('img')) {img.removeAttribute('style');img.removeAttribute('width');img.removeAttribute('height');const path=img.getAttribute('src')?.replace(/^\.\//,'')||'';const data=p.figures?.[path];if(data&&/^data:image\/(?:png|jpeg|gif|webp|svg\+xml);base64,/.test(data))img.src=data;else img.replaceWith(document.createTextNode('[Figure not downloaded]'))}

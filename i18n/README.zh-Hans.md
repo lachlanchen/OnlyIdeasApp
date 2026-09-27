@@ -36,11 +36,11 @@ npm run dev
 
 ## 状态
 
-原生版本 1.0.0（8）加入翡翠绿与金色的专属 O/i 图标，以及“共享／仅自己”的导入选项。iOS 使用 SwiftUI，Android 使用原生控件，支持调节字号、个人主页和保存智能体聊天。工作站智能体通过 LazyEdge 搜索研究索引并下载 PDF，Mathpix 保留公式和插图。Apple 正式送审仍需最终截图和 Apple 登录的实际验证。
+原生版本 1.0.0（9）更充分地利用屏幕空间：紧凑的控件、全宽摘要、默认 18 的正文字号，并防止页面横向移动。论文和插图自动缓存，优先打开本地副本，再从云端更新；“保留离线”可固定副本。O/i 图标采用清爽的青绿、蓝、紫渐变与金色圆点。Apple 正式送审仍需最终截图和 Apple 登录的实际验证。
 
 公共阅读室现有两篇真实论文：OpenAlex（CC0-1.0）和 Measuring holographic entanglement entropy on a quantum simulator（CC-BY-4.0），另保留明确标注的原创示例。四幅原始插图完整保留。两篇均通过真实转换流程导入，并在未登录的手机宽度阅读器中验证。
 
-[1.0.0 (8)](../docs/release-candidate-8.md) · [0.3](../docs/native-0.3.md) · [docs/native.md](../docs/native.md)
+[1.0.0 (9)](../docs/release-candidate-9.md) · [0.3](../docs/native-0.3.md) · [docs/native.md](../docs/native.md)
 
 ## 支持
 

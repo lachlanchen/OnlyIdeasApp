@@ -36,11 +36,11 @@ App-Code, öffentliche Inhalte und private Kontodaten liegen getrennt. MMD erhä
 
 ## Stand
 
-Die native Version 1.0.0 (8) enthält ein eigenes smaragdgrünes und goldenes O/i-Symbol sowie die Auswahl Teilen/Nur ich. SwiftUI auf iOS und native Android-Steuerelemente bieten einstellbare Schriftgröße, Profil und Gesprächsverlauf. Der Agent auf der Workstation sucht über LazyEdge nach Arbeiten und lädt PDFs herunter; Mathpix erhält Formeln und Abbildungen. Für Apples öffentliche Prüfung fehlen noch finale Screenshots und eine Prüfung der tatsächlichen Apple-Anmeldung.
+Die native Version 1.0.0 (9) nutzt den Platz besser: kompakte Bedienelemente, Abstracts in voller Breite, standardmäßig 18 Punkt Leseschrift und kein seitliches Verschieben der Seite. Arbeiten und Abbildungen werden automatisch gespeichert, zuerst lokal geöffnet und anschließend aus der Cloud aktualisiert. Offline behalten sichert eine feste Kopie. Das O/i-Symbol kombiniert einen Verlauf von Türkis über Blau zu Violett mit einem goldenen Punkt. Für Apples öffentliche Prüfung fehlen noch finale Screenshots und eine Prüfung der tatsächlichen Apple-Anmeldung.
 
 Der öffentliche Leseraum enthält zwei echte Arbeiten: OpenAlex (CC0-1.0) und Measuring holographic entanglement entropy on a quantum simulator (CC-BY-4.0), zusätzlich zum klar gekennzeichneten Originalbeispiel. Vier Originalabbildungen bleiben erhalten. Beide Arbeiten wurden über den echten Konvertierungsablauf importiert und ohne Anmeldung bei Smartphone-Breite geprüft.
 
-[1.0.0 (8)](../docs/release-candidate-8.md) · [0.3](../docs/native-0.3.md) · [docs/native.md](../docs/native.md)
+[1.0.0 (9)](../docs/release-candidate-9.md) · [0.3](../docs/native-0.3.md) · [docs/native.md](../docs/native.md)
 
 ## Unterstützung
 

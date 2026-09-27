@@ -1,6 +1,27 @@
 import XCTest
 
 final class NativeUITests: XCTestCase {
+  func testAutomaticCacheAndCompactReader() {
+    continueAfterFailure = false
+    let app = XCUIApplication()
+    let title = "Measuring holographic entanglement entropy on a quantum simulator"
+    app.launch()
+    let row = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", title)).firstMatch
+    XCTAssertTrue(row.waitForExistence(timeout: 30)); row.tap()
+    XCTAssertTrue(app.webViews.staticTexts[title].waitForExistence(timeout: 45))
+    shot("Compact real paper cached automatically")
+    app.swipeLeft()
+    shot("Reader after horizontal gesture")
+    app.terminate()
+    app.launchArguments = ["--onlyideas-native-offline"]
+    app.launch()
+    XCTAssertTrue(app.staticTexts["Offline · cached papers"].waitForExistence(timeout: 15))
+    let saved = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", title)).firstMatch
+    XCTAssertTrue(saved.waitForExistence(timeout: 10)); saved.tap()
+    XCTAssertTrue(app.webViews.staticTexts[title].waitForExistence(timeout: 10))
+    shot("Automatic cache after offline cold launch")
+  }
+
   func testAccessibleStoreScreens() {
     continueAfterFailure = false
     let settings = XCUIApplication(bundleIdentifier: "com.apple.Preferences")

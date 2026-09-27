@@ -9,3 +9,21 @@ mjx-container:not([display="true"])::-webkit-scrollbar { display: none; }
 .author { text-align: center; font-size: .85em; line-height: 1.6; margin: 1.4em 0; }
 .author p > span { display: block; }
 mjx-assistive-mml { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; border: 0 !important; overflow: hidden !important; clip: rect(1px, 1px, 1px, 1px) !important; white-space: nowrap !important; }
+
+/* Keep the page fixed to the viewport; wide content stays inside its own box. */
+:root{--size:18px}
+html,body{width:100%;max-width:100%;overflow-x:hidden;overscroll-behavior-x:none}
+body{padding:14px clamp(14px,3vw,24px) 28px}
+article{width:100%;min-width:0;max-width:960px;line-height:1.55;overflow-wrap:anywhere}
+article>*{max-width:100%;min-width:0}
+#paper p{line-height:1.55;margin:0 0 .8em}
+#paper h1{font-size:1.4em;line-height:1.24;margin:.2em 0 .7em}
+#paper h2{font-size:1.2em;margin:1.25em 0 .55em}
+#paper .abstract{width:100%!important;margin:1em 0!important;font-size:1em!important}
+#paper .abstract p{text-indent:0!important}
+#paper .abstract_head{text-align:left!important;margin:.7em 0 .5em}
+#paper .author{text-align:left;font-size:.82em;line-height:1.45;margin:.7em 0}
+#paper mjx-container[jax="SVG"]>svg{max-width:100%;height:auto}
+#paper .table_tabular,#paper pre,#paper table{max-width:100%;min-width:0;overscroll-behavior-x:contain}
+#paper blockquote{padding-left:12px;margin:12px 0}
+#paper img{display:block;margin:12px auto;max-width:100%}

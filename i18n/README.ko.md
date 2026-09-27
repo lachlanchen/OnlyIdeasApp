@@ -36,11 +36,11 @@ npm run dev
 
 ## 상태
 
-네이티브 1.0.0 (8)은 에메랄드와 금색의 독자적인 O/i 아이콘과 공유/나만 보기 선택을 제공합니다. iOS는 SwiftUI, Android는 네이티브 UI를 사용하며 글자 크기 조절, 프로필, 대화 기록을 지원합니다. 워크스테이션 에이전트가 LazyEdge를 통해 논문을 검색하고 PDF를 내려받으며 Mathpix가 수식과 그림을 보존합니다. Apple 공개 심사 신청에는 최종 스크린샷과 실제 Apple 로그인 확인이 남아 있습니다.
+네이티브 1.0.0 (9)은 간결한 조작부와 전체 너비의 초록으로 화면을 더 효율적으로 사용합니다. 본문 기본 크기는 18이며 페이지가 좌우로 밀리지 않습니다. 논문과 그림은 자동 저장되어 기기의 사본을 먼저 열고 클라우드 변경 사항을 반영합니다. 오프라인 보관으로 사본을 고정할 수 있습니다. O/i 아이콘은 청록·파랑·보라 그라데이션과 금색 점으로 정리했습니다. Apple 공개 심사에는 최종 스크린샷과 실제 Apple 로그인 확인이 남아 있습니다.
 
 공개 열람실에는 명확히 표시된 원본 예제와 함께 실제 논문 두 편인 OpenAlex (CC0-1.0), Measuring holographic entanglement entropy on a quantum simulator (CC-BY-4.0)가 있습니다. 원본 그림 네 개를 보존했습니다. 두 논문 모두 실제 변환 과정을 거쳤으며 로그인 없이 휴대폰 너비의 리더에서 확인했습니다.
 
-[1.0.0 (8)](../docs/release-candidate-8.md) · [0.3](../docs/native-0.3.md) · [docs/native.md](../docs/native.md)
+[1.0.0 (9)](../docs/release-candidate-9.md) · [0.3](../docs/native-0.3.md) · [docs/native.md](../docs/native.md)
 
 ## 후원
 

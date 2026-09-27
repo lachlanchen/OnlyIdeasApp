@@ -36,11 +36,11 @@ App code, content and private account data have separate homes. MMD preserves Te
 
 ## Status
 
-Native 1.0.0 (8) adds a custom emerald-and-gold O/i icon and Shared/Only me import controls. iOS uses SwiftUI and Android uses native controls, with adjustable reading text, a Profile page and saved agent chats. The workstation agent searches research indexes and downloads PDFs through LazyEdge; Mathpix preserves equations and figures. Apple public review still needs final screenshots and live Apple sign-in verification.
+Native 1.0.0 (9) uses space more carefully: compact controls, full-width abstracts, an 18-point reading default and no sideways page movement. Papers and figures cache automatically, open locally first and refresh from the cloud; Keep offline pins a copy. The O/i icon now has a clean teal–blue–violet gradient and gold dot. Apple public review still needs final screenshots and live Apple sign-in verification.
 
 The public reading room now includes two real papers: OpenAlex (CC0-1.0) and Measuring holographic entanglement entropy on a quantum simulator (CC-BY-4.0), alongside the clearly labeled original sample. Four original figures are retained. Both papers were imported through the real conversion workflow and checked in a phone-width reader without signing in.
 
-[1.0.0 (8)](docs/release-candidate-8.md) · [0.3](docs/native-0.3.md) · [docs/native.md](docs/native.md)
+[1.0.0 (9)](docs/release-candidate-9.md) · [0.3](docs/native-0.3.md) · [docs/native.md](docs/native.md)
 
 ## Support
 

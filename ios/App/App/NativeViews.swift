@@ -71,12 +71,12 @@ struct NativeLibrary: View {
   }
   var body: some View {
     ScrollView {
-      VStack(alignment: .leading, spacing: 22) {
+      VStack(alignment: .leading, spacing: 12) {
         HStack {
           VStack(alignment: .leading, spacing: 8) {
-            Text("Your next idea\nstarts with a paper.").font(
-              .system(.title, design: .default).weight(.bold))
-            Text("Read, ask, and make connections.").font(.title3).foregroundColor(.secondary)
+            Text("Your reading room").font(
+              .system(.title3, design: .default).weight(.bold))
+            Text("Read, ask, and make connections.").font(.subheadline).foregroundColor(.secondary)
           }
           Spacer()
         }.padding(.top, 8)
@@ -90,7 +90,7 @@ struct NativeLibrary: View {
         Toggle("Share new papers with the reading room", isOn: $sharePaper)
         Text("Shared papers appear after source and community review. Turn off for Only me.").font(.footnote).foregroundColor(.secondary)
         if store.offline {
-          Label("Offline · downloaded papers", systemImage: "arrow.down.circle.fill").font(.body)
+          Label("Offline · cached papers", systemImage: "arrow.down.circle.fill").font(.body)
             .foregroundColor(.secondary)
         }
         HStack {
@@ -118,8 +118,8 @@ struct NativeLibrary: View {
               .padding(.vertical, 10)
           }
         }
-      }.padding(22)
-    }.background(Color(.systemGroupedBackground)).navigationTitle("OnlyIdeas")
+      }.padding(14)
+    }.background(Color(.systemGroupedBackground)).navigationTitle("OnlyIdeas").navigationBarTitleDisplayMode(.inline)
       .searchable(text: $query, prompt: "Search your papers")
       .toolbar {
         ToolbarItem(placement: .navigationBarTrailing) {
@@ -146,32 +146,20 @@ struct PaperRow: View {
   let paper: ResearchPaper
   var downloaded: Bool
   var body: some View {
-    VStack(alignment: .leading, spacing: 14) {
+    VStack(alignment: .leading, spacing: 7) {
       HStack {
-        Image(systemName: "doc.richtext").font(.title2).foregroundColor(accent).frame(
-          width: 48, height: 54
-        ).background(accent.opacity(0.09)).cornerRadius(12)
+        Text(paper.language?.uppercased() ?? "PAPER").font(.caption.weight(.bold))
+        Text(paper.visibility == "private" ? "Private" : "Reading room").font(.caption)
         Spacer()
-        Text(paper.language?.uppercased() ?? "PAPER").font(.subheadline.weight(.bold))
-          .foregroundColor(.secondary)
-        if downloaded { Image(systemName: "arrow.down.circle.fill").foregroundColor(accent) }
-      }
-      Text(paper.title).font(.title3.weight(.semibold)).foregroundColor(.primary).fixedSize(
-        horizontal: false, vertical: true)
+        if downloaded { Image(systemName: "pin.fill").font(.caption) }
+        Image(systemName: "chevron.right").font(.caption)
+      }.foregroundColor(.secondary)
+      Text(paper.title).font(.headline).foregroundColor(.primary).fixedSize(horizontal: false, vertical: true)
       if let authors = paper.authors, !authors.isEmpty {
-        Text(authors).font(.body).foregroundColor(.secondary).lineLimit(2)
+        Text(authors).font(.subheadline).foregroundColor(.secondary).lineLimit(2)
       }
-      HStack {
-        Label(
-          paper.visibility == "private" ? "Private paper" : "Reading room",
-          systemImage: paper.visibility == "private" ? "lock" : "book"
-        ).font(.subheadline).foregroundColor(.secondary)
-        Spacer()
-        Image(systemName: "arrow.up.right").foregroundColor(accent)
-      }
-    }.padding(20).frame(maxWidth: .infinity, alignment: .leading).background(
-      Color(.secondarySystemGroupedBackground)
-    ).cornerRadius(22)
+    }.padding(14).frame(maxWidth: .infinity, alignment: .leading)
+      .background(Color(.secondarySystemGroupedBackground)).cornerRadius(14)
   }
 }
 struct NativeAgent: View {
@@ -183,7 +171,7 @@ struct NativeAgent: View {
     VStack(spacing: 0) {
       ScrollViewReader { proxy in
         ScrollView {
-          LazyVStack(alignment: .leading, spacing: 22) {
+          LazyVStack(alignment: .leading, spacing: 12) {
             if store.messages.isEmpty { welcome }
             ForEach(store.messages) { message in
               AgentBubble(message: message, requests: $requests).contextMenu {
@@ -199,7 +187,7 @@ struct NativeAgent: View {
               }
             }
             Color.clear.frame(height: 1).id("end")
-          }.padding(22)
+          }.padding(14)
         }.onChange(of: store.messages.count) { _ in
           withAnimation { proxy.scrollTo("end", anchor: .bottom) }
         }
@@ -207,7 +195,7 @@ struct NativeAgent: View {
       composer
     }
     .background(Color(.systemGroupedBackground))
-    .navigationTitle("Agent")
+    .navigationTitle("Agent").navigationBarTitleDisplayMode(.inline)
     .toolbar {
       ToolbarItemGroup(placement: .keyboard) {
         Spacer()
@@ -387,7 +375,7 @@ struct NativeProfile: View {
               set: {
                 store.readingSize = $0
                 store.objectWillChange.send()
-              }), in: 18...34, step: 1
+              }), in: 15...34, step: 1
           ).accessibilityLabel("Reading text size")
           Text("A little more room for your next idea.").font(.system(size: store.readingSize))
             .fixedSize(horizontal: false, vertical: true)
@@ -410,7 +398,7 @@ struct NativeProfile: View {
         Label(
           "\(store.papers.filter{$0.visibility=="private"}.count) private papers",
           systemImage: "lock.doc")
-        Label("\(store.downloads().count) offline downloads", systemImage: "arrow.down.circle")
+        Label("\(store.downloads().count) papers cached on this device", systemImage: "arrow.down.circle")
       }
       Section("About") {
         Text("OnlyIdeas 1.0").font(.headline)
@@ -559,13 +547,13 @@ struct NativePaper: View {
     .toolbar {
       ToolbarItemGroup(placement: .navigationBarTrailing) {
         Button {
-          store.readingSize = min(34, store.readingSize + 2)
+          store.readingSize = min(34, store.readingSize + 1)
           store.objectWillChange.send()
         } label: {
           Image(systemName: "textformat.size")
         }.accessibilityLabel("Increase reading text size")
         Menu {
-          Button(store.isDownloaded(paper.id) ? "Remove download" : "Read offline") {
+          Button(store.isDownloaded(paper.id) ? "Unpin offline copy" : "Keep offline") {
             if let document = document {
               do { try store.toggleDownload(document) } catch {
                 store.error = error.localizedDescription
@@ -573,7 +561,7 @@ struct NativePaper: View {
             }
           }
           Button("Smaller text") {
-            store.readingSize = max(18, store.readingSize - 2)
+            store.readingSize = max(15, store.readingSize - 1)
             store.objectWillChange.send()
           }
           Button("Export Markdown") {
@@ -605,8 +593,10 @@ struct NativePaper: View {
       }
     }
     .task {
-      do { document = try await store.loadPaper(paper) } catch {
-        store.error = error.localizedDescription
+      document = store.cachedPaper(paper.id)
+      do { document = try await store.loadPaper(paper, refresh: true) } catch {
+        if Task.isCancelled { return }
+        if store.cachedPaper(paper.id) == nil { document = nil; store.error = error.localizedDescription }
       }
     }
     .sheet(isPresented: $readingTools) {
@@ -631,6 +621,13 @@ struct NativeDocument: UIViewRepresentable {
     view.navigationDelegate = context.coordinator
     view.isOpaque = false
     view.backgroundColor = .clear
+    view.scrollView.isDirectionalLockEnabled = true
+    view.scrollView.alwaysBounceHorizontal = false
+    view.scrollView.showsHorizontalScrollIndicator = false
+    #if DEBUG
+      if #available(iOS 16.4, *) { view.isInspectable = true }
+    #endif
+
     if let root = Bundle.main.url(forResource: "public", withExtension: nil) {
       view.loadFileURL(
         root.appendingPathComponent("native-reader.html"), allowingReadAccessTo: root)
@@ -769,7 +766,7 @@ struct NativeDiscussion: View {
               .frame(maxWidth: .infinity)
           }.buttonStyle(.borderedProminent).disabled(
             draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || sending || (paper.visibility == "public" && !acceptedTerms))
-        }.padding(22)
+        }.padding(14)
       }.navigationTitle("Discussion").toolbar { Button("Done") { dismiss() } }.task { await load() }
         .sheet(item: $report) { comment in
           NavigationView {

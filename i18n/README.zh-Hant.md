@@ -36,11 +36,11 @@ npm run dev
 
 ## 狀態
 
-原生版本 1.0.0（8）加入翡翠綠與金色的專屬 O/i 圖示，以及「共享／僅自己」的匯入選項。iOS 使用 SwiftUI，Android 使用原生控制項，支援調整字級、個人頁面和保存代理聊天。工作站代理透過 LazyEdge 搜尋研究索引並下載 PDF，Mathpix 保留公式和插圖。Apple 正式送審仍需最終截圖和 Apple 登入的實際驗證。
+原生版本 1.0.0（9）更充分地利用螢幕空間：緊湊的控制項、全寬摘要、預設 18 的正文字級，並防止頁面橫向移動。論文與插圖自動快取，優先開啟本機副本，再從雲端更新；「保留離線」可固定副本。O/i 圖示採用清爽的青綠、藍、紫漸層與金色圓點。Apple 正式送審仍需最終截圖和 Apple 登入的實際驗證。
 
 公共閱讀室現有兩篇真實論文：OpenAlex（CC0-1.0）和 Measuring holographic entanglement entropy on a quantum simulator（CC-BY-4.0），另保留明確標示的原創範例。四幅原始插圖完整保留。兩篇均透過真實轉換流程匯入，並在未登入的手機寬度閱讀器中驗證。
 
-[1.0.0 (8)](../docs/release-candidate-8.md) · [0.3](../docs/native-0.3.md) · [docs/native.md](../docs/native.md)
+[1.0.0 (9)](../docs/release-candidate-9.md) · [0.3](../docs/native-0.3.md) · [docs/native.md](../docs/native.md)
 
 ## 支持
 

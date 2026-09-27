@@ -18,6 +18,10 @@ import javax.crypto.spec.GCMParameterSpec;
 import org.json.JSONObject;
 
 final class NativeSession {
+  static final class HttpError extends Exception {
+    final int status;
+    HttpError(int status, String message) { super(message); this.status = status; }
+  }
   static final String ORIGIN = "https://agent.onlyideas.art";
   private final SharedPreferences prefs;
 
@@ -144,7 +148,7 @@ final class NativeSession {
                     .optString("error", message);
           } catch (Exception ignored) {
           }
-          throw new Exception(message);
+          throw new HttpError(code, message);
         }
         return data;
       }

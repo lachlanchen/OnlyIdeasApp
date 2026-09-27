@@ -72,3 +72,16 @@ stay private. Existing private libraries and accounts are preserved.
 The icon keeps emerald/gold but uses a custom O/i conversation mark instead of a
 common open-book symbol. Native builds must be uploaded before claiming an icon
 change is available to installed apps.
+
+## Compact cached reading amendment · 2026-09-27
+
+Build 9 reduces margins and control sizes, uses full-width abstracts, prevents
+page-level horizontal scrolling and defaults to 18-point text (adjustable from
+15, with system text scaling). Tables and code keep their own scrolling area.
+Automatically save recently opened papers and figures, open the local copy first
+and check the cloud for updates. Warm the first three library entries; bound the
+automatic cache to 20 papers / 150 MB. Keep offline pins up to 30 copies. Reconcile
+withdrawn papers and visibility changes online; clear private cache on sign-out.
+Cloud notes and discussions still require a connection. Preserve the live database.
+The existing O/i icon receives a teal–blue–violet gradient and warm gold dot;
+remove the overlapping upper-right idea stroke.

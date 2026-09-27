@@ -55,7 +55,10 @@ public class MainActivity extends AppCompatActivity {
       jobs = new JSONArray();
   private String page = "library", chatId = "", agentStatus = "", quote = "", lastMessages = "";
   private boolean busy = false, refreshingChat = false, offline = false, shareUpload = true;
-  private int authEpoch = 0, ink, muted, bg, surface, soft, green;
+  private volatile int authEpoch = 0;
+  private int ink, muted, bg, surface, soft, green, readerRequest = 0;
+  private final Object cacheLock = new Object();
+  private Future<?> cacheWarmup;
   private WebView reader;
   private final OnBackPressedCallback navigateBack =
       new OnBackPressedCallback(false) {
@@ -91,6 +94,7 @@ public class MainActivity extends AppCompatActivity {
       }
     WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
     clearExports();
+    restoreLibrary();
     buildRoot();
     showLibrary();
     refresh();
@@ -188,14 +192,14 @@ public class MainActivity extends AppCompatActivity {
   Button button(String label, boolean primary, Runnable action) {
     Button b = new Button(this);
     b.setText(label);
-    b.setTextSize(17);
+    b.setTextSize(16);
     b.setAllCaps(false);
     b.setElevation(0);
     b.setStateListAnimator(null);
     b.setTextColor(primary ? Color.WHITE : green);
-    b.setMinHeight(dp(52));
-    b.setMinimumHeight(dp(52));
-    b.setPadding(dp(16), dp(10), dp(16), dp(10));
+    b.setMinHeight(dp(44));
+    b.setMinimumHeight(dp(44));
+    b.setPadding(dp(12), dp(7), dp(12), dp(7));
     b.setBackground(rounded(primary ? Color.parseColor("#28654d") : soft, 15));
     b.setOnClickListener(v -> action.run());
     return b;
@@ -207,7 +211,7 @@ public class MainActivity extends AppCompatActivity {
   }
 
   void caption(LinearLayout c, String value) {
-    TextView t = text(value, 16, false);
+    TextView t = text(value, 14, false);
     t.setTextColor(muted);
     c.addView(t);
   }
@@ -218,14 +222,14 @@ public class MainActivity extends AppCompatActivity {
 
   LinearLayout card() {
     LinearLayout c = column();
-    c.setPadding(dp(20), dp(20), dp(20), dp(20));
-    c.setBackground(rounded(surface, 22));
+    c.setPadding(dp(14), dp(14), dp(14), dp(14));
+    c.setBackground(rounded(surface, 14));
     return c;
   }
 
   void addCard(LinearLayout parent, LinearLayout card) {
     LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(-1, -2);
-    p.bottomMargin = dp(16);
+    p.bottomMargin = dp(10);
     parent.addView(card, p);
   }
 
@@ -233,7 +237,7 @@ public class MainActivity extends AppCompatActivity {
     ScrollView s = new ScrollView(this);
     s.setFillViewport(true);
     LinearLayout c = column();
-    c.setPadding(dp(22), dp(22), dp(22), dp(28));
+    c.setPadding(dp(14), dp(12), dp(14), dp(20));
     s.addView(c);
     content.addView(s, new LinearLayout.LayoutParams(-1, -1));
     return c;
@@ -244,13 +248,13 @@ public class MainActivity extends AppCompatActivity {
     root = column();
     root.setBackgroundColor(bg);
     header = row();
-    header.setPadding(dp(22), dp(10), dp(18), dp(10));
+    header.setPadding(dp(14), dp(4), dp(10), dp(4));
     root.addView(header);
     content = column();
     root.addView(content, new LinearLayout.LayoutParams(-1, 0, 1));
     bottom = row();
     bottom.setBackgroundColor(surface);
-    bottom.setPadding(dp(12), dp(8), dp(12), dp(8));
+    bottom.setPadding(dp(8), dp(2), dp(8), dp(2));
     root.addView(bottom);
     setContentView(root);
     ViewCompat.setOnApplyWindowInsetsListener(
@@ -266,7 +270,7 @@ public class MainActivity extends AppCompatActivity {
 
   void navigation(String name) {
     header.removeAllViews();
-    TextView t = text(name, 28, true);
+    TextView t = text(name, 22, true);
     header.addView(t, new LinearLayout.LayoutParams(0, -2, 1));
     Button profile = button(account == null ? "Profile" : initial(), false, () -> showProfile());
     profile.setContentDescription("Open profile");
@@ -285,7 +289,7 @@ public class MainActivity extends AppCompatActivity {
               });
       b.setTextSize(16);
       b.setBackground(rounded(page.equals(tab.toLowerCase()) ? soft : surface, 14));
-      LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, dp(52), 1);
+      LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, dp(44), 1);
       lp.setMargins(dp(3), 0, dp(3), 0);
       bottom.addView(b, lp);
     }
@@ -381,7 +385,9 @@ public class MainActivity extends AppCompatActivity {
           offline = r.optBoolean("offline");
           JSONObject session = r.optJSONObject("session");
           if (session != null) {
-            account = session.optJSONObject("user");
+            JSONObject next = session.optJSONObject("user");
+            if (!Objects.equals(account == null ? null : account.optString("id"), next == null ? null : next.optString("id"))) authEpoch++;
+            account = next;
             if (account == null && api.token() != null) {
               try {
                 api.token(null);
@@ -396,6 +402,12 @@ public class MainActivity extends AppCompatActivity {
           }
           papers = r.optJSONArray("papers");
           if (papers == null) papers = new JSONArray();
+          if (account == null) { JSONArray visible = new JSONArray(); for(int i=0;i<papers.length();i++) { JSONObject p=papers.optJSONObject(i); if(p!=null && p.optString("visibility").equals("public")) visible.put(p); } papers=visible; }
+          if (!offline) {
+            getPreferences(MODE_PRIVATE).edit().putString("library", papers.toString())
+                .putString("libraryOwner", account == null ? "public" : account.optString("id")).apply();
+            warmLibrary(papers);
+          }
           if (page.equals("library")) showLibrary();
           else if (page.equals("profile")) showProfile();
           else if (page.equals("agent")) navigation("Agent");
@@ -406,10 +418,10 @@ public class MainActivity extends AppCompatActivity {
   void showLibrary() {
     clear("library");
     LinearLayout c = scrollContent();
-    title(c, "Your next idea starts\nwith a paper.", 29);
+    title(c, "Your reading room", 20);
     gap(c, 10);
     caption(c, "Read, ask, and make connections.");
-    gap(c, 22);
+    gap(c, 12);
     c.addView(
         button(
             "＋  Add a paper",
@@ -425,28 +437,28 @@ public class MainActivity extends AppCompatActivity {
               startActivityForResult(pick, 42);
             }));
     android.widget.Switch sharing = new android.widget.Switch(this);
-    sharing.setText("Share new papers with the reading room"); sharing.setChecked(shareUpload);
+    sharing.setText("Share new papers"); sharing.setChecked(shareUpload);
     sharing.setOnCheckedChangeListener((v, checked) -> shareUpload = checked); c.addView(sharing);
     caption(c, "Shared after source and community review. Turn off for Only me.");
-    gap(c, 24);
+    gap(c, 14);
     if (offline) {
-      caption(c, "Offline · downloaded papers");
+      caption(c, "Offline · cached papers");
       gap(c, 14);
     }
     LinearLayout searchBox = row();
     EditText search = new EditText(this);
     search.setSingleLine(true);
-    search.setTextSize(18);
+    search.setTextSize(16);
     search.setTextColor(ink);
     search.setHintTextColor(muted);
     search.setHint("Search your papers");
-    search.setPadding(dp(16), dp(12), dp(16), dp(12));
+    search.setPadding(dp(12), dp(8), dp(12), dp(8));
     search.setBackground(rounded(surface, 14));
-    searchBox.addView(search, new LinearLayout.LayoutParams(0, dp(54), 1));
+    searchBox.addView(search, new LinearLayout.LayoutParams(0, dp(44), 1));
     c.addView(searchBox);
-    gap(c, 22);
-    title(c, "Reading library", 23);
-    gap(c, 18);
+    gap(c, 12);
+    title(c, "Reading library", 18);
+    gap(c, 10);
     LinearLayout list = column();
     c.addView(list);
     renderLibrary(list, "");
@@ -480,12 +492,14 @@ public class MainActivity extends AppCompatActivity {
           p.optString("language", "paper").toUpperCase()
               + "  ·  "
               + (p.optString("visibility").equals("private") ? "Private paper" : "Reading room"));
-      gap(card, 12);
-      title(card, p.optString("title"), 23);
-      gap(card, 10);
-      caption(card, p.optString("authors", "Personal paper"));
-      gap(card, 18);
-      card.addView(button("Open paper  ↗", false, () -> openPaper(p)));
+      gap(card, 6);
+      title(card, p.optString("title"), 18);
+      gap(card, 6);
+      TextView authors = text(p.optString("authors", "Personal paper"), 14, false);
+      authors.setTextColor(muted); authors.setMaxLines(2); authors.setEllipsize(android.text.TextUtils.TruncateAt.END);
+      card.addView(authors);
+      card.setContentDescription("Open paper: " + p.optString("title"));
+      card.setFocusable(true); card.setOnClickListener(v -> openPaper(p));
       addCard(list, card);
     }
     if (list.getChildCount() == 0)
@@ -508,10 +522,10 @@ public class MainActivity extends AppCompatActivity {
         account == null
             ? "Keep your papers and conversations together."
             : "@" + account.optString("login"));
-    gap(c, 24);
+    gap(c, 14);
     if (account == null) {
       c.addView(button("Continue with GitHub", true, this::signIn));
-      gap(c, 22);
+      gap(c, 12);
     }
     LinearLayout reading = card();
     title(reading, "Reading preferences", 22);
@@ -520,15 +534,15 @@ public class MainActivity extends AppCompatActivity {
     TextView size = text("Reading text · " + fontSize() + " sp", 18, false);
     reading.addView(size);
     SeekBar slider = new SeekBar(this);
-    slider.setMax(16);
-    slider.setProgress(fontSize() - 18);
+    slider.setMax(19);
+    slider.setProgress(fontSize() - 15);
     slider.setContentDescription("Reading text size");
     reading.addView(slider, new LinearLayout.LayoutParams(-1, dp(56)));
     reading.addView(sample);
     slider.setOnSeekBarChangeListener(
         new SeekBar.OnSeekBarChangeListener() {
           public void onProgressChanged(SeekBar s, int p, boolean user) {
-            int n = p + 18;
+            int n = p + 15;
             getPreferences(MODE_PRIVATE).edit().putInt("font", n).apply();
             size.setText("Reading text · " + n + " sp");
             sample.setTextSize(n);
@@ -562,7 +576,7 @@ public class MainActivity extends AppCompatActivity {
     LinearLayout library = card();
     title(library, "Your library", 22);
     gap(library, 12);
-    caption(library, downloads().size() + " offline downloads");
+    caption(library, downloads().size() + " papers cached on this device");
     gap(library, 16);
     library.addView(button("Your agent conversations", false, this::showAgent));
     addCard(c, library);
@@ -607,7 +621,7 @@ public class MainActivity extends AppCompatActivity {
   }
 
   int fontSize() {
-    return Math.max(18, getPreferences(MODE_PRIVATE).getInt("font", 22));
+    return Math.max(15, getPreferences(MODE_PRIVATE).getInt("font", 18));
   }
 
   void showAgent() {
@@ -643,7 +657,7 @@ public class MainActivity extends AppCompatActivity {
     LinearLayout compose = row();
     compose.setGravity(Gravity.BOTTOM);
     compose.setPadding(dp(12), dp(10), dp(12), dp(10));
-    compose.setBackground(rounded(surface, 22));
+    compose.setBackground(rounded(surface, 14));
     LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(-1, -2);
     cp.setMargins(dp(16), dp(4), dp(16), dp(14));
     content.addView(compose, cp);
@@ -710,11 +724,11 @@ public class MainActivity extends AppCompatActivity {
           gap(bubble, 18);
           LinearLayout card = card();
           caption(card, p.optString("year") + " · Open paper");
-          gap(card, 10);
+          gap(card, 6);
           title(card, p.optString("title"), 22);
-          gap(card, 10);
+          gap(card, 6);
           caption(card, p.optString("authors"));
-          gap(card, 12);
+          gap(card, 6);
           card.addView(
               button(
                   "Read abstract",
@@ -725,7 +739,7 @@ public class MainActivity extends AppCompatActivity {
                           .setMessage(p.optString("summary"))
                           .setPositiveButton("Done", null)
                           .show()));
-          gap(card, 10);
+          gap(card, 6);
           android.widget.Switch sharing = new android.widget.Switch(this);
           sharing.setText("Share with the reading room"); sharing.setChecked(true); card.addView(sharing);
           caption(card, "Shared after source and community review. Turn off for Only me.");
@@ -982,6 +996,37 @@ public class MainActivity extends AppCompatActivity {
         });
   }
 
+  void restoreLibrary() {
+    String owner = account == null ? "public" : account.optString("id");
+    try {
+      if (owner.equals(getPreferences(MODE_PRIVATE).getString("libraryOwner", "public")))
+        papers = new JSONArray(getPreferences(MODE_PRIVATE).getString("library", "[]"));
+    } catch (Exception ignored) { }
+    if (papers.length() == 0) for (JSONObject d : downloads()) papers.put(d.optJSONObject("paper"));
+  }
+
+  void warmLibrary(JSONArray summaries) {
+    if (cacheWarmup != null) cacheWarmup.cancel(true);
+    int epoch = authEpoch;
+    cacheWarmup = io.submit(() -> {
+      Map<String,String> visible = new HashMap<>();
+      for (int i = 0; i < summaries.length(); i++) { JSONObject p = summaries.optJSONObject(i); visible.put(p.optString("id"), p.optString("visibility")); }
+      synchronized (cacheLock) {
+        if (epoch != authEpoch) return;
+        for (JSONObject d : downloads()) { JSONObject p = d.optJSONObject("paper"); if (!Objects.equals(visible.get(p.optString("id")), p.optString("visibility"))) removeCached(p.optString("id")); }
+      }
+      for (int i = 0; i < Math.min(3, summaries.length()); i++) {
+        if (Thread.currentThread().isInterrupted() || epoch != authEpoch) return;
+        JSONObject p = summaries.optJSONObject(i), saved = cachedPaper(p.optString("id"));
+        if (saved != null) {
+          JSONObject old = saved.optJSONObject("paper");
+          if (old.optString("revision").equals(p.optString("revision")) && old.optString("title").equals(p.optString("title")) && old.optString("visibility").equals(p.optString("visibility"))) continue;
+        }
+        try { fetchPaper(p); } catch (Exception ignored) { }
+      }
+    });
+  }
+
   void clearExports() {
     File dir = new File(getCacheDir(), "exports");
     File[] files = dir.listFiles();
@@ -1029,7 +1074,7 @@ public class MainActivity extends AppCompatActivity {
     paper.remove("mmd");
     paper.remove("sections");
     JSONObject summary =
-        new JSONObject().put("paper", paper).put("owner", document.optString("owner"));
+        new JSONObject().put("paper", paper).put("owner", document.optString("owner")).put("pinned", document.optBoolean("pinned", true)).put("accessed", document.optLong("accessed", 0));
     try (FileOutputStream out = new FileOutputStream(metadataFile(file))) {
       out.write(summary.toString().getBytes(StandardCharsets.UTF_8));
     }
@@ -1059,6 +1104,11 @@ public class MainActivity extends AppCompatActivity {
   }
 
   void clearPrivateDownloads() {
+    if (cacheWarmup != null) cacheWarmup.cancel(true);
+    getPreferences(MODE_PRIVATE).edit().remove("library").remove("libraryOwner").apply();
+    JSONArray publicOnly = new JSONArray();
+    for (int i = 0; i < papers.length(); i++) { JSONObject p = papers.optJSONObject(i); if (p != null && p.optString("visibility").equals("public")) publicOnly.put(p); }
+    papers = publicOnly;
     File[] files = folder().listFiles();
     if (files != null)
       for (File f : files)
@@ -1072,67 +1122,114 @@ public class MainActivity extends AppCompatActivity {
         }
   }
 
-  JSONObject fetchPaper(JSONObject paper) throws Exception {
-    String id = paper.getString("id");
-    try {
-      JSONObject full = api.json("/api/papers/" + id, "GET", null).getJSONObject("paper"),
-          figures = new JSONObject();
-      JSONArray sections = full.optJSONArray("sections");
-      if (sections != null)
-        for (int i = 0; i < sections.length(); i++) sections.optJSONObject(i).remove("text");
-      JSONArray assets = full.optJSONArray("assets");
-      int total = 0;
-      if (assets != null)
-        for (int i = 0; i < assets.length(); i++) {
-          String path = assets.getJSONObject(i).getString("path");
-          if (!path.startsWith("figures/") || path.contains("..")) continue;
-          byte[] bytes = api.bytes("/content/" + id + "/" + path, "GET", null, null, null);
-          total += bytes.length;
-          if (total > 50_000_000) throw new Exception("This paper is too large to download.");
-          String ext = path.substring(path.lastIndexOf('.') + 1).toLowerCase();
-          String mime =
-              ext.equals("svg")
-                  ? "image/svg+xml"
-                  : ext.equals("jpg") ? "image/jpeg" : "image/" + ext;
-          figures.put(
-              path, "data:" + mime + ";base64," + Base64.encodeToString(bytes, Base64.NO_WRAP));
-        }
-      return new JSONObject()
-          .put("paper", full)
-          .put("figures", figures)
-          .put(
-              "owner",
-              full.optString("visibility").equals("public")
-                  ? "public"
-                  : account == null ? "private" : account.optString("id"));
-    } catch (Exception e) {
-      File saved = paperFile(id);
-      if (saved.exists()) {
-        JSONObject d = new JSONObject(new String(readFileBytes(saved), StandardCharsets.UTF_8));
-        if (d.optString("owner").equals("public")
-            || account != null && d.optString("owner").equals(account.optString("id"))) return d;
+  JSONObject cachedPaper(String id) {
+    synchronized (cacheLock) {
+      try {
+        JSONObject d = new JSONObject(new String(readFileBytes(paperFile(id)), StandardCharsets.UTF_8));
+        if (d.optString("owner").equals("public") || account != null && d.optString("owner").equals(account.optString("id"))) return d;
+      } catch (Exception ignored) { }
+      return null;
+    }
+  }
+
+  boolean isPinned(String id) {
+    try { return paperFile(id).exists() && metadata(paperFile(id)).optBoolean("pinned", true); }
+    catch (Exception ignored) { return false; }
+  }
+
+  void removeCached(String id) {
+    synchronized (cacheLock) { File f = paperFile(id); f.delete(); metadataFile(f).delete(); }
+  }
+
+  void saveCached(JSONObject doc) throws Exception {
+    synchronized (cacheLock) {
+      if (!doc.optString("owner").equals("public") && (account == null || !doc.optString("owner").equals(account.optString("id")))) return;
+      File file = paperFile(doc.getJSONObject("paper").getString("id"));
+      File stage = new File(folder(), file.getName() + ".tmp");
+      try (FileOutputStream out = new FileOutputStream(stage)) { out.write(doc.toString().getBytes(StandardCharsets.UTF_8)); }
+      if (!stage.renameTo(file)) throw new IOException("Could not cache this paper.");
+      saveMetadata(file, doc);
+      ArrayList<JSONObject> recent = downloads(); recent.removeIf(d -> d.optBoolean("pinned", true));
+      recent.sort((a,b) -> Long.compare(b.optLong("accessed"), a.optLong("accessed")));
+      long bytes = 0; int count = 0;
+      for (JSONObject d : recent) {
+        String id = d.optJSONObject("paper").optString("id"); bytes += paperFile(id).length();
+        if (++count > 20 || bytes > 150_000_000) removeCached(id);
       }
+    }
+  }
+
+  JSONObject fetchPaper(JSONObject paper) throws Exception {
+    String id = paper.getString("id"), token = api.token(), owner = account == null ? "private" : account.optString("id");
+    int epoch = authEpoch;
+    JSONObject saved = cachedPaper(id);
+    try {
+      JSONObject full = api.json("/api/papers/" + id, "GET", null).getJSONObject("paper"), figures = new JSONObject();
+      JSONArray sections = full.optJSONArray("sections");
+      if (sections != null) for (int i = 0; i < sections.length(); i++) sections.optJSONObject(i).remove("text");
+      JSONArray assets = full.optJSONArray("assets"); int total = 0;
+      boolean same = saved != null && saved.getJSONObject("paper").optString("revision").equals(full.optString("revision"));
+      if (assets != null) for (int i = 0; i < assets.length(); i++) {
+        if (epoch != authEpoch || !Objects.equals(token, api.token()) || Thread.currentThread().isInterrupted()) throw new InterruptedException();
+        String path = assets.getJSONObject(i).getString("path");
+        if (!path.startsWith("figures/") || path.contains("..")) continue;
+        if (same && saved.getJSONObject("figures").has(path)) { figures.put(path, saved.getJSONObject("figures").getString(path)); continue; }
+        byte[] bytes = api.bytes("/content/" + id + "/" + path, "GET", null, null, null);
+        total += bytes.length; if (total > 50_000_000) throw new IOException("This paper is too large to cache.");
+        String ext = path.substring(path.lastIndexOf('.') + 1).toLowerCase();
+        String mime = ext.equals("svg") ? "image/svg+xml" : ext.equals("jpg") ? "image/jpeg" : "image/" + ext;
+        figures.put(path, "data:" + mime + ";base64," + Base64.encodeToString(bytes, Base64.NO_WRAP));
+      }
+      JSONObject d = new JSONObject().put("paper", full).put("figures", figures)
+          .put("owner", full.optString("visibility").equals("public") ? "public" : owner)
+          .put("pinned", saved != null && saved.optBoolean("pinned", true)).put("accessed", System.currentTimeMillis());
+      synchronized (cacheLock) {
+        if (epoch != authEpoch || !Objects.equals(token, api.token()) || Thread.currentThread().isInterrupted()) throw new InterruptedException();
+        saveCached(d);
+      }
+      return d;
+    } catch (Exception e) {
+      if (e instanceof NativeSession.HttpError && Arrays.asList(401,403,404).contains(((NativeSession.HttpError)e).status)) { removeCached(id); throw e; }
+      if (epoch != authEpoch || !Objects.equals(token, api.token()) || Thread.currentThread().isInterrupted()) throw e;
+      if (saved != null) return saved;
       throw e;
     }
   }
 
   void openPaper(JSONObject paper) {
-    clear("reader");
-    content.addView(text("Opening your paper…", 20, false));
-    job(
-        () -> fetchPaper(paper),
-        d -> {
-          derived = false;
-          document = d;
-          showReader();
+    int request = ++readerRequest, epoch = authEpoch;
+    clear("reader"); document = null;
+    content.addView(text("Opening your paper…", 18, false));
+    io.execute(() -> {
+      JSONObject cached = cachedPaper(paper.optString("id"));
+      if (cached != null) handler.post(() -> {
+        if (epoch == authEpoch && request == readerRequest && page.equals("reader")) { document = cached; derived = false; showReader(); }
+      });
+      try {
+        JSONObject fresh = fetchPaper(paper);
+        handler.post(() -> {
+          if (epoch != authEpoch || request != readerRequest || !page.equals("reader")) return;
+          String old = document == null ? "" : document.optJSONObject("paper").optString("revision");
+          document = fresh; derived = false;
+          if (reader == null) showReader();
+          else if (!old.equals(fresh.optJSONObject("paper").optString("revision"))) renderDocument(reader);
         });
+      } catch (Exception e) {
+        handler.post(() -> {
+          if (epoch != authEpoch || request != readerRequest || !page.equals("reader")) return;
+          if (cachedPaper(paper.optString("id")) == null) { showLibrary(); alert(e.getMessage() == null ? "Could not open this paper." : e.getMessage()); }
+        });
+      }
+    });
   }
 
   void showReader() {
     clear("reader");
     header.removeAllViews();
-    Button back = button("‹ Library", false, this::showLibrary);
-    header.addView(back);
+    Button back = button("‹", false, this::showLibrary);
+    back.setContentDescription("Back to library");
+    back.setMinWidth(dp(44)); back.setMinimumWidth(dp(44));
+    header.addView(back, new LinearLayout.LayoutParams(dp(44), dp(44)));
     TextView title = text(document.optJSONObject("paper").optString("title"), 17, true);
     title.setMaxLines(1);
     title.setEllipsize(android.text.TextUtils.TruncateAt.END);
@@ -1143,6 +1240,9 @@ public class MainActivity extends AppCompatActivity {
     header.addView(more, new LinearLayout.LayoutParams(dp(48), dp(48)));
     reader = new WebView(this);
     reader.setBackgroundColor(surface);
+    reader.setHorizontalScrollBarEnabled(false);
+    reader.setOverScrollMode(View.OVER_SCROLL_NEVER);
+    reader.getSettings().setTextZoom(100);
     reader.getSettings().setJavaScriptEnabled(true);
     reader.getSettings().setAllowFileAccess(false);
     reader.getSettings().setAllowContentAccess(false);
@@ -1159,7 +1259,11 @@ public class MainActivity extends AppCompatActivity {
 
           @JavascriptInterface
           public void selection(String value) {
-            handler.post(() -> quote = value);
+            handler.post(() -> {
+              quote = value;
+              View bar = content.findViewWithTag("selection-action");
+              if (bar != null) bar.setVisibility(value.isEmpty() ? View.GONE : View.VISIBLE);
+            });
           }
         },
         "NativeReader");
@@ -1191,7 +1295,8 @@ public class MainActivity extends AppCompatActivity {
         });
     content.addView(reader, new LinearLayout.LayoutParams(-1, 0, 1));
     Button discuss = button("Discuss paper or selected passage", false, this::discussion);
-    content.addView(discuss, new LinearLayout.LayoutParams(-1, dp(54)));
+    discuss.setTag("selection-action"); discuss.setVisibility(View.GONE);
+    content.addView(discuss, new LinearLayout.LayoutParams(-1, dp(44)));
     reader.loadUrl("https://appassets.androidplatform.net/assets/public/native-reader.html");
   }
 
@@ -1226,9 +1331,9 @@ public class MainActivity extends AppCompatActivity {
             new String[] {
               "Larger text",
               "Smaller text",
-              paperFile(document.optJSONObject("paper").optString("id")).exists()
-                  ? "Remove download"
-                  : "Read offline",
+              isPinned(document.optJSONObject("paper").optString("id"))
+                  ? "Unpin offline copy"
+                  : "Keep offline",
               "Export Markdown",
               "Discuss selection",
               "Notes, guides & translation"
@@ -1237,7 +1342,7 @@ public class MainActivity extends AppCompatActivity {
               if (n < 2) {
                 getPreferences(MODE_PRIVATE)
                     .edit()
-                    .putInt("font", Math.max(18, Math.min(34, fontSize() + (n == 0 ? 2 : -2))))
+                    .putInt("font", Math.max(15, Math.min(34, fontSize() + (n == 0 ? 1 : -1))))
                     .apply();
                 boolean dark =
                     (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK)
@@ -1261,21 +1366,12 @@ public class MainActivity extends AppCompatActivity {
     JSONObject doc = document;
     job(
         () -> {
-          File file = paperFile(doc.getJSONObject("paper").getString("id"));
-          if (file.exists()) {
-            if (!file.delete()) throw new Exception("Could not remove download.");
-            metadataFile(file).delete();
-            return "Download removed.";
-          }
-          if (downloads().size() >= 30)
-            throw new Exception("Remove a download before saving another paper.");
-          File stage = new File(folder(), file.getName() + ".tmp");
-          try (FileOutputStream out = new FileOutputStream(stage)) {
-            out.write(doc.toString().getBytes(StandardCharsets.UTF_8));
-          }
-          if (!stage.renameTo(file)) throw new Exception("Could not save this paper.");
-          saveMetadata(file, doc);
-          return "Paper and figures saved for offline reading.";
+          String id = doc.getJSONObject("paper").getString("id");
+          boolean pin = !isPinned(id);
+          long pinned = downloads().stream().filter(d -> d.optBoolean("pinned", true)).count();
+          if (pin && pinned >= 30) throw new Exception("Unpin a download before saving another paper.");
+          doc.put("pinned", pin).put("accessed", System.currentTimeMillis()); saveCached(doc);
+          return pin ? "Kept offline. Recent papers also cache automatically." : "Unpinned. The recent reading cache is managed automatically.";
         },
         this::toast);
   }
@@ -1316,7 +1412,7 @@ public class MainActivity extends AppCompatActivity {
           scroll.addView(c);
           if (!quote.isEmpty()) {
             caption(c, quote);
-            gap(c, 18);
+            gap(c, 10);
           }
           JSONArray comments = r.optJSONArray("comments");
           if (comments != null)
@@ -1342,7 +1438,7 @@ public class MainActivity extends AppCompatActivity {
                   })));
                 }
               }
-              gap(c, 18);
+              gap(c, 10);
             }
           if (comments == null || comments.length() == 0)
             caption(c, "What caught your attention? Leave the first thought.");
@@ -1444,7 +1540,7 @@ public class MainActivity extends AppCompatActivity {
                                   "PUT",
                                   object("text", notes.getText().toString())),
                           v -> toast("Your private notes are saved."))));
-          gap(c, 24);
+          gap(c, 14);
           title(c, "Read in another way", 22);
           gap(c, 12);
           String[] labels = {
@@ -1514,7 +1610,7 @@ public class MainActivity extends AppCompatActivity {
               c,
               "AI generated text can be wrong. Check it against the paper. Requests use your shared"
                   + " model allowance.");
-          gap(c, 18);
+          gap(c, 10);
           AlertDialog dialog =
               new AlertDialog.Builder(this)
                   .setTitle("Reading tools")

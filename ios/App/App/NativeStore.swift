@@ -56,6 +56,8 @@ struct ReaderDocument: Codable {
   var paper: ResearchPaper
   var figures: [String: String]
   var owner: String
+  var pinned: Bool?
+  var accessed: TimeInterval?
 }
 struct ReadingJob: Codable, Identifiable {
   var id: String
@@ -93,7 +95,8 @@ final class ReadingStore: NSObject, ObservableObject,
   var reportContext = ""
   private var appleFlow: (id: String, verifier: String)?
   private var appleController: ASAuthorizationController?
-  @AppStorage("onlyideas.native.font") var readingSize: Double = 22
+  @AppStorage("onlyideas.native.font") var readingSize: Double = 18
+  private var warming: Task<Void, Never>?
   @AppStorage("onlyideas.native.appearance") var appearance = "system"
   private var token: String?
   private var authentication: ASWebAuthenticationSession?
@@ -119,6 +122,16 @@ final class ReadingStore: NSObject, ObservableObject,
     if token != nil, let data = UserDefaults.standard.data(forKey: "onlyideas.native.account") {
       account = try? JSONDecoder().decode(ReadingAccount.self, from: data)
     }
+    restoreLibrary()
+  }
+  private var scope: String { account?.id ?? "public" }
+  private var libraryURL: URL { folder.appendingPathComponent("library-" + Data(SHA256.hash(data: Data(scope.utf8))).map { String(format: "%02x", $0) }.joined() + ".index") }
+  private func restoreLibrary() {
+    if let data = try? Data(contentsOf: libraryURL), let saved = try? JSONDecoder().decode([ResearchPaper].self, from: data) { papers = saved }
+    else { papers = downloads().map(\.paper) }
+  }
+  private func persistLibrary() {
+    try? JSONEncoder().encode(papers).write(to: libraryURL, options: [.atomic, .completeFileProtection])
   }
   private func keychainRead(_ account: String) -> Data? {
     var result: CFTypeRef?
@@ -148,6 +161,7 @@ final class ReadingStore: NSObject, ObservableObject,
     } else {
       SecItemDelete(q as CFDictionary)
     }
+    warming?.cancel()
     token = value
   }
   func clearExports() {
@@ -188,7 +202,8 @@ final class ReadingStore: NSObject, ObservableObject,
     let (bytes, response) = try await URLSession.shared.data(for: request)
     guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
       let value = (try? JSONSerialization.jsonObject(with: bytes)) as? [String: Any]
-      throw failure(value?["error"] as? String ?? "Connection interrupted. Please try again.")
+      throw NSError(domain: "OnlyIdeasHTTP", code: (response as? HTTPURLResponse)?.statusCode ?? 0,
+        userInfo: [NSLocalizedDescriptionKey: value?["error"] as? String ?? "Connection interrupted. Please try again."])
     }
     return bytes
   }
@@ -218,8 +233,24 @@ final class ReadingStore: NSObject, ObservableObject,
         clearPrivateDownloads()
         UserDefaults.standard.removeObject(forKey: "onlyideas.native.account")
       }
+      let paperIdentity = token
       let result = try await json("/api/papers")
+      guard paperIdentity == token else { return }
       papers = try decoded([ResearchPaper].self, result["papers"] ?? [])
+      persistLibrary()
+      let available = Dictionary(papers.map { ($0.id, $0.visibility) }, uniquingKeysWith: { _, new in new })
+      for saved in downloads() where available[saved.paper.id] != saved.paper.visibility { removeCached(saved.paper.id) }
+      warming?.cancel()
+      let candidates = Array(papers.prefix(3)), identity = token
+      warming = Task { [weak self] in
+        guard let self else { return }
+        for paper in candidates {
+          guard !Task.isCancelled, self.token == identity else { return }
+          if let cached = self.cachedPaper(paper.id), cached.paper.revision == paper.revision,
+             cached.paper.title == paper.title, cached.paper.visibility == paper.visibility { continue }
+          _ = try? await self.loadPaper(paper, refresh: true)
+        }
+      }
       offline = false
       if account != nil {
         await loadConversations()
@@ -393,8 +424,34 @@ final class ReadingStore: NSObject, ObservableObject,
     folder.appendingPathComponent(
       Data(SHA256.hash(data: Data(id.utf8))).map { String(format: "%02x", $0) }.joined() + ".json")
   }
-  func isDownloaded(_ id: String) -> Bool { downloads().contains { $0.paper.id == id } }
+  func isDownloaded(_ id: String) -> Bool { downloads().contains { $0.paper.id == id && ($0.pinned ?? true) } }
+  func cachedPaper(_ id: String) -> ReaderDocument? {
+    guard let bytes = try? Data(contentsOf: downloadURL(id)),
+      let saved = try? JSONDecoder().decode(ReaderDocument.self, from: bytes),
+      saved.owner == "public" || saved.owner == account?.id else { return nil }
+    return saved
+  }
+  private func removeCached(_ id: String) {
+    let url = downloadURL(id)
+    try? FileManager.default.removeItem(at: url)
+    try? FileManager.default.removeItem(at: metadataURL(url))
+  }
+  private func saveCached(_ document: ReaderDocument) throws {
+    guard document.owner == "public" || document.owner == account?.id else { return }
+    let url = downloadURL(document.paper.id)
+    try JSONEncoder().encode(document).write(to: url, options: [.atomic, .completeFileProtection])
+    try saveMetadata(document, at: url)
+    let recent = downloads().filter { $0.pinned == false }.sorted { ($0.accessed ?? 0) > ($1.accessed ?? 0) }
+    var bytes = 0
+    for (index, saved) in recent.enumerated() {
+      bytes += (try? downloadURL(saved.paper.id).resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0
+      if index >= 20 || bytes > 150_000_000 { removeCached(saved.paper.id) }
+    }
+  }
   func clearPrivateDownloads() {
+    warming?.cancel()
+    papers = papers.filter { $0.visibility == "public" }
+    for url in (try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)) ?? [] where url.pathExtension == "index" { try? FileManager.default.removeItem(at: url) }
     for url
       in ((try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil))
       ?? []) where url.pathExtension == "json"
@@ -405,51 +462,53 @@ final class ReadingStore: NSObject, ObservableObject,
       }
     }
   }
-  func loadPaper(_ paper: ResearchPaper) async throws -> ReaderDocument {
+  func loadPaper(_ paper: ResearchPaper, refresh: Bool = false) async throws -> ReaderDocument {
+    let cached = cachedPaper(paper.id)
+    if let cached, !refresh { return cached }
+    let identity = token, owner = account?.id
     do {
       let result = try await json("/api/papers/\(paper.id)")
+      try Task.checkCancellation()
+      guard token == identity else { throw CancellationError() }
       let full = try decoded(ResearchPaper.self, result["paper"] ?? [:])
       var figures: [String: String] = [:]
       var total = 0
       for asset in full.assets ?? [] {
         guard asset.path.hasPrefix("figures/"), !asset.path.contains("..") else { continue }
+        if cached?.paper.revision == full.revision, let figure = cached?.figures[asset.path] {
+          figures[asset.path] = figure; continue
+        }
         let bytes = try await request("/content/\(full.id)/\(asset.path)")
+        try Task.checkCancellation()
+        guard token == identity else { throw CancellationError() }
         total += bytes.count
         guard total <= 50_000_000 else { throw failure("This paper is too large to download.") }
         let ext = (asset.path as NSString).pathExtension.lowercased()
         let mime = ext == "svg" ? "image/svg+xml" : ext == "jpg" ? "image/jpeg" : "image/\(ext)"
         figures[asset.path] = "data:\(mime);base64,\(bytes.base64EncodedString())"
       }
-      return ReaderDocument(
-        paper: full, figures: figures,
-        owner: full.visibility == "public" ? "public" : account?.id ?? "private")
+      let document = ReaderDocument(paper: full, figures: figures,
+        owner: full.visibility == "public" ? "public" : owner ?? "private",
+        pinned: cached.map { $0.pinned ?? true } ?? false, accessed: Date().timeIntervalSince1970)
+      try Task.checkCancellation()
+      guard token == identity else { throw CancellationError() }
+      try saveCached(document)
+      return document
     } catch {
-      if let bytes = try? Data(contentsOf: downloadURL(paper.id)),
-        let saved = try? JSONDecoder().decode(ReaderDocument.self, from: bytes),
-        saved.owner == "public" || saved.owner == account?.id
-      {
-        return saved
-      }
+      let denied = (error as NSError).domain == "OnlyIdeasHTTP" && [401,403,404].contains((error as NSError).code)
+      if denied { removeCached(paper.id); throw error }
+      guard token == identity, !Task.isCancelled else { throw CancellationError() }
+      if let cached { return cached }
       throw error
     }
   }
   func toggleDownload(_ document: ReaderDocument) throws {
-    let url = downloadURL(document.paper.id)
-    if isDownloaded(document.paper.id) {
-      try FileManager.default.removeItem(at: url)
-      try? FileManager.default.removeItem(at: metadataURL(url))
-    } else {
-      guard downloads().count < 30 else {
-        throw failure("Remove a download before saving another paper.")
-      }
-      try JSONEncoder().encode(document).write(
-        to: url, options: [.atomic, .completeFileProtection])
-      try saveMetadata(document, at: url)
-      var excluded = url
-      var values = URLResourceValues()
-      values.isExcludedFromBackup = true
-      try excluded.setResourceValues(values)
-    }
+    var saved = cachedPaper(document.paper.id) ?? document
+    let pin = !isDownloaded(document.paper.id)
+    if pin && downloads().filter({ $0.pinned ?? true }).count >= 30 { throw failure("Unpin a download before saving another paper.") }
+    saved.pinned = pin
+    saved.accessed = Date().timeIntervalSince1970
+    try saveCached(saved)
     objectWillChange.send()
   }
   func importPDF(_ url: URL, shared: Bool = true) async {

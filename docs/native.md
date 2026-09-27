@@ -1,5 +1,7 @@
 # Native mobile preview · 0.2.0 (1)
 
+Current native update: [1.0.0 (9), compact cached reading](release-candidate-9.md).
+
 This is the original wrapper implementation record. The current implementation
 and test status are described in [Native reading and agent chat · 0.3](native-0.3.md).
 
