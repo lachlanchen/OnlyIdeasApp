@@ -36,7 +36,7 @@ App-Code, öffentliche Inhalte und private Kontodaten liegen getrennt. MMD erhä
 
 ## Stand
 
-Der Cloud-Dienst ist verfügbar. Version 1.0.0 (6) ist in den bestehenden TestFlight- und internen Google-Play-Gruppen verfügbar. Die Google-Produktionsprüfung wurde angefordert; automatische Prüfungen können vorausgehen. Für die öffentliche Apple-Einreichung fehlen noch endgültige iOS-Screenshots und die praktische Prüfung der Apple-Anmeldung. Abbildungen, Tabellen und Formeln importierter Forschungsarbeiten wurden auf einem Bildschirm in Smartphone-Größe geprüft.
+Der Cloud-Dienst ist verfügbar. iOS 1.0.0 (7) ist mit einem scharfen smaragdgrünen und goldenen Symbol in der bestehenden TestFlight-Gruppe verfügbar. Der interne Google-Play-Test bleibt bei Build 6. Die Google-Produktionsprüfung wurde angefordert; automatische Prüfungen können vorausgehen. Für die öffentliche Apple-Einreichung fehlen noch endgültige iOS-Screenshots und die praktische Prüfung der Apple-Anmeldung. Abbildungen, Tabellen und Formeln importierter Forschungsarbeiten wurden auf einem Bildschirm in Smartphone-Größe geprüft.
 
 Version 0.3 bietet SwiftUI-Ansichten auf iOS und native Android-Bedienelemente, größere einstellbare Leseschrift, eine eigene Profilseite und gespeicherte Agentengespräche. Ein Agent auf der Workstation durchsucht offene Forschungsindizes und lädt PDFs herunter; ein lokales Modell wird über LazyEdge angebunden. Mit Konvertieren und hinzufügen erstellt Mathpix eine private Lesefassung mit Gleichungen und Abbildungen. Der Bericht zur nativen Aktualisierung enthält den Stand der Builds und Tests.
 

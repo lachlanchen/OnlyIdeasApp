@@ -36,7 +36,7 @@ Mã ứng dụng, nội dung công khai và dữ liệu riêng được lưu tá
 
 ## Trạng thái
 
-Dịch vụ đám mây đang hoạt động. Phiên bản 1.0.0 (6) có trong các nhóm TestFlight và thử nghiệm nội bộ Google Play hiện tại. Đã gửi yêu cầu duyệt bản phát hành chính thức trên Google; kiểm tra tự động có thể diễn ra trước. Việc gửi bản công khai cho Apple vẫn cần ảnh iOS cuối cùng và xác minh đăng nhập Apple thực tế. Hình, bảng và phương trình trong các bài báo nhập thật đã được kiểm tra trên màn hình cỡ điện thoại.
+Dịch vụ đám mây đang hoạt động. iOS 1.0.0 (7) đã có trong nhóm TestFlight hiện tại với biểu tượng xanh ngọc và vàng sắc nét. Thử nghiệm nội bộ Google Play vẫn dùng bản dựng 6. Đã gửi yêu cầu duyệt bản phát hành chính thức trên Google; kiểm tra tự động có thể diễn ra trước. Việc gửi bản công khai cho Apple vẫn cần ảnh iOS cuối cùng và xác minh đăng nhập Apple thực tế. Hình, bảng và phương trình trong các bài báo nhập thật đã được kiểm tra trên màn hình cỡ điện thoại.
 
 Phiên bản 0.3 có màn hình SwiftUI trên iOS và giao diện gốc Android, chữ đọc lớn hơn có thể điều chỉnh, trang hồ sơ riêng và hội thoại với tác nhân được lưu lại. Tác nhân trên máy trạm tìm trong các chỉ mục nghiên cứu mở và tải PDF, dùng mô hình cục bộ qua LazyEdge. Chọn chuyển đổi và thêm để tạo bản đọc Mathpix riêng tư, giữ nguyên phương trình và hình ảnh. Xem bản ghi cập nhật ứng dụng gốc để biết trạng thái bản dựng và kiểm thử.
 

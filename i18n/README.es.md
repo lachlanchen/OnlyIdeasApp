@@ -36,7 +36,7 @@ El código, el contenido público y los datos privados se guardan por separado. 
 
 ## Estado
 
-El servicio en la nube está disponible. La versión 1.0.0 (6) está en los grupos existentes de TestFlight y pruebas internas de Google Play. Se solicitó la revisión de producción de Google; pueden ejecutarse comprobaciones automáticas antes. El envío público a Apple aún requiere las capturas finales de iOS y verificar el acceso real con Apple. Se comprobaron figuras, tablas y ecuaciones de artículos importados en una pantalla de tamaño móvil.
+El servicio en la nube está disponible. iOS 1.0.0 (7) está disponible en el grupo TestFlight existente con un icono nítido en verde esmeralda y dorado. Las pruebas internas de Google Play siguen en la compilación 6. Se solicitó la revisión de producción de Google; pueden ejecutarse comprobaciones automáticas antes. El envío público a Apple aún requiere las capturas finales de iOS y verificar el acceso real con Apple. Se comprobaron figuras, tablas y ecuaciones de artículos importados en una pantalla de tamaño móvil.
 
 La versión 0.3 incorpora pantallas SwiftUI en iOS y controles nativos en Android, texto de lectura más grande y ajustable, una página de perfil y conversaciones persistentes con el agente. Un agente en la estación de trabajo busca en índices de investigación abierta y descarga PDF usando un modelo local mediante LazyEdge. Elige convertir y añadir para crear una copia privada con Mathpix que conserve ecuaciones y figuras. El registro de la actualización nativa detalla las compilaciones y pruebas.
 

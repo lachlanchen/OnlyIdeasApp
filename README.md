@@ -36,7 +36,7 @@ App code, content and private account data have separate homes. MMD preserves Te
 
 ## Status
 
-The cloud service is live. Version 1.0.0 (6) is available in the existing TestFlight and Google Play internal groups. Google production review has been requested; automated checks may run before review. Apple public submission still needs final iOS screenshots and live Apple sign-in verification. Real paper imports verified figures, tables and equations on phone-sized screens.
+The cloud service is live. iOS 1.0.0 (7) is available in the existing TestFlight group with a crisp emerald-and-gold icon. Google Play internal testing remains on build 6. Google production review has been requested; automated checks may run before review. Apple public submission still needs final iOS screenshots and live Apple sign-in verification. Real paper imports verified figures, tables and equations on phone-sized screens.
 
 Version 0.3 introduces SwiftUI screens on iOS and native Android controls, larger adjustable reading text, a dedicated Profile page, and persistent agent conversations. A workstation agent searches open research indexes and downloads PDFs, using a local model through LazyEdge. Choose Convert & add to create a private Mathpix reading copy with equations and figures. See the native update record for build and test status.
 
