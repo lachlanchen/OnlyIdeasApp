@@ -23,7 +23,7 @@ credits, monthly subscription foundations and clearer import controls.
 
 ## Evidence
 
-- All 50 automated checks passed, including concurrent reservations, failed
+- All 51 automated checks passed, including concurrent reservations, failed
   imports, publication deduplication, forged receipts, account isolation,
   renewals, refunds, deletion and reconciliation retries. Renderer and web builds
   passed; signed Android release lint/build and iOS archive/export passed.
@@ -35,7 +35,10 @@ credits, monthly subscription foundations and clearer import controls.
   native Android reader and opens from cache with Wi-Fi and mobile data disabled.
   The in-place upgrade preserved the account, library and credit balance.
 - Google authenticated billing notifications reached the deployed endpoint with
-  HTTP 200. Apple notification URLs are saved; successful delivery is pending.
+  HTTP 200. A fresh Apple-signed sandbox notification also delivered successfully
+  after correcting an SDK app-identifier/environment fallback bug. Invalid
+  signatures still fail closed. The deployment preserved every existing paper, credit-ledger
+  entry, reservation and account rollout setting.
 
 ## Release limits
 
@@ -46,5 +49,11 @@ Apple also requires an approved binary containing the new PurchaseIntent API
 before its Streamlined Purchasing setting can be disabled.
 
 Build 11 is available in existing internal TestFlight and Google Play testing.
-Build 12 is being uploaded. Public review remains on build 10; these records do
-not claim build 12 public submission, approval, or general paid activation.
+Build 12 is also available in both existing internal groups (Apple VALID /
+IN_BETA_TESTING, Google Available to internal testers). Public review remains on
+build 10; these records do not claim build 12 public submission, approval, or
+general paid activation.
+
+Apple’s published privacy label includes purchase history for app functionality,
+linked to the account and not used for tracking. Google’s matching declaration
+is staged for the next public submission.
