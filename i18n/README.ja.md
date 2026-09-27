@@ -46,7 +46,7 @@ npm run dev
 
 1.0.2（13）では、サイドバーとキーボードショートカットを備えたネイティブMacアプリ（macOS 13以降、Intel／Appleシリコン）とApple Watch連携（watchOS 11以降）を追加。iPhoneの閲覧メニューから公開論文の抜粋を明示的に送信すると、最新3件を文字サイズを変えながらオフラインで読めます。完全な数式や図はiPhoneとMacに残り、非公開論文・チャット・認証情報はWatchに送りません。審査状況はリリース記録をご覧ください。サブスクリプションの有効化は運営者のテストに限定しています。
 
-[macOS · Apple Watch](../docs/apple-platforms.md) · [1.0.2 (13)](../docs/release-candidate-13.md)
+[macOS · Apple Watch](../docs/apple-platforms.md) · [1.0.2 (14)](../docs/release-candidate-14.md)
 
 [Reading credits](../docs/reading-credits.md)
 

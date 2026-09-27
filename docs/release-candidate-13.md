@@ -1,5 +1,7 @@
 # OnlyIdeas 1.0.2 (13) · Apple platforms
 
+> Superseded by [1.0.2 (14)](release-candidate-14.md), including the paper-reuse and discussion fixes. The original build 13 receipts below are historical.
+
 Adds a native SwiftUI Mac Catalyst app for macOS 13+, Intel and Apple silicon,
 with sidebar navigation and Command-1/2/3 shortcuts. The existing native reader,
 agent, profile, account system and paper cache are shared with iPhone.

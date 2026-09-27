@@ -46,7 +46,7 @@ npm run dev
 
 يضيف الإصدار 1.0.2 (13) تطبيق Mac أصليًا (macOS 13 أو أحدث، Intel وApple Silicon) مع شريط جانبي واختصارات لوحة المفاتيح، وتطبيقًا مرافقًا لـ Apple Watch (watchOS 11 أو أحدث). أرسل مقتطفًا من ورقة عامة باختيار صريح من خيارات القراءة على iPhone؛ تبقى آخر ثلاثة مقتطفات متاحة دون اتصال مع حجم نص قابل للتعديل. تبقى المعادلات والرسوم الكاملة على iPhone وMac، ولا تُنقل الأوراق الخاصة أو المحادثات أو بيانات الدخول إلى الساعة. راجع سجل الإصدار لحالة المراجعة. يظل تفعيل الاشتراكات محدودًا باختبارات المشغّل.
 
-[macOS · Apple Watch](../docs/apple-platforms.md) · [1.0.2 (13)](../docs/release-candidate-13.md)
+[macOS · Apple Watch](../docs/apple-platforms.md) · [1.0.2 (14)](../docs/release-candidate-14.md)
 
 [Reading credits](../docs/reading-credits.md)
 

@@ -46,7 +46,7 @@ Staged next: native monthly plans with store prices, purchase restoration, verif
 
 Version 1.0.2 (13) adds a native Mac app (macOS 13+, Intel and Apple silicon) with sidebar navigation and keyboard shortcuts, plus an Apple Watch companion (watchOS 11+). On iPhone, explicitly send a public paper excerpt from Reading options; the latest three remain readable offline with adjustable text. Full equations and figures stay on iPhone and Mac. Private papers, chats and account credentials never transfer to Watch. See the release record for review status. Subscription activation remains limited to operator testing.
 
-[macOS · Apple Watch](docs/apple-platforms.md) · [1.0.2 (13)](docs/release-candidate-13.md)
+[macOS · Apple Watch](docs/apple-platforms.md) · [1.0.2 (14)](docs/release-candidate-14.md)
 
 [Reading credits](docs/reading-credits.md)
 

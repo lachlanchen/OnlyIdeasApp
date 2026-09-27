@@ -1,0 +1,105 @@
+{
+  "sourceCommit": "25663fd",
+  "version": "1.0.2",
+  "build": 14,
+  "tests": {
+    "server": {
+      "passed": 58,
+      "failed": 0
+    },
+    "renderer": "passed",
+    "web": "delayed comments, mobile and desktop, reopen at bottom",
+    "iOS": "native paragraph discussion bottom/composer, language and attachment controls passed",
+    "Android": "release lint/build passed; signed build14 installed preserving account and library; real public physics paragraph opens at bottom with keyboard closed",
+    "Mac": "universal release archive/export/Apple validation passed; shared discussion implementation tested on iOS",
+    "Watch": "companion retained from13; no new Watch behavior in14"
+  },
+  "server": {
+    "packageSHA256": "d5780c3825bec588863a0fe69c3a5cc8731db6ed4a6e61b5c516d29b48ac87fc",
+    "migration": "additive import-key index",
+    "preserved": [
+      "all existing paper bodies",
+      "credit ledger",
+      "credit holds",
+      "rollout configuration",
+      "ingress configuration"
+    ],
+    "candidate": "two accounts reuse real public physics paper with Mathpix disabled",
+    "liveProbe": {
+      "health": {
+        "service": "onlyideas",
+        "version": "1.0.1",
+        "ok": true
+      },
+      "publicPapers": 3,
+      "paperId": "1075aa33-5c53-442c-99b8-4678be1c40de",
+      "revision": "898b65fe711346365f10fd3d351446b08abae6e57818a04601809ee50e5f4774",
+      "figures": [
+        {
+          "path": "figures/42b8ad3c450b8af9d3164381.jpg",
+          "bytes": 46015
+        },
+        {
+          "path": "figures/4b483985fe71ac649d122d79.jpg",
+          "bytes": 198898
+        },
+        {
+          "path": "figures/b382a0f77c4b8629c6fe94e6.jpg",
+          "bytes": 180934
+        }
+      ]
+    }
+  },
+  "apple": {
+    "IOS": {
+      "versionId": "2d1f64a6-4865-4e3c-bece-c28a74b6af9e",
+      "buildId": "a690b17f-a6ea-419e-9580-aa64ee52a61b",
+      "reviewId": "2dae12a5-e7a8-4f06-a41b-13ad3c5775a4",
+      "reviewState": "WAITING_FOR_REVIEW",
+      "versionState": "WAITING_FOR_REVIEW",
+      "submittedAt": "2026-09-27T23:15:54.146Z",
+      "releaseType": "AFTER_APPROVAL"
+    },
+    "MAC_OS": {
+      "versionId": "bdda5b63-93cb-4321-bf88-e979f6cec6ca",
+      "buildId": "70466bfd-4c5f-42ac-90da-477936741193",
+      "reviewId": "4c259d6e-0673-4533-a1c1-4db8febfce6e",
+      "reviewState": "WAITING_FOR_REVIEW",
+      "versionState": "WAITING_FOR_REVIEW",
+      "submittedAt": "2026-09-27T23:16:09.819Z",
+      "releaseType": "AFTER_APPROVAL"
+    }
+  },
+  "testflight": [
+    {
+      "platform": "MAC_OS",
+      "id": "70466bfd-4c5f-42ac-90da-477936741193",
+      "version": "1.0.2",
+      "build": "14",
+      "processing": "VALID",
+      "internal": "IN_BETA_TESTING"
+    },
+    {
+      "platform": "IOS",
+      "id": "a690b17f-a6ea-419e-9580-aa64ee52a61b",
+      "version": "1.0.2",
+      "build": "14",
+      "processing": "VALID",
+      "internal": "IN_BETA_TESTING"
+    }
+  ],
+  "artifacts": {
+    "OnlyIdeas.ipa": "c84f034f2f08b2f9d7e3147bbe73e7b483d41ac21388809258b8c23490c59b06",
+    "OnlyIdeas.pkg": "8dd72144dc8ec2ac20dae406b48cd68a172501bc337997d48eb19b877406060b",
+    "app-release.aab": "93a268dd481510f2cfba5c24d98a1d03c5d5d6305b54b12f1d135f0f8b554097"
+  },
+  "google": {
+    "build": 14,
+    "internal": "Available to internal testers",
+    "production": "Changes in review; automatic quick checks pending",
+    "rollout": 1,
+    "countries": 176,
+    "restOfWorld": true,
+    "observedAt": "2026-09-27T23:49:00Z"
+  }
+}

@@ -46,7 +46,7 @@ npm run dev
 
 1.0.2（13）新增原生 Mac 應用程式（macOS 13 以上，支援 Intel 與 Apple 晶片），提供側欄導覽及鍵盤快捷鍵，並加入 Apple Watch 伴侶（watchOS 11 以上）。在 iPhone 的閱讀選項中主動傳送公開論文選段，最近三份可在手錶離線閱讀並調整字級。完整公式與插圖保留在 iPhone 和 Mac；私人論文、聊天及帳戶憑證不會傳送至手錶。審核狀態見發布紀錄。訂閱啟用仍限營運者測試。
 
-[macOS · Apple Watch](../docs/apple-platforms.md) · [1.0.2 (13)](../docs/release-candidate-13.md)
+[macOS · Apple Watch](../docs/apple-platforms.md) · [1.0.2 (14)](../docs/release-candidate-14.md)
 
 [Reading credits](../docs/reading-credits.md)
 
