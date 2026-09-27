@@ -11,7 +11,7 @@
 	<key>provisioningProfiles</key>
 	<dict>
 		<key>art.onlyideas.app</key>
-		<string>OnlyIdeas Mac App Store</string>
+		<string>OnlyIdeas Mac Catalyst App Store</string>
 	</dict>
 	<key>signingCertificate</key>
 	<string>Apple Distribution</string>

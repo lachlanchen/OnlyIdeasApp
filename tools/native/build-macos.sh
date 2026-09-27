@@ -13,7 +13,7 @@ if [[ ${ONLYIDEAS_MANAGED_KEYCHAIN:-1} == 1 ]]; then
 fi
 unset onlyideas_password
 mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles" "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles"
-onlyideas_profile="$HOME/.config/onlyideas/apple/OnlyIdeas_Mac_App_Store.provisionprofile"
+onlyideas_profile="$HOME/.config/onlyideas/apple/OnlyIdeas_Mac_Catalyst_App_Store.provisionprofile"
 onlyideas_profile_id=$(security cms -D -i "$onlyideas_profile" | plutil -extract UUID raw -o - -)
 cp "$onlyideas_profile" "$HOME/Library/MobileDevice/Provisioning Profiles/$onlyideas_profile_id.provisionprofile"
 cp "$onlyideas_profile" "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles/$onlyideas_profile_id.provisionprofile"
