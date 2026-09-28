@@ -1,3 +1,4 @@
+import {createStripeBilling} from './stripe-billing.mjs';
 import {requireValue,hash} from './domain.mjs';
 import {creditTransaction,creditSummary,creditsEnabled} from './credits.mjs';
 import {applyVerifiedPurchase,billingCatalog} from './billing-ledger.mjs';
@@ -8,7 +9,8 @@ import {createPurchaseVerifiers} from './purchase-verification.mjs';
 export function createBilling(store,config,{verifiers=createPurchaseVerifiers(config),poll=true}={}) {
   const enabled=config.credits?.enabled===true&&config.billing?.enabled===true;
   let stopped=false,running=false;
-  const ready=verifiers.ready;
+  const stripe=createStripeBilling(store,config),ready={...verifiers.ready,stripe:stripeReady()};
+  function stripeReady(){return stripe.ready}
   const requireReady=platform=>requireValue(enabled&&ready[platform],'Subscriptions are not available yet.',503);
   function persist(platform,source,proofs,requester) {
     requireValue(!stopped,'Purchase verification is restarting. Restore your purchase in a moment.',503);
@@ -68,7 +70,8 @@ export function createBilling(store,config,{verifiers=createPurchaseVerifiers(co
             if(result.proofs.length)persist('apple',result.source,result.proofs,item.owner);
             else store.db.prepare('UPDATE billing_sources SET body=?,failures=0 WHERE id=?').run(JSON.stringify(result.source),item.id);
             if(result.more)store.db.prepare('UPDATE billing_sources SET next=0 WHERE id=?').run(item.id);
-          } else await google(source.token,item.owner,source.orders);
+          } else if(item.platform==='stripe'){const result=await stripe.verify(source.subscription);if(!stopped&&result.proofs.length)persist('stripe',result.source,result.proofs,item.owner)}
+          else await google(source.token,item.owner,source.orders);
         } catch {
           if(stopped)break;
           // Deliberately omit provider errors: they can contain signed receipts
@@ -81,6 +84,12 @@ export function createBilling(store,config,{verifiers=createPurchaseVerifiers(co
   const timer=enabled&&poll?setInterval(()=>void reconcile(),60_000):null;timer?.unref();
   return {
     catalog:user=>billingCatalog(store,config,user,ready),
+    async web(action,body,user){
+      requireReady('stripe');store.requireActive(user.id);requireValue(creditsEnabled(config,user.id),'Subscriptions are not available yet.',503);
+      if(action==='restore'){for(const result of await stripe.restore(user))persist('stripe',result.source,result.proofs,user.id);return {ok:true,...billingCatalog(store,config,user,ready)}}
+      return action==='checkout'?stripe.checkout(user,body.plan):stripe.portal(user);
+    },
+    async stripeNotification(req,raw){requireReady('stripe');const result=await stripe.notification(req,raw);if(result)persist('stripe',result.source,result.proofs);return {ok:true}},
     async purchase(platform,body,user) {
       requireValue(['apple','google'].includes(platform),'Unknown purchase provider.');
       store.requireActive(user.id);

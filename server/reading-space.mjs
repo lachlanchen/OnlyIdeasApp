@@ -1,7 +1,7 @@
 import {randomUUID} from 'node:crypto';
 import {requireValue,hash,languages} from './domain.mjs';
 import {taxonomy} from './research-indexes.mjs';
-import {defaultInterests} from './research-focus.mjs';
+import {defaultInterests,currentInterests} from './research-focus.mjs';
 export function initReadingSpace(store){store.db.exec(`
  CREATE TABLE IF NOT EXISTS reading_preferences(owner TEXT PRIMARY KEY,body TEXT NOT NULL);
  CREATE TABLE IF NOT EXISTS reading_activity(id TEXT PRIMARY KEY,owner TEXT NOT NULL,kind TEXT NOT NULL,ref TEXT NOT NULL,body TEXT NOT NULL,created INTEGER NOT NULL);
@@ -16,7 +16,7 @@ export function recordActivity(store,owner,kind,ref,body={},id=randomUUID()){
 export function createReadingSpace(store,social,discovery){
  initReadingSpace(store);const db=store.db,pending=new Map();
  const defaults={interests:defaultInterests,discipline:'',language:'en',dailyEnabled:false,dailyTime:'09:00',timezone:'UTC',commentAlerts:true,likeAlerts:true};
- function preferences(user){return {...defaults,...JSON.parse(db.prepare('SELECT body FROM reading_preferences WHERE owner=?').get(user.id)?.body||'{}')}}
+ function preferences(user){const p={...defaults,...JSON.parse(db.prepare('SELECT body FROM reading_preferences WHERE owner=?').get(user.id)?.body||'{}')};p.interests=currentInterests(p.interests);return p}
  function savePreferences(user,b){const old=preferences(user),p={...old};
   for(const k of ['dailyEnabled','commentAlerts','likeAlerts']){if(k in b){requireValue(typeof b[k]==='boolean','Choose a valid notification setting.');p[k]=b[k]}}
   if('interests'in b){requireValue(typeof b.interests==='string'&&b.interests.length<=120,'Use up to 120 characters for your interests.');p.interests=b.interests.replace(/[\x00-\x1f]/g,' ').trim()}

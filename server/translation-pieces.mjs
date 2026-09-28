@@ -22,12 +22,36 @@ export function segmentSource(paper,id) {
  requireValue(false,'This passage changed. Reload the paper and select it again.',409);
 }
 export function initTranslationPieces(store){store.db.exec('CREATE TABLE IF NOT EXISTS translation_pieces(key TEXT PRIMARY KEY, paper TEXT NOT NULL, owner TEXT NOT NULL, body TEXT NOT NULL)')}
+const pieceKey=(paper,language,scope,source)=>hash(JSON.stringify(['translation-piece-v1',paper.id,paper.revision,language,scope,source]));
+// Read-only assembly: requesting a reading view never queues model work. Line
+// ranges bind both whole-document renders to the same canonical source blocks.
+export function readingView(store,paper,user,language) {
+ requireValue(Object.hasOwn(languages,language),'Choose a reading language.');
+ initTranslationPieces(store);
+ const scopes=paper.visibility==='public'?['public']:(user?[user.id]:[]);
+ let sourceLine=0,targetLine=0,translated=0,total=0;
+ const read=source=>{for(const scope of scopes){const row=store.db.prepare('SELECT body FROM translation_pieces WHERE key=?').get(pieceKey(paper,language,scope,source));if(row){const value=JSON.parse(row.body);if(value.revision===paper.revision&&value.scope===scope&&value.language===language)return value.text}}return null};
+ const blocks=paperSegments(paper.mmd,paper.language).map(p=>{
+  let available=0,needed=0;
+  const text=p.sentences.map(s=>{
+   const masked=translationChunks(s.text,1_000_000).chunks.join('').replace(/⟦OI[^⟧]+⟧/g,'');
+   const prose=/\p{L}/u.test(masked),saved=read(s.text);
+   if(prose){needed++;if(saved!==null)available++}
+   return saved??s.text;
+  }).join('');
+  const start=sourceLine+(p.text.match(/^\s*/)[0].match(/\n/g)||[]).length,targetStart=targetLine+(text.match(/^\s*/)[0].match(/\n/g)||[]).length;
+  sourceLine+=(p.text.match(/\n/g)||[]).length;targetLine+=(text.match(/\n/g)||[]).length;
+  total+=needed;translated+=available;
+  return {id:p.id,start,end:sourceLine-(p.text.match(/\s*$/)[0].match(/\n/g)||[]).length,targetStart,targetEnd:targetLine-(text.match(/\s*$/)[0].match(/\n/g)||[]).length,text,available,needed,content:!!p.text.trim()};
+ });
+ return {paperId:paper.id,revision:paper.revision,language,sourceLanguage:paper.language,mmd:blocks.map(b=>b.text).join(''),blocks:blocks.map(({text,...b})=>b),translated,total,complete:translated===total};
+}
 const marker=/⟦OI[^⟧]+⟧/g;
 export async function translatePieces(job,paper,text,config,store,provider) {
  initTranslationPieces(store);
  const scope=job.visibility==='public'?'public':job.owner,model=config.model;
  const pieces=paperSegments(text,paper.language).flatMap(p=>p.sentences);
- const cacheKey=source=>hash(JSON.stringify(['translation-piece-v1',paper.id,paper.revision,job.language,scope,source]));
+ const cacheKey=source=>pieceKey(paper,job.language,scope,source);
  const read=source=>{const row=store.db.prepare('SELECT body FROM translation_pieces WHERE key=?').get(cacheKey(source));return row?JSON.parse(row.body).text:null};
  const assertActive=()=>{store.requireActive(job.owner);requireValue(store.paper(paper.id)?.revision===paper.revision,'The paper changed; start a new request.');requireValue(!job.lease||store.job(job.id)?.lease===job.lease,'This request is no longer active.',409)};
  const save=(source,text)=>{assertActive();store.db.prepare('INSERT OR REPLACE INTO translation_pieces VALUES(?,?,?,?)').run(cacheKey(source),paper.id,job.owner,JSON.stringify({text,language:job.language,revision:paper.revision,scope,model:model.name}));};

@@ -66,7 +66,7 @@ test('Crossref finds an approximate title despite other provider outages and pre
 test('home recommendations use topic interests across authors and retain explicit personal preferences',async()=>{
  const dir=mkdtempSync(join(tmpdir(),'oi-focus-')),store=new Store(dir),queries=[];
  try{const d=createDiscovery(store,{search:async o=>{queries.push(o.q);return {papers:[{id:o.q,title:o.q+' research',authors:'Another researcher',source:'https://example.org/'+encodeURIComponent(o.q),doi:'',year:'2026'}]}}});
- const r=await d.find({},null);assert.equal(r.focused,true);assert.ok(queries.includes('neuromorphic imaging'));assert.ok(queries.includes('event cameras'));assert.equal(r.papers.length,2);
+ const r=await d.find({},null);assert.equal(r.focused,true);assert.ok(queries.includes('neuromorphic imaging'));assert.ok(queries.includes('Shaohua Ma organoids'));assert.equal(r.papers.length,2);
  store.db.prepare('INSERT INTO reading_preferences VALUES(?,?)').run('reader',JSON.stringify({interests:'organoid imaging'}));
  const custom=await d.find({},{id:'reader'});assert.deepEqual(custom.interests,['organoid imaging']);assert.equal(custom.papers[0].title,'organoid imaging research');
  }finally{store.close();rmSync(dir,{recursive:true,force:true})}

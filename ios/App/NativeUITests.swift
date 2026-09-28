@@ -1,6 +1,27 @@
 import XCTest
 
 final class NativeUITests: XCTestCase {
+  func testIntegratedTranslationReader() {
+    continueAfterFailure=false
+    let app=XCUIApplication()
+    app.launchArguments=["-onlyideas.native.language","en","-onlyideas.native.appearance","light","--onlyideas-space-qa"]
+    app.launchEnvironment["ONLYIDEAS_QA_ORIGIN"]="http://127.0.0.1:18649"
+    let path=URL(fileURLWithPath:NSHomeDirectory()).appendingPathComponent("Documents/onlyideas-qa-token")
+    guard let token=try? String(contentsOf:path,encoding:.utf8) else{XCTFail("Missing private QA token");return}
+    app.launchEnvironment["ONLYIDEAS_QA_TOKEN"]=token.trimmingCharacters(in:.whitespacesAndNewlines)
+    app.launch()
+    XCTAssertTrue(app.tabBars.buttons["Your space"].waitForExistence(timeout:20));app.tabBars.buttons["Your space"].tap()
+    XCTAssertTrue(app.buttons["Liked"].waitForExistence(timeout:15));app.buttons["Liked"].tap()
+    XCTAssertTrue(app.buttons["Open paper"].firstMatch.waitForExistence(timeout:15));app.buttons["Open paper"].firstMatch.tap()
+    XCTAssertTrue(app.buttons["Interlaced"].waitForExistence(timeout:30));app.buttons["Interlaced"].tap()
+    XCTAssertTrue(app.staticTexts["AI translation · 324/324"].waitForExistence(timeout:30))
+    app.webViews.firstMatch.swipeUp();shot("Reader20-interlaced")
+    XCTAssertTrue(app.webViews.staticTexts.matching(NSPredicate(format:"label CONTAINS %@","简体中文 · AI translation")).firstMatch.exists)
+    app.buttons["Translation"].tap();shot("Reader20-translation")
+    app.buttons["Original"].tap();shot("Reader20-original")
+    XCTAssertTrue(app.webViews.buttons["Discuss paragraph"].firstMatch.exists)
+    app.terminate()
+  }
   func testSavedAgentResult() {
     continueAfterFailure=false
     let app=XCUIApplication()

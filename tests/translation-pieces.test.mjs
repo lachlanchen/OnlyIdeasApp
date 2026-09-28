@@ -29,3 +29,17 @@ test('paragraphs and sentences reconstruct original math/figures and full transl
  }finally{f.close()}
 });
 test('a model dropping math markers falls back to prose-only translation with original math retained',async()=>{const f=fixture();try{const j=requestArtifact(f.store,config,{id:'reader'},f.paper,{kind:'translation',language:'zh-Hans'});let fallback=0;await generateArtifact(j,config,f.store,async(u,o)=>{const input=JSON.parse(o.body).messages.at(-1).content;if(input.startsWith('['))return {choices:[{message:{content:JSON.stringify(JSON.parse(input).map(x=>({...x,text:x.text.replace(/⟦OI[^⟧]+⟧/g,'')})))}}]};fallback++;assert.ok(!input.includes('⟦OI'));return {choices:[{message:{content:input}}]}});const text=visibleArtifacts(f.store,f.paper,null)[0].text;assert.ok(fallback>0);assert.ok(text.includes('$E=mc^2$'));assert.ok(text.includes('![Experiment](figures/a.png)'));}finally{f.close()}});
+
+test('integrated reading exposes cached pieces without model work, preserves ranges, and isolates private/revised translations',async()=>{
+ const {readingView}=await import('../server/translation-pieces.mjs');const f=fixture();
+ try{
+  let view=readingView(f.store,f.paper,null,'zh-Hans');assert.equal(view.translated,0);assert.equal(view.mmd,f.paper.mmd);
+  const p=paperSegments(f.paper.mmd).find(p=>p.text.startsWith('The energy'));
+  const j=requestArtifact(f.store,config,{id:'first'},f.paper,{kind:'translation',language:'zh-Hans',segmentId:p.id});
+  await generateArtifact(j,config,f.store,async(u,o)=>{const input=JSON.parse(o.body).messages.at(-1).content;return {choices:[{message:{content:JSON.stringify(JSON.parse(input).map(x=>({...x,text:x.text.replace('The energy is','能量为').replace('This second sentence keeps its figure.','第二句保留图像。')})))}}]}});
+  view=readingView(f.store,f.paper,{id:'other'},'zh-Hans');assert.ok(view.translated>0);assert.ok(!view.complete);assert.match(view.mmd,/能量为/);assert.match(view.mmd,/\$E=mc\^2\$/);assert.equal(view.blocks.find(b=>b.id===p.id).start,2);
+  const next={...f.paper,revision:'different'};assert.equal(readingView(f.store,next,null,'zh-Hans').translated,0);
+  const privatePaper={...f.paper,visibility:'private'};assert.equal(readingView(f.store,privatePaper,{id:'first'},'zh-Hans').translated,0);
+  assert.throws(()=>readingView(f.store,f.paper,null,'invalid'));
+ }finally{f.close()}
+});

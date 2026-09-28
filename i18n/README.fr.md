@@ -16,6 +16,11 @@ Un modèle économique configurable produit des guides de lecture et des traduct
 
 ![OnlyIdeas reading room](../evidence/library-desktop.png)
 
+<!-- reader20 -->
+1.0.2 (20) : original, traduction ou paragraphes alternés dans le même lecteur, avec cache, équations, figures et commentaires. Mac natif pour Apple silicon et Intel. Les intérêts incluent les organoïdes de Shaohua Ma. Abonnements et essai de sept jours préparés ; achats en attente de validation en sandbox.
+
+[1.0.2 (20)](../docs/release-candidate-20.md)
+
 <!-- agent19 -->
 1.0.2 (19) : demandez à l’agent de trouver, télécharger, transcrire, résumer, traduire ou enregistrer un article. Recherche par titre approximatif et DOI, sources publiques complémentaires et vérification du PDF. Les résultats se rouvrent depuis la conversation. Modifiez vos intérêts dans Votre espace. Retour sur Android ramène à la conversation.
 

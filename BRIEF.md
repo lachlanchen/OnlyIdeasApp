@@ -230,3 +230,30 @@ neuromorphic imaging, event cameras, hyperspectral imaging, biomedical imaging,
 organoids and computational optics. Include relevant work by all researchers.
 Readers can replace these defaults with their own interests; keep advanced
 filters collapsed and provide full online search from the same search field.
+
+## Integrated translations and subscriptions · 2026-09-28
+
+Translations are peer reading languages in the main reader: Original, Translation,
+or Interlaced, with source paragraphs and translated passages paired by canonical
+ranges. Keep figure/equation rendering, source discussion anchors, and offline
+reuse. Opening or switching a view must not start paid model work. Missing pieces
+remain in the original with an explicit request action. Generated translations
+remain labeled and revision keyed. Default research interests also include
+Professor Shaohua Ma's organoid work at Tsinghua SIGS; preserve custom preferences.
+
+The owner confirmed monthly US$2.99 / 14.99 / 29.99 price targets with 200 / 1,200 /
+2,600 new transcription pages. Existing papers and cached translations remain
+free to read. Plans include 60 / 300 / 700 new-paper fetches each period, alongside
+existing paid credits and daily agent allowances. Eligible subscribers have a
+seven-day trial with 50 transcription pages and 10 fetches. Free accounts have
+30 new transcription pages and 10 fetches per calendar month when quota billing
+is enabled. Private-import credit costs remain separate and explicit. Successful
+reuse uses no new quota; failed imports release reservations, while uncertain
+provider submissions retain a reservation until reconciled. Never double-charge
+retries, restore, renewals or simultaneous callbacks. Owner exemptions remain.
+
+PWA subscriptions use Stripe through ../Stripe's dedicated OnlyIdeas catalog.
+iOS and Mac Catalyst use StoreKit; Android uses Google Play Billing. The Watch
+excerpt companion remains available without a separate purchase. Show actual
+provider prices, trial eligibility, renewal dates, restoration and cancellation.
+Provider configuration and sandbox qualification precede purchase activation.

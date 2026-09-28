@@ -156,3 +156,20 @@ compile/lint and iOS device Release compile pass. This is not a real purchase te
 Store configuration, actual sandbox purchase/renewal/refund/restoration, device UI
 checks, purchase-history privacy declarations, and successor store builds remain
 release gates. Build 10's existing review has not been replaced by this work.
+
+## Build 20: approved page quotas and web billing
+
+The owner approved US$2.99 / 14.99 / 29.99 monthly with 200 / 1,200 / 2,600 new
+transcription pages and an eligible seven-day trial. See the [build 20 contract](release-candidate-20.md)
+for fetch allowances and trial limits. Existing reading/cache reuse is free.
+`billing.quotasEnabled` separately gates receipt-period quota enforcement and
+respects the existing credits rollout allowlist and exact owner exemption.
+
+Stripe PWA configuration uses protected `billing.stripe.keyFile`,
+`webhookSecretFile`, the three fixed `prices`, and a dedicated
+`portalConfiguration`. The existing account-wide/EchoMind Stripe products and
+portal are not changed. Portal subscription updates are disabled; cancellation
+is at period end. Web checkout is never offered inside native store apps.
+The OnlyIdeas webhook route is `POST /api/billing/notifications/stripe`.
+Keep it disabled at Stripe until the matching server config and sandbox
+qualification are ready. Never use a live card charge as a substitute for testing.

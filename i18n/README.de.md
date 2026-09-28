@@ -16,6 +16,11 @@ Ein konfigurierbares, kostengünstiges Modell erstellt auf Anfrage Lesehilfen un
 
 ![OnlyIdeas reading room](../evidence/library-desktop.png)
 
+<!-- reader20 -->
+1.0.2 (20): Original, Übersetzung oder abwechselnde Absätze im selben Reader, mit Cache, Formeln, Abbildungen und Quellkommentaren. Native Mac-App für Apple Silicon und Intel. Interessen umfassen Shaohua Mas Organoidforschung. Monatspläne und siebentägige Testphase sind vorbereitet; Käufe bleiben bis zur Sandbox-Prüfung gesperrt.
+
+[1.0.2 (20)](../docs/release-candidate-20.md)
+
 <!-- agent19 -->
 1.0.2 (19): Der Agent kann Artikel finden, herunterladen, transkribieren, zusammenfassen, übersetzen und speichern. Ungefähre Titel und DOIs werden mit ergänzender Suche in öffentlichen Quellen und PDF-Abgleich unterstützt. Gespeicherte Ergebnisse lassen sich im Chat öffnen. Interessen sind im persönlichen Bereich änderbar; Android Zurück führt zum Gespräch.
 

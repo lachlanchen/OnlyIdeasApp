@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { paragraphActions } from './paragraphs'
-import { t } from './i18n'
-import DOMPurify from 'dompurify'
+import { t,languageNames } from './i18n'
+import {cleanDocument,pairReading,readingMode,type ReadingView,type ReadingMode} from './parallel-reader'
 import type { Paper } from './api'
 import bundleUrl from '../.generated/document-math.js?url'
 import { request, native } from './native'
@@ -16,8 +16,10 @@ function loadRenderer() {
     document.head.append(script)
   })
 }
-export function ReaderContent({ paper, onSelection, onSection, onParagraph }: { paper: Paper; onSelection?: (quote: string, section: string) => void; onSection?: (section: string) => void; onParagraph?:(quote:string,id:string)=>void }) {
+export function ReaderContent({ paper, reading, mode='original', onSelection, onSection, onParagraph }: { paper: Paper; reading?:ReadingView; mode?:ReadingMode; onSelection?: (quote: string, section: string) => void; onSection?: (section: string) => void; onParagraph?:(quote:string,id:string)=>void }) {
   const ref = useRef<HTMLDivElement>(null)
+  const currentMode = useRef(mode)
+  currentMode.current = mode
   const [error, setError] = useState('')
   useEffect(() => {
     let active = true
@@ -27,9 +29,11 @@ export function ReaderContent({ paper, onSelection, onSection, onParagraph }: { 
       if (!active || !ref.current) return
       const render = (window as RendererWindow).markdownToHTML
       if (!render) throw new Error('Renderer unavailable')
-      const rendered = render(paper.mmd || '', { htmlTags: false, width: Math.max(280, ref.current.clientWidth), linkify: false, typographer: false, openLinkInNewWindow: true, accessibility: { assistiveMml: true }, outMath: { include_svg: true } })
-      const clean = DOMPurify.sanitize(rendered, { USE_PROFILES: { html: true, svg: true, mathMl: true }, ADD_TAGS: ['mjx-container', 'mjx-assistive-mml'], ADD_ATTR: ['jax', 'focusable', 'viewBox'], FORBID_TAGS: ['style', 'script', 'iframe', 'object', 'embed', 'form', 'input', 'button'], FORBID_ATTR: ['srcdoc', 'srcset'] })
-      const template = document.createElement('template'); template.innerHTML = clean
+      const renderText=(text:string)=>render(text,{htmlTags:false,lineNumbering:true,width:Math.max(280,ref.current!.clientWidth),linkify:false,typographer:false,openLinkInNewWindow:true,accessibility:{assistiveMml:true},outMath:{include_svg:true}})
+      const container=document.createElement('div');container.innerHTML=cleanDocument(renderText(paper.mmd||''))
+      if(onParagraph)paragraphActions(container,t('Discuss paragraph'),onParagraph)
+      if(reading)pairReading(container,reading,renderText,{source:languageNames[paper.language]||paper.language,translation:(languageNames[reading.language]||reading.language)+' · '+t('AI translation'),partial:t('Remaining passages use the original.')})
+      const template = document.createElement('template');template.content.append(...Array.from(container.childNodes))
       const saved = await downloadedPaper(paper.id, (await offlineSession())?.user?.id)
       for (const img of template.content.querySelectorAll('img')) {
         const path = img.getAttribute('src')?.replace(/^\.\//, '')
@@ -69,11 +73,12 @@ export function ReaderContent({ paper, onSelection, onSection, onParagraph }: { 
       }
       const firstHeading = wrapper.querySelector('h1,h2,h3')
       if (firstHeading?.textContent?.trim().toLowerCase() === paper.title.trim().toLowerCase()) firstHeading.remove()
-      if(onParagraph)paragraphActions(wrapper,t('Discuss paragraph'),onParagraph)
       ref.current.replaceChildren(wrapper)
+      ref.current.dataset.readingMode=currentMode.current
     }).catch(() => { if (active) setError(t("The equation renderer could not load. Reload to try again; the original text is below.")) })
     return () => { active = false; objectURLs.forEach(url => URL.revokeObjectURL(url)) }
-  }, [paper])
+  }, [paper,reading])
+  useEffect(()=>{if(ref.current)readingMode(ref.current,mode)},[mode])
   function select() {
     const selection = window.getSelection(), text = selection?.toString().trim() || ''
     const element = selection?.anchorNode?.parentElement

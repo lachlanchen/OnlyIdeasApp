@@ -14,6 +14,7 @@ export function appleProof(transaction) {
   const expires=timestamp(transaction.expiresDate),revoked=!!transaction.revocationDate;
   return {platform:'apple',environment:transaction.environment,accountToken:transaction.appAccountToken.toLowerCase(),receipt:transaction.transactionId,
     subscription:transaction.originalTransactionId,product:transaction.productId,expires,observed:timestamp(transaction.signedDate),purchased:timestamp(transaction.purchaseDate),revoked,
+    trial:!revoked&&transaction.price===0&&transaction.offerType===1&&transaction.offerDiscountType==='FREE_TRIAL',
     paid:!revoked&&Number.isSafeInteger(transaction.price)&&transaction.price>0,state:revoked?'revoked':expires>Date.now()?'active':'expired'};
 }
 export function googleProof(purchase,order,token) {
@@ -33,6 +34,7 @@ export function googleProof(purchase,order,token) {
   // reverses it. Pending initial payments never grant credits.
   const paid=['PROCESSED','PARTIALLY_REFUNDED','PENDING_REFUND'].includes(order.state)&&!billed.subscriptionDetails.offerPhaseDetails?.freeTrialDetails&&billed.subscriptionDetails.offerPhase!=='FREE_TRIAL';
   return {platform:'google',environment:purchase.testPurchase?'Sandbox':'Production',accountToken:purchase.externalAccountIdentifiers.obfuscatedExternalAccountId,
+    trial:!revoked&&!!(billed.subscriptionDetails.offerPhaseDetails?.freeTrialDetails||billed.subscriptionDetails.offerPhase==='FREE_TRIAL'),
     receipt:order.orderId,subscription:hash(token),product:line.productId,expires,observed:Date.now(),purchased:timestamp(order.createTime),revoked,paid,
     state:revoked?'revoked':!latest||expires<=Date.now()?'expired':states[purchase.subscriptionState]};
 }
@@ -130,7 +132,7 @@ export function createPurchaseVerifiers(config,{googleAuth=null}={}) {
       requireValue(returned.size===orders.length&&orders.every(id=>returned.has(id)),'The store returned mismatched orders.',502);
       const proofs=batch.orders.map(order=>googleProof(purchase,order,token));
       return {proofs,source:{token,orders:[...new Set(orders)],accountToken:proofs[0].accountToken,environment:proofs[0].environment},acknowledge:async()=>{
-        if(purchase.acknowledgementState==='ACKNOWLEDGEMENT_STATE_PENDING'&&proofs.some(p=>p.paid&&!p.revoked)) {
+        if(purchase.acknowledgementState==='ACKNOWLEDGEMENT_STATE_PENDING'&&proofs.some(p=>(p.paid||p.trial)&&!p.revoked)) {
           await googleRequest('/purchases/subscriptions/'+encodeURIComponent(proofs[0].product)+'/tokens/'+encodeURIComponent(token)+':acknowledge','POST',{});
         }
       }};

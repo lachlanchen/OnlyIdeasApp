@@ -18,6 +18,7 @@ final class NativeBilling {
   private final Set<String> processing=new HashSet<>();
   private List<String> productIDs=List.of();
   private boolean connecting=false,closed=false;
+  boolean trialEligible=false;
   NativeBilling(Activity activity,Host host) {
     this.activity=activity;this.host=host;
     client=BillingClient.newBuilder(activity)
@@ -51,8 +52,12 @@ final class NativeBilling {
       else host.notice("Plans are currently unavailable in this store.");
     }));
   }
-  static ProductDetails.SubscriptionOfferDetails monthly(ProductDetails product) {
+  static ProductDetails.SubscriptionOfferDetails monthly(ProductDetails product,boolean trialEligible) {
     if(product.getSubscriptionOfferDetails()==null)return null;
+    if(trialEligible)for(ProductDetails.SubscriptionOfferDetails offer:product.getSubscriptionOfferDetails()){
+      List<ProductDetails.PricingPhase> p=offer.getPricingPhases().getPricingPhaseList();
+      if("seven-day-trial".equals(offer.getOfferId())&&p.size()==2&&p.get(0).getPriceAmountMicros()==0&&Arrays.asList("P1W","P7D").contains(p.get(0).getBillingPeriod())&&p.get(0).getBillingCycleCount()==1&&p.get(1).getBillingPeriod().equals("P1M")&&p.get(1).getRecurrenceMode()==ProductDetails.RecurrenceMode.INFINITE_RECURRING)return offer;
+    }
     for(ProductDetails.SubscriptionOfferDetails offer:product.getSubscriptionOfferDetails()) {
       List<ProductDetails.PricingPhase> phases=offer.getPricingPhases().getPricingPhaseList();
       if(offer.getOfferId()==null&&phases.size()==1&&phases.get(0).getBillingPeriod().equals("P1M")&&phases.get(0).getRecurrenceMode()==ProductDetails.RecurrenceMode.INFINITE_RECURRING)return offer;
@@ -60,7 +65,7 @@ final class NativeBilling {
     return null;
   }
   void purchase(ProductDetails product,String accountToken) {
-    ProductDetails.SubscriptionOfferDetails offer=monthly(product);
+    ProductDetails.SubscriptionOfferDetails offer=monthly(product,trialEligible);
     if(offer==null||!client.isReady()){host.notice("The store is unavailable. Please try again.");return;}
     BillingFlowParams flow=BillingFlowParams.newBuilder().setObfuscatedAccountId(accountToken)
       .setProductDetailsParamsList(List.of(BillingFlowParams.ProductDetailsParams.newBuilder().setProductDetails(product).setOfferToken(offer.getOfferToken()).build())).build();

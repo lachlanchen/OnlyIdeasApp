@@ -708,6 +708,13 @@ struct NativePaper: View {
   @EnvironmentObject var store: ReadingStore
   @Environment(\.colorScheme) var scheme
   var paper: ResearchPaper
+  var initialLanguage:String? = nil
+  @State private var reading:AlignedReading?
+  @State private var readLanguage="zh-Hans"
+  @State private var readingMode="original"
+  @State private var translationPending=false
+  @State private var translationTask:Task<Void,Never>?
+  @State private var readingNotice=""
   @ScaledMetric(relativeTo: .body) private var readingScale: Double = 1
   @State private var document: ReaderDocument?
   @State private var quote = ""
@@ -722,9 +729,23 @@ struct NativePaper: View {
   var body: some View {
     VStack(spacing: 0) {
       if let document = document {
+        VStack(spacing:6) {
+          HStack {
+            Menu {ForEach(UILanguage.choices.filter{$0.0 != document.paper.language},id:\.0) {code,name in
+              Button(name){readLanguage=code;readingMode="interlaced";Task{await refreshReading()}}
+            }} label:{Label(UILanguage.choices.first{$0.0==readLanguage}?.1 ?? readLanguage,systemImage:"character.bubble").font(.subheadline.bold())}
+            Spacer()
+            if readingMode != "original",reading?.complete != true {
+              Button(T("Fetch remaining translation")){translationTask=Task{await fetchReading()}}.font(.caption).disabled(translationPending)
+            }
+          }
+          Picker(T("Reading view"),selection:$readingMode){Text(T("Original")).tag("original");Text(T("Translation")).tag("translation");Text(T("Interlaced")).tag("interlaced")}.pickerStyle(.segmented)
+          if readingMode != "original" {HStack {Text(T("AI translation")+" · "+(reading.map{"\($0.translated)/\($0.total)"} ?? T("Connect to fetch available languages.")));Spacer();if translationPending {ProgressView()}}.font(.caption).foregroundStyle(.secondary)}
+          if !readingNotice.isEmpty {Text(T(readingNotice)).font(.caption).foregroundStyle(.secondary)}
+        }.padding(.horizontal,14).padding(.vertical,6)
         NativeDocument(
           document: document, size: store.readingSize * readingScale, dark: scheme == .dark,
-          quote: $quote, onParagraph:{q,id in quote=q;paragraph=id;discussion=true},onSelection:{_ in paragraph=""}, onWatchProse:{watchProse=$0})
+          quote: $quote, reading:reading,mode:readingMode,onParagraph:{q,id in quote=q;paragraph=id;discussion=true},onSelection:{_ in paragraph=""}, onWatchProse:{watchProse=$0})
       } else {
         ProgressView(T("Opening your paper…")).font(.title3).frame(
           maxWidth: .infinity, maxHeight: .infinity)
@@ -761,7 +782,7 @@ struct NativePaper: View {
               sharing = true
             } catch { store.error = error.localizedDescription }
           }
-          Button(T("Read in another language")) { languages = true }
+          Button(T("Read in another language")) { readingMode = "interlaced" }
           #if !targetEnvironment(macCatalyst)
           if UIDevice.current.userInterfaceIdiom == .phone, let document, document.owner == "public", document.paper.visibility == "public" {
             Button {
@@ -797,13 +818,18 @@ struct NativePaper: View {
       }
     }
     .task {
+      readLanguage=initialLanguage ?? (paper.language == "zh-Hans" ? "en":"zh-Hans")
+      if initialLanguage != nil {readingMode="interlaced"}
       document = store.cachedPaper(paper.id)
+      reading=document?.readings?[readLanguage]
       do { document = try await store.loadPaper(paper, refresh: true) } catch {
         if Task.isCancelled { return }
         if store.cachedPaper(paper.id) == nil { document = nil; store.error = error.localizedDescription }
       }
+      await refreshReading()
     }
-    .sheet(isPresented:$languages) {if let document {NativeLanguages(document:document)}}
+    .onDisappear {translationTask?.cancel();translationTask=nil}
+
     .sheet(isPresented: $readingTools) {
       if let document = document { NativeReadingTools(document: document,selectedQuote:quote) }
     }
@@ -815,12 +841,37 @@ struct NativePaper: View {
       Button(T("OK")) { watchNotice = nil }
     } message: { Text(T(watchNotice ?? "")) }
   }
+  func refreshReading() async {
+    guard let document else {return}
+    let language=readLanguage
+    reading=store.cachedPaper(paper.id)?.readings?[language]
+    do {let result=try await store.loadReading(document,language:language);if readLanguage==language {reading=result;readingNotice=""}}
+    catch {if readLanguage==language && reading==nil {readingNotice="Connect to fetch available languages."}}
+  }
+  func fetchReading() async {
+    guard store.account != nil else {await store.signIn();return}
+    guard !translationPending else {return}
+    let language=readLanguage;translationPending=true;defer{translationPending=false}
+    do {
+      let response=try await store.json("/api/papers/\(paper.id)/assist",method:"POST",body:["kind":"translation","language":language])
+      let id=(response["job"] as? [String:Any])?["id"] as? String ?? ""
+      for _ in 0..<120 {
+        await refreshReading();await store.loadJobs()
+        if store.jobs.first(where:{$0.id==id})?.state=="failed" {readingNotice="Translation failed. Open Your requests to retry.";break}
+        if reading?.complete==true || Task.isCancelled || readLanguage != language {break}
+        try await Task.sleep(nanoseconds:3_000_000_000)
+      }
+    }catch{readingNotice=error.localizedDescription}
+  }
+
 }
 struct NativeDocument: UIViewRepresentable {
   let document: ReaderDocument
   let size: Double
   let dark: Bool
   @Binding var quote: String
+  var reading:AlignedReading? = nil
+  var mode:String = "original"
   var onParagraph:((String,String)->Void)? = nil
   var onSelection:((String)->Void)? = nil
   var onWatchProse:((String)->Void)? = nil
@@ -860,13 +911,16 @@ struct NativeDocument: UIViewRepresentable {
     }
     func render(_ webView: WKWebView) {
       guard ready else { return }
-      let identity = parent.document.paper.id + (parent.document.paper.revision ?? "")
+      let identity = parent.document.paper.id + (parent.document.paper.revision ?? "") + (parent.reading.map{"\($0.language):\($0.translated)"} ?? "")
       if revision != identity {
-        let data: [String: Any] = [
+        var data: [String: Any] = [
           "mmd": parent.document.paper.mmd ?? "", "figures": parent.document.figures,
           "attribution":[parent.document.paper.license,parent.document.paper.provenance?.licenseUrl,parent.document.paper.provenance?.changes].compactMap{$0}.filter{$0 != "private"}.joined(separator:" · "),
           "fontSize": parent.size, "dark": parent.dark, "language":parent.document.paper.language ?? "en", "comments":parent.onParagraph != nil, "commentLabel":T("Discuss paragraph"),
         ]
+        data["mode"]=parent.mode
+        data["labels"]=["source":UILanguage.choices.first{$0.0==parent.document.paper.language}?.1 ?? "Original","translation":(UILanguage.choices.first{$0.0==parent.reading?.language}?.1 ?? "")+" · "+T("AI translation"),"partial":T("Remaining passages use the original.")]
+        if let reading=parent.reading,let bytes=try? JSONEncoder().encode(reading),let value=try? JSONSerialization.jsonObject(with:bytes){data["reading"]=value}
         if let bytes = try? JSONSerialization.data(withJSONObject: data),
           let json = String(data: bytes, encoding: .utf8)
         {
@@ -876,6 +930,7 @@ struct NativeDocument: UIViewRepresentable {
           revision = identity
         }
       }
+      webView.evaluateJavaScript("window.OnlyIdeasMode && window.OnlyIdeasMode(\(String(data:try! JSONEncoder().encode(parent.mode),encoding:.utf8)!))")
       webView.evaluateJavaScript(
         "window.OnlyIdeasStyle && window.OnlyIdeasStyle(\(parent.size),\(parent.dark ? "true":"false"))"
       )
@@ -1140,6 +1195,7 @@ struct NativeArtifact: View {
     return value
   }
   var body: some View {
+    if artifact.kind == "translation" {NativePaper(paper:document.paper,initialLanguage:artifact.language)} else {
     VStack(spacing: 0) {
       Text(T("AI generated ·") + " " + artifact.model).font(.body).foregroundColor(.secondary).padding()
       NativeDocument(
@@ -1147,6 +1203,7 @@ struct NativeArtifact: View {
         quote: $quote)
     }.navigationTitle(artifact.kind == "digest" ? "Reading guide" : "Translation")
       .navigationBarTitleDisplayMode(.inline)
+    }
   }
 }
 
@@ -1220,14 +1277,20 @@ struct NativeSubscriptionSection:View {
     Group {
       if let catalog=store.subscriptionCatalog,catalog.enabled,catalog.providers.apple {
         Section(T("Monthly plans")) {
-          Text(T("Shared reading stays free. Choose a plan for more private imports and daily agent messages.")).font(.subheadline).foregroundColor(.secondary)
+          Text(T("Existing papers and cached translations are free to read. Plans cover new fetching and transcription.")).font(.subheadline).foregroundColor(.secondary)
+          if let quota=catalog.quota,quota.enabled {
+            Text(quota.unlimited ? T("Unlimited owner allowance"):T("{pages} transcription pages and {fetches} fetches remaining",["pages":String(quota.remainingPages),"fetches":String(quota.remainingFetches)])).font(.subheadline.bold())
+            if !quota.unlimited {Text(T("Renews on {date}",["date":Date(timeIntervalSince1970:quota.ends/1000).formatted(date:.abbreviated,time:.omitted)])).font(.caption).foregroundColor(.secondary)}
+          }
           if !catalog.canSubscribe {Text(T("Manage your plan in the store where you subscribed.")).font(.subheadline)}
           ForEach(store.subscriptionProducts,id:\.id) { product in
             if let plan=catalog.plans.first(where:{$0.apple==product.id}) {
               VStack(alignment:.leading,spacing:8) {
                 HStack {Text(T(plan.name)).font(.headline);Spacer();Text(T("{price} / month",["price":product.displayPrice])).font(.headline)}
+                Text(T("{pages} transcription pages · {fetches} new-paper fetches per month",["pages":String(plan.pages ?? plan.credits),"fetches":String(plan.fetches ?? 0)])).font(.subheadline.bold())
+                if store.trialProducts.contains(product.id) {Text(T("7 days free, then {price} per month. Trial includes 50 pages and 10 fetches. Cancel before it ends to avoid payment.",["price":product.displayPrice])).font(.subheadline)}
                 Text(T("{credits} credits each month · {messages} agent messages daily",["credits":String(plan.credits),"messages":String(plan.agentTurns)])).font(.subheadline)
-                Button(T(catalog.plan==plan.id ? "Current plan":store.requestedPlanID==product.id ? "Continue":"Subscribe")) {Task {await store.purchase(product)}}
+                Button(T(catalog.plan==plan.id ? "Current plan":store.requestedPlanID==product.id ? "Continue":store.trialProducts.contains(product.id) ? "Start 7-day free trial":"Subscribe")) {Task {await store.purchase(product)}}
                   .buttonStyle(.borderedProminent).disabled(store.purchaseBusy || !catalog.canSubscribe)
               }.padding(.vertical,6)
             }

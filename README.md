@@ -16,6 +16,11 @@ A configurable economical model creates reading guides and translations on reque
 
 ![OnlyIdeas reading room](evidence/library-desktop.png)
 
+<!-- reader20 -->
+1.0.2 (20): Read the original, translation, or interlaced passages in one reader, with cached languages, equations, figures and source comments. Native Mac supports Apple silicon and Intel. Default interests include Shaohua Ma’s organoid work. Monthly plans and a seven-day trial are prepared; purchases remain gated on sandbox qualification.
+
+[1.0.2 (20)](docs/release-candidate-20.md)
+
 <!-- agent19 -->
 1.0.2 (19): Ask the agent to find, download, transcribe, summarize, translate or save a paper. Approximate titles and DOIs work across research indexes, with a bounded public-source fallback and PDF identity checks. Saved results reopen from chat. Recommendations follow your research interests; change them in Your space. Android Back returns to the conversation.
 

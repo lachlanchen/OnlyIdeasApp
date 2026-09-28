@@ -196,6 +196,20 @@ import WebKit
             await pause(); try snapshot("equations")
             _ = try? await web.evaluateJavaScript("document.querySelector('#paper img')?.scrollIntoView({block:'start'})")
             await pause(); try snapshot("figures")
+            for _ in 0..<60 {
+                if (try? await web.evaluateJavaScript("document.querySelectorAll('.reading-pair').length>0")) as? Bool == true {break}
+                await pause(0.5)
+            }
+            _ = try await web.evaluateJavaScript("window.OnlyIdeasMode('interlaced');document.querySelector('.reading-translation')?.scrollIntoView({block:'start'})")
+            let bilingual = try await web.evaluateJavaScript("({pairs:document.querySelectorAll('.reading-pair').length,figures:[...document.querySelectorAll('#paper img')].filter(i=>i.getClientRects().length&&i.complete&&i.naturalWidth>0).length,translated:[...document.querySelectorAll('.reading-translation')].some(e=>e.getClientRects().length&&/[\\u3400-\\u9fff]/.test(e.textContent)),fits:document.documentElement.scrollWidth<=innerWidth+1})") as? [String:Any] ?? [:]
+            result["interlaced"] = bilingual
+            try check("Cached Chinese and original share the Mac reader", (bilingual["pairs"] as? Int ?? 0)>0 && bilingual["translated"] as? Bool == true)
+            try check("Interlaced figures appear once and fit the Mac window", bilingual["figures"] as? Int == 3 && bilingual["fits"] as? Bool == true)
+            await pause();try snapshot("interlaced")
+            _ = try await web.evaluateJavaScript("window.OnlyIdeasMode('translation')")
+            try check("Translation is a peer reading mode", (try await web.evaluateJavaScript("[...document.querySelectorAll('.reading-source')].every(e=>!e.getClientRects().length)")) as? Bool == true)
+            try snapshot("translation")
+            _ = try await web.evaluateJavaScript("window.OnlyIdeasMode('original')")
             let oldSize=store.readingSize, oldAppearance=store.appearance
             defer { store.readingSize=oldSize; store.appearance=oldAppearance }
             store.readingSize=22; store.appearance="dark"; store.objectWillChange.send(); await pause()

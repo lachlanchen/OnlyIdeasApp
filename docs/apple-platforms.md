@@ -43,3 +43,10 @@ The Debug-only Mac QA mode exercises the real public library and native navigati
 Its offline argument rejects app API requests; it never fabricates paper content
 or writes server accounts, credits or papers. Debug proxy support is scoped to
 this app's URLSession and is excluded from release builds.
+
+For native Mac QA, launch the app bundle through Launch Services with `open -n`
+and pass `--onlyideas-mac-qa` after `--args`. Launching the executable directly
+from a LaunchAgent can fail before Catalyst creates its main scene. Use
+`--onlyideas-native-offline` for the second cold launch; it blocks this app's API
+requests while preserving its real cache. The QA output distinguishes online and
+offline runs. It must be fresh, successful and match the tested build.

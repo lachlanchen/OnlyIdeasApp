@@ -1,4 +1,4 @@
-import {paperSegments,segmentSource} from './translation-pieces.mjs';
+import {paperSegments,segmentSource,readingView} from './translation-pieces.mjs';
 import {uploadContext,activeRecovery,bindRecovery,canUploadForJob,recoveryJob} from './import-recovery.mjs';
 import {unlimitedAllowance,countsAsRequest} from './allowances.mjs';
 import {createReadingSpace,recordActivity} from './reading-space.mjs';
@@ -87,6 +87,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         if (path === '/api/worker/paper') return response(res,chats.readPaper(await json(req)));
         requireValue(false, 'Not found.', 404);
       }
+      if(path==='/api/billing/notifications/stripe'&&method==='POST'){limit(`stripe-webhook:${req.socket.remoteAddress}`,120);return response(res,await billing.stripeNotification(req,await readBody(req,250_000)))}
       const notification=path.match(/^\/api\/billing\/notifications\/(apple|google)$/);
       if(notification&&method==='POST') {
         limit(`billing-webhook:${req.socket.remoteAddress}`,120);
@@ -150,6 +151,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         return response(res,{job:safeJob(job),paperId:job.paperId},202);
       }
       if (path === '/api/billing' && method === 'GET') {requireUser();return response(res,billing.catalog(user));}
+      if(['/api/billing/checkout','/api/billing/portal','/api/billing/restore'].includes(path)&&method==='POST'){requireUser();requireValue(!native,'Use your device store for subscriptions.',403);limit(`web-purchase:${user.id}`,10);return response(res,await billing.web(path.split('/').at(-1),await json(req),user))}
       const purchase=path.match(/^\/api\/billing\/(apple|google)$/);
       if(purchase&&method==='POST') {requireUser();limit(`purchase:${user.id}`,20);return response(res,await billing.purchase(purchase[1],await json(req),user));}
       if (path === '/api/credits' && method === 'GET') { requireUser(); return response(res, creditSummary(store,user.id,config)); }
@@ -301,9 +303,10 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         return response(res, { job }, 202);
       }
       if (path === '/api/jobs' && method === 'GET') { requireUser(); return response(res, { jobs: store.jobs(user.id).filter(j=>{const p=j.paperId?store.paper(j.paperId):null;return j.owner===user.id||(p&&store.active(p.owner)&&!store.blocked(user.id,p.owner)&&(p.owner===user.id||p.visibility==='public'));}).map(safeJob) }); }
-      const matchPaper = path.match(/^\/api\/papers\/([\w-]+)(?:\/(comments|notes|assist|publish|artifacts|export|segments))?$/);
+      const matchPaper = path.match(/^\/api\/papers\/([\w-]+)(?:\/(comments|notes|assist|publish|artifacts|export|segments|reading))?$/);
       if (matchPaper) {
         const p = paperFor(matchPaper[1]), action = matchPaper[2];
+        if(action==='reading'&&method==='GET')return response(res,readingView(store,p,user,url.searchParams.get('language')||'en'));
         if (!action && method === 'GET') return response(res, { paper: { ...p, isOwner: p.owner === user?.id, owner: undefined } });
         if(action==='segments'&&method==='GET')return response(res,{segments:paperSegments(p.mmd,p.language).filter(s=>s.display.length>=30&&s.translatable).map(s=>({...s,text:s.display,sentences:s.sentences.filter(x=>x.display).map(x=>({...x,text:x.display}))}))});
         if (action === 'export' && method === 'GET') { res.writeHead(200, { 'Content-Type': 'text/markdown; charset=utf-8', 'Content-Disposition': `attachment; filename="${p.id}.mmd"` }); return res.end(p.mmd); }

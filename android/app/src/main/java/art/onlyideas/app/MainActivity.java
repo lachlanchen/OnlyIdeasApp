@@ -59,6 +59,11 @@ public class MainActivity extends AppCompatActivity {
   private Button sendButton;
   private JSONObject account, document;
   private boolean derived = false;
+  private String readLanguage="zh-Hans",readingMode="original";
+  private JSONObject alignedReading;
+  private LinearLayout readerLanguages;
+  private boolean translationPending=false;
+  private int readingGeneration=0;
   private JSONArray papers = new JSONArray(),
       chats = new JSONArray(),
       chatMessages = new JSONArray(),
@@ -85,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
       new Runnable() {
         public void run() {
           if (page.equals("agent") && !chatId.isEmpty()) loadChat(false);
-          if (account != null) {loadJobs(false);if(System.currentTimeMillis()-inboxChecked>30000){inboxChecked=System.currentTimeMillis();int epoch=authEpoch;job(()->api.json("/api/inbox","GET",null),r->{if(epoch==authEpoch&&spaceNavigation!=null)spaceNavigation.setText(t("Your space")+(r.optInt("unread")>0?" · "+r.optInt("unread"):""));});}}
+          if (account != null && !offline) {loadJobs(false);if(System.currentTimeMillis()-inboxChecked>30000){inboxChecked=System.currentTimeMillis();int epoch=authEpoch;job(()->api.json("/api/inbox","GET",null),r->{if(epoch==authEpoch&&spaceNavigation!=null)spaceNavigation.setText(t("Your space")+(r.optInt("unread")>0?" · "+r.optInt("unread"):""));},false);}}
           handler.postDelayed(this, 3500);
         }
       };
@@ -370,6 +375,10 @@ public class MainActivity extends AppCompatActivity {
   }
 
   <T> void job(Callable<T> work, Consumer<T> done) {
+    job(work,done,true);
+  }
+
+  <T> void job(Callable<T> work, Consumer<T> done, boolean reportFailure) {
     int epoch = authEpoch;
     io.execute(
         () -> {
@@ -382,7 +391,7 @@ public class MainActivity extends AppCompatActivity {
           } catch (Exception e) {
             handler.post(
                 () -> {
-                  if (!isFinishing() && epoch == authEpoch) {
+                  if (reportFailure && !isFinishing() && epoch == authEpoch) {
                     busy = false;
                     alert(e.getMessage() == null ? "Please try again." : e.getMessage());
                     if (sendButton != null) sendButton.setEnabled(true);
@@ -610,7 +619,7 @@ public class MainActivity extends AppCompatActivity {
           });
           ArrayList<String> ids=new ArrayList<>();JSONArray plans=catalog.optJSONArray("plans");
           if(plans!=null)for(int i=0;i<plans.length();i++)ids.add(plans.optJSONObject(i).optString("google"));
-          billing.load(ids);renderSubscriptions();
+          billing.trialEligible=catalog.optBoolean("trialEligible");billing.load(ids);renderSubscriptions();
         });
       } catch(Exception ignored) { /* Older servers keep billing hidden. */ }
     });
@@ -620,19 +629,25 @@ public class MainActivity extends AppCompatActivity {
     subscriptionContainer.removeAllViews();
     if(account==null||billingCatalog==null||!billingCatalog.optBoolean("enabled")||!billingCatalog.optJSONObject("providers").optBoolean("google"))return;
     LinearLayout card=card();title(card,t("Monthly plans"),22);gap(card,10);
-    caption(card,t("Shared reading stays free. Choose a plan for more private imports and daily agent messages."));
+    caption(card,t("Existing papers and cached translations are free to read. Plans cover new fetching and transcription."));
+    JSONObject quota=billingCatalog.optJSONObject("quota");
+    if(quota!=null&&quota.optBoolean("enabled")){caption(card,quota.optBoolean("unlimited")?t("Unlimited owner allowance"):t("{pages} transcription pages and {fetches} fetches remaining").replace("{pages}",String.valueOf(quota.optInt("remainingPages"))).replace("{fetches}",String.valueOf(quota.optInt("remainingFetches"))));if(!quota.optBoolean("unlimited"))caption(card,t("Renews on {date}").replace("{date}",java.text.DateFormat.getDateInstance().format(new java.util.Date(quota.optLong("ends")))));}
+    if(billing!=null)billing.trialEligible=billingCatalog.optBoolean("trialEligible");
     String active=billingCatalog.optString("plan","");
     if(!billingCatalog.optBoolean("canSubscribe"))caption(card,t("Manage your plan in the store where you subscribed."));
     JSONArray plans=billingCatalog.optJSONArray("plans");
     for(ProductDetails product:billingProducts) {
-      ProductDetails.SubscriptionOfferDetails offer=NativeBilling.monthly(product);if(offer==null)continue;
+      ProductDetails.SubscriptionOfferDetails offer=NativeBilling.monthly(product,billingCatalog.optBoolean("trialEligible"));if(offer==null)continue;
       JSONObject plan=null;for(int i=0;i<plans.length();i++)if(plans.optJSONObject(i).optString("google").equals(product.getProductId()))plan=plans.optJSONObject(i);
       if(plan==null)continue;
       gap(card,18);title(card,t(plan.optString("name")),20);
       caption(card,t("{credits} credits each month · {messages} agent messages daily").replace("{credits}",String.valueOf(plan.optInt("credits"))).replace("{messages}",String.valueOf(plan.optInt("agentTurns"))));
-      String price=offer.getPricingPhases().getPricingPhaseList().get(0).getFormattedPrice();
+      caption(card,t("{pages} transcription pages · {fetches} new-paper fetches per month").replace("{pages}",String.valueOf(plan.optInt("pages",plan.optInt("credits")))).replace("{fetches}",String.valueOf(plan.optInt("fetches"))));
+      List<ProductDetails.PricingPhase> phases=offer.getPricingPhases().getPricingPhaseList();boolean trial=phases.size()==2&&phases.get(0).getPriceAmountMicros()==0;
+      String price=phases.get(phases.size()-1).getFormattedPrice();
+      if(trial)caption(card,t("7 days free, then {price} per month. Trial includes 50 pages and 10 fetches. Cancel before it ends to avoid payment.").replace("{price}",price));
       caption(card,t("{price} / month").replace("{price}",price));
-      Button buy=button(t(active.equals(plan.optString("id"))?"Current plan":"Subscribe"),true,()->billing.purchase(product,billingCatalog.optString("accountToken")));
+      Button buy=button(t(active.equals(plan.optString("id"))?"Current plan":trial?"Start 7-day free trial":"Subscribe"),true,()->billing.purchase(product,billingCatalog.optString("accountToken")));
       buy.setEnabled(billingCatalog.optBoolean("canSubscribe"));card.addView(buy);
     }
     if(billingProducts.isEmpty()&&!purchaseNotice.equals(t("Plans are currently unavailable in this store.")))caption(card,t("Plans are currently unavailable in this store."));
@@ -1344,6 +1359,7 @@ public class MainActivity extends AppCompatActivity {
       JSONObject d = new JSONObject().put("paper", full).put("figures", figures)
           .put("owner", full.optString("visibility").equals("public") ? "public" : owner)
           .put("pinned", saved != null && saved.optBoolean("pinned", true)).put("accessed", System.currentTimeMillis());
+      if(same && saved.optString("owner").equals(d.optString("owner")))d.put("readings",saved.optJSONObject("readings"));
       synchronized (cacheLock) {
         if (epoch != authEpoch || !Objects.equals(token, api.token()) || Thread.currentThread().isInterrupted()) throw new InterruptedException();
         saveCached(d);
@@ -1360,6 +1376,7 @@ public class MainActivity extends AppCompatActivity {
   void openPaper(JSONObject paper) {
     int request = ++readerRequest, epoch = authEpoch;
     if(!page.equals("reader"))readerReturn=page;
+    readLanguage=paper.optString("language").equals("zh-Hans")?"en":"zh-Hans";readingMode="original";alignedReading=null;++readingGeneration;translationPending=false;
     clear("reader"); document = null;
     content.addView(text(t("Opening your paper…"), 18, false));
     io.execute(() -> {
@@ -1375,6 +1392,7 @@ public class MainActivity extends AppCompatActivity {
           document = fresh; derived = false;
           if (reader == null) showReader();
           else if (!old.equals(fresh.optJSONObject("paper").optString("revision"))) renderDocument(reader);
+          refreshReading();
         });
       } catch (Exception e) {
         handler.post(() -> {
@@ -1415,6 +1433,7 @@ public class MainActivity extends AppCompatActivity {
     more.setContentDescription(t("Reading options"));
     header.addView(more, new LinearLayout.LayoutParams(dp(48), dp(48)));
     if (derived) { TextView notice = text(t("AI generated result. Reopen the paper from Library for the original."), 14, false); notice.setPadding(dp(14), dp(6), dp(14), dp(6)); notice.setBackgroundColor(soft); content.addView(notice); }
+    if(!derived){readerLanguages=column();content.addView(readerLanguages);updateReaderLanguages();}else readerLanguages=null;
     reader = new WebView(this);
     reader.setBackgroundColor(surface);
     reader.setHorizontalScrollBarEnabled(false);
@@ -1479,6 +1498,38 @@ public class MainActivity extends AppCompatActivity {
     reader.loadUrl("https://appassets.androidplatform.net/assets/public/native-reader.html");
   }
 
+  String languageName(String code){String[] codes={"en","zh-Hans","zh-Hant","ja","ko","ar","es","fr","de","ru","vi"};String[] names={"English","简体中文","繁體中文","日本語","한국어","العربية","Español","Français","Deutsch","Русский","Tiếng Việt"};for(int i=0;i<codes.length;i++)if(codes[i].equals(code))return names[i];return code;}
+  void updateReaderLanguages(){
+    if(readerLanguages==null||document==null||derived)return;
+    readerLanguages.removeAllViews();readerLanguages.setPadding(dp(10),dp(2),dp(10),dp(4));
+    LinearLayout top=new LinearLayout(this);top.setGravity(Gravity.CENTER_VERTICAL);
+    Button language=button(languageName(readLanguage)+" ▾",false,this::languagePicker);language.setTypeface(null,android.graphics.Typeface.BOLD);top.addView(language,new LinearLayout.LayoutParams(0,dp(42),1));
+    if(!readingMode.equals("original")&&(alignedReading==null||!alignedReading.optBoolean("complete"))){Button fetch=button(t("Fetch remaining translation"),false,this::requestReading);fetch.setEnabled(!translationPending);fetch.setTextSize(12);top.addView(fetch,new LinearLayout.LayoutParams(0,dp(42),1));}
+    readerLanguages.addView(top);
+    LinearLayout modes=new LinearLayout(this);String[] ids={"original","translation","interlaced"},names={"Original","Translation","Interlaced"};
+    for(int i=0;i<ids.length;i++){final String mode=ids[i];Button b=button(t(names[i]),readingMode.equals(mode),()->{readingMode=mode;updateReaderLanguages();if(reader!=null)reader.evaluateJavascript("window.OnlyIdeasMode&&window.OnlyIdeasMode("+JSONObject.quote(mode)+")",null);});b.setTextSize(13);modes.addView(b,new LinearLayout.LayoutParams(0,dp(42),1));}readerLanguages.addView(modes);
+    if(!readingMode.equals("original")){String progress=alignedReading==null?t("Connect to fetch available languages."):alignedReading.optInt("translated")+"/"+alignedReading.optInt("total");readerLanguages.addView(text(t("AI translation")+" · "+progress,12,false));}
+  }
+  void refreshReading(){
+    if(document==null||derived)return;String id=document.optJSONObject("paper").optString("id"),revision=document.optJSONObject("paper").optString("revision"),language=readLanguage;int epoch=authEpoch,generation=++readingGeneration;
+    JSONObject cached=document.optJSONObject("readings");JSONObject saved=cached==null?null:cached.optJSONObject(language);if(alignedReading==null&&saved!=null){alignedReading=saved;if(reader!=null)renderDocument(reader);}updateReaderLanguages();
+    io.execute(()->{try{JSONObject result=api.json("/api/papers/"+id+"/reading?language="+language,"GET",null);handler.post(()->{
+      if(epoch!=authEpoch||generation!=readingGeneration||document==null||!page.equals("reader")||!id.equals(document.optJSONObject("paper").optString("id"))||!revision.equals(result.optString("revision")))return;
+      boolean changed=alignedReading==null||!result.optString("mmd").equals(alignedReading.optString("mmd"))||result.optInt("translated")!=alignedReading.optInt("translated");
+      alignedReading=result;try{JSONObject readings=document.optJSONObject("readings");if(readings==null)readings=new JSONObject();readings.put(language,result);document.put("readings",readings);saveCached(document);}catch(Exception ignored){}
+      updateReaderLanguages();if(changed&&reader!=null)renderDocument(reader);
+    });}catch(Exception ignored){}});
+  }
+  void requestReading(){
+    if(account==null){signIn();return;}if(translationPending||document==null)return;
+    String id=document.optJSONObject("paper").optString("id"),language=readLanguage;int epoch=authEpoch;
+    translationPending=true;updateReaderLanguages();
+    io.execute(()->{try{api.json("/api/papers/"+id+"/assist","POST",new JSONObject().put("kind","translation").put("language",language));handler.post(()->{if(epoch!=authEpoch||!page.equals("reader")||document==null||!id.equals(document.optJSONObject("paper").optString("id")))return;translationPending=false;toast(t("Translation requested. Existing work is reused."));refreshReading();pollReading(id,language,epoch,0);});}catch(Exception e){handler.post(()->{if(epoch==authEpoch){translationPending=false;updateReaderLanguages();alert(e.getMessage());}});}});
+  }
+  void pollReading(String id,String language,int epoch,int attempt){
+    handler.postDelayed(()->{if(epoch!=authEpoch||!page.equals("reader")||document==null||!id.equals(document.optJSONObject("paper").optString("id"))||!language.equals(readLanguage)||attempt>=120)return;refreshReading();if(alignedReading==null||!alignedReading.optBoolean("complete"))pollReading(id,language,epoch,attempt+1);},3000);
+  }
+
   String paperAttribution(JSONObject p){JSONObject proof=p.optJSONObject("provenance");return proof==null?"":p.optString("license")+" · "+proof.optString("licenseUrl")+" · "+proof.optString("changes");}
   void renderDocument(WebView view) {
     try {
@@ -1492,6 +1543,7 @@ public class MainActivity extends AppCompatActivity {
                   "dark",
                   (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK)
                       == Configuration.UI_MODE_NIGHT_YES);
+      if(!derived){if(alignedReading==null){JSONObject cached=document.optJSONObject("readings");alignedReading=cached==null?null:cached.optJSONObject(readLanguage);}payload.put("reading",alignedReading).put("mode",readingMode).put("labels",new JSONObject().put("source",languageName(document.optJSONObject("paper").optString("language"))).put("translation",languageName(readLanguage)+" · "+t("AI translation")).put("partial",t("Remaining passages use the original.")));}
       view.evaluateJavascript(
           "window.OnlyIdeasRender && window.OnlyIdeasRender(" + payload + ")", null);
     } catch (Exception e) {
@@ -1690,17 +1742,13 @@ public class MainActivity extends AppCompatActivity {
   }
 
   void languagePicker() {
-    if(derived){toast(t("Reopen the original paper to use reading tools."));return;}
-    final String id=document.optJSONObject("paper").optString("id");
-    job(()->api.json("/api/papers/"+id+"/artifacts","GET",null),response->{
-      JSONArray artifacts=response.optJSONArray("artifacts");String[] codes={"en","zh-Hans","zh-Hant","ja","ko","ar","es","fr","de","ru","vi"};String[] names={"English","简体中文","繁體中文","日本語","한국어","العربية","Español","Français","Deutsch","Русский","Tiếng Việt"};
-      Map<String,JSONObject> ready=new HashMap<>();if(artifacts!=null)for(int i=0;i<artifacts.length();i++){JSONObject a=artifacts.optJSONObject(i);if(a.optString("kind").equals("translation")&&(a.isNull("sectionId")||a.optString("sectionId").isEmpty())&&(a.isNull("segmentId")||a.optString("segmentId").isEmpty()))ready.put(a.optString("language"),a);}
-      for(int i=0;i<codes.length;i++)if(ready.containsKey(codes[i]))names[i]+=" ✓";
-      new AlertDialog.Builder(this).setTitle(t("Read in another language")).setItems(names,(d,n)->{if(ready.containsKey(codes[n])){showArtifact(ready.get(codes[n]));return;}if(account==null){signIn();return;}job(()->api.json("/api/papers/"+id+"/assist","POST",new JSONObject().put("kind","translation").put("language",codes[n])),r->{toast(t("Translation requested. Existing work is reused."));loadJobs(true);});}).setNegativeButton(t("Done"),null).show();
-    });
+    if(derived)return;
+    String[] codes={"en","zh-Hans","zh-Hant","ja","ko","ar","es","fr","de","ru","vi"};String[] names=new String[codes.length];for(int i=0;i<codes.length;i++)names[i]=languageName(codes[i]);
+    new AlertDialog.Builder(this).setTitle(t("Read in another language")).setItems(names,(d,n)->{readLanguage=codes[n];readingMode="interlaced";alignedReading=null;translationPending=false;refreshReading();if(reader!=null)renderDocument(reader);}).setNegativeButton(t("Done"),null).show();
   }
 
   void showArtifact(JSONObject artifact) {
+    if(artifact.optString("kind").equals("translation")){derived=false;readLanguage=artifact.optString("language");readingMode="interlaced";alignedReading=null;showReader();refreshReading();return;}
     try { JSONObject next=new JSONObject(document.toString());JSONObject p=next.getJSONObject("paper");p.put("mmd",artifact.getString("text")).put("revision",artifact.getString("id")).put("language",artifact.getString("language"));document=next;derived=true;showReader(); }
     catch(Exception e){alert(e.getMessage());}
   }
@@ -1874,19 +1922,7 @@ public class MainActivity extends AppCompatActivity {
               .setItems(
                   labels,
                   (d, n) -> {
-                    try {
-                      JSONObject a = list.optJSONObject(n),
-                          copy = new JSONObject(document.toString());
-                      copy.getJSONObject("paper")
-                          .put("mmd", a.optString("text"))
-                          .put("title", "AI generated · " + a.optString("model"));
-                      document = copy;
-                      derived = true;
-                      showReader();
-                      toast(t("AI generated result. Reopen the paper from Library for the original."));
-                    } catch (Exception e) {
-                      alert(e.getMessage());
-                    }
+                    showArtifact(list.optJSONObject(n));
                   })
               .setNegativeButton(t("Done"), null)
               .show();
@@ -2054,7 +2090,7 @@ public class MainActivity extends AppCompatActivity {
     caption(c,t("Tap a paper to fetch and convert it. Existing papers open immediately. Shared imports enter publication review."));gap(c,10);
     researchList=column();c.addView(researchList);researchNotice=text("",14,false);researchNotice.setTextColor(muted);c.addView(researchNotice);
     researchMore=button(t("Load more"),false,()->researchLoad(researchPage,researchGeneration));c.addView(researchMore);researchMore.setVisibility(View.GONE);
-    if(researchTaxonomy.length()==0)job(()->api.json("/api/discovery/taxonomy","GET",null),r->researchTaxonomy=r);
+    if(researchTaxonomy.length()==0)job(()->api.json("/api/discovery/taxonomy","GET",null),r->researchTaxonomy=r,false);
     if(c.getParent() instanceof LinearLayout && ((LinearLayout)c.getParent()).getParent() instanceof ScrollView){ScrollView scroll=(ScrollView)((LinearLayout)c.getParent()).getParent();scroll.setOnScrollChangeListener((View v,int x,int y,int ox,int oy)->{android.graphics.Rect rect=new android.graphics.Rect();if(researchMore.getVisibility()==View.VISIBLE&&researchMore.getGlobalVisibleRect(rect)&&!researchLoading)researchLoad(researchPage,researchGeneration);});}
     researchReset();
   }
@@ -2068,7 +2104,7 @@ public class MainActivity extends AppCompatActivity {
     Map<String,EditText> inputs=new LinkedHashMap<>();for(String key:List.of("from","to","journal")){caption(c,t(key.equals("from")?"From year":key.equals("to")?"To year":"Journal"));EditText edit=new EditText(this);edit.setSingleLine(true);edit.setText(draft.getOrDefault(key,""));if(!key.equals("journal"))edit.setInputType(InputType.TYPE_CLASS_NUMBER);c.addView(edit);inputs.put(key,edit);}Spinner order=new Spinner(this);order.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,new String[]{t("Relevance"),t("Newest first")}));order.setSelection("latest".equals(draft.get("sort"))?1:0);caption(c,t("Sort"));c.addView(order);
     new AlertDialog.Builder(this).setTitle(t("Filters")).setView(scroll).setPositiveButton(t("Apply"),(d,w)->{researchOptions.clear();researchOptions.putAll(draft);for(String key:inputs.keySet())researchOptions.put(key,inputs.get(key).getText().toString());researchOptions.put("sort",order.getSelectedItemPosition()==1?"latest":"relevance");researchReset();}).setNeutralButton(t("Clear filters"),(d,w)->{researchOptions.clear();researchReset();}).setNegativeButton(t("Cancel"),null).show();
   }
-  void socialActions(LinearLayout parent,String ref,String title){LinearLayout row=row();parent.addView(row);JSONObject[] state={new JSONObject()};Runnable[] render=new Runnable[1];render[0]=()->{row.removeAllViews();for(String action:List.of("saved","liked","comments","share")){String label=action.equals("saved")?(state[0].optBoolean("saved")?"★ "+t("Saved"):"☆ "+t("Save")):action.equals("liked")?(state[0].optBoolean("liked")?"♥ ":"♡ ")+t("Like"):t(action.equals("comments")?"Comment":"Share");Button b=button(label,false,()->{if(action.equals("comments")){itemDiscussion(ref,title,state[0].optBoolean("private"));return;}if(action.equals("share")){String url=state[0].optString("shareUrl");if(url.isEmpty()||url.equals("null")){toast(t("Private papers can only be opened by their owner."));return;}Intent send=new Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT,title+"\n"+url);startActivity(Intent.createChooser(send,t("Share")));return;}if(account==null){signIn();return;}job(()->api.json("/api/items/"+ref,"PUT",new JSONObject().put(action,!state[0].optBoolean(action))),r->{state[0]=r;render[0].run();});});b.setTextSize(11);b.setPadding(0,0,0,0);row.addView(b,new LinearLayout.LayoutParams(0,dp(44),1));}};render[0].run();job(()->api.json("/api/items/"+ref,"GET",null),r->{state[0]=r;render[0].run();});}
+  void socialActions(LinearLayout parent,String ref,String title){LinearLayout row=row();parent.addView(row);JSONObject[] state={new JSONObject()};Runnable[] render=new Runnable[1];render[0]=()->{row.removeAllViews();for(String action:List.of("saved","liked","comments","share")){String label=action.equals("saved")?(state[0].optBoolean("saved")?"★ "+t("Saved"):"☆ "+t("Save")):action.equals("liked")?(state[0].optBoolean("liked")?"♥ ":"♡ ")+t("Like"):t(action.equals("comments")?"Comment":"Share");Button b=button(label,false,()->{if(action.equals("comments")){itemDiscussion(ref,title,state[0].optBoolean("private"));return;}if(action.equals("share")){String url=state[0].optString("shareUrl");if(url.isEmpty()||url.equals("null")){toast(t("Private papers can only be opened by their owner."));return;}Intent send=new Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT,title+"\n"+url);startActivity(Intent.createChooser(send,t("Share")));return;}if(account==null){signIn();return;}job(()->api.json("/api/items/"+ref,"PUT",new JSONObject().put(action,!state[0].optBoolean(action))),r->{state[0]=r;render[0].run();});});b.setTextSize(11);b.setPadding(0,0,0,0);row.addView(b,new LinearLayout.LayoutParams(0,dp(44),1));}};render[0].run();job(()->api.json("/api/items/"+ref,"GET",null),r->{state[0]=r;render[0].run();},false);}
   void itemDiscussion(String ref,String paperTitle,boolean privatePaper){LinearLayout c=column();c.setPadding(dp(18),dp(8),dp(18),dp(16));c.setFocusableInTouchMode(true);caption(c,paperTitle);LinearLayout thread=column();c.addView(thread);CheckBox terms=new CheckBox(this);terms.setText(t("I accept the Community Terms"));if(!privatePaper){c.addView(terms);c.addView(button(t("Read Community Terms"),false,()->startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse("https://lachlan.lazying.art/OnlyIdeasApp/terms.html")))));}EditText draft=new EditText(this);draft.setHint(t("Your comment"));draft.setMinLines(3);draft.setGravity(Gravity.TOP);draft.setInputType(InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_FLAG_MULTI_LINE);c.addView(draft);ScrollView scroll=new ScrollView(this);scroll.addView(c);AlertDialog dialog=new AlertDialog.Builder(this).setTitle(t("Paper discussion")).setView(scroll).setNegativeButton(t("Done"),null).create();Runnable[] load=new Runnable[1];load[0]=()->job(()->api.json("/api/items/"+ref+"/comments","GET",null),r->{thread.removeAllViews();JSONArray comments=r.optJSONArray("comments");if(comments!=null)for(int i=0;i<comments.length();i++){JSONObject comment=comments.optJSONObject(i);title(thread,comment.optString("author"),15);caption(thread,comment.optString("text"));if(comment.optBoolean("pending"))caption(thread,t("Waiting for community review"));if(comment.optBoolean("canDelete"))thread.addView(button(t("Delete"),false,()->job(()->api.json("/api/comments/"+comment.optString("id"),"DELETE",null),v->load[0].run())));else{thread.addView(button(t("Report"),false,()->{if(account==null){signIn();return;}EditText reason=new EditText(this);new AlertDialog.Builder(this).setTitle(t("What should we review?")).setView(reason).setPositiveButton(t("Send report"),(d,w)->job(()->api.json("/api/comments/"+comment.optString("id")+"/report","POST",new JSONObject().put("reason",reason.getText().toString())),v->toast(t("Report sent.")))).show();}));thread.addView(button(t("Block reader"),false,()->{if(account==null){signIn();return;}job(()->api.json("/api/comments/"+comment.optString("id")+"/block","POST",new JSONObject()),v->load[0].run());}));}}scroll.post(()->scroll.fullScroll(View.FOCUS_DOWN));});c.addView(button(t("Post thought"),true,()->{if(account==null){signIn();return;}if(!privatePaper&&!terms.isChecked()){toast(t("I accept the Community Terms"));return;}job(()->api.json("/api/items/"+ref+"/comments","POST",new JSONObject().put("id",UUID.randomUUID().toString()).put("text",draft.getText().toString()).put("acceptTerms",terms.isChecked())),r->{draft.setText("");load[0].run();});}));dialog.setOnShowListener(v->{c.requestFocus();dialog.getWindow().setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);load[0].run();});dialog.show();}
 
   private String spaceTab="saved";

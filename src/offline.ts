@@ -1,6 +1,7 @@
 import type { Paper, Session } from './api'
 import { request, native, hasToken } from './native'
-type Download = { key: string; owner: string; paper: Paper; figures: Record<string, Blob>; pinned?: boolean; accessed?: number }
+import type {ReadingView} from './parallel-reader'
+type Download = { key: string; owner: string; paper: Paper; figures: Record<string, Blob>; pinned?: boolean; accessed?: number; readings?:Record<string,ReadingView> }
 let generation = 0
 window.addEventListener('storage', e => { if (e.key === 'onlyideas-offline-session') generation++ })
 const database = new Promise<IDBDatabase>((resolve, reject) => {
@@ -48,7 +49,7 @@ export async function downloadPaper(paper: Paper, owner?: string, pinned = true)
   if (epoch !== generation) return
   await new Promise<void>((resolve, reject) => {
     const tx = db.transaction('papers', 'readwrite')
-    const next = { key: `${scope}:${paper.id}`, owner: scope, paper, figures, pinned: pinned || (existing ? existing.pinned !== false : false), accessed: Date.now() } satisfies Download
+    const next = { key: `${scope}:${paper.id}`, owner: scope, paper, figures, pinned: pinned || (existing ? existing.pinned !== false : false), accessed: Date.now(),readings:existing?.paper.revision===paper.revision&&existing.owner===scope?existing.readings:undefined } satisfies Download
     for (const r of all) if (r.paper.id === paper.id && r.key !== next.key) tx.objectStore('papers').delete(r.key)
     tx.objectStore('papers').put(next)
     const recent = [...all.filter(r=>r.key !== next.key), next].filter(r=>r.pinned === false).sort((a,b)=>(b.accessed||0)-(a.accessed||0))
@@ -56,6 +57,11 @@ export async function downloadPaper(paper: Paper, owner?: string, pinned = true)
     recent.forEach((r,i)=>{ bytes += new Blob([r.paper.mmd||'']).size + Object.values(r.figures).reduce((n,b)=>n+b.size,0); if(i>=20 || bytes>150_000_000) tx.objectStore('papers').delete(r.key) })
     tx.oncomplete = () => resolve(); tx.onerror = () => reject(tx.error)
   })
+}
+export async function cacheReading(view:ReadingView,owner?:string){
+ const epoch=generation,saved=await downloadedPaper(view.paperId,owner);if(!saved||saved.paper.revision!==view.revision)return
+ const db=await database;if(epoch!==generation)return
+ await new Promise<void>((resolve,reject)=>{const tx=db.transaction('papers','readwrite'),r=tx.objectStore('papers').get(saved.key);r.onsuccess=()=>{const current=r.result as Download|undefined;if(current?.paper.revision===view.revision)tx.objectStore('papers').put({...current,readings:{...current.readings,[view.language]:view}})};tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error)})
 }
 export async function removeDownload(id: string, owner?: string) {
   const db = await database, all = await records()

@@ -1,9 +1,11 @@
+import {initSubscriptionQuota,recordPeriod,deleteSubscriptionQuota,quotaSummary,trialPolicy,trialEligible} from './subscription-quota.mjs';
 import { randomUUID } from 'node:crypto';
 import { hash, requireValue } from './domain.mjs';
 import { creditTransaction,creditsEnabled } from './credits.mjs';
 import { planForProduct, plans } from './plans.mjs';
 
 export function initBilling(store) {
+  initSubscriptionQuota(store);
   store.db.exec(`
     CREATE TABLE IF NOT EXISTS billing_accounts(owner TEXT PRIMARY KEY, token TEXT UNIQUE NOT NULL, closed INTEGER NOT NULL DEFAULT 0);
     CREATE TABLE IF NOT EXISTS billing_receipts(id TEXT PRIMARY KEY, owner TEXT NOT NULL, platform TEXT NOT NULL, product TEXT NOT NULL, credits INTEGER NOT NULL, state TEXT NOT NULL, created INTEGER NOT NULL);
@@ -22,7 +24,7 @@ export function billingAccount(store, owner) {
 }
 export function activePlan(store, owner) {
   if (!owner) return null;
-  const products = store.db.prepare("SELECT platform,product FROM billing_subscriptions WHERE owner=? AND expires>? AND state IN ('active','grace')").all(owner, Date.now());
+  const products = store.db.prepare("SELECT s.platform,s.product FROM billing_subscriptions s WHERE s.owner=? AND s.expires>? AND s.state IN ('active','grace') AND EXISTS (SELECT 1 FROM billing_periods p WHERE p.subscription=s.id AND p.owner=s.owner AND p.ends>s.purchased AND p.state IN ('active','grace'))").all(owner, Date.now());
   return products.map(p=>planForProduct(p.platform,p.product)).filter(Boolean).sort((a,b)=>b.agentTurns-a.agentTurns)[0] || null;
 }
 export function subscriptionSummary(store, owner) {
@@ -34,7 +36,7 @@ export function subscriptionSummary(store, owner) {
 // Internal boundary: proof must come from the provider verifier, never a request
 // body. Transaction IDs are global, bound to the opaque purchase account token.
 export function applyVerifiedPurchase(store, proof, requester) {
-  requireValue(['apple','google'].includes(proof.platform) && ['Production','Sandbox'].includes(proof.environment), 'Unsupported purchase provider.');
+  requireValue(['apple','google','stripe'].includes(proof.platform) && ['Production','Sandbox'].includes(proof.environment), 'Unsupported purchase provider.');
   const plan=planForProduct(proof.platform,proof.product);
   requireValue(plan && typeof proof.receipt==='string' && proof.receipt.length>0 && proof.receipt.length<300, 'Unrecognized purchase.');
   requireValue(typeof proof.subscription==='string' && proof.subscription.length>0 && proof.subscription.length<300, 'Unrecognized subscription.');
@@ -68,19 +70,22 @@ export function applyVerifiedPurchase(store, proof, requester) {
       const state=proof.revoked || prior?.state==='revoked' ? 'revoked':proof.state;
       store.db.prepare('INSERT OR REPLACE INTO billing_subscriptions VALUES(?,?,?,?,?,?,?,?)').run(subscription,owner,proof.platform,proof.product,proof.expires,state,proof.observed,proof.purchased);
     }
+    if(!account.closed)recordPeriod(store,proof,owner,id,subscription);
     return { awarded, ...subscriptionSummary(store,owner) };
   });
 }
 export function deleteBillingAccount(store, owner) {
+  deleteSubscriptionQuota(store,owner);
   const tombstone='deleted:'+hash(owner);
   store.db.prepare('UPDATE billing_accounts SET owner=?,closed=1 WHERE owner=?').run(tombstone,owner);
   store.db.prepare('UPDATE billing_receipts SET owner=? WHERE owner=?').run(tombstone,owner);
   store.db.prepare('DELETE FROM billing_subscriptions WHERE owner=?').run(owner);
   store.db.prepare('DELETE FROM billing_sources WHERE owner=?').run(owner);
+  for(const table of ['billing_stripe_customers','billing_stripe_checkout'])if(store.db.prepare("SELECT 1 FROM sqlite_master WHERE name=?").get(table))store.db.prepare(`DELETE FROM ${table} WHERE owner=?`).run(owner);
 }
 
 export function billingCatalog(store,config,user,ready={}) {
-  const enabled=creditsEnabled(config,user.id) && config.billing?.enabled===true && (ready.apple===true || ready.google===true);
-  return { enabled, providers:{apple:enabled&&ready.apple===true,google:enabled&&ready.google===true}, accountToken:enabled?billingAccount(store,user.id):null,
-    plans:enabled?plans.map(({targetUSD,...p})=>p):[], ...subscriptionSummary(store,user.id) };
+  const enabled=creditsEnabled(config,user.id) && config.billing?.enabled===true && (ready.apple===true || ready.google===true || ready.stripe===true);
+  return { enabled, providers:{apple:enabled&&ready.apple===true,google:enabled&&ready.google===true,stripe:enabled&&ready.stripe===true}, accountToken:enabled?billingAccount(store,user.id):null,
+    plans:enabled?plans.map(p=>({...p,trial:trialPolicy})):[],trialEligible:trialEligible(store,user.id),quota:quotaSummary(store,config,user.id), ...subscriptionSummary(store,user.id) };
 }

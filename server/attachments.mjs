@@ -1,3 +1,4 @@
+import {reserveSubscriptionQuota} from './subscription-quota.mjs';
 import {unlimitedAllowance} from './allowances.mjs';
 import { randomUUID } from 'node:crypto';
 import { readFile, writeFile, mkdir, rm } from 'node:fs/promises';
@@ -65,6 +66,7 @@ export async function convertAttachment(job,config,store,{mathpix,provider=provi
   const directory=join(store.directory,'jobs',job.id),file=join(directory,'source.'+job.ext),bytes=await readFile(file);
   const inspected=inspectAttachment(bytes,'file.'+job.ext);let mmd='',assets=[];
   if(job.mime.startsWith('image/')) {
+    job.pages=1;reserveSubscriptionQuota(store,config,job);
     requireValue(!job.ocrSubmittedAt||job.ocrText!==undefined||job.ocrResult,'The image conversion receipt is uncertain. Contact support before retrying to avoid another charge.',409);
     if(job.ocrText===undefined) {
       const count=store.db.prepare("SELECT count(*) AS n FROM jobs WHERE created>? AND json_extract(body,'$.ocrSubmittedAt') IS NOT NULL").get(Date.now()-86400_000).n;

@@ -16,6 +16,11 @@ Mô hình tiết kiệm có thể cấu hình sẽ tạo hướng dẫn đọc v
 
 ![OnlyIdeas reading room](../evidence/library-desktop.png)
 
+<!-- reader20 -->
+1.0.2 (20): Đọc bản gốc, bản dịch hoặc xen kẽ trong cùng trình đọc, giữ bộ nhớ đệm, công thức, hình và bình luận. Mac gốc hỗ trợ Apple silicon và Intel. Sở thích mặc định có nghiên cứu organoid của Shaohua Ma. Đã chuẩn bị gói tháng và dùng thử bảy ngày; chỉ mở thanh toán sau kiểm thử sandbox.
+
+[1.0.2 (20)](../docs/release-candidate-20.md)
+
 <!-- agent19 -->
 1.0.2 (19): Nhờ trợ lý tìm, tải xuống, chuyển thành văn bản, tóm tắt, dịch hoặc lưu bài báo. Tìm bằng tiêu đề gần đúng và DOI, bổ sung nguồn công khai và kiểm tra PDF có khớp bài báo. Mở lại kết quả trong cuộc trò chuyện; chỉnh sở thích nghiên cứu trong Không gian của bạn. Nút Quay lại trên Android trở về cuộc trò chuyện.
 

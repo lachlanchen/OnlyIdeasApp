@@ -1,3 +1,4 @@
+import {reserveSubscriptionQuota,finishSubscriptionQuota} from './subscription-quota.mjs';
 import {transcriptTitle} from './paper-metadata.mjs';
 import {inspectPaperIdentity} from './pdf-identity.mjs';
 import {verifySourceLicense} from './source-license.mjs';
@@ -61,11 +62,13 @@ export async function mathpix(job, config, store) {
     const form = new FormData();
     form.append('file', new Blob([await readFile(pdfFile)], { type: 'application/pdf' }), 'paper.pdf');
     form.append('options_json', JSON.stringify({ conversion_formats: { 'mmd.zip': true }, improve_mathpix: false }));
+    reserveSubscriptionQuota(store,config,job);
     job.submittedAt = Date.now(); store.saveJob(job);
     const receipt = await providerJSON('https://api.mathpix.com/v3/pdf', { method: 'POST', headers, body: form });
     requireValue(typeof receipt.pdf_id === 'string' && /^[\w-]+$/.test(receipt.pdf_id), 'Conversion receipt is missing. Contact support before retrying.', 502);
     job.pdfId = receipt.pdf_id; job.message = 'Recognizing text, equations and figures'; store.saveJob(job);
   }
+  reserveSubscriptionQuota(store,config,job);
   let complete = false;
   for (let n = 0; n < 100; n++) {
     const status = await providerJSON(`https://api.mathpix.com/v3/pdf/${job.pdfId}`, { headers });
@@ -229,6 +232,7 @@ export function startWorker(store, config) {
         if (store.active(job.owner) && store.job(job.id)?.lease===job.lease) creditTransaction(store, () => {
           requireValue(store.job(job.id)?.lease===job.lease,'The request moved to another worker.',409);
           finishImportCredits(store,job,job.state==='completed');
+          finishSubscriptionQuota(store,job,job.state==='completed');
           if(job.kind==='publish'&&job.state==='completed') rewardPublication(store,job);
           store.saveJob(job);
           completeRecovery(store,job);

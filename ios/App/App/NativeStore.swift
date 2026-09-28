@@ -88,7 +88,13 @@ struct AgentMessage: Codable, Identifiable {
   var actions:[AgentAction]?
 }
 struct AgentAction:Codable,Identifiable {var id:String;var kind:String;var state:String;var message:String;var title:String?;var jobId:String?;var paperId:String?;var artifactId:String?;var canUpload:Bool?;var sharing:String?}
+struct AlignedReading: Codable {
+  struct Block: Codable {var id:String;var start:Int;var end:Int;var targetStart:Int;var targetEnd:Int;var available:Int;var needed:Int;var content:Bool}
+  var paperId:String;var revision:String;var language:String;var sourceLanguage:String
+  var mmd:String;var translated:Int;var total:Int;var complete:Bool;var blocks:[Block]
+}
 struct ReaderDocument: Codable {
+  var readings:[String:AlignedReading]? = nil
   var paper: ResearchPaper
   var figures: [String: String]
   var owner: String
@@ -114,7 +120,9 @@ struct ReadingCredits: Decodable {
   var policy:Policy; var history:[Entry]
 }
 struct SubscriptionCatalog: Decodable {
-  struct Plan: Decodable, Identifiable {var id:String;var name:String;var credits:Int;var agentTurns:Int;var apple:String;var google:String}
+  struct Plan: Decodable, Identifiable {var id:String;var name:String;var credits:Int;var agentTurns:Int;var apple:String;var google:String;var pages:Int?;var fetches:Int?}
+  struct Quota:Decodable {var enabled:Bool;var unlimited:Bool;var trial:Bool;var pages:Int;var fetches:Int;var remainingPages:Int;var remainingFetches:Int;var ends:Double}
+  var trialEligible:Bool?;var quota:Quota?
   struct Providers:Decodable {var apple:Bool;var google:Bool}
   var enabled:Bool;var accountToken:String?;var providers:Providers;var plans:[Plan];var plan:String?;var canSubscribe:Bool
 }
@@ -152,6 +160,7 @@ final class ReadingStore: NSObject, ObservableObject,
   @Published var credits:ReadingCredits?
   @Published var subscriptionCatalog:SubscriptionCatalog?
   @Published var subscriptionProducts:[Product]=[]
+  @Published var trialProducts:Set<String>=[]
   @Published var purchaseBusy=false
   @Published var purchaseNotice:String?
   private var purchaseUpdates:Task<Void,Never>?
@@ -483,7 +492,7 @@ final class ReadingStore: NSObject, ObservableObject,
     try? saveToken(nil)
     account = nil
     credits = nil
-    subscriptionCatalog=nil;subscriptionProducts=[];purchaseNotice=nil
+    subscriptionCatalog=nil;subscriptionProducts=[];trialProducts=[];purchaseNotice=nil
     resolveCreditPrompt(false)
     draftAttachments = []
     messages = []
@@ -601,7 +610,7 @@ final class ReadingStore: NSObject, ObservableObject,
         let mime = ext == "svg" ? "image/svg+xml" : ext == "jpg" ? "image/jpeg" : "image/\(ext)"
         figures[asset.path] = "data:\(mime);base64,\(bytes.base64EncodedString())"
       }
-      let document = ReaderDocument(paper: full, figures: figures,
+      let document = ReaderDocument(readings:cached?.paper.revision == full.revision && cached?.paper.visibility == full.visibility ? cached?.readings : nil,paper: full, figures: figures,
         owner: full.visibility == "public" ? "public" : owner ?? "private",
         pinned: cached.map { $0.pinned ?? true } ?? false, accessed: Date().timeIntervalSince1970)
       try Task.checkCancellation()
@@ -615,6 +624,17 @@ final class ReadingStore: NSObject, ObservableObject,
       if let cached { return cached }
       throw error
     }
+  }
+  func loadReading(_ document:ReaderDocument,language:String) async throws -> AlignedReading {
+    let identity=token
+    let result=try JSONDecoder().decode(AlignedReading.self,from:await request("/api/papers/\(document.paper.id)/reading?language=\(language)"))
+    guard identity==token,result.revision==document.paper.revision else {throw CancellationError()}
+    var saved=cachedPaper(document.paper.id) ?? document
+    if saved.paper.revision==result.revision {
+      if saved.readings==nil {saved.readings=[:]};saved.readings?[language]=result
+      try saveCached(saved)
+    }
+    return result
   }
   func toggleDownload(_ document: ReaderDocument) throws {
     var saved = cachedPaper(document.paper.id) ?? document
@@ -848,6 +868,12 @@ extension ReadingStore {
       let products=try await Product.products(for:catalog.plans.map(\.apple))
       guard identity==token else {return}
       subscriptionProducts=products.sorted {$0.price<$1.price}
+      var eligible=Set<String>()
+      if catalog.trialEligible==true {for product in products {
+        if let subscription=product.subscription,let offer=subscription.introductoryOffer,offer.paymentMode == .freeTrial,offer.periodCount==1,
+           (offer.period.unit == .week && offer.period.value==1 || offer.period.unit == .day && offer.period.value==7),await subscription.isEligibleForIntroOffer {eligible.insert(product.id)}
+      }}
+      if identity==token {trialProducts=eligible}
     } catch {if identity==token {subscriptionCatalog=nil;subscriptionProducts=[]}}
   }
   private func deliverPurchase(_ result:VerificationResult<StoreKit.Transaction>) async throws {
