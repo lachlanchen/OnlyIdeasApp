@@ -57,7 +57,7 @@ The owner was asked whether to implement these public-release fixes in this repo
   Console readback: **Active**, **Available to internal testers**, **Not reviewed**.
   A separate OnlyIdeas Internal Owner list is selected and saved; other apps'
   tester lists were neither selected nor changed.
-- Google join URL: https://play.google.com/apps/internaltest/4701512710674115784
+- Google join URL: https://play.google.com/apps/internaltest/4701325459048995948
   (restricted to the selected tester account). Google may temporarily display
   `art.onlyideas.app (unreviewed)` until listing review.
 - Formal Apple version 1.0 remains `PREPARE_FOR_SUBMISSION`; external beta review

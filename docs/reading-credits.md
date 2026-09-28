@@ -179,6 +179,23 @@ qualification are ready. Never use a live card charge as a substitute for testin
 
 Profile → Plans & usage is visible on all four clients. Apple products are now
 READY_TO_SUBMIT; Google base plans and seven-day trial offers are ACTIVE. General
-checkout is still disabled pending real purchase qualification, and Stripe
-sandbox access is pending. Store activation is not evidence of a successful
-purchase. See [the current receipt](release-candidate-21.md).
+checkout is still disabled. Real Stripe sandbox and Android Play test purchases,
+restores, paid cycles, cancellation and refund reconciliation now pass. Actual
+Apple StoreKit qualification remains pending. Stripe fixes are not cloud deployed;
+Play download listing availability remains unresolved despite verified enrollment.
+See [the current receipt](release-candidate-21.md).
+
+### Cancellation controls
+
+Customer controls offer Manage subscription / Cancel subscription and Restore
+purchases. There is no in-app refund request button on PWA, iOS, Mac or Android.
+Cancellation stops future renewal and keeps the paid period available; it does not
+issue an automatic prorated refund. Keep support, terms and provider remedies
+available. Provider-approved refunds, disputes and revocations must still update
+credits and entitlements, and actual reversals remain visible in credit history.
+
+Provider references checked on 2026-09-28: [Google cancellation](https://support.google.com/googleplay/answer/7018481),
+[Apple refund requests](https://support.apple.com/en-us/118223), and
+[Stripe customer portal](https://support.stripe.com/questions/billing-customer-portal).
+The ordinary cancellation UI and backend refund reconciliation are separate
+operations. Sandbox refund tests are qualification evidence, not a customer feature.

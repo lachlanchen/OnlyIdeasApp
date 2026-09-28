@@ -46,14 +46,35 @@ working purchases:
 - Apple signed sandbox TEST notification: provider delivery SUCCESS, replay HTTP200.
   This verifies notification transport, not a purchase. Production TEST API still
   returns 401 before the app's first production release.
-- Stripe: live catalog is staged; cloud checkout and webhook remain disabled.
-  Sandbox access is pending dashboard verification. No charge was made.
+- Stripe: real hosted sandbox checkout passed with a seven-day trial, 50 pages
+  and 10 fetches. Two paid test cycles each granted 200 credits once; repeated
+  restores, portal cancellation and provider refund reconciliation passed. The
+  second cycle used an explicit test API cycle reset, not an automatic test clock.
+  Live catalog remains staged and the cloud webhook/checkout remain disabled.
+- Android: the owner signed in after repair of the test phone's crashed scrcpy
+  input handler. Real Play test checkout, acknowledgement, account binding,
+  accelerated trial, two automatic paid cycles, repeated restores, cancellation
+  in Play, and refund/revocation notifications passed against the existing cloud
+  service. All 400 test credits were reversed; no real charge or data reset.
+- The internal-test URL was incorrect in two old notes and the first publication
+  receipt. Corrected from the OnlyIdeas Console and verified enrollment:
+  https://play.google.com/apps/internaltest/4701325459048995948 . The Play listing
+  still reports “Item not found” on the enrolled emulator and in its browser.
+  The console reports build 21 available internally; download availability is not
+  yet verified. Purchase tests used the existing signed sideloaded build.
 
-Real provider purchase, restore, renewal and refund tests remain outstanding on
-all platforms. The retained Android test phone has no Google Play account yet.
-Do not enable ordinary-user checkout or claim billing is ready based on UI,
-metadata, store activation or notification tests alone. Complete qualification
-before submitting the first Apple subscriptions with the app version.
+Actual Apple StoreKit purchase/restore/renewal testing remains outstanding. No
+ordinary-user checkout or quota enforcement was enabled. The original owner
+pilot remains; Stripe used an isolated local QA database. Backend fixes discovered
+in sandbox testing pin Checkout to the configured USD currency and resolve
+invoice/charge links using the pinned API when newer webhook payloads omit them.
+103 tests, renderer and production web build pass. These server fixes are staged
+in source and have not been deployed to the cloud in this checkpoint.
+
+The owner confirmed cancellation as the customer action: stop renewal and keep
+paid access until the period ends. No refund action is exposed in PWA, Android,
+iOS or Mac UI. Provider-issued refunds/revocations still reconcile on the server.
+See [sandbox evidence](../evidence/plans-1.0.2-21/billing-sandbox-20260928.json).
 
 Apple permits sandbox testing before review; the first auto-renewable subscription
 must be submitted with an app version and its subscription group. See
@@ -66,4 +87,4 @@ production purchase verification has passed:
 
 Sanitized receipts are in `evidence/plans-1.0.2-21/`. Original library, account,
 credit, quota and discussion data are preserved. No new general billing rollout
-or payment credential installation occurred in this checkpoint.
+or production payment credential installation occurred in this checkpoint.

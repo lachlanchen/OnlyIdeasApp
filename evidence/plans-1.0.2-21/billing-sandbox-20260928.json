@@ -1,0 +1,67 @@
+{
+  "date": "2026-09-28",
+  "scope": "Real provider sandbox tests, no real charges. General rollout remains disabled.",
+  "automatedTests": 103,
+  "stripe": {
+    "realHostedCheckout": true,
+    "sevenDayTrialSeconds": 604800,
+    "trialPages": 50,
+    "trialFetches": 10,
+    "trialPaidCreditGrant": 0,
+    "currency": "USD",
+    "adaptivePricingDisabled": true,
+    "trialEndedByTestAPI": true,
+    "paidCycles": 2,
+    "secondCycle": "Explicit test API billing-cycle reset; automatic test-clock renewal not exercised",
+    "creditsPerPaidCycle": 200,
+    "repeatedRestoreNoDuplicate": true,
+    "customerPortalCancelAtPeriodEnd": true,
+    "providerRefundReconciliation": true,
+    "totalPaidCreditsGranted": 400,
+    "totalRefundCreditsReversed": 400,
+    "finalPlan": null,
+    "testSubscriptionCanceled": true,
+    "database": "Isolated local QA database; original paper database untouched"
+  },
+  "google": {
+    "platform": "Android emulator 5598, signed build 21; sideloaded install",
+    "realPlayTestCheckout": true,
+    "testCardAlwaysApproves": true,
+    "acknowledged": true,
+    "accountBound": true,
+    "acceleratedTrialSeconds": 180,
+    "trialPages": 50,
+    "trialFetches": 10,
+    "trialPaidCreditGrant": 0,
+    "automaticPaidCycles": 2,
+    "creditsPerPaidCycle": 200,
+    "repeatedRestoreNoDuplicate": true,
+    "cancelAtPeriodEndThroughPlayUI": true,
+    "realTimeDeveloperNotifications": true,
+    "providerRefundReconciliation": true,
+    "totalPaidCreditsGranted": 400,
+    "totalRefundCreditsReversed": 400,
+    "testSubscriptionExpired": true,
+    "ownerTestRolloutPreserved": true,
+    "generalQuotaEnforcementEnabled": false
+  },
+  "playEnrollment": {
+    "verifiedPackage": "art.onlyideas.app",
+    "joinURL": "https://play.google.com/apps/internaltest/4701325459048995948",
+    "enrolled": true,
+    "consoleTrack": "Active, build 21 available to internal testers",
+    "listingOnDevice": "Still Item not found after enrollment; web listing also not found",
+    "listingIssueResolved": false
+  },
+  "apple": {
+    "actualStoreKitPurchaseTest": false,
+    "products": "READY_TO_SUBMIT",
+    "formalReviewStillBuild": 20
+  },
+  "deployment": {
+    "stripeFixesCloudDeployed": false,
+    "liveStripeWebhookEnabled": false,
+    "generalBillingEnabled": false
+  },
+  "customerCancellation": "Stop renewal; benefits remain until paid period end. No in-app refund button."
+}

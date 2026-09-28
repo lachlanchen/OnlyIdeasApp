@@ -7,7 +7,7 @@ test('PWA checkout fixes the plan price, account binding, seven-day trial and UR
  const stripe=createStripeBilling(store,config,{transport:async(url,options)=>{const u=new URL(url),v=Object.fromEntries(new URLSearchParams(options.body));calls.push({path:u.pathname,v,headers:options.headers});let data;
   if(u.pathname==='/v1/prices/price_reader')data={id:'price_reader',active:true,livemode:false,currency:'usd',unit_amount:299,recurring:{interval:'month',interval_count:1}};
   else if(u.pathname==='/v1/customers')data={id:'cus_reader'};
-  else if(u.pathname==='/v1/checkout/sessions'){sessions++;data={id:'cs_trial',url:'https://checkout.stripe.com/c/pay/test',livemode:false};assert.equal(v['subscription_data[trial_period_days]'],'7');assert.equal(v['line_items[0][price]'],'price_reader');assert.equal(v['subscription_data[metadata][account_token]'],billingAccount(store,'reader'));assert.equal(v.success_url,config.origin+'/?billing=success')}
+  else if(u.pathname==='/v1/checkout/sessions'){sessions++;data={id:'cs_trial',url:'https://checkout.stripe.com/c/pay/test',livemode:false};assert.equal(v['adaptive_pricing[enabled]'],'false');assert.equal(v['subscription_data[trial_period_days]'],'7');assert.equal(v['line_items[0][price]'],'price_reader');assert.equal(v['subscription_data[metadata][account_token]'],billingAccount(store,'reader'));assert.equal(v.success_url,config.origin+'/?billing=success')}
   else throw Error('Unexpected '+url);return new Response(JSON.stringify(data));}});
  assert.equal(stripe.ready,true);const first=await stripe.checkout({id:'reader'},'reader');assert.deepEqual(await stripe.checkout({id:'reader'},'reader'),first);assert.equal(sessions,1);
  await assert.rejects(stripe.checkout({id:'reader'},'invented'));await assert.rejects(stripe.checkout({id:'reader'},'studio'),/current checkout/);
@@ -24,4 +24,27 @@ test('only a verified bound invoice grants quotas/credits; refunds revoke once a
  const raw=Buffer.from(JSON.stringify({livemode:false,type:'customer.subscription.updated',data:{object:{id:'sub_other',metadata:{app:'echomind'}}}}));assert.equal(await stripe.notification({headers:{'stripe-signature':sign(raw)}},raw),null);
  pending=true;assert.equal((await stripe.verify('sub_reader')).proofs.length,0);pending=false;
  deleteBillingAccount(store,'reader');const closed=Buffer.from(JSON.stringify({livemode:false,type:'customer.subscription.updated',data:{object:sub}}));assert.equal(await stripe.notification({headers:{'stripe-signature':sign(closed)}},closed),null);assert.equal(store.db.prepare('SELECT count(*) n FROM billing_subscriptions').get().n,0);
+});
+test('new webhook formats resolve invoice and charge links through the pinned API, including refunds',async t=>{
+ const {store,config}=fixture(t),accountToken=billingAccount(store,'reader'),calls=[];
+ const start=Math.floor(Date.now()/1000)-10,end=start+30*86400;
+ const price={id:'price_reader',active:true,livemode:false,currency:'usd',unit_amount:299,recurring:{interval:'month',interval_count:1}};
+ const sub={id:'sub_reader',customer:'cus_reader',livemode:false,metadata:{app:'onlyideas',account_token:accountToken},status:'active',items:{data:[{quantity:1,price}]}};
+ const invoice={id:'in_paid',subscription:'sub_reader',customer:'cus_reader',livemode:false,status:'paid',amount_paid:299,currency:'usd',charge:'ch_paid',lines:{data:[{price:'price_reader',quantity:1,period:{start,end}}]}};
+ let refunded=false;
+ const stripe=createStripeBilling(store,config,{transport:async(url,options)=>{
+  assert.equal(options.headers['Stripe-Version'],'2024-06-20');const path=new URL(url).pathname;calls.push(path);
+  const data=path==='/v1/invoices/in_paid'?invoice:path==='/v1/invoices'?{data:[invoice]}:path==='/v1/subscriptions/sub_reader'?sub:path==='/v1/charges/ch_paid'?{id:'ch_paid',invoice:'in_paid',customer:'cus_reader',livemode:false,refunded}:null;
+  assert.ok(data,'Unexpected provider request '+path);return new Response(JSON.stringify(data));
+ }});
+ store.db.prepare('INSERT INTO billing_stripe_customers VALUES(?,?)').run('reader','cus_reader');
+ async function deliver(type,object){const raw=Buffer.from(JSON.stringify({livemode:false,type,api_version:'2025-12-15.clover',data:{object}}));return stripe.notification({headers:{'stripe-signature':sign(raw)}},raw)}
+ let result=await deliver('invoice.paid',{id:'in_paid',object:'invoice',parent:{subscription_details:{subscription:'sub_reader'}}});
+ assert.equal(applyVerifiedPurchase(store,result.proofs[0],'reader').awarded,200);assert.equal(quotaSummary(store,config,'reader').pages,200);
+ refunded=true;calls.length=0;
+ result=await deliver('charge.refunded',{id:'ch_paid',object:'charge',refunded:true});
+ assert.deepEqual(calls.slice(0,2),['/v1/charges/ch_paid','/v1/invoices/in_paid']);
+ applyVerifiedPurchase(store,result.proofs[0],'reader');assert.equal(quotaSummary(store,config,'reader').pages,30);
+ result=await deliver('charge.refunded',{id:'ch_paid',object:'charge',refunded:true});applyVerifiedPurchase(store,result.proofs[0],'reader');
+ assert.equal(store.db.prepare("SELECT count(*) n FROM credit_ledger WHERE kind='purchase_refund'").get().n,1);
 });

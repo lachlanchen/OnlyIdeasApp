@@ -75,7 +75,8 @@ export function createStripeBilling(store,config,{transport=fetch}={}){
    const price=await api('GET','/prices/'+encodeURIComponent(settings.prices[plan.id]));validPrice(price);
    let customer=store.db.prepare('SELECT customer FROM billing_stripe_customers WHERE owner=?').get(user.id)?.customer;
    if(!customer){const c=await api('POST','/customers',{'metadata[app]':'onlyideas','metadata[account_token]':accountToken},'onlyideas-customer-'+accountToken);store.requireActive(user.id);customer=c.id;store.db.prepare('INSERT OR IGNORE INTO billing_stripe_customers VALUES(?,?)').run(user.id,customer)}
-   const values={mode:'subscription',customer,'line_items[0][price]':price.id,'line_items[0][quantity]':'1',success_url:config.origin+'/?billing=success',cancel_url:config.origin+'/?billing=cancel',client_reference_id:accountToken,'subscription_data[metadata][app]':'onlyideas','subscription_data[metadata][account_token]':accountToken,'metadata[app]':'onlyideas',expires_at:String(Math.floor(checkout.expires/1000)),payment_method_collection:'always',billing_address_collection:'auto'};
+   // Verification expects the configured USD price; do not inherit account-wide FX conversion.
+   const values={mode:'subscription',customer,'adaptive_pricing[enabled]':'false','line_items[0][price]':price.id,'line_items[0][quantity]':'1',success_url:config.origin+'/?billing=success',cancel_url:config.origin+'/?billing=cancel',client_reference_id:accountToken,'subscription_data[metadata][app]':'onlyideas','subscription_data[metadata][account_token]':accountToken,'metadata[app]':'onlyideas',expires_at:String(Math.floor(checkout.expires/1000)),payment_method_collection:'always',billing_address_collection:'auto'};
    if(trialEligible(store,user.id))values['subscription_data[trial_period_days]']=String(trialPolicy.days);
    const session=await api('POST','/checkout/sessions',values,'onlyideas-checkout-'+checkout.id);
    requireValue(session.livemode===live&&new URL(session.url).origin==='https://checkout.stripe.com','Invalid checkout response.',502);
@@ -92,9 +93,16 @@ export function createStripeBilling(store,config,{transport=fetch}={}){
    requireReady();stripeSignature(raw,req.headers['stripe-signature'],secret);const event=JSON.parse(raw.toString());requireValue(event.livemode===live,'Invalid payment environment.',400);
    const object=event.data?.object;let id;
    if(event.type.startsWith('customer.subscription.')){if(object?.metadata?.app!=='onlyideas')return null;id=object.id}
-   else if(event.type.startsWith('invoice.'))id=stripeID(object?.subscription);
+   else if(event.type.startsWith('invoice.')){
+    // Webhook versions are independent of our API version. Basil+ moved these links.
+    const invoice=object?.subscription?object:await api('GET','/invoices/'+encodeURIComponent(object?.id||''));
+    id=stripeID(invoice.subscription);
+   }
    else if(event.type==='checkout.session.completed'){if(object?.metadata?.app!=='onlyideas')return null;id=stripeID(object.subscription)}
-   else if(event.type.startsWith('charge.')){const charge=object?.object==='dispute'?await api('GET','/charges/'+encodeURIComponent(stripeID(object.charge))):object;if(!charge?.invoice)return null;const invoice=await api('GET','/invoices/'+encodeURIComponent(stripeID(charge.invoice)));id=stripeID(invoice.subscription)}
+   else if(event.type.startsWith('charge.')){
+    const charge=object?.object==='dispute'||!object?.invoice?await api('GET','/charges/'+encodeURIComponent(stripeID(object?.object==='dispute'?object.charge:object?.id)||'')):object;
+    if(!charge?.invoice)return null;const invoice=await api('GET','/invoices/'+encodeURIComponent(stripeID(charge.invoice)));id=stripeID(invoice.subscription);
+   }
    if(!id)return null;
    // Shared Stripe account: ignore unrelated products without changing them.
    const subscription=await api('GET','/subscriptions/'+encodeURIComponent(id));if(subscription.metadata?.app!=='onlyideas')return null;

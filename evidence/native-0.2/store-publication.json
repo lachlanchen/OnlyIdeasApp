@@ -24,8 +24,12 @@
     "releaseState": "Available to internal testers",
     "reviewState": "Not reviewed",
     "testerCount": 1,
-    "joinUrl": "https://play.google.com/apps/internaltest/4701512710674115784",
-    "productionReviewSubmitted": false
+    "joinUrl": "https://play.google.com/apps/internaltest/4701325459048995948",
+    "productionReviewSubmitted": false,
+    "joinUrlCorrection": {
+      "date": "2026-09-28",
+      "reason": "Previous copied URL belonged to another app; corrected from OnlyIdeas Console and verified art.onlyideas.app enrollment."
+    }
   },
   "publiclyReleased": false
 }

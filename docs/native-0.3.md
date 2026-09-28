@@ -63,7 +63,7 @@ Build **0.3.0 (2)** is available in the existing internal TestFlight and Google
 Play groups. Apple reports `VALID` / `IN_BETA_TESTING`; Google reports **Available
 to internal testers**, **Not reviewed**. The existing owner is enrolled in both.
 Use TestFlight with the invited Apple account, or the restricted
-[Google Play test link](https://play.google.com/apps/internaltest/4701512710674115784).
+[Google Play test link](https://play.google.com/apps/internaltest/4701325459048995948).
 Public store review remains pending the requirements in the
 [store publication record](store-release-20260926.md).
 

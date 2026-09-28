@@ -257,3 +257,12 @@ iOS and Mac Catalyst use StoreKit; Android uses Google Play Billing. The Watch
 excerpt companion remains available without a separate purchase. Show actual
 provider prices, trial eligibility, renewal dates, restoration and cancellation.
 Provider configuration and sandbox qualification precede purchase activation.
+
+## Subscription cancellation · 2026-09-28
+
+The owner confirmed that the ordinary customer action is cancellation. Stop future
+renewal and retain access until the paid period ends. Provide Manage subscription
+through the original store or Stripe portal; do not add an in-app self-service
+refund action. Continue reconciling refunds/revocations issued by payment providers
+or store support so credits and access reflect authoritative payment status.
+Sandbox refund checks verify this backend behavior and never move real money.
