@@ -46,7 +46,7 @@ Phòng đọc công khai hiện có hai bài nghiên cứu thật: OpenAlex (CC0
 
 Phiên bản 1.0.2 (13) bổ sung ứng dụng Mac gốc (macOS 13+, Intel và Apple Silicon) với thanh bên, phím tắt và ứng dụng đồng hành Apple Watch (watchOS 11+). Chủ động gửi trích đoạn bài viết công khai từ tùy chọn đọc trên iPhone; ba trích đoạn gần nhất được lưu để đọc ngoại tuyến và chỉnh cỡ chữ. Công thức, hình ảnh đầy đủ vẫn ở iPhone và Mac. Bài riêng tư, trò chuyện và thông tin đăng nhập không được gửi tới Watch. Xem hồ sơ phát hành để biết trạng thái xét duyệt. Đăng ký vẫn chỉ được bật cho thử nghiệm của người vận hành.
 
-[macOS · Apple Watch](../docs/apple-platforms.md) · [1.0.2 (14)](../docs/release-candidate-14.md)
+[macOS · Apple Watch](../docs/apple-platforms.md) · [1.0.2 (15)](../docs/release-candidate-15.md)
 
 [Reading credits](../docs/reading-credits.md)
 

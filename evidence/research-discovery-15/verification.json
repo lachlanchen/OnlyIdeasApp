@@ -1,0 +1,119 @@
+{
+  "sourceCommit": "b05f42b",
+  "version": "1.0.2",
+  "build": 15,
+  "tests": {
+    "server": {
+      "passed": 65,
+      "failed": 0
+    },
+    "renderer": "passed",
+    "webProductionBuild": "passed",
+    "web": "Mobile 390x844 and desktop: hierarchy filters, immediate fuzzy library search, saved/liked state, moderated paper-level comment in isolated database; modal composer visible, no page overflow",
+    "iOS": "Two XCTest UI cases passed: latest research, filters, fuzzy local match, paper-level and paragraph discussion composer, translation and attachment controls",
+    "Android": "Signed release lint/build passed; installed preserving account/library; latest research, filters and paper-level discussion composer checked with keyboard closed",
+    "Mac": "Universal arm64/x86_64 archive/export/Apple validation passed; shared SwiftUI views tested on iOS; Mac reading/offline baseline from build13",
+    "Watch": "Companion included in qualified iOS archive; transfer baseline from build13, no Watch behavior change in15"
+  },
+  "server": {
+    "release": "09cd6626a910a1b1",
+    "basePackageSHA256": "8d2cb626fa81eb938bb519c9caef7bc4bb5d265ee9eac6e86e5ed55109597b14",
+    "patchPackageSHA256": "09cd6626a910a1b1bf51def3b22378dd3a16a9e264cad9e499f3aedf8156ef75",
+    "migration": "additive public metadata cache and paper social tables",
+    "preserved": [
+      "existing paper bodies and figures",
+      "accounts and private library",
+      "credit ledger",
+      "credit holds",
+      "rollout configuration",
+      "ingress configuration"
+    ],
+    "candidate": "Copy of real database; two readers reused public physics paper with Mathpix disabled; live OpenAlex latest metadata and arXiv cs.AI retrieval passed",
+    "metadataEnrichment": [
+      {
+        "id": "1075aa33-5c53-442c-99b8-4678be1c40de",
+        "title": "Measuring holographic entanglement entropy on a quantum simulator",
+        "expectedSource": "https://www.nature.com/articles/s41534-019-0145-z.pdf",
+        "metadata": {
+          "discipline": "Physics and Astronomy",
+          "subdiscipline": "Atomic and Molecular Physics, and Optics",
+          "disciplineId": "31",
+          "subdisciplineId": "3107",
+          "journal": "npj Quantum Information",
+          "journalId": "S2738600312",
+          "doi": "10.1038/s41534-019-0145-z",
+          "index": "openalex",
+          "metadataSource": "https://openalex.org/W2610894048",
+          "publicationDate": "2019-04-23",
+          "type": "article",
+          "year": "2019"
+        }
+      }
+    ],
+    "agent": "Worker uses shared server metadata cache and provider budget; restarted with no active chat tasks",
+    "limitations": [
+      "Intermittent upstream OpenAlex anonymous search 429 and arXiv 406; cached/partial results and notices shown",
+      "arXiv fallback uses verified arXiv repository in OpenAlex only when no incompatible category/journal filter",
+      "Shared imports still require publication review; open access is not automatic republication permission"
+    ]
+  },
+  "apple": {
+    "IOS": {
+      "versionId": "2d1f64a6-4865-4e3c-bece-c28a74b6af9e",
+      "buildId": "71a3d2c2-2038-45ce-932d-345b620180f6",
+      "reviewId": "4616851d-e1ff-455e-b92e-657b5bf93572",
+      "reviewState": "WAITING_FOR_REVIEW",
+      "versionState": "WAITING_FOR_REVIEW",
+      "submittedAt": "2026-09-28T00:13:37.471Z",
+      "releaseType": "AFTER_APPROVAL"
+    },
+    "MAC_OS": {
+      "versionId": "bdda5b63-93cb-4321-bf88-e979f6cec6ca",
+      "buildId": "f85684a2-6d81-4094-97d3-09f491f27179",
+      "reviewId": "f487dec1-6def-4fbd-bc79-a2e20f925013",
+      "reviewState": "WAITING_FOR_REVIEW",
+      "versionState": "WAITING_FOR_REVIEW",
+      "submittedAt": "2026-09-28T00:13:53.336Z",
+      "releaseType": "AFTER_APPROVAL"
+    }
+  },
+  "testflight": [
+    {
+      "platform": "MAC_OS",
+      "id": "f85684a2-6d81-4094-97d3-09f491f27179",
+      "version": "1.0.2",
+      "build": "15",
+      "processing": "VALID",
+      "internal": "IN_BETA_TESTING"
+    },
+    {
+      "platform": "IOS",
+      "id": "71a3d2c2-2038-45ce-932d-345b620180f6",
+      "version": "1.0.2",
+      "build": "15",
+      "processing": "VALID",
+      "internal": "IN_BETA_TESTING"
+    }
+  ],
+  "artifacts": {
+    "OnlyIdeas.ipa": "b0dc97a734bb89aa5cd0b27765c875b3b7bdc6b24293d141e2aa1394e6a62164",
+    "OnlyIdeas.pkg": "5f8e24642d7adcf646fff5438cb0a606228fb4e6a7856dccc604f9d515a9fb24",
+    "app-release.aab": "1a0e8445657153e11735e9e7f4d88124f2e69321aa7eedf18b3aa0a90ce113da",
+    "app-release.apk": "af9de0417c4eb3434b73550af459c3ddcbadf3210ca968f4cb96a03c607e6c0f"
+  },
+  "google": {
+    "build": 15,
+    "internal": "Available to internal testers",
+    "production": "Changes in review; automatic quick checks running",
+    "rollout": 1,
+    "countries": 176,
+    "restOfWorld": true,
+    "managedPublishing": false,
+    "observedAt": "2026-09-28T00:21:19.132245+00:00"
+  },
+  "deferred": [
+    "EchoMind friend forwarding",
+    "Dedicated central-account adapter activation",
+    "Paid subscription activation pending purchase qualification"
+  ]
+}

@@ -46,7 +46,7 @@ En développement : crédits de lecture en base de données, avec réservations 
 
 La version 1.0.2 (13) ajoute une app Mac native (macOS 13+, Intel et Apple Silicon), avec barre latérale et raccourcis, et un compagnon Apple Watch (watchOS 11+). Envoyez explicitement un extrait d’article public depuis les options de lecture de l’iPhone : les trois derniers restent disponibles hors ligne, avec taille du texte réglable. Les équations et figures complètes restent sur iPhone et Mac. Aucun article privé, échange ou identifiant n’est envoyé à la Watch. Consultez le suivi de version pour l’état de validation. Les abonnements restent réservés aux tests de l’opérateur.
 
-[macOS · Apple Watch](../docs/apple-platforms.md) · [1.0.2 (14)](../docs/release-candidate-14.md)
+[macOS · Apple Watch](../docs/apple-platforms.md) · [1.0.2 (15)](../docs/release-candidate-15.md)
 
 [Reading credits](../docs/reading-credits.md)
 

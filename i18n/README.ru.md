@@ -46,7 +46,7 @@ npm run dev
 
 Версия 1.0.2 (13) добавляет нативное приложение Mac (macOS 13+, Intel и Apple Silicon) с боковой панелью и клавиатурными сокращениями, а также приложение для Apple Watch (watchOS 11+). Отправьте отрывок общедоступной статьи через меню чтения на iPhone: три последних доступны на часах без сети, с настройкой размера текста. Полные формулы и рисунки остаются на iPhone и Mac. Личные статьи, чаты и данные входа не передаются на Watch. Статус проверки указан в записи релиза. Подписки пока активны только для тестов оператора.
 
-[macOS · Apple Watch](../docs/apple-platforms.md) · [1.0.2 (14)](../docs/release-candidate-14.md)
+[macOS · Apple Watch](../docs/apple-platforms.md) · [1.0.2 (15)](../docs/release-candidate-15.md)
 
 [Reading credits](../docs/reading-credits.md)
 

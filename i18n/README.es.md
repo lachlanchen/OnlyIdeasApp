@@ -46,7 +46,7 @@ Próxima etapa preparada: planes mensuales nativos con precios de la tienda, res
 
 La versión 1.0.2 (13) añade una app nativa para Mac (macOS 13+, Intel y Apple Silicon) con barra lateral y atajos, y una app complementaria para Apple Watch (watchOS 11+). Envía explícitamente un fragmento de un artículo público desde las opciones de lectura del iPhone: los tres últimos quedan disponibles sin conexión y con texto ajustable. Las ecuaciones y figuras completas permanecen en el iPhone y Mac. Los artículos privados, chats y credenciales nunca pasan al Watch. Consulta el registro de versión para el estado de revisión. Las suscripciones siguen limitadas a pruebas del operador.
 
-[macOS · Apple Watch](../docs/apple-platforms.md) · [1.0.2 (14)](../docs/release-candidate-14.md)
+[macOS · Apple Watch](../docs/apple-platforms.md) · [1.0.2 (15)](../docs/release-candidate-15.md)
 
 [Reading credits](../docs/reading-credits.md)
 

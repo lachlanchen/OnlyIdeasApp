@@ -1,5 +1,7 @@
 # OnlyIdeas 1.0.2 (14) · paper reuse and discussions
 
+> Superseded by [1.0.2 (15)](release-candidate-15.md), adding discovery and paper-item actions. The build 14 receipts below are historical.
+
 Source: `25663fd`. This follows the native Mac/Watch release in build 13.
 
 ## Changes

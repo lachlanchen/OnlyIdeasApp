@@ -3,8 +3,11 @@
 Owner request: make EchoMind's existing OnlyIdeas mini app an adapter for the
 standalone OnlyIdeas research service. Current delivery is a contract/handoff;
 EchoMind's code, database, auth and deployment are unchanged. Friend forwarding
-is explicitly deferred. Build 15 discovery/social endpoints are under qualification;
-verify the deployed version and this release receipt before enabling an adapter.
+is explicitly deferred. Build 15 discovery/social endpoints are live and qualified
+(server release `09cd6626a910a1b1`, source `b05f42b`); native builds are available
+in internal testing and submitted for store review. See OnlyIdeasApp
+`docs/release-candidate-15.md` and `evidence/research-discovery-15/verification.json`.
+This delivery does not register or enable an EchoMind auth adapter.
 
 ## Ownership and current implementation
 

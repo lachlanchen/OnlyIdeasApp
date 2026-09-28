@@ -46,7 +46,7 @@ Nächster Schritt vorbereitet: native monatliche Abos mit Store-Preisen, Wiederh
 
 Version 1.0.2 (13) ergänzt eine native Mac-App (macOS 13+, Intel und Apple Silicon) mit Seitenleiste und Tastaturkürzeln sowie eine Apple-Watch-Begleitapp (watchOS 11+). Sende einen Auszug eines öffentlichen Artikels ausdrücklich über die Leseoptionen am iPhone. Die letzten drei bleiben mit anpassbarer Schrift offline lesbar. Vollständige Formeln und Abbildungen bleiben auf iPhone und Mac. Private Artikel, Chats und Zugangsdaten werden niemals zur Watch übertragen. Der Freigabestatus steht im Versionsbericht. Abonnements sind weiterhin auf Betreibertests beschränkt.
 
-[macOS · Apple Watch](../docs/apple-platforms.md) · [1.0.2 (14)](../docs/release-candidate-14.md)
+[macOS · Apple Watch](../docs/apple-platforms.md) · [1.0.2 (15)](../docs/release-candidate-15.md)
 
 [Reading credits](../docs/reading-credits.md)
 

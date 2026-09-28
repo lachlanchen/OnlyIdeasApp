@@ -24,6 +24,13 @@ removes duplicate IDs; partial failures are visible. No PDF/Mathpix/translation
 is triggered by browsing. Server page caches contain public metadata only; every
 response independently checks the reader before exposing an existing paper ID.
 
+The agent uses this same server cache, so app and chat searches share metadata
+and provider budgets. When arXiv is unavailable, an unfiltered arXiv request can
+fall back to OpenAlex records restricted to arXiv repository `S4306400194`.
+Category/journal requests are not broadened silently. Results retain source URLs
+and a truthful unavailable/fallback notice. Anonymous OpenAlex search may itself
+return rate limits; stale metadata and partial results remain usable.
+
 A tap on a result reuses an accessible stored paper, or enqueues conversion using
 the server's cached metadata and PDF URL. No client URL override is accepted.
 No direct PDF means the source/upload path. Shared conversion produces an owner

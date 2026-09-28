@@ -46,7 +46,7 @@ npm run dev
 
 1.0.2 (13)은 사이드바와 키보드 단축키를 갖춘 네이티브 Mac 앱(macOS 13 이상, Intel 및 Apple Silicon)과 Apple Watch 동반 앱(watchOS 11 이상)을 추가합니다. iPhone 읽기 메뉴에서 공개 논문의 발췌문을 직접 보내면 최근 세 개를 시계에서 글자 크기를 조절하며 오프라인으로 읽을 수 있습니다. 전체 수식과 그림은 iPhone과 Mac에 남으며 비공개 논문, 채팅, 계정 인증 정보는 시계로 전송하지 않습니다. 심사 상태는 릴리스 기록을 참조하세요. 구독 활성화는 운영자 테스트에 한정됩니다.
 
-[macOS · Apple Watch](../docs/apple-platforms.md) · [1.0.2 (14)](../docs/release-candidate-14.md)
+[macOS · Apple Watch](../docs/apple-platforms.md) · [1.0.2 (15)](../docs/release-candidate-15.md)
 
 [Reading credits](../docs/reading-credits.md)
 
