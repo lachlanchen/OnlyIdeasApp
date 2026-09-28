@@ -37,6 +37,36 @@ final class NativeUITests: XCTestCase {
       }
     }
   }
+  func testResearchDiscoveryAndPaperActions() {
+    continueAfterFailure = false
+    let app = XCUIApplication()
+    app.launchArguments = ["-onlyideas.native.language","en","-onlyideas.native.appearance","light"]
+    app.launch()
+    XCTAssertTrue(app.buttons["Filters"].waitForExistence(timeout:20))
+    XCTAssertTrue(app.buttons["Fetch & read"].firstMatch.waitForExistence(timeout:40))
+    shot("Discovery15-latest")
+    app.buttons["Filters"].tap()
+    XCTAssertTrue(app.buttons["Clear filters"].waitForExistence(timeout:10))
+    shot("Discovery15-filters")
+    app.buttons["Filters"].tap()
+    let search=app.searchFields.firstMatch
+    if !search.isHittable {app.swipeDown()}
+    XCTAssertTrue(search.waitForExistence(timeout:10));search.tap();search.typeText("holograpic")
+    let title="Measuring holographic entanglement entropy on a quantum simulator"
+    let match=app.buttons.matching(NSPredicate(format:"label CONTAINS %@",title)).firstMatch
+    XCTAssertTrue(match.waitForExistence(timeout:10))
+    shot("Discovery15-local-fuzzy")
+    if app.buttons["Cancel"].exists {app.buttons["Cancel"].tap()}
+    app.buttons["Reading library"].tap()
+    XCTAssertTrue(app.buttons["Comment"].firstMatch.waitForExistence(timeout:10))
+    app.buttons["Comment"].firstMatch.tap()
+    XCTAssertTrue(app.textViews["Your comment"].waitForExistence(timeout:10))
+    XCTAssertTrue(app.buttons["Post thought"].isHittable)
+    XCTAssertEqual(app.keyboards.count,0)
+    shot("Discovery15-paper-discussion")
+    app.buttons["Done"].firstMatch.tap()
+  }
+
   func testParagraphDiscussionAndTranslationMenu() {
     continueAfterFailure = false
     let app = XCUIApplication()

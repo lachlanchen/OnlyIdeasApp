@@ -22,7 +22,14 @@ export function directPaper(text) {
   return {title:decodeURIComponent(u.pathname.split('/').pop() || 'Research paper').replace(/\.pdf$/i,''),authors:'',pdfUrl:u.href,source:u.href,summary:'A direct paper link supplied in this conversation.'};
 }
 export async function respond(task, config, update, deps = {}) {
-  const download=deps.download || downloadPublic, search=deps.search || searchPapers;
+  const download=deps.download || downloadPublic;
+  // The shared service owns metadata caching and provider budgets. Agent workers
+  // reuse it instead of issuing another OpenAlex/arXiv request per conversation.
+  const search=deps.search || (config.origin ? async(query,options={})=>{
+    const params=new URLSearchParams({...searchOptions({...options,q:query}),page:'1'});
+    const result=await providerJSON(config.origin+'/api/discovery?'+params,{timeout:30_000});
+    return result.papers.filter(p=>p.pdfUrl).slice(0,8);
+  }:searchPapers);
   if(task.documents?.length) {
     requireValue(config.model?.url&&config.model?.name,'The reading assistant is not connected yet.',503);
     await update('Reading your attachments');

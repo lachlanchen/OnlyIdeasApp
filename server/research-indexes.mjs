@@ -15,11 +15,11 @@ export function parseArxiv(xml) {
   return [{id:hash(source).slice(0,24),title:field(e,'title').slice(0,300),authors:[...e.matchAll(/<author>([\s\S]*?)<\/author>/g)].map(([,a])=>field(a,'name')).join(', ').slice(0,500),summary:field(e,'summary').slice(0,1800),pdfUrl:`https://arxiv.org/pdf/${id}`,source,year:field(e,'published').slice(0,4),publicationDate:field(e,'published').slice(0,10),doi:field(e,'arxiv:doi'),journal:field(e,'arxiv:journal_ref'),discipline:primary?.name||'',subdiscipline:secondary?.name||category||'',disciplineId:primary?.id||'',subdisciplineId:category||'',index:'arxiv',type:'preprint',metadataSource:source}];
  });
 }
-export function parseOpenAlex(data) {
+export function parseOpenAlex(data,repository) {
  return (data.results||[]).slice(0,30).flatMap(p=>{
-  const locations=[p.best_oa_location,...(p.locations||[])].filter(Boolean);
+  const locations=[p.best_oa_location,...(p.locations||[])].filter(l=>l&&(!repository||last(l.source?.id)===repository));
   const loc=locations.find(l=>l.is_oa!==false&&safeURL(l.pdf_url));
-  const landing=loc||p.best_oa_location||p.primary_location;
+  const landing=loc||locations.find(l=>l.is_oa)||(!repository?(p.best_oa_location||p.primary_location):null);
   if(!landing||!(p.open_access?.is_oa||locations.some(l=>l.is_oa)))return [];
   const words=[];for(const [word,positions]of Object.entries(p.abstract_inverted_index||{}))for(const pos of positions)if(Number.isInteger(pos)&&pos>=0&&pos<400)words[pos]=word;
   const topic=p.primary_topic,venue=p.primary_location?.source;
@@ -49,23 +49,29 @@ export async function queryArxiv(o,download=downloadPublic) {
  if(o.from||o.to)clauses.push(`submittedDate:[${o.from||'1991'}01010000 TO ${o.to||new Date().getUTCFullYear()}12312359]`);
  if(!clauses.length)clauses.push('all:*');
  const url=new URL('https://export.arxiv.org/api/query');url.search=new URLSearchParams({search_query:clauses.join(' AND '),...(o.page>1?{start:String((o.page-1)*12)}:{}),max_results:'12',...(o.sort==='latest'?{sortBy:'submittedDate',sortOrder:'descending'}:{})}).toString().replaceAll('%3A',':');
- const xml=(await arxivDownload(url.href,download)).toString(),papers=parseArxiv(xml),total=Number(xml.match(/<opensearch:totalResults[^>]*>(\d+)</)?.[1]||0);
- return {papers,hasMore:o.page*12<total};
+ try {const xml=(await arxivDownload(url.href,download)).toString(),papers=parseArxiv(xml),total=Number(xml.match(/<opensearch:totalResults[^>]*>(\d+)</)?.[1]||0);return {papers,hasMore:o.page*12<total};}
+ catch(error){
+  // OpenAlex also indexes arXiv itself. Preserve repository restriction; don't
+  // silently approximate arXiv category or journal filters in another taxonomy.
+  if(o.discipline||o.subdiscipline||o.journal)throw error;
+  return {...await queryOpenAlex({...o,repository:'S4306400194'},download),fallback:'openalex'};
+ }
 }
 export async function queryOpenAlex(o,download=downloadPublic) {
  const filters=['is_oa:true',...(!o.q?['has_pdf_url:true']:[]),'type:article|preprint|review','to_publication_date:'+new Date().toISOString().slice(0,10)];
+ if(o.repository)filters.push('locations.source.id:'+o.repository);
  if(o.discipline)filters.push('primary_topic.field.id:'+o.discipline);
  if(o.subdiscipline)filters.push('primary_topic.subfield.id:'+o.subdiscipline);
  if(o.from||o.to)filters.push('publication_year:'+(o.from||'1800')+'-'+(o.to||new Date().getUTCFullYear()));
  if(o.journal){const url=new URL('https://api.openalex.org/sources');url.search=new URLSearchParams({search:o.journal,filter:'type:journal',per_page:'10',select:'id,display_name'});const matches=JSON.parse((await download(url.href,{maxBytes:500_000,timeout:12000})).toString()).results||[];if(!matches.length)return {papers:[],hasMore:false};filters.push('primary_location.source.id:'+matches.map(s=>last(s.id)).filter(s=>/^S\d+$/.test(s)).join('|'))}
  const url=new URL('https://api.openalex.org/works');url.search=new URLSearchParams({filter:filters.join(','),per_page:'12',page:String(o.page),select:'id,title,authorships,publication_year,publication_date,primary_topic,primary_location,best_oa_location,locations,abstract_inverted_index,doi,type,open_access',...(o.q?{search:o.q}:{}),...(o.sort==='latest'?{sort:'publication_date:desc'}:{})});
- const data=JSON.parse((await download(url.href,{maxBytes:3_500_000,timeout:12000})).toString());return {papers:parseOpenAlex(data),hasMore:o.page*12<(data.meta?.count||0)};
+ const data=JSON.parse((await download(url.href,{maxBytes:3_500_000,timeout:12000})).toString());return {papers:parseOpenAlex(data,o.repository),hasMore:o.page*12<(data.meta?.count||0)};
 }
 export async function searchIndexes(raw={},download=downloadPublic) {
  const o=searchOptions(raw);const names=o.source==='arxiv'?['arxiv']:o.source==='openalex'||o.discipline||o.subdiscipline||o.journal?['openalex']:['openalex','arxiv'];
  const results=await Promise.allSettled(names.map(n=>n==='arxiv'?queryArxiv(o,download):queryOpenAlex(o,download)));
  const papers=[],seen=new Set(),unavailable=[];let hasMore=false,ok=0;
- results.forEach((r,i)=>{if(r.status==='rejected'){unavailable.push(names[i]);return}ok++;hasMore ||= r.value.hasMore;for(const p of r.value.papers){const key=p.doi.toLowerCase()||p.source;if(!seen.has(key)){papers.push(p);seen.add(key)}}});
+ results.forEach((r,i)=>{if(r.status==='rejected'){unavailable.push(names[i]);return}ok++;if(r.value.fallback)unavailable.push(names[i]);hasMore ||= r.value.hasMore;for(const p of r.value.papers){const key=p.doi.toLowerCase()||p.source;if(!seen.has(key)){papers.push(p);seen.add(key)}}});
  requireValue(ok,'Research indexes are temporarily unavailable. Try again shortly.',503);
  if(o.sort==='latest')papers.sort((a,b)=>b.publicationDate.localeCompare(a.publicationDate));
  return {papers,nextPage:hasMore&&o.page<100?o.page+1:null,unavailable,sources:names};

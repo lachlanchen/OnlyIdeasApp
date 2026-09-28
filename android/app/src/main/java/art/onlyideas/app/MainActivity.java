@@ -507,31 +507,9 @@ public class MainActivity extends AppCompatActivity {
   void showLibrary() {
     clear("library");
     LinearLayout c = scrollContent();
-    LinearLayout libraryTop=row();
-    TextView heading=text(t("Your reading room"),20,true);libraryTop.addView(heading,new LinearLayout.LayoutParams(0,-2,1));
-    libraryTop.addView(sharingButton());c.addView(libraryTop);
-    gap(c, 10);
-    caption(c, t("Read, ask, and make connections."));
-    gap(c, 12);
-    c.addView(
-        button(
-            t("＋  Add a paper"),
-            true,
-            () -> {
-              if (account == null) {
-                signIn();
-                return;
-              }
-              Intent pick = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-              pick.setType("application/pdf");
-              pick.addCategory(Intent.CATEGORY_OPENABLE);
-              startActivityForResult(pick, 42);
-            }));
-    gap(c, 14);
-    if (offline) {
-      caption(c, t("Offline · cached papers"));
-      gap(c, 14);
-    }
+    LinearLayout libraryTop=row();libraryTop.addView(sharingButton(),new LinearLayout.LayoutParams(0,dp(44),1));
+    libraryTop.addView(button(t("＋  Add a paper"),true,()->{if(account==null){signIn();return;}Intent pick=new Intent(Intent.ACTION_OPEN_DOCUMENT);pick.setType("application/pdf");pick.addCategory(Intent.CATEGORY_OPENABLE);startActivityForResult(pick,42);}),new LinearLayout.LayoutParams(0,dp(44),1));c.addView(libraryTop);gap(c,10);
+    if(offline){caption(c,t("Offline · cached papers"));gap(c,8);}
     LinearLayout searchBox = row();
     EditText search = new EditText(this);
     search.setSingleLine(true);
@@ -547,8 +525,7 @@ public class MainActivity extends AppCompatActivity {
     gap(c, 12);
     c.addView(button(t(browseResearch?"Reading library":"Latest open research"),false,()->{browseResearch=!browseResearch;showLibrary();}));
     LinearLayout researchArea=column();
-    title(c, t("Reading library"), 18);
-    gap(c, 10);
+    if(!browseResearch){title(c,t("Reading library"),18);gap(c,10);}
     LinearLayout list = column();
     c.addView(list);
     renderLibrary(list, researchQuery);
