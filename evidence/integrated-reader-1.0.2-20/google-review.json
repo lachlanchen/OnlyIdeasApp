@@ -1,0 +1,16 @@
+{
+  "observedAt": "2026-09-28T05:24:01.760830+00:00",
+  "app": "OnlyIdeas",
+  "package": "art.onlyideas.app",
+  "version": "1.0.2",
+  "versionCode": 20,
+  "internal": "Available to internal testers",
+  "production": "In review",
+  "targetedCountriesAndRegions": 177,
+  "rolloutPercent": 100,
+  "managedPublishing": false,
+  "dataSafetySubmitted": true,
+  "source": "Google Play Console production and publishing overview UI",
+  "approved": false,
+  "automaticChecks": "Completed; publishing overview confirms changes are now in review"
+}

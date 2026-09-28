@@ -1,5 +1,5 @@
 {
-  "checks": [
+  "checks" : [
     "QA preserves signed-in accounts",
     "Live or previously cached public library",
     "Real public paper and figures cached",
@@ -12,22 +12,22 @@
     "Native text size and dark appearance update renderer",
     "Offline cold launch uses durable cached paper"
   ],
-  "interlaced": {
-    "figures": 3,
-    "fits": true,
-    "pairs": 33,
-    "translated": true
+  "interlaced" : {
+    "figures" : 3,
+    "fits" : true,
+    "pairs" : 33,
+    "translated" : true
   },
-  "offline": true,
-  "ok": true,
-  "reader": {
-    "equations": 350,
-    "figures": 6,
-    "fits": true,
-    "paragraphs": 67,
-    "size": 18
+  "offline" : true,
+  "ok" : true,
+  "reader" : {
+    "equations" : 350,
+    "figures" : 6,
+    "fits" : true,
+    "paragraphs" : 67,
+    "size" : 18
   },
-  "titles": [
+  "titles" : [
     "A place for questions",
     "OpenAlex: A fully-open index of scholarly works, authors, venues, institutions, and concepts",
     "Measuring holographic entanglement entropy on a quantum simulator"

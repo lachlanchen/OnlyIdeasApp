@@ -1,0 +1,48 @@
+{
+  "version": "1.0.2",
+  "build": 20,
+  "backendTests": 101,
+  "testFailures": 0,
+  "iOSIntegratedReader": "passed",
+  "androidReleaseLint": "passed",
+  "androidColdOfflineBilingual": "passed",
+  "physicalMacOnlineAndColdOffline": "passed",
+  "publicPaper": "Measuring holographic entanglement entropy on a quantum simulator",
+  "translatedPieces": 324,
+  "pairedGroups": 33,
+  "visibleInterlacedFigures": 3,
+  "webPageOverflow": false,
+  "publicationsAndCreditLedgerPreserved": true,
+  "generalPaidActivation": false,
+  "appleInternal": [
+    {
+      "platform": "MAC_OS",
+      "id": "30789204-12ef-4fc1-b8bf-8101a00ae235",
+      "version": "1.0.2",
+      "build": "20",
+      "processing": "VALID",
+      "internal": "IN_BETA_TESTING"
+    },
+    {
+      "platform": "IOS",
+      "id": "5f40ad7a-8b9d-48a6-a233-c8ff9bed5cdb",
+      "version": "1.0.2",
+      "build": "20",
+      "processing": "VALID",
+      "internal": "IN_BETA_TESTING"
+    }
+  ],
+  "googleInternal": "Available to internal testers",
+  "androidAABSHA256": "4b8f29f4e71c907a36fed43f46b9233315a8e18997f3b3b0e7a2f9ea0e101b8e",
+  "appleIPASHA256": "0ff2d9929e3edb036964dcd9b3a6fc521088dee12844211e3b1d4978c3c75dd8",
+  "macPKGSHA256": "02b37b3853fa81f4617538ce50dc33b8fe4191b801d9fce8e2db9c531a8f7ae2",
+  "physicalMacEvidence": [
+    "mac-reader.png",
+    "mac-interlaced.png",
+    "mac-cached-translation.png",
+    "mac-offline.json"
+  ],
+  "debugHarness": "Final Mac screenshots drive the native picker state; follow-up changes are DEBUG-only and do not change signed Release build 20.",
+  "googleProduction": "In review",
+  "appleProduction": "WAITING_FOR_REVIEW"
+}

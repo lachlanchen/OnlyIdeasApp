@@ -1,0 +1,20 @@
+{
+  "IOS": {
+    "versionId": "2d1f64a6-4865-4e3c-bece-c28a74b6af9e",
+    "buildId": "5f40ad7a-8b9d-48a6-a233-c8ff9bed5cdb",
+    "reviewId": "b8405af0-1bc7-49b0-9d66-7eeaba448d4f",
+    "reviewState": "WAITING_FOR_REVIEW",
+    "versionState": "WAITING_FOR_REVIEW",
+    "submittedAt": "2026-09-28T05:09:24.917Z",
+    "releaseType": "AFTER_APPROVAL"
+  },
+  "MAC_OS": {
+    "versionId": "bdda5b63-93cb-4321-bf88-e979f6cec6ca",
+    "buildId": "30789204-12ef-4fc1-b8bf-8101a00ae235",
+    "reviewId": "20730421-4ee2-41db-b18c-b2183a635cad",
+    "reviewState": "WAITING_FOR_REVIEW",
+    "versionState": "WAITING_FOR_REVIEW",
+    "submittedAt": "2026-09-28T05:09:41.37Z",
+    "releaseType": "AFTER_APPROVAL"
+  }
+}

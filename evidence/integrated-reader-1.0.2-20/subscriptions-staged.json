@@ -1,0 +1,29 @@
+[
+  {
+    "id": "6816715367",
+    "name": "Reader",
+    "localizedDescriptions": 11,
+    "pages": 200,
+    "fetches": 60,
+    "state": "MISSING_METADATA",
+    "purchaseActivation": false
+  },
+  {
+    "id": "6816715106",
+    "name": "Researcher",
+    "localizedDescriptions": 11,
+    "pages": 1200,
+    "fetches": 300,
+    "state": "MISSING_METADATA",
+    "purchaseActivation": false
+  },
+  {
+    "id": "6816715136",
+    "name": "Studio",
+    "localizedDescriptions": 11,
+    "pages": 2600,
+    "fetches": 700,
+    "state": "MISSING_METADATA",
+    "purchaseActivation": false
+  }
+]

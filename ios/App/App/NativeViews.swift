@@ -829,6 +829,11 @@ struct NativePaper: View {
       await refreshReading()
     }
     .onDisappear {translationTask?.cancel();translationTask=nil}
+    #if DEBUG
+    .onReceive(NotificationCenter.default.publisher(for:Notification.Name("OnlyIdeas.QA.ReaderMode"))) {event in
+      if let mode=event.object as? String,["original","translation","interlaced"].contains(mode){readingMode=mode}
+    }
+    #endif
 
     .sheet(isPresented: $readingTools) {
       if let document = document { NativeReadingTools(document: document,selectedQuote:quote) }

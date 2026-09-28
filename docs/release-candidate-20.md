@@ -39,7 +39,9 @@ verification. Native billing uses StoreKit and Play Billing. Refunds, account
 deletion, restoration and replay are covered by server tests. Trial quota cannot
 be granted again through a different provider on the same account.
 
-Apple seven-day introductory offers are configured in 175 territories. The three
+Apple seven-day introductory offers are configured in 175 territories, and all
+33 subscription descriptions now state the approved page/fetch allowances in
+the 11 supported languages. The three
 Google seven-day offers are saved as drafts. Stripe live prices and its dedicated
 portal/webhook are prepared; the webhook is disabled until qualification. General
 purchases and monthly quota enforcement are not activated. Actual sandbox
@@ -54,8 +56,10 @@ pairs, preserving three figures and fitting a 347-pixel reading area without pag
 horizontal scrolling. A browser test caught and fixed an early mode-selection race.
 The integrated iOS reader XCTest passes. Android signed build and release lint pass;
 background inbox, taxonomy and social refresh failures no longer stack offline
-network dialogs. Physical Mac and final Android offline evidence is recorded with
-the release receipt after completion.
+network dialogs. The physical Mac mini passed online and cold-offline reading with 33 paired
+groups and three visible figures. Android cold-offline reading also retained
+all 324 translated pieces after the app was stopped and restarted.
+See [verification evidence](../evidence/integrated-reader-1.0.2-20/verification.json).
 
 The cloud update was checked against a SQLite backup before promotion. Two separate
 readers reused the real physics transcript with Mathpix disabled. Cached Chinese
@@ -65,5 +69,14 @@ were verified unchanged; shared ingress and the worker service were preserved.
 ## Release status
 
 Both iOS/Watch and universal Mac build 20 are VALID and available to the existing
-internal TestFlight group. Google internal and formal production review receipts
-are recorded below when confirmed. Store approval is separate from submission.
+internal TestFlight group. Google internal testing also has build 20. Apple
+submissions on 2026-09-28 are WAITING_FOR_REVIEW, with automatic release after
+approval. Google production now shows build 20 In review across 177 countries /
+regions, with full rollout and managed publishing off. The updated Data safety
+declaration was submitted alongside it. Approval is separate from submission.
+
+The final Mac evidence uses the native reading-mode picker and waits for painting
+before capture. Those follow-up harness changes are DEBUG-only; the qualified,
+signed Release build 20 is unchanged. Temporary QA servers, Mac apps, own simulator
+and forwards were stopped. The shared store browser and pending Android sandbox
+sign-in desktop remain available; production papers and account data are preserved.
