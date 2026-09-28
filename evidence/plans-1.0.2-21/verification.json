@@ -1,0 +1,22 @@
+{
+  "build": 21,
+  "version": "1.0.2",
+  "tests": 102,
+  "failedTests": 0,
+  "androidLintAndSignedBuild": "passed",
+  "iOSNativePlansXCTest": "passed",
+  "physicalMacPlans": "passed",
+  "pwaPlansForOrdinaryAccount": "passed",
+  "livePWAOwnerPlans": "passed",
+  "publicCatalogNoAccountData": "passed",
+  "authenticatedCheckoutStillRequired": true,
+  "generalPurchasesActivated": false,
+  "productionDataPreserved": true,
+  "webRelease": "a1acee92bf012d9a",
+  "artifacts": {
+    "App.ipa": "6ea0c8e7be75d4ab75621658857b03d543d736da381c0c34746a99322b46a613",
+    "OnlyIdeas.pkg": "49d59b5ee33da18d5748c4439cbc48064739c28d777a08e02f8c242c9cadb04a",
+    "app-release.aab": "0df834ae72dc493354f95d625c886f2eedb66b5a34b8ecb24ed156307fb295d1",
+    "app-release.apk": "dfc5959e3ee58b9dc0a793b197172729139e9255fb43698e99a194152fdd098f"
+  }
+}

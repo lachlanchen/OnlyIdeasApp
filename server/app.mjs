@@ -150,7 +150,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         if(job.state==='failed')return response(res,{error:job.message,job:safeJob(job),source:card.source,code:job.errorCode||'import_failed'},409);
         return response(res,{job:safeJob(job),paperId:job.paperId},202);
       }
-      if (path === '/api/billing' && method === 'GET') {requireUser();return response(res,billing.catalog(user));}
+      if (path === '/api/billing' && method === 'GET') {return response(res,billing.catalog(user));}
       if(['/api/billing/checkout','/api/billing/portal','/api/billing/restore'].includes(path)&&method==='POST'){requireUser();requireValue(!native,'Use your device store for subscriptions.',403);limit(`web-purchase:${user.id}`,10);return response(res,await billing.web(path.split('/').at(-1),await json(req),user))}
       const purchase=path.match(/^\/api\/billing\/(apple|google)$/);
       if(purchase&&method==='POST') {requireUser();limit(`purchase:${user.id}`,20);return response(res,await billing.purchase(purchase[1],await json(req),user));}

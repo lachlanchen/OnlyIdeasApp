@@ -142,7 +142,13 @@ import WebKit
     private func snapshot(_ name: String) throws {
         guard let window = view.window else { throw store.failure("No native window") }
         let format = UIGraphicsImageRendererFormat(); format.scale = 1; format.opaque = true
-        let data = UIGraphicsImageRenderer(bounds: window.bounds, format: format).pngData { _ in window.drawHierarchy(in: window.bounds, afterScreenUpdates: false) }
+        func presentation(_ controller:UIViewController)->UIViewController? {
+          if let shown=controller.presentedViewController {return presentation(shown) ?? shown}
+          return controller.children.compactMap {presentation($0)}.first
+        }
+        let target:UIView = name == "plans" ? (presentation(window.rootViewController ?? self)?.view ?? window) : window
+        if name == "plans" {result["plansPresentationCaptured"] = target !== window}
+        let data = UIGraphicsImageRenderer(bounds: target.bounds, format: format).pngData { _ in target.drawHierarchy(in: target.bounds, afterScreenUpdates: true) }
         try data.write(to: output.appendingPathComponent(name + ".png"))
     }
     private func webView(_ view: UIView) -> WKWebView? {
@@ -167,6 +173,14 @@ import WebKit
             await pause(); try snapshot("agent")
             NotificationCenter.default.post(name: Notification.Name("OnlyIdeas.QA.Tab"), object: 2)
             await pause(); try snapshot("profile")
+            if ProcessInfo.processInfo.arguments.contains("--onlyideas-plans-qa") {
+              NotificationCenter.default.post(name:Notification.Name("OnlyIdeas.QA.Plans"),object:true)
+              try await wait { self.store.subscriptionCatalog != nil }
+              try check("Plans remain visible with purchases disabled",store.subscriptionCatalog?.enabled == false && store.subscriptionCatalog?.plans.count == 3)
+              await pause(2);try snapshot("plans")
+              NotificationCenter.default.post(name:Notification.Name("OnlyIdeas.QA.Plans"),object:false)
+              await pause()
+            }
             store.showSignIn = true; await pause(); try snapshot("sign-in")
             store.showSignIn = false
             NotificationCenter.default.post(name: Notification.Name("OnlyIdeas.QA.Tab"), object: 0)

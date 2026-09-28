@@ -458,6 +458,7 @@ struct NativeAgentResult:View {
  var body:some View {Group{if let document,let artifact{NativeArtifact(document:document,artifact:artifact)}else if !notice.isEmpty{Text(T(notice)).padding()}else{ProgressView()}}.task{do{let d=try await store.loadPaper(ResearchPaper(id:paperID,title:""));let result=try await store.json("/api/papers/\(paperID)/artifacts");let a=try store.decoded([ReadingArtifact].self,result["artifacts"] ?? []).first{$0.id==artifactID};guard let a else{throw store.failure(T("This saved result is no longer available."))};document=d;artifact=a}catch{notice=error.localizedDescription}}}
 }
 struct NativeProfile: View {
+  @State private var plans = false
   @EnvironmentObject var store: ReadingStore
   @State private var confirm = false
   @State private var deleteConfirm = false
@@ -483,7 +484,8 @@ struct NativeProfile: View {
           }.disabled(store.signingIn)
         }
       }
-      if store.account != nil { NativeCreditSection(); NativeSubscriptionSection() }
+      Section {Button {plans=true} label: {Label(T("Plans & usage"),systemImage:"sparkles").font(.headline)}.accessibilityIdentifier("plans-entry")}
+      if store.account != nil { NativeCreditSection() }
       Section(T("Reading")) {
         Picker(T("App language"), selection:Binding(get:{store.language},set:{store.language=$0;store.objectWillChange.send()})) {
           Text(T("System")).tag("system")
@@ -546,7 +548,12 @@ struct NativeProfile: View {
             .vertical, 8)
         }
       }
-    }.navigationTitle(T("Profile")).alert(T("Permanently delete your account?"), isPresented: $deleteConfirm) {
+    }.navigationTitle(T("Profile"))
+    .sheet(isPresented:$plans) {NavigationView {Form {NativeSubscriptionSection()}.navigationTitle(T("Monthly plans")).toolbar {ToolbarItem(placement:.confirmationAction){Button(T("Done")){plans=false}}}}.navigationViewStyle(.stack)}
+    #if DEBUG
+    .onReceive(NotificationCenter.default.publisher(for:Notification.Name("OnlyIdeas.QA.Plans"))) {event in plans=event.object as? Bool ?? true}
+    #endif
+    .alert(T("Permanently delete your account?"), isPresented: $deleteConfirm) {
       Button(T("Cancel"), role: .cancel) {}
       Button(T("Delete account"), role: .destructive) { Task { await store.deleteAccount() } }
     } message: {
@@ -1280,16 +1287,18 @@ struct NativeSubscriptionSection:View {
   @EnvironmentObject var store:ReadingStore
   var body:some View {
     Group {
-      if let catalog=store.subscriptionCatalog,catalog.enabled,catalog.providers.apple {
+      if let catalog=store.subscriptionCatalog {
         Section(T("Monthly plans")) {
           Text(T("Existing papers and cached translations are free to read. Plans cover new fetching and transcription.")).font(.subheadline).foregroundColor(.secondary)
           if let quota=catalog.quota,quota.enabled {
             Text(quota.unlimited ? T("Unlimited owner allowance"):T("{pages} transcription pages and {fetches} fetches remaining",["pages":String(quota.remainingPages),"fetches":String(quota.remainingFetches)])).font(.subheadline.bold())
             if !quota.unlimited {Text(T("Renews on {date}",["date":Date(timeIntervalSince1970:quota.ends/1000).formatted(date:.abbreviated,time:.omitted)])).font(.caption).foregroundColor(.secondary)}
           }
-          if !catalog.canSubscribe {Text(T("Manage your plan in the store where you subscribed.")).font(.subheadline)}
-          ForEach(store.subscriptionProducts,id:\.id) { product in
-            if let plan=catalog.plans.first(where:{$0.apple==product.id}) {
+          let available=catalog.enabled && catalog.providers.apple
+          if !available {Text(T("Subscriptions are coming soon. You can keep reading for free.")).font(.subheadline)}
+          if available && !catalog.canSubscribe {Text(T("Manage your plan in the store where you subscribed.")).font(.subheadline)}
+          ForEach(catalog.plans) { plan in
+            if let product=store.subscriptionProducts.first(where:{$0.id==plan.apple}),available {
               VStack(alignment:.leading,spacing:8) {
                 HStack {Text(T(plan.name)).font(.headline);Spacer();Text(T("{price} / month",["price":product.displayPrice])).font(.headline)}
                 Text(T("{pages} transcription pages · {fetches} new-paper fetches per month",["pages":String(plan.pages ?? plan.credits),"fetches":String(plan.fetches ?? 0)])).font(.subheadline.bold())
@@ -1298,14 +1307,28 @@ struct NativeSubscriptionSection:View {
                 Button(T(catalog.plan==plan.id ? "Current plan":store.requestedPlanID==product.id ? "Continue":store.trialProducts.contains(product.id) ? "Start 7-day free trial":"Subscribe")) {Task {await store.purchase(product)}}
                   .buttonStyle(.borderedProminent).disabled(store.purchaseBusy || !catalog.canSubscribe)
               }.padding(.vertical,6)
+            } else {
+              VStack(alignment:.leading,spacing:8) {
+                Text(T(plan.name)).font(.headline)
+                Text(T("Planned price: {price} / month",["price":"US$"+(plan.targetUSD ?? "—")])).font(.subheadline.bold())
+                Text(T("{pages} transcription pages · {fetches} new-paper fetches per month",["pages":String(plan.pages ?? plan.credits),"fetches":String(plan.fetches ?? 0)])).font(.subheadline)
+                Button(T("Coming soon")){}.buttonStyle(.bordered).disabled(true)
+              }.padding(.vertical,6)
             }
           }
-          if store.subscriptionProducts.isEmpty {Text(T("Plans are currently unavailable in this store.")).foregroundColor(.secondary)}
+          if !available {Text(T("Eligible subscribers get a 7-day trial when plans become available.")).font(.footnote).foregroundColor(.secondary)}
+          if available && store.subscriptionProducts.isEmpty {Text(T("Plans are currently unavailable in this store.")).foregroundColor(.secondary)}
           if let notice=store.purchaseNotice {Text(notice).font(.subheadline).accessibilityAddTraits(.updatesFrequently)}
-          Button(T("Restore purchases")){Task {await store.restorePurchases()}}.disabled(store.purchaseBusy)
+          Button(T("Restore purchases")){Task {await store.restorePurchases()}}.disabled(store.purchaseBusy || !available)
           Link(T("Manage subscription"),destination:URL(string:"https://apps.apple.com/account/subscriptions")!)
           Text(T("Subscriptions renew monthly until canceled in store settings. Unused credits do not expire. Service limits apply.")).font(.footnote).foregroundColor(.secondary)
           HStack {Link(T("Privacy"),destination:URL(string:"https://lachlan.lazying.art/OnlyIdeasApp/privacy.html")!);Spacer();Link(T("Terms"),destination:URL(string:"https://lachlan.lazying.art/OnlyIdeasApp/terms.html")!)}.font(.footnote)
+        }
+      } else {
+        Section(T("Monthly plans")) {
+          Text(T("Existing papers and cached translations are free to read. Plans cover new fetching and transcription."))
+          if let notice=store.purchaseNotice {Text(notice)} else {ProgressView()}
+          Button(T("Try again")){Task {await store.loadSubscriptions()}}
         }
       }
     }.task {await store.loadSubscriptions()}

@@ -16,6 +16,11 @@ OnlyIdeas는 연구 논문을 함께 읽는 공간입니다. PDF나 공개 접�
 
 ![OnlyIdeas reading room](../evidence/library-desktop.png)
 
+<!-- plans21 -->
+1.0.2 (21): 프로필에 요금제 및 사용량이 항상 표시됩니다. 로그인 전이나 결제가 불가능한 경우에도 iOS, Android, Mac, PWA에서 세 요금제와 할당량을 볼 수 있습니다. 유료 기능은 샌드박스 구매 검증 후 활성화됩니다.
+
+[1.0.2 (21)](../docs/release-candidate-21.md)
+
 <!-- reader20 -->
 1.0.2 (20): 하나의 리더에서 원문, 번역 또는 교차 표시를 선택하며 캐시, 수식, 그림과 원문 댓글을 유지합니다. Mac은 Apple Silicon과 Intel을 지원합니다. 기본 관심사에 Shaohua Ma 교수의 오가노이드 연구를 추가했습니다. 월간 요금제와 7일 체험은 준비되었으며 구매는 샌드박스 검증 후 활성화됩니다.
 

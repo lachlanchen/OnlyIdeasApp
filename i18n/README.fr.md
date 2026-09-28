@@ -16,6 +16,11 @@ Un modèle économique configurable produit des guides de lecture et des traduct
 
 ![OnlyIdeas reading room](../evidence/library-desktop.png)
 
+<!-- plans21 -->
+1.0.2 (21) : Le profil affiche toujours les forfaits et leur utilisation, même sans connexion ou lorsque le paiement est indisponible. Les trois forfaits et leurs quotas sont visibles sur iOS, Android, Mac et PWA. Les paiements restent soumis à la validation des achats en environnement de test.
+
+[1.0.2 (21)](../docs/release-candidate-21.md)
+
 <!-- reader20 -->
 1.0.2 (20) : original, traduction ou paragraphes alternés dans le même lecteur, avec cache, équations, figures et commentaires. Mac natif pour Apple silicon et Intel. Les intérêts incluent les organoïdes de Shaohua Ma. Abonnements et essai de sept jours préparés ; achats en attente de validation en sandbox.
 

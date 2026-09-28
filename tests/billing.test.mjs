@@ -133,7 +133,7 @@ test('HTTP purchase boundary requires a session and ignores forged amounts and o
 test('disabled purchase service exposes no products and never calls the provider',async t=>{
  const {store}=fixture(t);const {createBilling}=await import('../server/billing.mjs');
  const billing=createBilling(store,config,{verifiers:{ready:{apple:true},apple:async()=>{throw Error('must not run');}},poll:false});t.after(()=>billing.stop());
- assert.equal(billing.catalog({id:'reader'}).enabled,false);assert.deepEqual(billing.catalog({id:'reader'}).plans,[]);
+ assert.equal(billing.catalog({id:'reader'}).enabled,false);assert.equal(billing.catalog({id:'reader'}).plans.length,3);
  await assert.rejects(billing.purchase('apple',{signedTransaction:'x'},{id:'reader'}),/not available/);
 });
 test('sandbox receipts cannot fund an ordinary production reader account',async t=>{
@@ -170,4 +170,16 @@ test('Play verifies batched renewal history and can reconcile refunds after a to
  assert.equal(first.proofs.length,2);assert.equal(acknowledged,0);await first.acknowledge();assert.equal(acknowledged,1);
  expired=true;const old=await verifier.google(token,first.source.orders,first.source);
  assert.ok(old.proofs.every(p=>p.revoked&&p.accountToken===accountToken));await old.acknowledge();assert.equal(acknowledged,1);
+});
+
+test('public plan discovery stays visible while purchases and account data stay gated',async t=>{
+ const {store}=fixture(t);const {createApp}=await import('../server/app.mjs');
+ const app=createApp(store,{development:true,origin:'http://127.0.0.1:4182'},{worker:false});
+ await new Promise(r=>app.listen(0,'127.0.0.1',r));t.after(()=>new Promise(r=>app.close(r)));
+ const base='http://127.0.0.1:'+app.address().port;
+ const res=await fetch(base+'/api/billing'),catalog=await res.json();assert.equal(res.status,200);
+ assert.equal(catalog.enabled,false);assert.equal(catalog.accountToken,null);assert.equal(catalog.quota,null);assert.equal(catalog.signInRequired,true);assert.deepEqual(catalog.subscriptions,[]);
+ assert.deepEqual(catalog.plans.map(p=>[p.targetUSD,p.pages,p.fetches]),[['2.99',200,60],['14.99',1200,300],['29.99',2600,700]]);
+ assert.equal(store.db.prepare('SELECT count(*) n FROM billing_accounts').get().n,0);
+ const purchase=await fetch(base+'/api/billing/checkout',{method:'POST',headers:{Origin:'http://127.0.0.1:4182','Content-Type':'application/json'},body:JSON.stringify({plan:'reader'})});assert.equal(purchase.status,401);
 });

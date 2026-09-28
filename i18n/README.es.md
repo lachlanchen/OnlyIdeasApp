@@ -16,6 +16,11 @@ Un modelo económico configurable crea guías de lectura y traducciones cuando s
 
 ![OnlyIdeas reading room](../evidence/library-desktop.png)
 
+<!-- plans21 -->
+1.0.2 (21): El perfil siempre muestra los planes y el uso, incluso sin iniciar sesión o cuando no se puede comprar. Los tres planes y sus cuotas aparecen en iOS, Android, Mac y PWA. La activación de pagos sigue pendiente de validar las compras en pruebas.
+
+[1.0.2 (21)](../docs/release-candidate-21.md)
+
 <!-- reader20 -->
 1.0.2 (20): Original, traducción o párrafos intercalados en un lector, con idiomas guardados, ecuaciones, figuras y comentarios. Mac nativo para Apple silicon e Intel. Los intereses incluyen los organoides de Shaohua Ma. Planes mensuales y prueba de siete días preparados; compras pendientes de validación en sandbox.
 

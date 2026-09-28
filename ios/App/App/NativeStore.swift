@@ -120,7 +120,7 @@ struct ReadingCredits: Decodable {
   var policy:Policy; var history:[Entry]
 }
 struct SubscriptionCatalog: Decodable {
-  struct Plan: Decodable, Identifiable {var id:String;var name:String;var credits:Int;var agentTurns:Int;var apple:String;var google:String;var pages:Int?;var fetches:Int?}
+  struct Plan: Decodable, Identifiable {var id:String;var name:String;var credits:Int;var agentTurns:Int;var apple:String;var google:String;var pages:Int?;var fetches:Int?;var targetUSD:String?}
   struct Quota:Decodable {var enabled:Bool;var unlimited:Bool;var trial:Bool;var pages:Int;var fetches:Int;var remainingPages:Int;var remainingFetches:Int;var ends:Double}
   var trialEligible:Bool?;var quota:Quota?
   struct Providers:Decodable {var apple:Bool;var google:Bool}
@@ -858,7 +858,6 @@ func T(_ key:String, _ values:[String:String] = [:]) -> String {
 
 extension ReadingStore {
   func loadSubscriptions() async {
-    guard account != nil else {subscriptionCatalog=nil;subscriptionProducts=[];return}
     let identity=token
     do {
       let catalog=try JSONDecoder().decode(SubscriptionCatalog.self,from:await request("/api/billing"))
@@ -874,7 +873,7 @@ extension ReadingStore {
            (offer.period.unit == .week && offer.period.value==1 || offer.period.unit == .day && offer.period.value==7),await subscription.isEligibleForIntroOffer {eligible.insert(product.id)}
       }}
       if identity==token {trialProducts=eligible}
-    } catch {if identity==token {subscriptionCatalog=nil;subscriptionProducts=[]}}
+    } catch {if identity==token {subscriptionCatalog=nil;subscriptionProducts=[];purchaseNotice=T("Unable to load plans. Try again.")}}
   }
   private func deliverPurchase(_ result:VerificationResult<StoreKit.Transaction>) async throws {
     guard case .verified(let transaction)=result else {throw failure(T("The store could not verify this purchase."))}

@@ -16,6 +16,11 @@ Ein konfigurierbares, kostengünstiges Modell erstellt auf Anfrage Lesehilfen un
 
 ![OnlyIdeas reading room](../evidence/library-desktop.png)
 
+<!-- plans21 -->
+1.0.2 (21): Das Profil zeigt Tarife und Nutzung jetzt immer an, auch vor der Anmeldung oder bei nicht verfügbarem Kauf. Alle drei Tarife und Kontingente sind auf iOS, Android, Mac und PWA sichtbar. Zahlungen werden erst nach erfolgreichen Sandbox-Kauftests aktiviert.
+
+[1.0.2 (21)](../docs/release-candidate-21.md)
+
 <!-- reader20 -->
 1.0.2 (20): Original, Übersetzung oder abwechselnde Absätze im selben Reader, mit Cache, Formeln, Abbildungen und Quellkommentaren. Native Mac-App für Apple Silicon und Intel. Interessen umfassen Shaohua Mas Organoidforschung. Monatspläne und siebentägige Testphase sind vorbereitet; Käufe bleiben bis zur Sandbox-Prüfung gesperrt.
 

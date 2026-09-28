@@ -687,7 +687,14 @@
     "{pages} transcription pages · {fetches} new-paper fetches per month": "{pages} transcription pages · {fetches} new-paper fetches per month",
     "7 days free, then {price} per month. Trial includes 50 pages and 10 fetches. Cancel before it ends to avoid payment.": "7 days free, then {price} per month. Trial includes 50 pages and 10 fetches. Cancel before it ends to avoid payment.",
     "Start 7-day free trial": "Start 7-day free trial",
-    "Subscriptions renew monthly until canceled. Monthly quotas reset; unused credits do not expire.": "Subscriptions renew monthly until canceled. Monthly quotas reset; unused credits do not expire."
+    "Subscriptions renew monthly until canceled. Monthly quotas reset; unused credits do not expire.": "Subscriptions renew monthly until canceled. Monthly quotas reset; unused credits do not expire.",
+    "Plans & usage": "Plans & usage",
+    "View plans": "View plans",
+    "Coming soon": "Coming soon",
+    "Planned price: {price} / month": "Planned price: {price} / month",
+    "Subscriptions are coming soon. You can keep reading for free.": "Subscriptions are coming soon. You can keep reading for free.",
+    "Eligible subscribers get a 7-day trial when plans become available.": "Eligible subscribers get a 7-day trial when plans become available.",
+    "Unable to load plans. Try again.": "Unable to load plans. Try again."
   },
   "zh-Hans": {
     "Choose a valid PDF.": "请选择有效的 PDF。",
@@ -1377,7 +1384,14 @@
     "{pages} transcription pages · {fetches} new-paper fetches per month": "每月 {pages} 页转录 · {fetches} 次新论文获取",
     "7 days free, then {price} per month. Trial includes 50 pages and 10 fetches. Cancel before it ends to avoid payment.": "免费试用 7 天，之后每月 {price}。试用含 50 页转录和 10 次获取。试用结束前取消可避免扣费。",
     "Start 7-day free trial": "开始 7 天免费试用",
-    "Subscriptions renew monthly until canceled. Monthly quotas reset; unused credits do not expire.": "订阅每月自动续费，直至取消。月度额度重置，未使用积分不过期。"
+    "Subscriptions renew monthly until canceled. Monthly quotas reset; unused credits do not expire.": "订阅每月自动续费，直至取消。月度额度重置，未使用积分不过期。",
+    "Plans & usage": "套餐与用量",
+    "View plans": "查看套餐",
+    "Coming soon": "即将推出",
+    "Planned price: {price} / month": "计划价格：{price} / 月",
+    "Subscriptions are coming soon. You can keep reading for free.": "订阅即将推出。您可以继续免费阅读。",
+    "Eligible subscribers get a 7-day trial when plans become available.": "套餐开放后，符合条件的订阅者可享受7天试用。",
+    "Unable to load plans. Try again.": "无法加载套餐，请重试。"
   },
   "zh-Hant": {
     ". Public comments are reviewed.": "公開評論會經過審核。",
@@ -2067,7 +2081,14 @@
     "{pages} transcription pages · {fetches} new-paper fetches per month": "每月 {pages} 頁轉錄 · {fetches} 次新論文取得",
     "7 days free, then {price} per month. Trial includes 50 pages and 10 fetches. Cancel before it ends to avoid payment.": "免費試用 7 天，之後每月 {price}。試用含 50 頁轉錄和 10 次取得。試用結束前取消可避免扣款。",
     "Start 7-day free trial": "開始 7 天免費試用",
-    "Subscriptions renew monthly until canceled. Monthly quotas reset; unused credits do not expire.": "訂閱每月自動續費，直至取消。月度額度重設，未使用積分不會到期。"
+    "Subscriptions renew monthly until canceled. Monthly quotas reset; unused credits do not expire.": "訂閱每月自動續費，直至取消。月度額度重設，未使用積分不會到期。",
+    "Plans & usage": "方案與用量",
+    "View plans": "查看方案",
+    "Coming soon": "即將推出",
+    "Planned price: {price} / month": "預定價格：{price} / 月",
+    "Subscriptions are coming soon. You can keep reading for free.": "訂閱即將推出。您可以繼續免費閱讀。",
+    "Eligible subscribers get a 7-day trial when plans become available.": "方案開放後，符合資格的訂閱者可享7天試用。",
+    "Unable to load plans. Try again.": "無法載入方案，請重試。"
   },
   "ja": {
     ". Public comments are reviewed.": "公開コメントは審査されます。",
@@ -2757,7 +2778,14 @@
     "{pages} transcription pages · {fetches} new-paper fetches per month": "毎月 {pages} ページの文字起こし・新規論文 {fetches} 件の取得",
     "7 days free, then {price} per month. Trial includes 50 pages and 10 fetches. Cancel before it ends to avoid payment.": "7日間無料、その後は月額 {price}。体験には50ページと10件の取得を含みます。終了前に解約すると課金されません。",
     "Start 7-day free trial": "7日間の無料体験を始める",
-    "Subscriptions renew monthly until canceled. Monthly quotas reset; unused credits do not expire.": "解約するまで毎月自動更新されます。月間利用枠はリセットされ、未使用クレジットは失効しません。"
+    "Subscriptions renew monthly until canceled. Monthly quotas reset; unused credits do not expire.": "解約するまで毎月自動更新されます。月間利用枠はリセットされ、未使用クレジットは失効しません。",
+    "Plans & usage": "プランと利用状況",
+    "View plans": "プランを見る",
+    "Coming soon": "近日公開",
+    "Planned price: {price} / month": "予定価格：{price} / 月",
+    "Subscriptions are coming soon. You can keep reading for free.": "サブスクリプションは近日公開です。引き続き無料で読めます。",
+    "Eligible subscribers get a 7-day trial when plans become available.": "プラン公開後、対象の方は7日間無料でお試しいただけます。",
+    "Unable to load plans. Try again.": "プランを読み込めませんでした。もう一度お試しください。"
   },
   "ko": {
     ". Public comments are reviewed.": "공개 댓글은 검토됩니다.",
@@ -3447,7 +3475,14 @@
     "{pages} transcription pages · {fetches} new-paper fetches per month": "매월 전사 {pages}페이지 · 새 논문 가져오기 {fetches}회",
     "7 days free, then {price} per month. Trial includes 50 pages and 10 fetches. Cancel before it ends to avoid payment.": "7일 무료 후 월 {price}입니다. 체험에는 전사 50페이지와 가져오기 10회가 포함됩니다. 종료 전에 취소하면 결제되지 않습니다.",
     "Start 7-day free trial": "7일 무료 체험 시작",
-    "Subscriptions renew monthly until canceled. Monthly quotas reset; unused credits do not expire.": "취소할 때까지 매월 자동 갱신됩니다. 월 한도는 초기화되며 남은 크레딧은 만료되지 않습니다."
+    "Subscriptions renew monthly until canceled. Monthly quotas reset; unused credits do not expire.": "취소할 때까지 매월 자동 갱신됩니다. 월 한도는 초기화되며 남은 크레딧은 만료되지 않습니다.",
+    "Plans & usage": "요금제 및 사용량",
+    "View plans": "요금제 보기",
+    "Coming soon": "출시 예정",
+    "Planned price: {price} / month": "예정 가격: 월 {price}",
+    "Subscriptions are coming soon. You can keep reading for free.": "구독 서비스가 곧 시작됩니다. 계속 무료로 읽을 수 있습니다.",
+    "Eligible subscribers get a 7-day trial when plans become available.": "요금제가 출시되면 대상 구독자는 7일 무료 체험을 이용할 수 있습니다.",
+    "Unable to load plans. Try again.": "요금제를 불러올 수 없습니다. 다시 시도해 주세요."
   },
   "ar": {
     ". Public comments are reviewed.": "التعليقات العامة تخضع للمراجعة.",
@@ -4137,7 +4172,14 @@
     "{pages} transcription pages · {fetches} new-paper fetches per month": "{pages} صفحة تحويل و{fetches} عملية جلب أوراق جديدة شهريًا",
     "7 days free, then {price} per month. Trial includes 50 pages and 10 fetches. Cancel before it ends to avoid payment.": "7 أيام مجانًا، ثم {price} شهريًا. تشمل التجربة 50 صفحة و10 عمليات جلب. ألغِ قبل انتهائها لتجنب الدفع.",
     "Start 7-day free trial": "ابدأ تجربة مجانية لمدة 7 أيام",
-    "Subscriptions renew monthly until canceled. Monthly quotas reset; unused credits do not expire.": "يتجدد الاشتراك شهريًا حتى إلغائه. تُعاد الحصص الشهرية ولا تنتهي صلاحية الرصيد غير المستخدم."
+    "Subscriptions renew monthly until canceled. Monthly quotas reset; unused credits do not expire.": "يتجدد الاشتراك شهريًا حتى إلغائه. تُعاد الحصص الشهرية ولا تنتهي صلاحية الرصيد غير المستخدم.",
+    "Plans & usage": "الخطط والاستخدام",
+    "View plans": "عرض الخطط",
+    "Coming soon": "قريبًا",
+    "Planned price: {price} / month": "السعر المخطط: {price} شهريًا",
+    "Subscriptions are coming soon. You can keep reading for free.": "الاشتراكات متاحة قريبًا. يمكنك متابعة القراءة مجانًا.",
+    "Eligible subscribers get a 7-day trial when plans become available.": "يحصل المشتركون المؤهلون على تجربة لمدة 7 أيام عند إتاحة الخطط.",
+    "Unable to load plans. Try again.": "تعذر تحميل الخطط. حاول مجددًا."
   },
   "fr": {
     ". Public comments are reviewed.": ". Les commentaires publics sont examinés.",
@@ -4827,7 +4869,14 @@
     "{pages} transcription pages · {fetches} new-paper fetches per month": "{pages} pages de transcription · {fetches} nouveaux articles par mois",
     "7 days free, then {price} per month. Trial includes 50 pages and 10 fetches. Cancel before it ends to avoid payment.": "7 jours gratuits, puis {price} par mois. L’essai comprend 50 pages et 10 téléchargements. Annulez avant la fin pour éviter tout paiement.",
     "Start 7-day free trial": "Commencer l’essai gratuit de 7 jours",
-    "Subscriptions renew monthly until canceled. Monthly quotas reset; unused credits do not expire.": "Renouvellement mensuel jusqu’à résiliation. Les quotas mensuels sont réinitialisés ; les crédits inutilisés n’expirent pas."
+    "Subscriptions renew monthly until canceled. Monthly quotas reset; unused credits do not expire.": "Renouvellement mensuel jusqu’à résiliation. Les quotas mensuels sont réinitialisés ; les crédits inutilisés n’expirent pas.",
+    "Plans & usage": "Forfaits et utilisation",
+    "View plans": "Voir les forfaits",
+    "Coming soon": "Bientôt disponible",
+    "Planned price: {price} / month": "Prix prévu : {price} / mois",
+    "Subscriptions are coming soon. You can keep reading for free.": "Les abonnements arrivent bientôt. Vous pouvez continuer à lire gratuitement.",
+    "Eligible subscribers get a 7-day trial when plans become available.": "Les abonnés éligibles auront un essai de 7 jours à la disponibilité des forfaits.",
+    "Unable to load plans. Try again.": "Impossible de charger les forfaits. Réessayez."
   },
   "de": {
     ". Public comments are reviewed.": "Öffentliche Kommentare werden geprüft.",
@@ -5517,7 +5566,14 @@
     "{pages} transcription pages · {fetches} new-paper fetches per month": "{pages} Transkriptionsseiten · {fetches} neue Artikel pro Monat",
     "7 days free, then {price} per month. Trial includes 50 pages and 10 fetches. Cancel before it ends to avoid payment.": "7 Tage kostenlos, danach {price} pro Monat. Der Test umfasst 50 Seiten und 10 Downloads. Vor Ablauf kündigen, um Zahlungen zu vermeiden.",
     "Start 7-day free trial": "7 Tage kostenlos testen",
-    "Subscriptions renew monthly until canceled. Monthly quotas reset; unused credits do not expire.": "Monatliche Verlängerung bis zur Kündigung. Monatskontingente werden zurückgesetzt; ungenutztes Guthaben verfällt nicht."
+    "Subscriptions renew monthly until canceled. Monthly quotas reset; unused credits do not expire.": "Monatliche Verlängerung bis zur Kündigung. Monatskontingente werden zurückgesetzt; ungenutztes Guthaben verfällt nicht.",
+    "Plans & usage": "Tarife und Nutzung",
+    "View plans": "Tarife ansehen",
+    "Coming soon": "Demnächst",
+    "Planned price: {price} / month": "Geplanter Preis: {price} / Monat",
+    "Subscriptions are coming soon. You can keep reading for free.": "Abonnements sind bald verfügbar. Du kannst weiterhin kostenlos lesen.",
+    "Eligible subscribers get a 7-day trial when plans become available.": "Berechtigte Abonnenten erhalten bei Verfügbarkeit der Tarife eine 7-tägige Testphase.",
+    "Unable to load plans. Try again.": "Tarife konnten nicht geladen werden. Bitte erneut versuchen."
   },
   "es": {
     ". Public comments are reviewed.": "Los comentarios públicos se revisan.",
@@ -6207,7 +6263,14 @@
     "{pages} transcription pages · {fetches} new-paper fetches per month": "{pages} páginas de transcripción · {fetches} artículos nuevos al mes",
     "7 days free, then {price} per month. Trial includes 50 pages and 10 fetches. Cancel before it ends to avoid payment.": "7 días gratis, después {price} al mes. Incluye 50 páginas y 10 descargas durante la prueba. Cancela antes de que termine para evitar el cobro.",
     "Start 7-day free trial": "Empezar prueba gratuita de 7 días",
-    "Subscriptions renew monthly until canceled. Monthly quotas reset; unused credits do not expire.": "Se renueva cada mes hasta cancelar. Las cuotas mensuales se reinician; los créditos no utilizados no caducan."
+    "Subscriptions renew monthly until canceled. Monthly quotas reset; unused credits do not expire.": "Se renueva cada mes hasta cancelar. Las cuotas mensuales se reinician; los créditos no utilizados no caducan.",
+    "Plans & usage": "Planes y uso",
+    "View plans": "Ver planes",
+    "Coming soon": "Próximamente",
+    "Planned price: {price} / month": "Precio previsto: {price} al mes",
+    "Subscriptions are coming soon. You can keep reading for free.": "Las suscripciones llegarán pronto. Puedes seguir leyendo gratis.",
+    "Eligible subscribers get a 7-day trial when plans become available.": "Los suscriptores que cumplan los requisitos tendrán 7 días de prueba cuando se lancen los planes.",
+    "Unable to load plans. Try again.": "No se pudieron cargar los planes. Inténtalo de nuevo."
   },
   "ru": {
     ". Public comments are reviewed.": "Публичные комментарии проходят проверку.",
@@ -6897,7 +6960,14 @@
     "{pages} transcription pages · {fetches} new-paper fetches per month": "{pages} страниц распознавания · {fetches} новых статей в месяц",
     "7 days free, then {price} per month. Trial includes 50 pages and 10 fetches. Cancel before it ends to avoid payment.": "7 дней бесплатно, затем {price} в месяц. Пробный период включает 50 страниц и 10 загрузок. Отмените до его окончания, чтобы избежать списания.",
     "Start 7-day free trial": "Начать бесплатный пробный период на 7 дней",
-    "Subscriptions renew monthly until canceled. Monthly quotas reset; unused credits do not expire.": "Подписка продлевается ежемесячно до отмены. Месячные квоты обновляются, неиспользованные кредиты не сгорают."
+    "Subscriptions renew monthly until canceled. Monthly quotas reset; unused credits do not expire.": "Подписка продлевается ежемесячно до отмены. Месячные квоты обновляются, неиспользованные кредиты не сгорают.",
+    "Plans & usage": "Тарифы и использование",
+    "View plans": "Посмотреть тарифы",
+    "Coming soon": "Скоро",
+    "Planned price: {price} / month": "Планируемая цена: {price} в месяц",
+    "Subscriptions are coming soon. You can keep reading for free.": "Подписки скоро появятся. Вы можете продолжать читать бесплатно.",
+    "Eligible subscribers get a 7-day trial when plans become available.": "После запуска тарифов доступным пользователям будет предложен пробный период на 7 дней.",
+    "Unable to load plans. Try again.": "Не удалось загрузить тарифы. Попробуйте ещё раз."
   },
   "vi": {
     ". Public comments are reviewed.": "Bình luận công khai sẽ được kiểm duyệt.",
@@ -7587,6 +7657,13 @@
     "{pages} transcription pages · {fetches} new-paper fetches per month": "{pages} trang chuyển văn bản · {fetches} bài mới mỗi tháng",
     "7 days free, then {price} per month. Trial includes 50 pages and 10 fetches. Cancel before it ends to avoid payment.": "Miễn phí 7 ngày, sau đó {price}/tháng. Dùng thử gồm 50 trang và 10 lượt tải. Hủy trước khi hết hạn để tránh bị tính phí.",
     "Start 7-day free trial": "Bắt đầu dùng thử miễn phí 7 ngày",
-    "Subscriptions renew monthly until canceled. Monthly quotas reset; unused credits do not expire.": "Tự động gia hạn hằng tháng đến khi hủy. Hạn mức tháng được đặt lại; tín dụng chưa dùng không hết hạn."
+    "Subscriptions renew monthly until canceled. Monthly quotas reset; unused credits do not expire.": "Tự động gia hạn hằng tháng đến khi hủy. Hạn mức tháng được đặt lại; tín dụng chưa dùng không hết hạn.",
+    "Plans & usage": "Gói và mức sử dụng",
+    "View plans": "Xem gói",
+    "Coming soon": "Sắp ra mắt",
+    "Planned price: {price} / month": "Giá dự kiến: {price} / tháng",
+    "Subscriptions are coming soon. You can keep reading for free.": "Gói đăng ký sắp ra mắt. Bạn vẫn có thể đọc miễn phí.",
+    "Eligible subscribers get a 7-day trial when plans become available.": "Người đăng ký đủ điều kiện sẽ được dùng thử 7 ngày khi các gói ra mắt.",
+    "Unable to load plans. Try again.": "Không thể tải các gói. Vui lòng thử lại."
   }
 }

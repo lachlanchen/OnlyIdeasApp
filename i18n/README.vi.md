@@ -16,6 +16,11 @@ Mô hình tiết kiệm có thể cấu hình sẽ tạo hướng dẫn đọc v
 
 ![OnlyIdeas reading room](../evidence/library-desktop.png)
 
+<!-- plans21 -->
+1.0.2 (21): Hồ sơ luôn hiển thị gói và mức sử dụng, kể cả trước khi đăng nhập hoặc khi chưa thể thanh toán. Cả ba gói cùng hạn mức xuất hiện trên iOS, Android, Mac và PWA. Tính năng trả phí vẫn cần được kiểm chứng bằng giao dịch thử nghiệm.
+
+[1.0.2 (21)](../docs/release-candidate-21.md)
+
 <!-- reader20 -->
 1.0.2 (20): Đọc bản gốc, bản dịch hoặc xen kẽ trong cùng trình đọc, giữ bộ nhớ đệm, công thức, hình và bình luận. Mac gốc hỗ trợ Apple silicon và Intel. Sở thích mặc định có nghiên cứu organoid của Shaohua Ma. Đã chuẩn bị gói tháng và dùng thử bảy ngày; chỉ mở thanh toán sau kiểm thử sandbox.
 

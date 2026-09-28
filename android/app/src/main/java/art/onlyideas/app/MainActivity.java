@@ -129,6 +129,7 @@ public class MainActivity extends AppCompatActivity {
     buildRoot();
     if (current.equals("space")) showSpace();
     else if (current.equals("profile")) showProfile();
+    else if (current.equals("plans")) showPlans();
     else if (current.equals("agent")) showAgent();
     else if (current.equals("reader") && document != null) showReader();
     else showLibrary();
@@ -140,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
     handler.removeCallbacks(poll);
     handler.postDelayed(poll, 2000);
     if (api != null && api.get("onlyideas.native.flow") != null) completeLogin();
-    if(api!=null&&account!=null)loadSubscriptions();
+    if(api!=null&&(account!=null||page.equals("plans")))loadSubscriptions();
   }
 
   @Override
@@ -595,7 +596,7 @@ public class MainActivity extends AppCompatActivity {
   }
 
   void loadSubscriptions() {
-    if(account==null||api==null)return;
+    if(api==null)return;
     int epoch=authEpoch;
     io.execute(()->{
       try {
@@ -621,22 +622,24 @@ public class MainActivity extends AppCompatActivity {
           if(plans!=null)for(int i=0;i<plans.length();i++)ids.add(plans.optJSONObject(i).optString("google"));
           billing.trialEligible=catalog.optBoolean("trialEligible");billing.load(ids);renderSubscriptions();
         });
-      } catch(Exception ignored) { /* Older servers keep billing hidden. */ }
+      } catch(Exception error) {handler.post(()->{if(epoch==authEpoch&&!isFinishing()){purchaseNotice=t("Unable to load plans. Try again.");renderSubscriptions();}});}
     });
   }
   void renderSubscriptions() {
-    if(!page.equals("profile")||subscriptionContainer==null)return;
+    if(!page.equals("plans")||subscriptionContainer==null)return;
     subscriptionContainer.removeAllViews();
-    if(account==null||billingCatalog==null||!billingCatalog.optBoolean("enabled")||!billingCatalog.optJSONObject("providers").optBoolean("google"))return;
+    if(billingCatalog==null){caption(subscriptionContainer,purchaseNotice.isEmpty()?t("Loading…"):purchaseNotice);subscriptionContainer.addView(button("Try again",false,this::loadSubscriptions));return;}
+    boolean available=billingCatalog.optBoolean("enabled")&&billingCatalog.optJSONObject("providers").optBoolean("google");
     LinearLayout card=card();title(card,t("Monthly plans"),22);gap(card,10);
     caption(card,t("Existing papers and cached translations are free to read. Plans cover new fetching and transcription."));
     JSONObject quota=billingCatalog.optJSONObject("quota");
     if(quota!=null&&quota.optBoolean("enabled")){caption(card,quota.optBoolean("unlimited")?t("Unlimited owner allowance"):t("{pages} transcription pages and {fetches} fetches remaining").replace("{pages}",String.valueOf(quota.optInt("remainingPages"))).replace("{fetches}",String.valueOf(quota.optInt("remainingFetches"))));if(!quota.optBoolean("unlimited"))caption(card,t("Renews on {date}").replace("{date}",java.text.DateFormat.getDateInstance().format(new java.util.Date(quota.optLong("ends")))));}
     if(billing!=null)billing.trialEligible=billingCatalog.optBoolean("trialEligible");
     String active=billingCatalog.optString("plan","");
-    if(!billingCatalog.optBoolean("canSubscribe"))caption(card,t("Manage your plan in the store where you subscribed."));
+    if(!available)caption(card,t("Subscriptions are coming soon. You can keep reading for free."));
+    if(available&&!billingCatalog.optBoolean("canSubscribe"))caption(card,t("Manage your plan in the store where you subscribed."));
     JSONArray plans=billingCatalog.optJSONArray("plans");
-    for(ProductDetails product:billingProducts) {
+    for(ProductDetails product:available?billingProducts:List.<ProductDetails>of()) {
       ProductDetails.SubscriptionOfferDetails offer=NativeBilling.monthly(product,billingCatalog.optBoolean("trialEligible"));if(offer==null)continue;
       JSONObject plan=null;for(int i=0;i<plans.length();i++)if(plans.optJSONObject(i).optString("google").equals(product.getProductId()))plan=plans.optJSONObject(i);
       if(plan==null)continue;
@@ -650,9 +653,19 @@ public class MainActivity extends AppCompatActivity {
       Button buy=button(t(active.equals(plan.optString("id"))?"Current plan":trial?"Start 7-day free trial":"Subscribe"),true,()->billing.purchase(product,billingCatalog.optString("accountToken")));
       buy.setEnabled(billingCatalog.optBoolean("canSubscribe"));card.addView(buy);
     }
-    if(billingProducts.isEmpty()&&!purchaseNotice.equals(t("Plans are currently unavailable in this store.")))caption(card,t("Plans are currently unavailable in this store."));
+    if(plans!=null)for(int i=0;i<plans.length();i++) {
+      JSONObject plan=plans.optJSONObject(i);boolean found=false;
+      if(available)for(ProductDetails p:billingProducts)if(p.getProductId().equals(plan.optString("google"))&&NativeBilling.monthly(p,billingCatalog.optBoolean("trialEligible"))!=null)found=true;
+      if(found)continue;
+      gap(card,18);title(card,t(plan.optString("name")),20);
+      caption(card,t("Planned price: {price} / month").replace("{price}","US$"+plan.optString("targetUSD")));
+      caption(card,t("{pages} transcription pages · {fetches} new-paper fetches per month").replace("{pages}",String.valueOf(plan.optInt("pages"))).replace("{fetches}",String.valueOf(plan.optInt("fetches"))));
+      Button soon=button("Coming soon",false,()->{});soon.setEnabled(false);card.addView(soon);
+    }
+    if(!available)caption(card,t("Eligible subscribers get a 7-day trial when plans become available."));
+    if(available&&billingProducts.isEmpty()&&!purchaseNotice.equals(t("Plans are currently unavailable in this store.")))caption(card,t("Plans are currently unavailable in this store."));
     if(!purchaseNotice.isEmpty())caption(card,purchaseNotice);
-    gap(card,12);card.addView(button("Restore purchases",false,()->{if(billing!=null)billing.restore();}));
+    gap(card,12);Button restore=button("Restore purchases",false,()->{if(billing!=null)billing.restore();});restore.setEnabled(available&&billing!=null);card.addView(restore);
     card.addView(button("Manage subscription",false,()->startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse("https://play.google.com/store/account/subscriptions?package=art.onlyideas.app")))));
     caption(card,t("Subscriptions renew monthly until canceled in store settings. Unused credits do not expire. Service limits apply."));
     card.addView(button("Terms",false,()->startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse("https://lachlan.lazying.art/OnlyIdeasApp/terms.html")))));
@@ -660,6 +673,11 @@ public class MainActivity extends AppCompatActivity {
     subscriptionContainer.addView(card);
   }
 
+  void showPlans() {
+    clear("plans");navigation("Monthly plans");
+    LinearLayout c=scrollContent();c.addView(button("Back",false,this::showProfile));
+    subscriptionContainer=column();c.addView(subscriptionContainer);renderSubscriptions();loadSubscriptions();
+  }
   void showProfile() {
     clear("profile");
     LinearLayout c = scrollContent();
@@ -683,13 +701,13 @@ public class MainActivity extends AppCompatActivity {
       c.addView(button(t("Continue with GitHub"), true, this::signIn));
       gap(c, 12);
     }
+    c.addView(button("Plans & usage",true,this::showPlans));gap(c,12);
     if(account!=null) {
       c.addView(button(t("Saved, liked & activity"),false,this::showSpace));
       c.addView(button(t("Interests & notifications"),false,this::showReadingPreferences));
       LinearLayout wallet=column();creditContainer=wallet;c.addView(wallet);
       job(()->api.json("/api/credits","GET",null),r->{if(page.equals("profile")&&r.optBoolean("enabled"))renderCredits(wallet,r);});
     }
-    subscriptionContainer=column();c.addView(subscriptionContainer);renderSubscriptions();loadSubscriptions();
     LinearLayout reading = card();
     title(reading, t("Reading preferences"), 22);
     gap(reading, 18);
@@ -1412,7 +1430,8 @@ public class MainActivity extends AppCompatActivity {
 
   void returnFromReader(){
     ++readerRequest;
-    if(page.equals("reader")&&readerReturn.equals("agent"))showAgent();
+    if(page.equals("plans"))showProfile();
+    else if(page.equals("reader")&&readerReturn.equals("agent"))showAgent();
     else if(page.equals("reader")&&readerReturn.equals("space"))showSpace();
     else showLibrary();
   }

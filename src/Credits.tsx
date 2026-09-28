@@ -1,4 +1,3 @@
-import {Subscriptions} from './Subscriptions'
 import { useEffect, useState } from 'react'
 import { api } from './api'
 import { t } from './i18n'
@@ -19,7 +18,7 @@ export function CreditsPanel() {
  const [credits,setCredits]=useState<Credits|null>(null),[error,setError]=useState('')
  useEffect(()=>{let active=true;api<Credits>('/credits').then(c=>{if(active)setCredits(c)}).catch(e=>{if(active)setError(e.message)});return()=>{active=false}},[])
  if(!credits?.enabled&&!error)return null
- return <><Subscriptions/><section className="credit-panel"><h2>{t('Reading credits')}</h2>{error?<p role="status">{t(error)}</p>:credits&&<><div className="credit-balance"><strong>{credits.balance}</strong><span>{t('Available credits')}</span></div>{credits.held>0&&<p>{t('Reserved for imports')}: {credits.held}</p>}<CreditRules credits={credits}/><details><summary>{t('Credit history')}</summary><ul className="credit-history">{credits.history.map((item,i)=><li key={i}><span>{t(creditLabels[item.kind]||item.kind)}<small>{new Date(item.created).toLocaleDateString()}</small></span><strong>{item.delta>0?'+':''}{item.delta}</strong></li>)}</ul></details></>}</section></>
+ return <><section className="credit-panel"><h2>{t('Reading credits')}</h2>{error?<p role="status">{t(error)}</p>:credits&&<><div className="credit-balance"><strong>{credits.balance}</strong><span>{t('Available credits')}</span></div>{credits.held>0&&<p>{t('Reserved for imports')}: {credits.held}</p>}<CreditRules credits={credits}/><details><summary>{t('Credit history')}</summary><ul className="credit-history">{credits.history.map((item,i)=><li key={i}><span>{t(creditLabels[item.kind]||item.kind)}<small>{new Date(item.created).toLocaleDateString()}</small></span><strong>{item.delta>0?'+':''}{item.delta}</strong></li>)}</ul></details></>}</section></>
 }
 export function SharingOptions({sharing,setSharing}:{sharing:string;setSharing:(s:string)=>void}) {
  const [credits,setCredits]=useState<Credits|null>(null)

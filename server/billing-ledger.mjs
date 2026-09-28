@@ -85,7 +85,7 @@ export function deleteBillingAccount(store, owner) {
 }
 
 export function billingCatalog(store,config,user,ready={}) {
-  const enabled=creditsEnabled(config,user.id) && config.billing?.enabled===true && (ready.apple===true || ready.google===true || ready.stripe===true);
+  const enabled=!!user && creditsEnabled(config,user.id) && config.billing?.enabled===true && (ready.apple===true || ready.google===true || ready.stripe===true);
   return { enabled, providers:{apple:enabled&&ready.apple===true,google:enabled&&ready.google===true,stripe:enabled&&ready.stripe===true}, accountToken:enabled?billingAccount(store,user.id):null,
-    plans:enabled?plans.map(p=>({...p,trial:trialPolicy})):[],trialEligible:trialEligible(store,user.id),quota:quotaSummary(store,config,user.id), ...subscriptionSummary(store,user.id) };
+    plans:plans.map(p=>({...p,trial:trialPolicy})),signInRequired:!user,trialEligible:user?trialEligible(store,user.id):false,quota:user?quotaSummary(store,config,user.id):null, ...(user?subscriptionSummary(store,user.id):{plan:null,canSubscribe:false,subscriptions:[]}) };
 }

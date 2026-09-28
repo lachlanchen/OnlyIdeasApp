@@ -16,6 +16,11 @@ OnlyIdeas 是共享的論文閱讀空間。匯入 PDF 或開放取用的 PDF 連
 
 ![OnlyIdeas reading room](../evidence/library-desktop.png)
 
+<!-- plans21 -->
+1.0.2 (21)：個人檔案現在一律顯示「方案與用量」，登入前或暫時無法購買時也能查看。iOS、Android、Mac 和 PWA 均展示三個已確認方案及配額。付費功能仍須完成沙盒購買驗證後開放。
+
+[1.0.2 (21)](../docs/release-candidate-21.md)
+
 <!-- reader20 -->
 1.0.2（20）：在同一閱讀器切換原文、譯文或交錯雙語，保留語言快取、公式、插圖和原文評論。原生 Mac 版支援 Apple 晶片及 Intel。預設興趣加入馬韶華教授的類器官研究。月度訂閱與七天試用已準備，購買功能須通過沙盒驗證後開放。
 

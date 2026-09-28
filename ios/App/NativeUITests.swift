@@ -1,6 +1,20 @@
 import XCTest
 
 final class NativeUITests: XCTestCase {
+  func testPlansVisibleWithoutPurchaseActivation() {
+    continueAfterFailure=false
+    let app=XCUIApplication()
+    app.launchArguments=["-onlyideas.native.language","en","-onlyideas.native.appearance","light","--onlyideas-space-qa"]
+    app.launchEnvironment["ONLYIDEAS_QA_ORIGIN"]="http://127.0.0.1:18649"
+    app.launch()
+    XCTAssertTrue(app.tabBars.buttons["Profile"].waitForExistence(timeout:20));app.tabBars.buttons["Profile"].tap()
+    let entry=app.buttons["plans-entry"];XCTAssertTrue(entry.waitForExistence(timeout:10));shot("Plans21-profile");entry.tap()
+    XCTAssertTrue(app.staticTexts["Subscriptions are coming soon. You can keep reading for free."].waitForExistence(timeout:20))
+    XCTAssertTrue(app.staticTexts["200 transcription pages · 60 new-paper fetches per month"].exists)
+    XCTAssertTrue(app.buttons["Coming soon"].firstMatch.exists);XCTAssertFalse(app.buttons["Coming soon"].firstMatch.isEnabled)
+    shot("Plans21-visible")
+    app.terminate()
+  }
   func testIntegratedTranslationReader() {
     continueAfterFailure=false
     let app=XCUIApplication()
