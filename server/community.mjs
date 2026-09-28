@@ -18,7 +18,7 @@ export async function deleteAccount(store, user) {
     db.prepare("DELETE FROM sessions WHERE json_extract(user,'$.id')=?").run(user.id);
     db.prepare("DELETE FROM oauth WHERE json_extract(body,'$.user.id')=?").run(user.id);
     db.prepare('DELETE FROM chat_messages WHERE chat IN (SELECT id FROM chats WHERE owner=?)').run(user.id);
-    for (const table of ['chat_tasks', 'chats', 'comments', 'notes', 'artifacts', 'reports', 'terms', 'jobs', 'attachments', 'job_subscriptions', 'paper_reactions']) {
+    for (const table of ['chat_tasks', 'chats', 'comments', 'notes', 'artifacts', 'reports', 'terms', 'jobs', 'attachments', 'job_subscriptions', 'paper_reactions','reading_preferences','reading_activity','inbox_reads','reading_digests']) {
       if (db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?").get(table)) db.prepare(`DELETE FROM ${table} WHERE owner=?`).run(user.id);
     }
     for (const paper of papers) {

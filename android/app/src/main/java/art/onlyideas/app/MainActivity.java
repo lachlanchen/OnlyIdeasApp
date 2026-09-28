@@ -77,11 +77,13 @@ public class MainActivity extends AppCompatActivity {
           showLibrary();
         }
       };
+  private long inboxChecked=0;
+  private Button spaceNavigation;
   private final Runnable poll =
       new Runnable() {
         public void run() {
           if (page.equals("agent") && !chatId.isEmpty()) loadChat(false);
-          if (account != null) loadJobs(false);
+          if (account != null) {loadJobs(false);if(System.currentTimeMillis()-inboxChecked>30000){inboxChecked=System.currentTimeMillis();int epoch=authEpoch;job(()->api.json("/api/inbox","GET",null),r->{if(epoch==authEpoch&&spaceNavigation!=null)spaceNavigation.setText(t("Your space")+(r.optInt("unread")>0?" · "+r.optInt("unread"):""));});}}
           handler.postDelayed(this, 3500);
         }
       };
@@ -108,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
     buildRoot();
     showLibrary();
     refresh();
+    if(getIntent().getBooleanExtra("onlyideas.daily",false)){spaceTab="daily";showSpace();}
   }
 
   @Override
@@ -116,7 +119,8 @@ public class MainActivity extends AppCompatActivity {
     if (root == null) return;
     String current = page;
     buildRoot();
-    if (current.equals("profile")) showProfile();
+    if (current.equals("space")) showSpace();
+    else if (current.equals("profile")) showProfile();
     else if (current.equals("agent")) showAgent();
     else if (current.equals("reader") && document != null) showReader();
     else showLibrary();
@@ -150,6 +154,7 @@ public class MainActivity extends AppCompatActivity {
   protected void onNewIntent(Intent intent) {
     super.onNewIntent(intent);
     setIntent(intent);
+    if(intent.getBooleanExtra("onlyideas.daily",false)){spaceTab="daily";showSpace();return;}
     if (intent.getData() != null
         && intent.getData().toString().startsWith("art.onlyideas.app://oauth/complete"))
       completeLogin();
@@ -316,7 +321,7 @@ public class MainActivity extends AppCompatActivity {
     profile.setContentDescription(t("Open profile"));
     header.addView(profile, new LinearLayout.LayoutParams(-2, dp(48)));
     bottom.removeAllViews();
-    String[] tabs = {"Library", "Agent", "Profile"};
+    String[] tabs = {"Library", "Agent", "Your space", "Profile"};
     for (String tab : tabs) {
       Button b =
           button(
@@ -325,10 +330,12 @@ public class MainActivity extends AppCompatActivity {
               () -> {
                 if (tab.equals("Library")) showLibrary();
                 else if (tab.equals("Agent")) showAgent();
+                else if (tab.equals("Your space")) showSpace();
                 else showProfile();
               });
-      b.setTextSize(16);
-      b.setBackground(rounded(page.equals(tab.toLowerCase()) ? soft : surface, 14));
+      if(tab.equals("Your space"))spaceNavigation=b;
+      b.setTextSize(13);
+      b.setBackground(rounded(page.equals(tab.equals("Your space") ? "space" : tab.toLowerCase()) ? soft : surface, 14));
       LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, dp(44), 1);
       lp.setMargins(dp(3), 0, dp(3), 0);
       bottom.addView(b, lp);
@@ -356,7 +363,7 @@ public class MainActivity extends AppCompatActivity {
     navigation(
         next.equals("library")
             ? "OnlyIdeas"
-            : next.equals("agent") ? "Agent" : next.equals("reader") ? "Reading" : "Profile");
+            : next.equals("space") ? "Your space" : next.equals("agent") ? "Agent" : next.equals("reader") ? "Reading" : "Profile");
   }
 
   <T> void job(Callable<T> work, Consumer<T> done) {
@@ -658,6 +665,8 @@ public class MainActivity extends AppCompatActivity {
       gap(c, 12);
     }
     if(account!=null) {
+      c.addView(button(t("Saved, liked & activity"),false,this::showSpace));
+      c.addView(button(t("Interests & notifications"),false,this::showReadingPreferences));
       LinearLayout wallet=column();creditContainer=wallet;c.addView(wallet);
       job(()->api.json("/api/credits","GET",null),r->{if(page.equals("profile")&&r.optBoolean("enabled"))renderCredits(wallet,r);});
     }
@@ -1103,6 +1112,7 @@ public class MainActivity extends AppCompatActivity {
   }
 
   void signOut() {
+    ReadingReminder.cancel(this);
     job(
         () -> {
           try {
@@ -1987,12 +1997,49 @@ public class MainActivity extends AppCompatActivity {
     io.execute(()->{try{android.net.Uri.Builder uri=new android.net.Uri.Builder().path(saved?"/api/saved":"/api/discovery");for(Map.Entry<String,String> e:params.entrySet())uri.appendQueryParameter(e.getKey(),e.getValue());JSONObject result=api.json(uri.build().toString(),"GET",null);handler.post(()->{if(g!=researchGeneration||epoch!=authEpoch||!page.equals("library"))return;researchLoading=false;researchNotice.setText(result.optBoolean("stale")?t("Showing cached research results."):result.optJSONArray("unavailable")!=null&&result.optJSONArray("unavailable").length()>0?t("Some research indexes are temporarily unavailable."):"");JSONArray hits=result.optJSONArray("papers");if(hits!=null)for(int i=0;i<hits.length();i++){JSONObject hit=hits.optJSONObject(i);if(hit!=null&&researchIDs.add(hit.optString("id")))researchCard(hit);}researchPage=result.optInt("nextPage",0);researchMore.setEnabled(true);researchMore.setVisibility(researchPage>0?View.VISIBLE:View.GONE);if(researchIDs.isEmpty()&&researchNotice.getText().length()==0)researchNotice.setText(t("No papers found. Try broader keywords or fewer filters."));});}catch(Exception error){handler.post(()->{if(g!=researchGeneration||epoch!=authEpoch||!page.equals("library"))return;researchLoading=false;researchNotice.setText(error.getMessage());researchPage=p;researchMore.setText(t("Try again"));researchMore.setEnabled(true);researchMore.setVisibility(View.VISIBLE);});}});
   }
   void researchCard(JSONObject p){LinearLayout card=card();caption(card,researchMetadata(p));TextView heading=text(p.optString("title"),18,true);heading.setPadding(0,dp(8),0,dp(8));heading.setOnClickListener(v->researchChoose(p));card.addView(heading);caption(card,p.optString("authors"));if(!p.optString("summary").isEmpty()){TextView summary=text(p.optString("summary"),15,false);summary.setMaxLines(3);summary.setEllipsize(android.text.TextUtils.TruncateAt.END);card.addView(summary);}if(!p.optString("doi").isEmpty())caption(card,"DOI "+p.optString("doi"));LinearLayout actions=row();actions.addView(button(t(p.has("paperId")?"Open paper":"Fetch & read"),false,()->researchChoose(p)),new LinearLayout.LayoutParams(0,-2,1));actions.addView(button(t("Source"),false,()->{String source=p.optString("source");if(source.startsWith("https://"))startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(source)));}));card.addView(actions);socialActions(card,p.optString("ref","r-"+p.optString("id")),p.optString("title"));addCard(researchList,card);}
-  void researchChoose(JSONObject p){String id=p.optString("paperId");if(id.isEmpty()&&p.has("ref")&&!p.optString("ref").startsWith("r-"))id=p.optString("ref");if(!id.isEmpty()){try{openPaper(new JSONObject().put("id",id).put("title",p.optString("title")));}catch(Exception ignored){}return;}if(account==null){signIn();return;}if(p.optString("pdfUrl").isEmpty()){toast(t("No direct PDF. Open the source or upload your copy."));return;}job(()->api.json("/api/discovery/import","POST",new JSONObject().put("id",p.optString("id")).put("sharing","shared")),r->{if(!r.optString("paperId").isEmpty()){try{openPaper(new JSONObject().put("id",r.optString("paperId")).put("title",p.optString("title")));}catch(Exception ignored){}}else loadJobs(true);});}
+  void researchChoose(JSONObject p){if(!p.optString("fetchUnavailable").isEmpty()){new AlertDialog.Builder(this).setTitle(t("Source unavailable")).setMessage(t(p.optString("fetchUnavailable"))).setPositiveButton(t("Open source"),(d,w)->startActivity(new Intent(Intent.ACTION_VIEW,android.net.Uri.parse(p.optString("source"))))).setNegativeButton(t("Done"),null).show();return;}String id=p.optString("paperId");if(id.isEmpty()&&p.has("ref")&&!p.optString("ref").startsWith("r-"))id=p.optString("ref");if(!id.isEmpty()){try{openPaper(new JSONObject().put("id",id).put("title",p.optString("title")));}catch(Exception ignored){}return;}if(account==null){signIn();return;}if(p.optString("pdfUrl").isEmpty()){toast(t("No direct PDF. Open the source or upload your copy."));return;}job(()->api.json("/api/discovery/import","POST",new JSONObject().put("id",p.optString("id")).put("sharing","shared")),r->{if(!r.optString("paperId").isEmpty()){try{openPaper(new JSONObject().put("id",r.optString("paperId")).put("title",p.optString("title")));}catch(Exception ignored){}}else loadJobs(true);});}
   void researchFilters(){LinearLayout c=column();c.setPadding(dp(20),dp(8),dp(20),dp(8));ScrollView scroll=new ScrollView(this);scroll.addView(c);Map<String,String> draft=new LinkedHashMap<>(researchOptions);String[] providers={"all","openalex","arxiv"};Spinner source=new Spinner(this);source.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,new String[]{t("All research"),"OpenAlex","arXiv"}));caption(c,t("Source"));c.addView(source);LinearLayout category=column();c.addView(category);Runnable categories=()->{category.removeAllViews();JSONArray tree=researchTaxonomy.optJSONArray(draft.getOrDefault("source","all").equals("arxiv")?"arxiv":"openalex");if(tree==null)return;ArrayList<String> names=new ArrayList<>(List.of(t("All disciplines"))),ids=new ArrayList<>(List.of(""));for(int i=0;i<tree.length();i++){JSONObject f=tree.optJSONObject(i);names.add(f.optString("name"));ids.add(f.optString("id"));}Spinner first=new Spinner(this),second=new Spinner(this);caption(category,t("Primary discipline"));category.addView(first);caption(category,t("Secondary discipline"));category.addView(second);first.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,names));first.setSelection(Math.max(0,ids.indexOf(draft.getOrDefault("discipline",""))));first.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){public void onNothingSelected(AdapterView<?> v){}public void onItemSelected(AdapterView<?> v,View view,int pos,long id){String prev=draft.getOrDefault("discipline","");draft.put("discipline",ids.get(pos));if(!prev.equals(ids.get(pos)))draft.put("subdiscipline","");JSONArray children=pos>0?tree.optJSONObject(pos-1).optJSONArray("children"):new JSONArray();ArrayList<String> subNames=new ArrayList<>(List.of(t("All disciplines"))),subIDs=new ArrayList<>(List.of(""));if(children!=null)for(int j=0;j<children.length();j++){subNames.add(children.optJSONObject(j).optString("name"));subIDs.add(children.optJSONObject(j).optString("id"));}second.setAdapter(new ArrayAdapter<>(MainActivity.this,android.R.layout.simple_spinner_dropdown_item,subNames));second.setSelection(Math.max(0,subIDs.indexOf(draft.getOrDefault("subdiscipline",""))));second.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){public void onNothingSelected(AdapterView<?> v){}public void onItemSelected(AdapterView<?> v,View view,int n,long id){draft.put("subdiscipline",subIDs.get(n));}});}});};source.setSelection(Math.max(0,Arrays.asList(providers).indexOf(draft.getOrDefault("source","all"))));source.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){public void onNothingSelected(AdapterView<?> v){}public void onItemSelected(AdapterView<?> v,View view,int pos,long id){if(!draft.getOrDefault("source","all").equals(providers[pos])){draft.remove("discipline");draft.remove("subdiscipline");}draft.put("source",providers[pos]);categories.run();}});
     Map<String,EditText> inputs=new LinkedHashMap<>();for(String key:List.of("from","to","journal")){caption(c,t(key.equals("from")?"From year":key.equals("to")?"To year":"Journal"));EditText edit=new EditText(this);edit.setSingleLine(true);edit.setText(draft.getOrDefault(key,""));if(!key.equals("journal"))edit.setInputType(InputType.TYPE_CLASS_NUMBER);c.addView(edit);inputs.put(key,edit);}Spinner order=new Spinner(this);order.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,new String[]{t("Relevance"),t("Newest first")}));order.setSelection("latest".equals(draft.get("sort"))?1:0);caption(c,t("Sort"));c.addView(order);
     new AlertDialog.Builder(this).setTitle(t("Filters")).setView(scroll).setPositiveButton(t("Apply"),(d,w)->{researchOptions.clear();researchOptions.putAll(draft);for(String key:inputs.keySet())researchOptions.put(key,inputs.get(key).getText().toString());researchOptions.put("sort",order.getSelectedItemPosition()==1?"latest":"relevance");researchReset();}).setNeutralButton(t("Clear filters"),(d,w)->{researchOptions.clear();researchReset();}).setNegativeButton(t("Cancel"),null).show();
   }
   void socialActions(LinearLayout parent,String ref,String title){LinearLayout row=row();parent.addView(row);JSONObject[] state={new JSONObject()};Runnable[] render=new Runnable[1];render[0]=()->{row.removeAllViews();for(String action:List.of("saved","liked","comments","share")){String label=action.equals("saved")?(state[0].optBoolean("saved")?"★ "+t("Saved"):"☆ "+t("Save")):action.equals("liked")?(state[0].optBoolean("liked")?"♥ ":"♡ ")+t("Like"):t(action.equals("comments")?"Comment":"Share");Button b=button(label,false,()->{if(action.equals("comments")){itemDiscussion(ref,title,state[0].optBoolean("private"));return;}if(action.equals("share")){String url=state[0].optString("shareUrl");if(url.isEmpty()||url.equals("null")){toast(t("Private papers can only be opened by their owner."));return;}Intent send=new Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT,title+"\n"+url);startActivity(Intent.createChooser(send,t("Share")));return;}if(account==null){signIn();return;}job(()->api.json("/api/items/"+ref,"PUT",new JSONObject().put(action,!state[0].optBoolean(action))),r->{state[0]=r;render[0].run();});});b.setTextSize(11);b.setPadding(0,0,0,0);row.addView(b,new LinearLayout.LayoutParams(0,dp(44),1));}};render[0].run();job(()->api.json("/api/items/"+ref,"GET",null),r->{state[0]=r;render[0].run();});}
   void itemDiscussion(String ref,String paperTitle,boolean privatePaper){LinearLayout c=column();c.setPadding(dp(18),dp(8),dp(18),dp(16));c.setFocusableInTouchMode(true);caption(c,paperTitle);LinearLayout thread=column();c.addView(thread);CheckBox terms=new CheckBox(this);terms.setText(t("I accept the Community Terms"));if(!privatePaper){c.addView(terms);c.addView(button(t("Read Community Terms"),false,()->startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse("https://lachlan.lazying.art/OnlyIdeasApp/terms.html")))));}EditText draft=new EditText(this);draft.setHint(t("Your comment"));draft.setMinLines(3);draft.setGravity(Gravity.TOP);draft.setInputType(InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_FLAG_MULTI_LINE);c.addView(draft);ScrollView scroll=new ScrollView(this);scroll.addView(c);AlertDialog dialog=new AlertDialog.Builder(this).setTitle(t("Paper discussion")).setView(scroll).setNegativeButton(t("Done"),null).create();Runnable[] load=new Runnable[1];load[0]=()->job(()->api.json("/api/items/"+ref+"/comments","GET",null),r->{thread.removeAllViews();JSONArray comments=r.optJSONArray("comments");if(comments!=null)for(int i=0;i<comments.length();i++){JSONObject comment=comments.optJSONObject(i);title(thread,comment.optString("author"),15);caption(thread,comment.optString("text"));if(comment.optBoolean("pending"))caption(thread,t("Waiting for community review"));if(comment.optBoolean("canDelete"))thread.addView(button(t("Delete"),false,()->job(()->api.json("/api/comments/"+comment.optString("id"),"DELETE",null),v->load[0].run())));else{thread.addView(button(t("Report"),false,()->{if(account==null){signIn();return;}EditText reason=new EditText(this);new AlertDialog.Builder(this).setTitle(t("What should we review?")).setView(reason).setPositiveButton(t("Send report"),(d,w)->job(()->api.json("/api/comments/"+comment.optString("id")+"/report","POST",new JSONObject().put("reason",reason.getText().toString())),v->toast(t("Report sent.")))).show();}));thread.addView(button(t("Block reader"),false,()->{if(account==null){signIn();return;}job(()->api.json("/api/comments/"+comment.optString("id")+"/block","POST",new JSONObject()),v->load[0].run());}));}}scroll.post(()->scroll.fullScroll(View.FOCUS_DOWN));});c.addView(button(t("Post thought"),true,()->{if(account==null){signIn();return;}if(!privatePaper&&!terms.isChecked()){toast(t("I accept the Community Terms"));return;}job(()->api.json("/api/items/"+ref+"/comments","POST",new JSONObject().put("id",UUID.randomUUID().toString()).put("text",draft.getText().toString()).put("acceptTerms",terms.isChecked())),r->{draft.setText("");load[0].run();});}));dialog.setOnShowListener(v->{c.requestFocus();dialog.getWindow().setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);load[0].run();});dialog.show();}
+
+  private String spaceTab="saved";
+  private int spaceGeneration=0;
+  void showSpace(){
+    clear("space");int generation=++spaceGeneration;int epoch=authEpoch;LinearLayout c=scrollContent();title(c,t("Your space"),25);
+    if(account==null){c.addView(button(t("Sign in"),true,this::signIn));return;}
+    c.addView(button(t("Interests & notifications"),false,this::showReadingPreferences));
+    android.widget.HorizontalScrollView strip=new android.widget.HorizontalScrollView(this);strip.setHorizontalScrollBarEnabled(false);LinearLayout tabs=row();strip.addView(tabs);c.addView(strip);
+    String[] ids={"saved","liked","inbox","activity","daily"},names={"Saved","Liked","Inbox","Activity","For you"};
+    for(int i=0;i<ids.length;i++){String id=ids[i];tabs.addView(button(t(names[i]),spaceTab.equals(id),()->{spaceTab=id;showSpace();}));}
+    LinearLayout results=column();c.addView(results);caption(results,t("Loading…"));
+    job(()->api.json("/api/"+spaceTab,"GET",null),r->{if(!page.equals("space")||generation!=spaceGeneration||epoch!=authEpoch)return;results.removeAllViews();
+      JSONArray list=r.optJSONArray("papers"),events=r.optJSONArray("events");if(events==null)events=r.optJSONArray("notifications");
+      if(list!=null)for(int i=0;i<list.length();i++){JSONObject p=list.optJSONObject(i);if(p==null)continue;LinearLayout card=card();title(card,p.optString("title"),18);caption(card,researchMetadata(p));caption(card,p.optString("authors"));card.addView(button(t(!p.optString("paperId").isEmpty()||(p.has("ref")&&!p.optString("ref").startsWith("r-"))?"Open paper":"Fetch & read"),false,()->researchChoose(p)));socialActions(card,p.optString("ref","r-"+p.optString("id")),p.optString("title"));results.addView(card);}
+      if(events!=null){JSONArray entries=events;if(spaceTab.equals("inbox")&&r.optInt("unread")>0)results.addView(button(t("Mark all read"),false,()->job(()->{JSONArray idsRead=new JSONArray();for(int i=0;i<entries.length();i++)idsRead.put(entries.getJSONObject(i).getString("id"));return api.json("/api/inbox","PUT",new JSONObject().put("ids",idsRead));},v->showSpace())));
+        for(int i=0;i<events.length();i++){JSONObject e=events.optJSONObject(i);if(e==null)continue;LinearLayout card=card();String kind=e.optString("kind");String label=kind.equals("comment")?"New comment":kind.equals("like")?"New like":kind.equals("fetch")?"Paper request":kind.equals("saved")?(e.optBoolean("active")?"Saved":"Removed from Saved"):(e.optBoolean("active")?"Liked":"Removed from Liked");caption(card,(e.has("read")&&!e.optBoolean("read")?"● ":"")+t(label)+" · "+java.text.DateFormat.getDateTimeInstance(java.text.DateFormat.SHORT,java.text.DateFormat.SHORT).format(new java.util.Date(e.optLong("created"))));title(card,e.optString("title"),17);if(e.has("actor"))caption(card,e.optString("actor"));if(e.has("message"))caption(card,t(e.optString("message")));String ref=e.optString("ref");
+          if(!ref.isEmpty())card.addView(button(t("Open paper"),false,()->{if(e.has("read")&&!e.optBoolean("read"))job(()->api.json("/api/inbox","PUT",new JSONObject().put("ids",new JSONArray().put(e.optString("id")))),v->{});if(ref.startsWith("r-"))job(()->api.json("/api/discovery/item/"+ref.substring(2),"GET",null),v->{JSONObject p=v.optJSONObject("paper");if(p!=null)new AlertDialog.Builder(this).setTitle(p.optString("title")).setMessage(researchMetadata(p)).setPositiveButton(t("Fetch & read"),(d,w)->researchChoose(p)).setNeutralButton(t("Comment"),(d,w)->itemDiscussion(ref,p.optString("title"),false)).setNegativeButton(t("Done"),null).show();});else openPaper(object("id",ref));}));
+          if(kind.equals("fetch")&&e.optString("paperId").isEmpty())card.addView(button(t("Your requests"),false,()->loadJobs(true)));results.addView(card);
+        }
+      }
+      if((list==null||list.length()==0)&&(events==null||events.length()==0))caption(results,t(spaceTab.equals("inbox")?"No new notifications":spaceTab.equals("activity")?"Your reading activity will appear here.":"No papers here yet."));
+    });
+  }
+  void showReadingPreferences(){
+    if(account==null){signIn();return;}job(()->{JSONObject r=api.json("/api/preferences","GET",null);r.put("taxonomy",api.json("/api/discovery/taxonomy","GET",null));return r;},r->{
+      JSONObject prefs=r.optJSONObject("preferences");if(prefs==null)return;LinearLayout c=column();c.setPadding(dp(18),dp(12),dp(18),dp(12));
+      caption(c,t("Topics you enjoy"));EditText interests=new EditText(this);interests.setText(prefs.optString("interests"));interests.setHint(t("For example: quantum physics"));interests.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(120)});c.addView(interests);
+      JSONArray fields=r.optJSONObject("taxonomy").optJSONArray("openalex");ArrayList<String> names=new ArrayList<>(),ids=new ArrayList<>();names.add(t("All disciplines"));ids.add("");if(fields!=null)for(int i=0;i<fields.length();i++){names.add(fields.optJSONObject(i).optString("name"));ids.add(fields.optJSONObject(i).optString("id"));}
+      caption(c,t("Primary discipline"));Spinner field=new Spinner(this);field.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,names));field.setSelection(Math.max(0,ids.indexOf(prefs.optString("discipline"))));c.addView(field);
+      String[] langCodes={"en","zh-Hans","zh-Hant","ja","ko","ar","es","fr","de","ru","vi"};String[] langNames={"English","简体中文","繁體中文","日本語","한국어","العربية","Español","Français","Deutsch","Русский","Tiếng Việt"};caption(c,t("Preferred reading language"));Spinner lang=new Spinner(this);lang.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,langNames));lang.setSelection(Math.max(0,java.util.Arrays.asList(langCodes).indexOf(prefs.optString("language"))));c.addView(lang);
+      android.widget.CheckBox daily=new android.widget.CheckBox(this),comments=new android.widget.CheckBox(this),likes=new android.widget.CheckBox(this);daily.setText(t("Daily reading reminder"));daily.setChecked(prefs.optBoolean("dailyEnabled"));comments.setText(t("Comment notifications"));comments.setChecked(prefs.optBoolean("commentAlerts",true));likes.setText(t("Like notifications"));likes.setChecked(prefs.optBoolean("likeAlerts",true));c.addView(comments);c.addView(likes);caption(c,t("Activity appears in your inbox when you open the app."));c.addView(daily);
+      String[] at=prefs.optString("dailyTime","09:00").split(":");int[] time={Integer.parseInt(at[0]),Integer.parseInt(at[1])};Button choose=button(t("Daily time")+" · "+prefs.optString("dailyTime"),false,()->{});choose.setOnClickListener(v->new android.app.TimePickerDialog(this,(view,h,m)->{time[0]=h;time[1]=m;choose.setText(t("Daily time")+" · "+String.format(Locale.ROOT,"%02d:%02d",h,m));},time[0],time[1],true).show());c.addView(choose);caption(c,java.util.TimeZone.getDefault().getID());caption(c,t("Open For you for papers matching your interests. Reminders do not download or convert papers."));
+      ScrollView scroll=new ScrollView(this);scroll.addView(c);AlertDialog dialog=new AlertDialog.Builder(this).setTitle(t("Interests & notifications")).setView(scroll).setNegativeButton(t("Cancel"),null).create();
+      c.addView(button(t("Save preferences"),true,()->job(()->api.json("/api/preferences","PUT",new JSONObject().put("interests",interests.getText().toString()).put("discipline",ids.get(field.getSelectedItemPosition())).put("language",langCodes[lang.getSelectedItemPosition()]).put("dailyEnabled",daily.isChecked()).put("dailyTime",String.format(Locale.ROOT,"%02d:%02d",time[0],time[1])).put("timezone",java.util.TimeZone.getDefault().getID()).put("commentAlerts",comments.isChecked()).put("likeAlerts",likes.isChecked())),v->{
+        ReadingReminder.configure(this,daily.isChecked(),time[0],time[1],t("Your daily reading time"),t("Open For you to explore research matching your interests."));if(daily.isChecked()&&android.os.Build.VERSION.SDK_INT>=33&&checkSelfPermission("android.permission.POST_NOTIFICATIONS")!=android.content.pm.PackageManager.PERMISSION_GRANTED)requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"},91);toast(t("Preferences saved"));dialog.dismiss();if(page.equals("space"))showSpace();})));dialog.show();
+    });
+  }
 
 }

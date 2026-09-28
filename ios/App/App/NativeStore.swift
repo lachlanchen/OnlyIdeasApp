@@ -27,7 +27,7 @@ struct ResearchCategory:Codable,Identifiable {var id:String;var name:String}
 struct ResearchDiscipline:Codable,Identifiable {var id:String;var name:String;var children:[ResearchCategory]}
 struct DiscoveryPaper:Codable,Identifiable {
  var id:String;var title:String;var authors:String;var source:String
- var summary:String?;var pdfUrl:String?;var paperId:String?;var year:String?;var journal:String?;var doi:String?;var discipline:String?;var subdiscipline:String?;var index:String?;var ref:String?
+ var fetchUnavailable:String?;var summary:String?;var pdfUrl:String?;var paperId:String?;var year:String?;var journal:String?;var doi:String?;var discipline:String?;var subdiscipline:String?;var index:String?;var ref:String?
  var metadata:String {[discipline,subdiscipline,year,journal].compactMap{$0}.filter{!$0.isEmpty}.joined(separator:" · ")}
 }
 func researchMatches(_ query:String,_ text:String)->Bool {
@@ -126,6 +126,7 @@ final class ReadingStore: NSObject, ObservableObject,
   @Published var jobs: [ReadingJob] = []
   @Published var conversationID: String?
   @Published var agentStatus = ""
+  @Published var inboxUnread = 0
   @Published var error: String?
   @Published var busy = false
   @Published var attachmentBusy = false
@@ -154,7 +155,12 @@ final class ReadingStore: NSObject, ObservableObject,
   @AppStorage("onlyideas.native.appearance") var appearance = "system"
   private var token: String?
   private var authentication: ASWebAuthenticationSession?
-  private let origin = "https://agent.onlyideas.art"
+  private var origin:String {
+    #if DEBUG
+    if ProcessInfo.processInfo.arguments.contains("--onlyideas-space-qa"),let value=ProcessInfo.processInfo.environment["ONLYIDEAS_QA_ORIGIN"],let url=URL(string:value),url.scheme=="http",url.host=="127.0.0.1",url.port != nil {return value}
+    #endif
+    return "https://agent.onlyideas.art"
+  }
   private lazy var network: URLSession = {
     #if DEBUG && targetEnvironment(macCatalyst)
     if let port = Int(ProcessInfo.processInfo.environment["ONLYIDEAS_QA_PROXY_PORT"] ?? ""), (1024...65535).contains(port) {
@@ -271,7 +277,11 @@ final class ReadingStore: NSObject, ObservableObject,
     request.timeoutInterval = 65
     request.setValue("capacitor://localhost", forHTTPHeaderField: "Origin")
     request.setValue("native", forHTTPHeaderField: "X-OnlyIdeas-Client")
-    if let token = token {
+    var requestToken=token
+    #if DEBUG
+    if origin.hasPrefix("http://127.0.0.1:"){requestToken=ProcessInfo.processInfo.environment["ONLYIDEAS_QA_TOKEN"]}
+    #endif
+    if let token = requestToken {
       request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
     }
     if let body = body {

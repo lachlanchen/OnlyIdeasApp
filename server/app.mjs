@@ -1,3 +1,5 @@
+import {unlimitedAllowance,countsAsRequest} from './allowances.mjs';
+import {createReadingSpace,recordActivity} from './reading-space.mjs';
 import { createPaperSocial } from './paper-social.mjs';
 import { createDiscovery } from './discovery.mjs';
 import { paperMetadata } from './paper-metadata.mjs';
@@ -32,6 +34,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
   const chats = createChats(store, config);
   const discovery = createDiscovery(store,discoveryOptions);
   const social = createPaperSocial(store,discovery);
+  const space=createReadingSpace(store,social,discovery);
   const apple = createAppleAuth(store, config, provider);
   const billing = createBilling(store,config,billingOptions);
   const limits = new Map();
@@ -56,8 +59,8 @@ export function createApp(store, config, { worker = true, provider = providerJSO
     const existing = store.existing(user.id, fields.dedupe) || store.existing(user.id,legacyDedupe)
       || (fields.kind==='import' && sourceKey(fields.url) && store.db.prepare("SELECT body FROM jobs WHERE owner=? AND json_extract(body,'$.kind')='import'").all(user.id).map(r=>JSON.parse(r.body)).find(j=>j.url && sourceKey(j.url)===sourceKey(fields.url)));
     if (existing) return existing;
-    const today = store.jobs(user.id).filter(j => j.created > Date.now() - 86400_000);
-    requireValue(today.length < (config.maxJobsPerUserPerDay || 20), 'Today’s request allowance is full. Try tomorrow.', 429);
+    const today = store.jobs(user.id).filter(j => j.created > Date.now() - 86400_000 && countsAsRequest(j));
+    requireValue(unlimitedAllowance(config,user.id) || today.length < (config.maxJobsPerUserPerDay || 20), 'Today’s request allowance is full. Try tomorrow.', 429);
     const { creditLimit, ...data } = fields;
     const job = { ...data, id: fields.id || randomUUID(), owner: user.id, created: Date.now(), state: 'queued', message: 'Waiting to start' };
     reserveImport(store, config, job, creditLimit);
@@ -114,7 +117,11 @@ export function createApp(store, config, { worker = true, provider = providerJSO
       }
       const paperFor = id => { const p = store.paper(id); requireValue(p && store.active(p.owner) && !store.blocked(user?.id, p.owner) && (p.visibility === 'public' || p.owner === user?.id), 'Paper not found.', 404); return p; };
       if (path.startsWith('/api/')) limit(user?.id || req.socket.remoteAddress, 240);
-      if (path === '/api/saved' && method === 'GET') { requireUser();return response(res,{papers:social.saved(user)}); }
+      if (['/api/saved','/api/liked'].includes(path) && method === 'GET') { requireUser();return response(res,{papers:social.saved(user,path==='/api/liked'?'liked':'saved')}); }
+      if(path==='/api/preferences'){requireUser();if(method==='GET')return response(res,{preferences:space.preferences(user)});if(method==='PUT')return response(res,{preferences:space.savePreferences(user,await json(req))});}
+      if(path==='/api/activity'&&method==='GET'){requireUser();return response(res,space.history(user));}
+      if(path==='/api/inbox'){requireUser();if(method==='GET')return response(res,space.inbox(user));if(method==='PUT')return response(res,space.markRead(user,await json(req)));}
+      if(path==='/api/daily'&&method==='GET'){requireUser();return response(res,await space.digest(user));}
       const socialMatch=path.match(/^\/api\/items\/([\w-]+)(?:\/(comments))?$/);
       if(socialMatch){const ref=socialMatch[1];if(method==='GET')return response(res,socialMatch[2]?social.comments(ref,user):social.state(ref,user));requireUser();limit(`social:${user.id}`,40);const body=await json(req);if(method==='PUT'&&!socialMatch[2])return response(res,social.update(ref,user,body));if(method==='POST'&&socialMatch[2])return response(res,social.post(ref,user,body),201);requireValue(false,'Method not allowed.',405);}
       if (path.startsWith('/api/discovery/item/') && method==='GET') return response(res,{paper:discovery.item(path.split('/').at(-1),user)});
@@ -130,7 +137,8 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         requireValue(card.pdfUrl,'This source has no direct open PDF. Open its source page or upload your copy.');
         requireValue(config.mathpix?.appKey,'PDF conversion is not connected yet.',503);
         const sharing=body.sharing==='private'?'private':'shared';
-        const job=enqueue(user,{kind:'import',sharing,creditLimit:body.creditLimit,url:card.pdfUrl,dedupe:`import:${hash(card.pdfUrl)}`,metadata:{...paperMetadata(card),title:card.title,authors:card.authors,language:'en',category:card.discipline||'Research',license:'private'}});
+        const job=enqueue(user,{kind:'import',sharing,creditLimit:body.creditLimit,url:card.pdfUrl,sourcePage:card.source,downloadSources:card.downloadSources||[],discoveryId:card.id,dedupe:`import:${hash(card.pdfUrl)}`,metadata:{...paperMetadata(card),title:card.title,authors:card.authors,language:'en',category:card.discipline||'Research',license:'private'}});
+        if(job.state==='failed')return response(res,{error:job.message,job:safeJob(job),source:card.source,code:job.errorCode||'import_failed'},409);
         return response(res,{job:safeJob(job),paperId:job.paperId},202);
       }
       if (path === '/api/billing' && method === 'GET') {requireUser();return response(res,billing.catalog(user));}
@@ -290,7 +298,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
           const prior = store.db.prepare('SELECT * FROM comments WHERE id=?').get(b.id);
           if (prior) { requireValue(prior.owner === user.id && prior.paper === p.id, 'Comment ID unavailable.', 409); return response(res, { ok: true }); }
           const c = { id: b.id, paperId: p.id, owner: user.id, visibility: p.visibility === 'public' ? 'pending' : 'private', moderation: p.visibility === 'public' ? 'pending' : 'private', author: user.name, login: user.login, text: b.text.trim(), sectionId: b.sectionId || null, paragraphId:b.paragraphId||null, quote: String(b.quote || '').slice(0, 1200), revision: p.revision, createdAt: new Date().toISOString() };
-          store.db.prepare('INSERT INTO comments VALUES(?,?,?,?,?)').run(c.id, p.id, user.id, JSON.stringify(c), Date.now()); return response(res, { ok: true }, 201);
+          store.db.prepare('INSERT INTO comments VALUES(?,?,?,?,?)').run(c.id, p.id, user.id, JSON.stringify(c), Date.now());recordActivity(store,user.id,'comment',p.id,{},'comment:'+c.id); return response(res, { ok: true }, 201);
         }
         if (action === 'notes') {
           requireUser();
@@ -340,7 +348,8 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         creditTransaction(store, () => {
           const current=store.job(j.id);requireValue(current?.state==='failed','This request is already running or complete.',409);
           retryImportCredits(store,current,consent.creditLimit);
-          current.state = 'queued'; current.message = 'Waiting to resume'; current.retries = (current.retries || 0) + 1; store.saveJob(current);
+          const cached=store.db.prepare("SELECT body FROM discovery_items WHERE json_extract(body,'$.pdfUrl')=? LIMIT 1").get(current.url);if(cached){const card=JSON.parse(cached.body);current.downloadSources=card.downloadSources||[];current.sourcePage=card.source;current.discoveryId=card.id;current.metadata={...current.metadata,...paperMetadata(card)};}
+          current.errorCode=null;current.state = 'queued'; current.message = 'Waiting to resume'; current.retries = (current.retries || 0) + 1; store.saveJob(current);
         });
         return response(res, { ok: true }, 202);
       }

@@ -1,3 +1,4 @@
+import {unlimitedAllowance} from './allowances.mjs';
 import { paperMetadata } from './paper-metadata.mjs';
 import { randomUUID, timingSafeEqual } from 'node:crypto';
 import { requestSharing } from './sharing.mjs';
@@ -21,8 +22,8 @@ export function createChats(store, config) {
     requireValue(!db.prepare("SELECT id FROM chat_tasks WHERE chat=? AND state IN ('queued','running')").get(chat), 'Wait for the current response before sending another message.', 409);
     const count = db.prepare('SELECT count(*) AS n FROM chat_tasks WHERE owner=? AND created>?').get(user.id, Date.now() - 86400_000).n;
     const allowance=config.billing?.enabled===true ? activePlan(store,user.id)?.agentTurns : null;
-    requireValue(count < (allowance || config.maxAgentTurnsPerDay || 30), 'Your daily agent allowance is full. Try tomorrow.', 429);
-    requireValue(db.prepare('SELECT count(*) AS n FROM chat_tasks WHERE created>?').get(Date.now()-86400_000).n < (config.maxAgentTurnsGlobalPerDay || 200), 'The shared agent allowance is full. Try tomorrow.', 429);
+    requireValue(unlimitedAllowance(config,user.id) || count < (allowance || config.maxAgentTurnsPerDay || 30), 'Your daily agent allowance is full. Try tomorrow.', 429);
+    requireValue(unlimitedAllowance(config,user.id) || db.prepare('SELECT owner FROM chat_tasks WHERE created>?').all(Date.now()-86400_000).filter(r=>!unlimitedAllowance(config,r.owner)).length < (config.maxAgentTurnsGlobalPerDay || 200), 'The shared agent allowance is full. Try tomorrow.', 429);
     const id = randomUUID(); db.prepare('INSERT INTO chat_tasks VALUES(?,?,?,?,?,?)').run(id, chat, user.id, 'queued', JSON.stringify(data), Date.now()); return id;
   };
   return {
@@ -55,7 +56,7 @@ export function createChats(store, config) {
         const card = messages(id).flatMap(m=>m.papers || []).find(p=>p.id === body.paperId);
         requireValue(card?.pdfUrl, 'Choose an available PDF from this conversation.');
         // Existing queue enforces deduplication, account quotas and Mathpix page caps.
-        const job = enqueue(user,{ kind:'import', sharing:body.sharing === 'shared' ? 'shared' : 'private', creditLimit:body.creditLimit, url:card.pdfUrl, metadata:{...paperMetadata(card),title:card.title,authors:card.authors,language:'en',license:'private',category:'Research'}, dedupe:`import:${hash(card.pdfUrl)}` });
+        const job = enqueue(user,{ kind:'import', sharing:body.sharing === 'shared' ? 'shared' : 'private', creditLimit:body.creditLimit, url:card.pdfUrl, sourcePage:card.source,downloadSources:card.downloadSources||[],discoveryId:card.id,metadata:{...paperMetadata(card),title:card.title,authors:card.authors,language:'en',license:'private',category:'Research'}, dedupe:`import:${hash(card.pdfUrl)}` });
         if (job.paperId && body.sharing === 'shared') { const p=store.paper(job.paperId); if(p)requestSharing(store,p,'shared'); }
         add(id,'assistant',{text:job.reused ? 'This paper is already available. Open the existing paper; its text, figures and available translations are reused. Your chat and notes stay private.' : body.sharing !== 'shared' ? 'The paper is saved to your private library after conversion.' : 'The paper will be added to the shared reading room after source and community review. Your chat and notes stay private.',jobId:job.id});
         return { job };

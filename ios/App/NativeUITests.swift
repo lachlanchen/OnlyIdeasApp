@@ -1,6 +1,29 @@
 import XCTest
 
 final class NativeUITests: XCTestCase {
+  func testReadingSpacePreferences() {
+    continueAfterFailure=false
+    let app=XCUIApplication()
+    app.launchArguments=["-onlyideas.native.language","en","-onlyideas.native.appearance","light","--onlyideas-space-qa"]
+    app.launchEnvironment["ONLYIDEAS_QA_ORIGIN"]="http://127.0.0.1:18649"
+    let tokenURL=URL(fileURLWithPath:NSHomeDirectory()).appendingPathComponent("Documents/onlyideas-qa-token")
+    guard let token=try? String(contentsOf:tokenURL,encoding:.utf8) else {XCTFail("Missing private QA token");return}
+    app.launchEnvironment["ONLYIDEAS_QA_TOKEN"]=token.trimmingCharacters(in:.whitespacesAndNewlines)
+    app.launch()
+    XCTAssertTrue(app.tabBars.buttons["Your space"].waitForExistence(timeout:20));app.tabBars.buttons["Your space"].tap()
+    XCTAssertTrue(app.buttons["Liked"].waitForExistence(timeout:15));app.buttons["Liked"].tap()
+    XCTAssertTrue(app.buttons["Open paper"].firstMatch.waitForExistence(timeout:15));shot("Space16-liked")
+    app.buttons["Inbox"].tap();XCTAssertTrue(app.buttons["Mark all read"].waitForExistence(timeout:10));shot("Space16-inbox")
+    app.buttons["Mark all read"].tap();app.buttons["Activity"].tap();XCTAssertTrue(app.staticTexts["Saved"].firstMatch.waitForExistence(timeout:10));shot("Space16-activity")
+    app.buttons["Interests & notifications"].tap();XCTAssertTrue(app.textFields["Topics you enjoy"].waitForExistence(timeout:10));
+    let field=app.textFields["Topics you enjoy"];field.tap();let old=field.value as? String ?? "";if !old.isEmpty {field.typeText(String(repeating:XCUIKeyboardKey.delete.rawValue,count:old.count))};field.typeText("quantum optics")
+    app.swipeUp();let daily=app.switches["Daily reading reminder"].firstMatch;XCTAssertTrue(daily.waitForExistence(timeout:10));if daily.value as? String == "0" {daily.tap()}
+    XCTAssertTrue(app.buttons["Save preferences"].waitForExistence(timeout:10));app.buttons["Save preferences"].tap()
+    let allow=XCUIApplication(bundleIdentifier:"com.apple.springboard").buttons["Allow"];if allow.waitForExistence(timeout:5){allow.tap()}
+    XCTAssertTrue(app.staticTexts["Preferences saved"].waitForExistence(timeout:10));shot("Space16-preferences")
+    app.buttons["Done"].tap()
+    app.terminate()
+  }
   func testWatchTransfer() {
     continueAfterFailure=false
     let app=XCUIApplication()

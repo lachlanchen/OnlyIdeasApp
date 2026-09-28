@@ -1,3 +1,4 @@
+import {unlimitedAllowance,countsAsRequest} from './allowances.mjs';
 import { randomUUID } from 'node:crypto';
 import { hash, requireValue } from './domain.mjs';
 
@@ -20,8 +21,8 @@ export function requestArtifact(store, config, user, paper, fields) {
     if (!job) job=db.prepare('SELECT j.body FROM artifact_requests r JOIN jobs j ON j.id=r.job WHERE r.paper=? AND r.revision=?').all(paper.id,paper.revision)
       .map(r=>JSON.parse(r.body)).find(j=>j.kind===fields.kind&&j.language===fields.language&&(j.sectionId||'')===(fields.sectionId||'')&&j.visibility===paper.visibility&&(paper.visibility==='public'||j.owner===user.id));
     if(!job) {
-      requireValue(store.jobs(user.id).filter(j=>j.created>Date.now()-86400_000).length < (config.maxJobsPerUserPerDay||20), 'Today’s request allowance is full. Try tomorrow.',429);
-      job={id:randomUUID(),owner:paper.visibility==='public'?paper.owner:user.id,dedupe:key,created:Date.now(),state:previous?'completed':'queued',message:previous?'Ready':'Waiting to start',paperId:paper.id,revision:paper.revision,visibility:paper.visibility,...fields,...(previous?{artifactId:previous.id}:{})};
+      requireValue(unlimitedAllowance(config,user.id) || store.jobs(user.id).filter(j=>j.created>Date.now()-86400_000&&countsAsRequest(j)).length < (config.maxJobsPerUserPerDay||20), 'Today’s request allowance is full. Try tomorrow.',429);
+      job={id:randomUUID(),requestedBy:user.id,owner:paper.visibility==='public'?paper.owner:user.id,dedupe:key,created:Date.now(),state:previous?'completed':'queued',message:previous?'Ready':'Waiting to start',paperId:paper.id,revision:paper.revision,visibility:paper.visibility,...fields,...(previous?{artifactId:previous.id}:{})};
       store.saveJob(job);
     }
     db.prepare('INSERT OR REPLACE INTO artifact_requests VALUES(?,?,?,?)').run(key,paper.id,paper.revision,job.id);

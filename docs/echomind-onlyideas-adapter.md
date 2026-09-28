@@ -101,3 +101,15 @@ search responses; revoked/suspended tokens; account deletion; paragraph versus
 paper comments; comment reporting/blocking; offline figures/equations; 11 locales,
 RTL and dark/light themes. Preserve existing mini-app settings and user-selected
 languages. Coordinate migration before retiring any legacy conversion rows.
+
+## Build 16 reading space extension
+
+`GET /liked` mirrors `/saved`. `GET /activity` returns private `{events}` with
+`id,kind,created,title,ref` and optional job state/paperId. `GET /inbox` returns
+`{notifications,unread}`; `PUT /inbox` accepts `{ids:[notificationId]}` to mark
+visible items read. `GET/PUT /preferences` returns `{preferences}` containing
+`interests,discipline,language,dailyEnabled,dailyTime,timezone,commentAlerts,likeAlerts`.
+`GET /daily` returns cached `{day,papers,language,unavailable,stale}`. Require an
+independently authenticated OnlyIdeas account for all personal endpoints. Never
+cache one user's inbox/favorites for another account. Daily notifications are
+native local reminders; do not advertise remote push from these endpoints.

@@ -1,3 +1,4 @@
+import {unlimitedAllowance} from './allowances.mjs';
 import { randomUUID } from 'node:crypto';
 import { readFile, writeFile, mkdir, rm } from 'node:fs/promises';
 import { join, extname } from 'node:path';
@@ -67,7 +68,7 @@ export async function convertAttachment(job,config,store,{mathpix,provider=provi
     requireValue(!job.ocrSubmittedAt||job.ocrText!==undefined||job.ocrResult,'The image conversion receipt is uncertain. Contact support before retrying to avoid another charge.',409);
     if(job.ocrText===undefined) {
       const count=store.db.prepare("SELECT count(*) AS n FROM jobs WHERE created>? AND json_extract(body,'$.ocrSubmittedAt') IS NOT NULL").get(Date.now()-86400_000).n;
-      requireValue(count<(config.maxImagesPerDay||50),'Today’s image allowance is full. Try tomorrow.',429);
+      requireValue(unlimitedAllowance(config,job.owner) || count<(config.maxImagesPerDay||50),'Today’s image allowance is full. Try tomorrow.',429);
       if(!job.ocrResult) {
         let image=await sharp(bytes,{limitInputPixels:30_000_000}).rotate().flatten({background:'#ffffff'}).resize({width:2000,height:2000,fit:'inside',withoutEnlargement:true}).jpeg({quality:88}).toBuffer();
         if(image.length>1_400_000)image=await sharp(image).resize({width:1600,height:1600,fit:'inside'}).jpeg({quality:65}).toBuffer();

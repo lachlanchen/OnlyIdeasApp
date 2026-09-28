@@ -1,4 +1,5 @@
 import SwiftUI
+import UserNotifications
 import StoreKit
 import AuthenticationServices
 import UniformTypeIdentifiers
@@ -10,6 +11,7 @@ private let accent = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? U
 struct NativeReadingApp: View {
   @StateObject private var store = ReadingStore()
   @State private var tab = 0
+  @State private var spaceSection = "saved"
   init() {}
   #if DEBUG
   init(qaStore: ReadingStore) { _store = StateObject(wrappedValue: qaStore) }
@@ -21,6 +23,7 @@ struct NativeReadingApp: View {
         Text("OnlyIdeas").font(.title.bold()).foregroundStyle(ideaGradient).padding(.bottom, 12)
         Button { tab = 0 } label: { Label(T("Library"), systemImage: "books.vertical").frame(maxWidth: .infinity, alignment: .leading) }.keyboardShortcut("1", modifiers: .command)
         Button { tab = 1 } label: { Label(T("Agent"), systemImage: "bubble.left.and.bubble.right").frame(maxWidth: .infinity, alignment: .leading) }.keyboardShortcut("2", modifiers: .command)
+        Button { tab = 3 } label: { Label(T("Your space"), systemImage: "tray").frame(maxWidth: .infinity, alignment: .leading) }
         Button { tab = 2 } label: { Label(T("Profile"), systemImage: "person.crop.circle").frame(maxWidth: .infinity, alignment: .leading) }.keyboardShortcut("3", modifiers: .command)
         Spacer()
         Button { tab = 2 } label: { Label(T("Settings"), systemImage: "gearshape").frame(maxWidth: .infinity, alignment: .leading) }.keyboardShortcut(",", modifiers: .command)
@@ -32,6 +35,7 @@ struct NativeReadingApp: View {
           .navigationViewStyle(.stack).toolbar(.hidden, for: .tabBar).tag(0)
         NavigationView { NativeAgent() }.navigationViewStyle(.stack)
           .toolbar(.hidden, for: .tabBar).tag(1)
+        NavigationView { NativeReadingSpace(initialSection:spaceSection) }.navigationViewStyle(.stack).toolbar(.hidden, for: .tabBar).tag(3)
         NavigationView { NativeProfile() }.navigationViewStyle(.stack)
           .toolbar(.hidden, for: .tabBar).tag(2)
       }
@@ -45,6 +49,7 @@ struct NativeReadingApp: View {
       NavigationView { NativeAgent() }.navigationViewStyle(.stack).tabItem {
         Label(T("Agent"), systemImage: "bubble.left.and.bubble.right")
       }.tag(1)
+      NavigationView { NativeReadingSpace(initialSection:spaceSection) }.navigationViewStyle(.stack).tabItem {Label(T("Your space"),systemImage:"tray")}.badge(store.inboxUnread).tag(3)
       NavigationView { NativeProfile() }.navigationViewStyle(.stack).tabItem {
         Label(T("Profile"), systemImage: "person.crop.circle")
       }.tag(2)
@@ -61,6 +66,10 @@ struct NativeReadingApp: View {
       if value != nil {tab=2;if store.account==nil {store.showSignIn=true}}
     }
     .task { await store.refresh() }
+    .onChange(of:store.account?.id){id in if id==nil {ReadingReminder.cancel();store.inboxUnread=0}}
+    .onReceive(Timer.publish(every:30,on:.main,in:.common).autoconnect()){_ in guard let id=store.account?.id,UIApplication.shared.applicationState == .active else{return};Task{if let r=try? await store.json("/api/inbox"),store.account?.id==id {store.inboxUnread=r["unread"]as?Int ?? 0}}}
+    .onReceive(NotificationCenter.default.publisher(for:Notification.Name("OnlyIdeas.OpenSpace"))){_ in spaceSection="daily";tab=3;UserDefaults.standard.removeObject(forKey:"onlyideas.open.daily")}
+    .onAppear{if UserDefaults.standard.bool(forKey:"onlyideas.open.daily"){spaceSection="daily";tab=3;UserDefaults.standard.removeObject(forKey:"onlyideas.open.daily")}}
     #if DEBUG
     .onReceive(NotificationCenter.default.publisher(for: Notification.Name("OnlyIdeas.QA.Tab"))) { event in
       if let value = event.object as? Int, (0...2).contains(value) { tab = value }
@@ -484,6 +493,8 @@ struct NativeProfile: View {
         }
       }
       Section(T("Your library")) {
+        NavigationLink(T("Saved, liked & activity")){NativeReadingSpace()}
+        NavigationLink(T("Interests & notifications")){NativeReadingPreferences()}
         Label(
           T("{count} private papers",["count":String(store.papers.filter{$0.visibility=="private"}.count)]),
           systemImage: "lock.doc")
@@ -1235,6 +1246,7 @@ struct ResearchDiscovery: View {
         VStack(alignment:.leading,spacing:8) {
           Text(hit.metadata).font(.caption).foregroundColor(.secondary)
           Button {Task{await choose(hit)}}label:{Text(hit.title).font(.headline).multilineTextAlignment(.leading).foregroundColor(.primary).frame(maxWidth:.infinity,alignment:.leading)}.disabled(importing==hit.id)
+          if let unavailable=hit.fetchUnavailable {Text(T(unavailable)).font(.caption).foregroundColor(.secondary)}
           Text(hit.authors).font(.caption).foregroundColor(.secondary).lineLimit(2)
           if let summary=hit.summary,!summary.isEmpty {Text(summary).font(.subheadline).lineLimit(3)}
           HStack {Text(hit.doi.map{"DOI "+$0} ?? hit.index ?? "").font(.caption2).foregroundColor(.secondary).lineLimit(1);Spacer();if let source=URL(string:hit.source) {Link(T("Source"),destination:source).font(.caption)}}
@@ -1272,6 +1284,7 @@ struct ResearchDiscovery: View {
     }catch{if generation==id && !Task.isCancelled {notice=error.localizedDescription}}
   }
   func choose(_ hit:DiscoveryPaper) async {
+    if let unavailable=hit.fetchUnavailable {store.error=T(unavailable);return}
     if let id=hit.paperId ?? (hit.ref?.hasPrefix("r-")==false ? hit.ref:nil){selected=ResearchPaper(id:id,title:hit.title);showPaper=true;return}
     guard store.account != nil else {await store.signIn();return}
     guard let pdf=hit.pdfUrl,!pdf.isEmpty else {store.error=T("No direct PDF. Open the source or upload your copy.");return}
@@ -1301,4 +1314,123 @@ struct NativePaperActions:View {
  func apply(_ r:[String:Any]){saved=r["saved"]as?Bool ?? false;liked=r["liked"]as?Bool ?? false;likes=r["likes"]as?Int ?? 0;comments=r["commentCount"]as?Int ?? 0;shareURL=(r["shareUrl"]as?String).flatMap(URL.init(string:));isPrivate=r["private"]as?Bool ?? false}
  func load()async {do{apply(try await store.json("/api/items/"+reference))}catch{}}
  func toggle(_ key:String,_ value:Bool)async {guard store.account != nil else{await store.signIn();return};busy=true;defer{busy=false};do{apply(try await store.json("/api/items/"+reference,method:"PUT",body:[key:value]))}catch{store.error=error.localizedDescription}}
+}
+
+struct SpaceEvent:Decodable,Identifiable {
+ var id:String;var kind:String;var created:Double;var ref:String;var title:String
+ var actor:String?;var read:Bool?;var active:Bool?;var message:String?;var state:String?;var paperId:String?
+ var label:String {kind=="comment" ? "New comment":kind=="like" ? "New like":kind=="fetch" ? "Paper request":kind=="saved" ? (active==true ? "Saved":"Removed from Saved"):(active==true ? "Liked":"Removed from Liked")}
+}
+struct ReadingPreferences:Codable {
+ var interests="";var discipline="";var language="en";var dailyEnabled=false;var dailyTime="09:00";var timezone="UTC";var commentAlerts=true;var likeAlerts=true
+}
+struct NativeReadingSpace:View {
+ var initialSection="saved"
+ @EnvironmentObject var store:ReadingStore
+ @State private var tab="saved"
+ @State private var papers:[DiscoveryPaper]=[]
+ @State private var events:[SpaceEvent]=[]
+ @State private var notice=""
+ @State private var busy=false
+ @State private var unread=0
+ @State private var settings=false
+ @State private var selected:ResearchPaper?
+ @State private var showPaper=false
+ @State private var requests=false
+ private let tabs=[("saved","Saved"),("liked","Liked"),("inbox","Inbox"),("activity","Activity"),("daily","For you")]
+ var body:some View {
+  ScrollView {
+   VStack(alignment:.leading,spacing:16) {
+    if store.account == nil {
+     Text(T("Sign in to keep your papers and conversations together."))
+     Button(T("Sign in")){Task{await store.signIn()}}
+    } else {
+     sectionTabs
+     if tab == "inbox" && events.contains(where:{$0.read == false}) {
+      Button(T("Mark all read")){Task{await markRead(events.map(\.id))}}
+     }
+     if busy {ProgressView()}
+     if !notice.isEmpty {
+      Text(T(notice)).foregroundColor(.secondary)
+      Button(T("Try again")){Task{await load()}}
+     }
+     ForEach(papers){p in paperCard(p)}
+     ForEach(events){e in eventCard(e)}
+     if !busy && notice.isEmpty && papers.isEmpty && events.isEmpty {
+      Text(T(tab == "inbox" ? "No new notifications":tab == "activity" ? "Your reading activity will appear here.":"No papers here yet."))
+       .foregroundColor(.secondary).padding(.vertical,32)
+     }
+    }
+   }.padding(16)
+  }
+  .navigationTitle(T("Your space"))
+  .toolbar{Button{settings=true}label:{Image(systemName:"slider.horizontal.3")}.accessibilityLabel(T("Interests & notifications")).disabled(store.account==nil)}
+  .sheet(isPresented:$settings,onDismiss:{Task{await load()}}){NavigationView{NativeReadingPreferences()}.environmentObject(store)}
+  .sheet(isPresented:$requests){NativeRequests().environmentObject(store)}
+  .task(id:tab+(store.account?.id ?? "")){await load()}
+  .onAppear{tab=initialSection}
+  .onChange(of:initialSection){tab=$0}
+  .onReceive(Timer.publish(every:30,on:.main,in:.common).autoconnect()){_ in if tab=="inbox" {Task{await load()}}}
+  .onReceive(NotificationCenter.default.publisher(for:Notification.Name("OnlyIdeas.OpenSpace"))){_ in tab="daily"}
+  .background(NavigationLink(destination:NativePaper(paper:selected ?? ResearchPaper(id:"",title:"")),isActive:$showPaper){EmptyView()}.hidden())
+ }
+ private var sectionTabs:some View {
+  ScrollView(.horizontal,showsIndicators:false) {
+   HStack {
+    ForEach(tabs,id:\.0) { id,name in
+     Button{tab=id}label:{
+      Text(T(name)+(id=="inbox" && unread>0 ? " · \(unread)":""))
+       .padding(.horizontal,14).padding(.vertical,9)
+       .background(tab==id ? accent:Color(.secondarySystemGroupedBackground))
+       .foregroundColor(tab==id ? .white:.primary).clipShape(Capsule())
+     }
+    }
+   }
+  }
+ }
+ private func paperCard(_ p:DiscoveryPaper)->some View {
+  VStack(alignment:.leading,spacing:10) {
+   Text(p.metadata).font(.caption).foregroundColor(.secondary)
+   Button{Task{await choose(p)}}label:{Text(p.title).font(.headline).multilineTextAlignment(.leading).foregroundColor(.primary)}
+   Text(p.authors).font(.caption).foregroundColor(.secondary)
+   Button(T(p.paperId != nil || p.ref?.hasPrefix("r-")==false ? "Open paper":"Fetch & read")){Task{await choose(p)}}
+   NativePaperActions(reference:p.ref ?? "r-"+p.id,title:p.title)
+  }.padding(14).background(Color(.secondarySystemGroupedBackground)).cornerRadius(16)
+ }
+ private func eventCard(_ e:SpaceEvent)->some View {
+  VStack(alignment:.leading,spacing:8) {
+   HStack {
+    Text(T(e.label)).font(.subheadline.bold())
+    if e.read==false {Circle().fill(accent).frame(width:8,height:8)}
+    Spacer()
+    Text(Date(timeIntervalSince1970:e.created/1000),style:.date).font(.caption).foregroundColor(.secondary)
+   }
+   Text(e.title).font(.headline)
+   if let actor=e.actor {Text(actor).font(.caption)}
+   if let message=e.message {Text(T(message)).font(.subheadline).foregroundColor(.secondary)}
+   if !e.ref.isEmpty {Button(T("Open paper")){Task{await openEvent(e)}}}
+   if e.kind=="fetch" && e.paperId==nil {Button(T("Your requests")){requests=true}}
+  }.padding(14).background(Color(.secondarySystemGroupedBackground)).cornerRadius(16)
+ }
+ func load() async {guard store.account != nil else{papers=[];events=[];return};let owner=store.account?.id,section=tab;busy=true;notice="";defer{busy=false};do{let r=try await store.json("/api/"+section);guard store.account?.id==owner,tab==section else{return};papers=try store.decoded([DiscoveryPaper].self,r["papers"] ?? []);events=try store.decoded([SpaceEvent].self,r["events"] ?? r["notifications"] ?? []);if let count=r["unread"]as?Int {unread=count;store.inboxUnread=count}}catch{notice=error.localizedDescription}}
+ func markRead(_ ids:[String])async{do{_ = try await store.json("/api/inbox",method:"PUT",body:["ids":ids]);await load()}catch{notice=error.localizedDescription}}
+ func choose(_ p:DiscoveryPaper)async{if let id=p.paperId ?? (p.ref?.hasPrefix("r-")==false ? p.ref:nil){selected=ResearchPaper(id:id,title:p.title);showPaper=true;return};do{let r=try await store.json("/api/discovery/import",method:"POST",body:["id":p.id,"sharing":"shared"]);if let id=r["paperId"]as?String{selected=ResearchPaper(id:id,title:p.title);showPaper=true}else{requests=true}}catch{notice=error.localizedDescription}}
+ func openEvent(_ e:SpaceEvent)async{if e.read==false {await markRead([e.id])};if e.ref.hasPrefix("r-"){do{let r=try await store.json("/api/discovery/item/"+String(e.ref.dropFirst(2)));papers=[try store.decoded(DiscoveryPaper.self,r["paper"] ?? [:])]}catch{notice=error.localizedDescription}}else{selected=ResearchPaper(id:e.ref,title:e.title);showPaper=true}}
+}
+struct NativeReadingPreferences:View {
+ @EnvironmentObject var store:ReadingStore
+ @Environment(\.dismiss) var dismiss
+ @State private var prefs=ReadingPreferences()
+ @State private var fields:[ResearchDiscipline]=[]
+ @State private var time=Date()
+ @State private var notice=""
+ @State private var ready=false
+ var body:some View {Form {
+  Section(T("Interests")){TextField(T("Topics you enjoy"),text:$prefs.interests);Picker(T("Primary discipline"),selection:$prefs.discipline){Text(T("All disciplines")).tag("");ForEach(fields){Text($0.name).tag($0.id)}};Picker(T("Preferred reading language"),selection:$prefs.language){ForEach(UILanguage.choices,id:\.0){code,name in Text(name).tag(code)}}}
+  Section(T("Inbox")){Toggle(T("Comment notifications"),isOn:$prefs.commentAlerts);Toggle(T("Like notifications"),isOn:$prefs.likeAlerts);Text(T("Activity appears in your inbox when you open the app.")).font(.footnote).foregroundColor(.secondary)}
+  Section(T("Daily reading reminder")){Toggle(T("Daily reading reminder"),isOn:$prefs.dailyEnabled);DatePicker(T("Daily time"),selection:$time,displayedComponents:.hourAndMinute);Text(TimeZone.current.identifier).font(.caption).foregroundColor(.secondary);Text(T("Open For you for papers matching your interests. Reminders do not download or convert papers.")).font(.footnote).foregroundColor(.secondary)}
+  if !notice.isEmpty {Text(T(notice))}
+  Button(T("Save preferences")){Task{await save()}}.disabled(!ready)
+ }.navigationTitle(T("Interests & notifications")).toolbar{Button(T("Done")){dismiss()}}.task{do{let r=try await store.json("/api/preferences");prefs=try store.decoded(ReadingPreferences.self,r["preferences"] ?? [:]);let tax=try await store.json("/api/discovery/taxonomy");fields=try store.decoded([ResearchDiscipline].self,tax["openalex"] ?? []);let parts=prefs.dailyTime.split(separator:":").compactMap{Int($0)};if parts.count==2{time=Calendar.current.date(bySettingHour:parts[0],minute:parts[1],second:0,of:Date()) ?? Date()};ready=true}catch{notice=error.localizedDescription}}}
+ func save()async{do{let c=Calendar.current.dateComponents([.hour,.minute],from:time);prefs.dailyTime=String(format:"%02d:%02d",c.hour ?? 9,c.minute ?? 0);prefs.timezone=TimeZone.current.identifier;let body=try JSONSerialization.jsonObject(with:JSONEncoder().encode(prefs));_ = try await store.json("/api/preferences",method:"PUT",body:body);let enabled=await ReadingReminder.configure(prefs);notice=prefs.dailyEnabled && !enabled ? "Preferences saved. Enable notifications in system settings for reminders.":"Preferences saved"}catch{notice=error.localizedDescription}}
 }

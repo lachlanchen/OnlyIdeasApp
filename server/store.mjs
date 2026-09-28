@@ -1,3 +1,4 @@
+import {initReadingSpace,recordActivity} from './reading-space.mjs';
 import { DatabaseSync } from 'node:sqlite';
 import { mkdirSync } from 'node:fs';
 import { join } from 'node:path';
@@ -31,6 +32,7 @@ export class Store {
       CREATE INDEX IF NOT EXISTS paper_visibility ON papers(visibility,owner);
       CREATE INDEX IF NOT EXISTS job_state ON jobs(state);`);
     initCredits(this);
+    initReadingSpace(this);
     initBilling(this);
     creditTransaction(this, () => initImportReuse(this));
   }
@@ -60,7 +62,7 @@ export class Store {
   }
   createSession(user) { this.requireActive(user.id); const token = randomUUID() + randomUUID(); this.db.prepare('INSERT INTO sessions VALUES(?,?,?)').run(hash(token), JSON.stringify(user), Date.now() + 90 * 86400_000); return token; }
   job(id) { const r = this.db.prepare('SELECT body FROM jobs WHERE id=?').get(id); return r ? JSON.parse(r.body) : null; }
-  saveJob(j) { this.requireActive(j.owner); this.db.prepare('INSERT OR REPLACE INTO jobs VALUES(?,?,?,?,?,?)').run(j.id, j.owner, j.dedupe, j.state, JSON.stringify(j), j.created); return j; }
+  saveJob(j) { this.requireActive(j.owner); const previous=this.job(j.id); this.db.prepare('INSERT OR REPLACE INTO jobs VALUES(?,?,?,?,?,?)').run(j.id, j.owner, j.dedupe, j.state, JSON.stringify(j), j.created); if(['import','attachment'].includes(j.kind)&&!previous)recordActivity(this,j.owner,'fetch',j.id,{},'job:'+j.id); return j; }
   jobs(owner) { return this.db.prepare('SELECT body FROM jobs WHERE owner=? OR id IN (SELECT job FROM job_subscriptions WHERE owner=?) ORDER BY created DESC LIMIT 80').all(owner,owner).map(r => JSON.parse(r.body)); }
   existing(owner, dedupe) { const r = this.db.prepare('SELECT body FROM jobs WHERE owner=? AND dedupe=?').get(owner, dedupe); return r ? JSON.parse(r.body) : null; }
   pending() { return this.db.prepare("SELECT body FROM jobs WHERE state IN ('queued','running') AND owner NOT IN (SELECT id FROM suspensions) AND owner NOT IN (SELECT id FROM deleted_accounts) ORDER BY created LIMIT 1").all().map(r => JSON.parse(r.body))[0]; }

@@ -71,7 +71,7 @@ test('paper agent uses observed metadata and validates direct PDFs before offeri
   const task={text:'Read https://arxiv.org/abs/1706.03762',messages:[]};
   const answer=await respond(task,{},s=>events.push(s),{download:async()=>Buffer.from('%PDF-1.4\nOriginal')});
   assert.equal(answer.papers.length,1);assert.match(events[0],/Downloading/);
-  await assert.rejects(respond(task,{},()=>{},{download:async()=>Buffer.from('<html>login</html>')}),/not a downloadable PDF/);
+  await assert.rejects(respond(task,{},()=>{},{download:async()=>Buffer.from('<html>login</html>')}),/instead of a PDF/);
   const search=await respond({text:'quantum entanglement',messages:[]},{},()=>{},{search:async q=>{assert.equal(q,'quantum entanglement');return papers;}});
   assert.deepEqual(search.papers,papers);
 });

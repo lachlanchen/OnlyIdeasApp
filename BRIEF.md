@@ -148,3 +148,27 @@ Preserve paragraph comments in the reader. Private paper links are not shareable
 public comments retain moderation, report/block and deletion. Provide an EchoMind
 mini-app adapter handoff; forwarding to friends is deferred. Do not enable central
 auth for OnlyIdeas until that dedicated adapter is separately registered/qualified.
+
+## Personal reading space and source recovery · 2026-09-28
+
+Saved and Liked have separate account-synced collections, reachable from a visible
+Your space destination and Profile. Record reading requests, saves, likes and
+comments in private activity history. An inbox tracks unread, moderated comments
+on followed papers and likes on one's own papers; respect blocks, withdrawal and
+account deletion. Preferences include interests, discipline, reading language,
+comment/like inbox notifications and an opt-in daily reading reminder/time zone.
+For you retrieves cached research metadata without downloading or converting it.
+Native daily reminders request OS permission; activity notifications are in-app
+and refresh when the app is open. Remote APNs/FCM activity push is not configured.
+
+Recover blocked or obsolete PDF URLs using only verified open-access locations
+for the same indexed work and its citation PDF metadata. Preserve original source
+provenance and record the actual download URL. Never evade publisher access checks.
+If all sources deny access, explain the repository restriction and offer source /
+upload recovery, without spending Mathpix credits or silently repeating a failed job.
+
+Owner amendment: daily request, agent, OCR/conversion and reading-assistant limits
+are disabled only for server-provisioned owner accounts. Ordinary accounts keep
+their limits. Exact authenticated IDs come from private operator configuration;
+clients cannot grant exemptions. Keep file limits, deduplication, source access
+checks and uncertain-provider-receipt protection.

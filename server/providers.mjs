@@ -1,9 +1,11 @@
+import {unlimitedAllowance,allowanceAccount,conversionAllowance} from './allowances.mjs';
 import { readFile, writeFile, mkdir, rm, rename } from 'node:fs/promises';
 import { join } from 'node:path';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { AppError, requireValue, makePaper, hash, languages } from './domain.mjs';
-import { downloadPublic, providerJSON } from './network.mjs';
+import { providerJSON } from './network.mjs';
+import { downloadPaperPDF } from './paper-download.mjs';
 import { requestSharing } from './sharing.mjs';
 import { unpackMMD } from './archive.mjs';
 import { convertAttachment } from './attachments.mjs';
@@ -35,7 +37,7 @@ export async function mathpix(job, config, store) {
     // An interrupted/ambiguous POST must be reconciled manually, never billed twice.
     requireValue(!job.submittedAt, 'The conversion was submitted, but its receipt is uncertain. Contact support before retrying.', 409);
     if (job.url) {
-      const bytes = await downloadPublic(job.url);
+      const {bytes,url:downloadedFrom} = await downloadPaperPDF(job);job.downloadedFrom=downloadedFrom;
       requireValue(bytes.subarray(0, 5).toString() === '%PDF-', 'This URL did not return a PDF. Try the direct PDF link or upload.');
       await writeFile(pdfFile, bytes, { mode: 0o600 });
       job.sourceDigest = hash(bytes); store.saveJob(job);
@@ -45,8 +47,8 @@ export async function mathpix(job, config, store) {
     const sameFile = reusablePaper(store,job.owner,{sourceDigest:job.sourceDigest},job.id);
     if (sameFile) { await rm(pdfFile,{force:true}); return {paperId:sameFile.id,reused:true}; }
     job.pages = await inspectPDF(pdfFile, config.maxPages || 30);
-    const used = store.db.prepare('SELECT body FROM jobs WHERE created>?').all(Date.now() - 86400_000).map(r => JSON.parse(r.body)).filter(j => j.id !== job.id && j.submittedAt).reduce((n, j) => n + (j.pages || 0), 0);
-    requireValue(used + job.pages <= (config.maxPagesPerDay || 100), 'Today’s shared conversion allowance is full. Try tomorrow.', 429);
+    const allowance=conversionAllowance(store,config,job);
+    requireValue(allowance.unlimited || job.pages<=allowance.remaining, 'Today’s shared conversion allowance is full. Try tomorrow.', 429);
     const form = new FormData();
     form.append('file', new Blob([await readFile(pdfFile)], { type: 'application/pdf' }), 'paper.pdf');
     form.append('options_json', JSON.stringify({ conversion_formats: { 'mmd.zip': true }, improve_mathpix: false }));
@@ -113,8 +115,8 @@ export async function generateArtifact(job, config, store, provider = providerJS
   for(let index=saved.parts.length;index<chunks.length;index++) {
     store.requireActive(job.owner);
     requireValue(store.paper(p.id)?.revision===p.revision,'The paper changed; start a new request.');
-    const daily=store.db.prepare('SELECT body FROM jobs WHERE created>?').all(Date.now()-86400_000).map(r=>JSON.parse(r.body)).filter(j=>j.aiSubmittedAt&&j.id!==job.id);
-    requireValue(daily.length<(config.maxAssistantJobsPerDay||40),'Today’s shared reading-assistant allowance is full. Try tomorrow.',429);
+    const daily=store.db.prepare('SELECT body FROM jobs WHERE created>?').all(Date.now()-86400_000).map(r=>JSON.parse(r.body)).filter(j=>j.aiSubmittedAt&&j.id!==job.id&&!unlimitedAllowance(config,allowanceAccount(j)));
+    requireValue(unlimitedAllowance(config,allowanceAccount(job)) || daily.length<(config.maxAssistantJobsPerDay||40),'Today’s shared reading-assistant allowance is full. Try tomorrow.',429);
     job.aiSubmittedAt=Date.now();job.message=translation?`Translating ${index+1}/${chunks.length}`:'Creating a reading guide';store.saveJob(job);
     const task=translation
       ? `Translate the supplied research prose into ${languages[job.language]}. Preserve every marker like ${protectedSource.example} exactly once, in its original order. Those markers contain equations, figures and source references. Preserve heading levels, table structure and Markdown. Do not add findings or omit paragraphs. Return only translated Markdown.`
@@ -203,7 +205,7 @@ export function startWorker(store, config) {
       Object.assign(job, result, { state: 'completed', message: 'Ready', finishedAt: Date.now() });
     } catch (error) {
       job.state = 'failed'; job.message = error instanceof AppError ? error.message : 'Connection failed. Your request is saved; try again when the service returns.';
-      job.finishedAt = Date.now();
+      job.errorCode = error.code || null;job.finishedAt = Date.now();
     } finally {
       clearInterval(heartbeat);
       try {

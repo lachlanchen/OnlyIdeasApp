@@ -2,6 +2,7 @@ import { readFileSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
+import {downloadPaperPDF} from '../server/paper-download.mjs';
 import { downloadPublic, providerJSON } from '../server/network.mjs';
 import { requireValue, languages } from '../server/domain.mjs';
 
@@ -42,7 +43,7 @@ export async function respond(task, config, update, deps = {}) {
   const linked=directPaper(task.text);
   if(linked) {
     await update('Downloading and checking the PDF');
-    const pdf=await download(linked.pdfUrl);
+    const {bytes:pdf}=await downloadPaperPDF({url:linked.pdfUrl,sourcePage:linked.source},{download});
     requireValue(pdf.subarray(0,5).toString()==='%PDF-','That link is not a downloadable PDF. Send its direct PDF or arXiv link, or use Upload PDF.');
     return {text:'I found a readable PDF. Choose Convert & add to keep the flowing text, equations and figures. Shared papers enter the reading room after source and community review; choose Only me for a private copy.',papers:[linked]};
   }

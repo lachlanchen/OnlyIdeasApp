@@ -1,3 +1,4 @@
+import {recordActivity} from './reading-space.mjs';
 import { randomUUID } from 'node:crypto';
 import { hash,requireValue,publicPaper } from './domain.mjs';
 import { sourceKey,canReusePaper } from './import-reuse.mjs';
@@ -25,12 +26,12 @@ export function createPaperSocial(store,discovery) {
  const comments=visibleComments(store,key,user);
  return {ref,...rest,saved:!!own?.saved,liked:!!own?.liked,likes,commentCount:comments.length,shareUrl:card.visibility==='private'?null:`https://agent.onlyideas.art/?${ref.startsWith('r-')?'research':'paper'}=${encodeURIComponent(ref.startsWith('r-')?ref.slice(2):ref)}`};
  }
- return {check,state,
-  saved(user){return db.prepare('SELECT ref FROM paper_reactions WHERE owner=? AND saved=1 ORDER BY updated DESC LIMIT 500').all(user.id).flatMap(({ref})=>{try{return [{ref,...resolve(ref,user).card}]}catch{return []}})},
-  update(ref,user,body){const {key}=resolve(ref,user);const old=db.prepare('SELECT saved,liked FROM paper_reactions WHERE item=? AND owner=?').get(key,user.id)||{saved:0,liked:0};requireValue(['saved','liked'].some(k=>typeof body[k]==='boolean'),'Choose Save or Like.');requireValue(db.prepare('SELECT count(*) AS n FROM paper_reactions WHERE owner=?').get(user.id).n<1000||db.prepare('SELECT 1 FROM paper_reactions WHERE item=? AND owner=?').get(key,user.id),'Your saved reading list is full.');db.prepare('INSERT OR REPLACE INTO paper_reactions VALUES(?,?,?,?,?,?)').run(key,user.id,ref,typeof body.saved==='boolean'?+body.saved:old.saved,typeof body.liked==='boolean'?+body.liked:old.liked,Date.now());return state(ref,user)},
+ return {check,state,resolve,
+  saved(user,kind='saved'){const column=kind==='liked'?'liked':'saved';return db.prepare(`SELECT ref FROM paper_reactions WHERE owner=? AND ${column}=1 ORDER BY updated DESC LIMIT 500`).all(user.id).flatMap(({ref})=>{try{return [{ref,...resolve(ref,user).card}]}catch{return []}})},
+  update(ref,user,body){const {key}=resolve(ref,user);const old=db.prepare('SELECT saved,liked FROM paper_reactions WHERE item=? AND owner=?').get(key,user.id)||{saved:0,liked:0};requireValue(['saved','liked'].some(k=>typeof body[k]==='boolean'),'Choose Save or Like.');requireValue(db.prepare('SELECT count(*) AS n FROM paper_reactions WHERE owner=?').get(user.id).n<1000||db.prepare('SELECT 1 FROM paper_reactions WHERE item=? AND owner=?').get(key,user.id),'Your saved reading list is full.');db.prepare('INSERT OR REPLACE INTO paper_reactions VALUES(?,?,?,?,?,?)').run(key,user.id,ref,typeof body.saved==='boolean'?+body.saved:old.saved,typeof body.liked==='boolean'?+body.liked:old.liked,Date.now());for(const k of ['saved','liked'])if(typeof body[k]==='boolean'&&+body[k]!==old[k])recordActivity(store,user.id,k,ref,{active:body[k]});return state(ref,user)},
   comments(ref,user){return {comments:visibleComments(store,resolve(ref,user).key,user)}},
   post(ref,user,body){const item=resolve(ref,user);if(!item.private)acceptTerms(store,user,body.acceptTerms);requireValue(typeof body.text==='string'&&body.text.trim()&&body.text.length<=5000,'Write a comment of up to 5,000 characters.');requireValue(/^[a-f0-9-]{36}$/.test(body.id||''),'A comment ID is required.');const old=db.prepare('SELECT * FROM comments WHERE id=?').get(body.id);if(old){requireValue(old.owner===user.id&&old.paper===item.key,'Comment ID unavailable.',409);return {ok:true}}
-   const c={id:body.id||randomUUID(),paperId:item.key,owner:user.id,author:user.name,visibility:item.private?'private':'pending',moderation:item.private?'private':'pending',text:body.text.trim(),quote:'',sectionId:null,paragraphId:null,createdAt:new Date().toISOString()};db.prepare('INSERT INTO comments VALUES(?,?,?,?,?)').run(c.id,item.key,user.id,JSON.stringify(c),Date.now());return {ok:true};
+   const c={id:body.id||randomUUID(),paperId:item.key,owner:user.id,author:user.name,visibility:item.private?'private':'pending',moderation:item.private?'private':'pending',text:body.text.trim(),quote:'',sectionId:null,paragraphId:null,createdAt:new Date().toISOString()};db.prepare('INSERT INTO comments VALUES(?,?,?,?,?)').run(c.id,item.key,user.id,JSON.stringify(c),Date.now());recordActivity(store,user.id,'comment',ref,{},'comment:'+c.id);return {ok:true};
   }
  };
 }
