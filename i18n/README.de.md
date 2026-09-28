@@ -16,6 +16,11 @@ Ein konfigurierbares, kostengünstiges Modell erstellt auf Anfrage Lesehilfen un
 
 ![OnlyIdeas reading room](../evidence/library-desktop.png)
 
+<!-- agent19 -->
+1.0.2 (19): Der Agent kann Artikel finden, herunterladen, transkribieren, zusammenfassen, übersetzen und speichern. Ungefähre Titel und DOIs werden mit ergänzender Suche in öffentlichen Quellen und PDF-Abgleich unterstützt. Gespeicherte Ergebnisse lassen sich im Chat öffnen. Interessen sind im persönlichen Bereich änderbar; Android Zurück führt zum Gespräch.
+
+[1.0.2 (19)](../docs/release-candidate-19.md)
+
 <!-- recovery17 -->
 Version 1.0.2 (17) ergänzt getrennte Listen für gespeicherte und mit Gefällt mir markierte Artikel, Aktivitäten, Posteingang und Lesevorlieben. Bei blockierten Downloads lässt sich die eigene PDF direkt auf der Artikelkarte oder beim fehlgeschlagenen Auftrag hochladen. Übersetzungen ganzer Artikel, Absätze oder Sätze verwenden gespeicherte Teile erneut und erhalten Formeln und Abbildungen. Teilen bleibt die Vorgabe: bestätigte unterstützte offene Lizenzen erlauben automatische Veröffentlichung, andere Artikel warten auf Prüfung. Tägliche Geräteerinnerungen sind optional; Aktivitätshinweise werden derzeit innerhalb der App aktualisiert.
 

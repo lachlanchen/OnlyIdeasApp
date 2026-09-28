@@ -16,6 +16,11 @@ Mô hình tiết kiệm có thể cấu hình sẽ tạo hướng dẫn đọc v
 
 ![OnlyIdeas reading room](../evidence/library-desktop.png)
 
+<!-- agent19 -->
+1.0.2 (19): Nhờ trợ lý tìm, tải xuống, chuyển thành văn bản, tóm tắt, dịch hoặc lưu bài báo. Tìm bằng tiêu đề gần đúng và DOI, bổ sung nguồn công khai và kiểm tra PDF có khớp bài báo. Mở lại kết quả trong cuộc trò chuyện; chỉnh sở thích nghiên cứu trong Không gian của bạn. Nút Quay lại trên Android trở về cuộc trò chuyện.
+
+[1.0.2 (19)](../docs/release-candidate-19.md)
+
 <!-- recovery17 -->
 Phiên bản 1.0.2 (17) thêm danh sách đã lưu và đã thích riêng biệt, lịch sử hoạt động, hộp thư và tùy chọn đọc. Khi tải xuống bị chặn, bạn có thể tải PDF của mình lên ngay từ thẻ bài báo hoặc yêu cầu thất bại. Dịch toàn bài, đoạn văn hoặc câu, tái sử dụng phần đã dịch và giữ nguyên công thức, hình ảnh. Chia sẻ vẫn là mặc định: bài có giấy phép mở được hỗ trợ và đã xác minh có thể tự động công bố; bài khác hiển thị đang chờ duyệt. Nhắc đọc hằng ngày trên thiết bị là tùy chọn; thông báo hoạt động hiện được cập nhật trong ứng dụng.
 

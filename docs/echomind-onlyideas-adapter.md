@@ -135,3 +135,18 @@ publication after conversion; other requests show awaiting review. Public papers
 have one shared transcript, reusable translations and moderated discussions across
 accounts. Only me papers, private notes and agent conversations remain private.
 See [recovery and translation contract](paper-recovery-and-translation.md).
+
+## Build 19 research agent extension
+
+New clients may send `agentActions: true` and explicit `sharing` with a chat
+message. Read each response's `actions` list for durable progress, `paperId`,
+`artifactId`, `jobId` and contextual recovery. Only open results authorized for
+the signed-in account; server references are authoritative. Limit plans to three
+observed-paper actions and retain the private-import credit confirmation.
+Contextual PDF uploads may return 409 `pdf_match_uncertain` with a file-bound
+confirmation; present it to the reader before resubmitting with
+`X-Paper-Match-Confirm`. `pdf_match_mismatch` requires a different file or separate
+import. Do not confirm automatically. Central auth remains disabled.
+
+Next requested change: integrated original/translated/interlaced reading with
+shared paragraph alignment. Wait for that contract before adapting translation UI.

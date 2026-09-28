@@ -1,6 +1,7 @@
 import {randomUUID} from 'node:crypto';
 import {requireValue,hash,languages} from './domain.mjs';
 import {taxonomy} from './research-indexes.mjs';
+import {defaultInterests} from './research-focus.mjs';
 export function initReadingSpace(store){store.db.exec(`
  CREATE TABLE IF NOT EXISTS reading_preferences(owner TEXT PRIMARY KEY,body TEXT NOT NULL);
  CREATE TABLE IF NOT EXISTS reading_activity(id TEXT PRIMARY KEY,owner TEXT NOT NULL,kind TEXT NOT NULL,ref TEXT NOT NULL,body TEXT NOT NULL,created INTEGER NOT NULL);
@@ -14,7 +15,7 @@ export function recordActivity(store,owner,kind,ref,body={},id=randomUUID()){
 }
 export function createReadingSpace(store,social,discovery){
  initReadingSpace(store);const db=store.db,pending=new Map();
- const defaults={interests:'',discipline:'',language:'en',dailyEnabled:false,dailyTime:'09:00',timezone:'UTC',commentAlerts:true,likeAlerts:true};
+ const defaults={interests:defaultInterests,discipline:'',language:'en',dailyEnabled:false,dailyTime:'09:00',timezone:'UTC',commentAlerts:true,likeAlerts:true};
  function preferences(user){return {...defaults,...JSON.parse(db.prepare('SELECT body FROM reading_preferences WHERE owner=?').get(user.id)?.body||'{}')}}
  function savePreferences(user,b){const old=preferences(user),p={...old};
   for(const k of ['dailyEnabled','commentAlerts','likeAlerts']){if(k in b){requireValue(typeof b[k]==='boolean','Choose a valid notification setting.');p[k]=b[k]}}
@@ -52,7 +53,7 @@ export function createReadingSpace(store,social,discovery){
   const row=db.prepare('SELECT body FROM reading_digests WHERE owner=? AND day=? AND revision=?').get(user.id,day,revision);
   const current=body=>({...body,papers:body.papers.map(p=>discovery.identify(p,user))});
   if(row)return {day,...current(JSON.parse(row.body)),language:p.language};
-  if(!pending.has(key))pending.set(key,(async()=>{const result=await discovery.find({q:p.interests,discipline:p.discipline,source:'openalex',sort:'latest'},user);const body={papers:result.papers.slice(0,8).map(({paperId,...v})=>v),unavailable:result.unavailable||[],stale:!!result.stale};store.requireActive(user.id);db.prepare('INSERT OR REPLACE INTO reading_digests VALUES(?,?,?,?)').run(user.id,day,revision,JSON.stringify(body));db.prepare('DELETE FROM reading_digests WHERE owner=? AND day<?').run(user.id,new Date(Date.now()-30*86400_000).toISOString().slice(0,10));return body})().finally(()=>pending.delete(key)));
+  if(!pending.has(key))pending.set(key,(async()=>{const result=await discovery.find({q:p.discipline?p.interests:'',discipline:p.discipline,source:'all',sort:'latest'},user);const body={papers:result.papers.slice(0,8).map(({paperId,...v})=>v),unavailable:result.unavailable||[],stale:!!result.stale};store.requireActive(user.id);db.prepare('INSERT OR REPLACE INTO reading_digests VALUES(?,?,?,?)').run(user.id,day,revision,JSON.stringify(body));db.prepare('DELETE FROM reading_digests WHERE owner=? AND day<?').run(user.id,new Date(Date.now()-30*86400_000).toISOString().slice(0,10));return body})().finally(()=>pending.delete(key)));
   return {day,...current(await pending.get(key)),language:p.language};
  }
  return {preferences,savePreferences,history,inbox,digest,markRead(user,body){requireValue(Array.isArray(body.ids)&&body.ids.length<=200,'Select notifications to mark read.');const visible=new Set(inbox(user).notifications.map(n=>n.id));for(const id of body.ids)if(visible.has(id))db.prepare('INSERT OR IGNORE INTO inbox_reads VALUES(?,?)').run(user.id,id);return inbox(user)}};

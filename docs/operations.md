@@ -81,3 +81,21 @@ credentials, paper payloads or the application database into the Pages branch.
 - [Scientific renderer](https://github.com/Mathpix/mathpix-markdown-it)
 - [GitHub repository size guidance](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-large-files-on-github)
 - [DeepSeek API](https://api-docs.deepseek.com/)
+
+## Bounded research fallback
+
+The workstation paper worker optionally accepts a private `codex` configuration:
+`enabled`, absolute `executable` and `stateDir`, `quotaCommand`, `maxDaily`,
+`timeoutMs`, and the operator-selected `model`/`reasoningEffort`. Keep the existing
+model choice unless the owner changes it. Gate every fresh Codex launch on the
+quota probe; never retry quota/auth failures in a loop. The worker keeps a daily
+public-query cache and independently resolves returned DOI metadata. It runs an
+ephemeral read-only request with shell, app, plugin and multi-agent tools disabled.
+Allow bounded child processes in the worker's service unit and use an explicit
+Node PATH. No Codex access is exposed to the public API. Keep its state and raw
+research-event logs private, outside Git.
+
+Chat actions require the client's `agentActions: true` and explicit sharing mode.
+Up to three observed-paper actions are persisted. An action never accepts a model
+invented reference. Import/artifact idempotency survives worker/server restarts.
+The paper-read worker endpoint is bound to its active task, lease and owner.

@@ -1,0 +1,48 @@
+{
+  "version": "1.0.2",
+  "build": 19,
+  "backendTests": 93,
+  "webBuild": "passed",
+  "renderer": "passed",
+  "androidReleaseLint": "passed",
+  "iosSavedResultUI": "passed; isolated fixture",
+  "realWorkflow": {
+    "title": "Self-calibrated neuromorphic hyperspectral derivative imaging",
+    "doi": "10.1364/OPTICA.585766",
+    "pages": 4,
+    "figures": 4,
+    "transcriptCharacters": 18414,
+    "pdfIdentity": "matched title and author",
+    "digest": "completed and opened on Android",
+    "sentenceTranslation": "Chinese, completed and opened on Android",
+    "save": "completed",
+    "publication": "Shared, awaiting source permission review"
+  },
+  "serverRelease": "6057ff8991016e935061d8497fd27d1922ac5a642d59a8f3f60a24a0e2c195e9",
+  "workerRelease": "4fa2b41abe2935b02dfc24e55da64d1516dd252100e7a851b68f4de1559388a4",
+  "androidAabSha256": "b2990736ddf29dfbbe7da5ebf0d3c04de38a8a72f4e5edd1eee9b8bb0cefb950",
+  "appleArtifactHashes": [
+    "6c16ebeae0233f0e8ff42cb5157d538b4a4a27790bf5a00f90fabb646d552dbc  release/export-1.0.2-19/App.ipa",
+    "767bd3147f2ec2710f920dd446db8720d241269493bac990e40cd7c898d917ec  release/macos-export-1.0.2-19/OnlyIdeas.pkg"
+  ],
+  "testflight": [
+    {
+      "platform": "IOS",
+      "id": "4086b1ae-f087-406c-abeb-5bbcd3689551",
+      "version": "1.0.2",
+      "build": "19",
+      "processing": "VALID",
+      "internal": "IN_BETA_TESTING"
+    },
+    {
+      "platform": "MAC_OS",
+      "id": "b38d32ad-4e4e-4e13-a92f-e3888883a344",
+      "version": "1.0.2",
+      "build": "19",
+      "processing": "VALID",
+      "internal": "IN_BETA_TESTING"
+    }
+  ],
+  "googleInternal": "19 available to internal testers; observed 2026-09-28 11:59 Hong Kong",
+  "production": "Not submitted: owner requested integrated bilingual reading and Shaohua Ma interests before next production build. Apple 15 canceled, 19 assigned and prepared. Google 15 still pending; data safety update saved for next review."
+}

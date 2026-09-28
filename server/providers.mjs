@@ -1,3 +1,5 @@
+import {transcriptTitle} from './paper-metadata.mjs';
+import {inspectPaperIdentity} from './pdf-identity.mjs';
 import {verifySourceLicense} from './source-license.mjs';
 import {unlimitedAllowance,allowanceAccount,conversionAllowance} from './allowances.mjs';
 import { readFile, writeFile, mkdir, rm, rename } from 'node:fs/promises';
@@ -53,6 +55,7 @@ export async function mathpix(job, config, store) {
     const sameFile = reusablePaper(store,job.owner,{sourceDigest:job.sourceDigest},job.id);
     if (sameFile) { await rm(pdfFile,{force:true}); return {paperId:sameFile.id,reused:true}; }
     job.pages = await inspectPDF(pdfFile, config.maxPages || 30);
+    if(job.url&&job.metadata?.doi&&!job.paperIdentity){job.paperIdentity=await inspectPaperIdentity(pdfFile,job.metadata);requireValue(job.paperIdentity.state!=='mismatch','The downloaded PDF does not match this paper’s title. Open the source or upload the correct PDF.',409);store.saveJob(job);}
     const allowance=conversionAllowance(store,config,job);
     requireValue(allowance.unlimited || job.pages<=allowance.remaining, 'Today’s shared conversion allowance is full. Try tomorrow.', 429);
     const form = new FormData();
@@ -94,8 +97,8 @@ export async function mathpix(job, config, store) {
     store.requireActive(job.owner);
     await writeFile(target, asset.data, { mode: 0o600 });
   }
-  const paper = makePaper({ ...job.metadata, id: paperId, mmd, owner: job.owner, source: job.url || job.metadata.source || '', assets: assets.map(({ path, bytes }) => ({ path, bytes })) });
-  if (job.uploadSource) { paper.source=job.uploadSource; paper.provenance={source:job.uploadSource,userSupplied:true,retrieval:'user-upload'}; }
+  const paper = makePaper({ ...job.metadata, title:transcriptTitle(job.metadata.title,mmd), id: paperId, mmd, owner: job.owner, source: job.url || job.metadata.source || '', assets: assets.map(({ path, bytes }) => ({ path, bytes })) });
+  if (job.uploadSource) { paper.source=job.uploadSource; paper.provenance={source:job.uploadSource,userSupplied:true,retrieval:'user-upload',identity:job.paperIdentity}; }
   if(job.sourceLicense&&!job.uploadSource){paper.license=job.sourceLicense.license;paper.provenance=job.sourceLicense;}
   store.savePaper(paper);
   requestSharing(store, paper, job.sharing);

@@ -195,3 +195,38 @@ pieces keyed by paper revision, language and visibility, and assemble larger
 requests from those pieces. Equations and figures stay unchanged; if the model
 alters preservation markers, translate only intervening prose. Private translation
 caches remain private after a paper is shared.
+
+## Agent reliability and broad discovery · 2026-09-28
+
+The owner reported a 503 in agent search and requested searching both the local
+library and online papers, whether or not PDFs/transcripts already exist. The
+worker must use the deployed shared metadata service and reusable library cards.
+Keyword searches include metadata for papers without open PDFs; the latest feed
+remains open-access research. Existing accessible transcripts open immediately.
+Other cards offer bounded source resolution and contextual PDF upload. Metadata
+presence does not grant access or redistribution rights. Private libraries remain
+isolated. Model-planning failures must not disable research search, and temporary
+index failures should retain clearly labeled cached/library results. Verify a real
+native chat, search, download, conversion/reuse and library-opening flow before
+promoting the successor build to production review.
+
+## Research requests and focused recommendations · 2026-09-28
+
+A single search or chat request can find a paper, import its accessible PDF, then
+summarize, translate, save or like it. Persist bounded action steps and their
+results in the conversation. Reuse stored transcripts and artifacts. A new DOI
+or link must not silently target a previous paper. Private imports retain the
+explicit credit confirmation. Contextual PDF uploads check the title/DOI before
+conversion; unreadable or uncertain matches require the reader's confirmation.
+
+Use economical metadata indexes first, including Crossref when other indexes
+are unavailable. The owner authorizes a bounded local Codex web-search fallback
+for public bibliographic queries and missing PDF locations. Verify citations
+against a research index and verify downloaded PDFs before conversion. Never
+pass private documents, credentials or full conversations to this fallback.
+
+Default recommendations reflect the owner's published research interests:
+neuromorphic imaging, event cameras, hyperspectral imaging, biomedical imaging,
+organoids and computational optics. Include relevant work by all researchers.
+Readers can replace these defaults with their own interests; keep advanced
+filters collapsed and provide full online search from the same search field.

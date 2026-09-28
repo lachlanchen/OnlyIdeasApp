@@ -16,6 +16,11 @@ Un modelo económico configurable crea guías de lectura y traducciones cuando s
 
 ![OnlyIdeas reading room](../evidence/library-desktop.png)
 
+<!-- agent19 -->
+1.0.2 (19): Pide al agente que encuentre, descargue, transcriba, resuma, traduzca o guarde un artículo. Busca por títulos aproximados y DOI, con búsqueda adicional en fuentes públicas y verificación del PDF. Reabre los resultados desde el chat y ajusta tus intereses en Tu espacio. Atrás en Android vuelve a la conversación.
+
+[1.0.2 (19)](../docs/release-candidate-19.md)
+
 <!-- recovery17 -->
 La versión 1.0.2 (17) añade listas separadas de guardados y favoritos, actividad, bandeja de entrada y preferencias de lectura. Si una descarga se bloquea, sube tu PDF desde la ficha o la solicitud fallida. Traduce el artículo completo, un párrafo o una frase reutilizando traducciones guardadas y conservando ecuaciones y figuras. Compartir sigue siendo la opción predeterminada: las licencias abiertas compatibles verificadas permiten publicar automáticamente; los demás artículos quedan pendientes de revisión. Los recordatorios diarios del dispositivo son opcionales; las alertas de actividad se actualizan dentro de la aplicación.
 

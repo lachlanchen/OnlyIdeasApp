@@ -7,7 +7,7 @@ import {randomUUID} from 'node:crypto';
 import {Store} from '../server/store.mjs';
 import {createApp} from '../server/app.mjs';
 import {createDiscovery} from '../server/discovery.mjs';
-import {makePaper} from '../server/domain.mjs';
+import {makePaper,hash} from '../server/domain.mjs';
 import {completeRecovery} from '../server/import-recovery.mjs';
 import {reusablePaper} from '../server/import-reuse.mjs';
 import {downloadPaperPDF,citationPDFs} from '../server/paper-download.mjs';
@@ -19,9 +19,12 @@ test('contextual PDF recovery keeps source metadata, isolates accounts and dedup
  const card={id:'indexed-paper',title:'An actual indexed title',authors:'Researcher',source:'https://journal.org/article',pdfUrl:'https://journal.org/a.pdf',year:'2025'};
  store.db.prepare('INSERT INTO discovery_items VALUES(?,?,?)').run(card.id,JSON.stringify(card),Date.now());
  const failed={id:randomUUID(),owner:owner.id,kind:'import',dedupe:'old',state:'failed',message:'HTTP 403',errorCode:'source_access_denied',url:card.pdfUrl,sourcePage:card.source,discoveryId:card.id,sharing:'shared',metadata:card,created:Date.now()};store.saveJob(failed);
- const upload=async(headers={},as=token)=>{const r=await fetch(base+'/api/import',{method:'POST',headers:{Origin:origin,Cookie:'onlyideas-local='+as,'Content-Type':'application/pdf','X-Request-Id':randomUUID(),'X-Paper-Sharing':'shared',...headers},body:Buffer.from('%PDF- fixture bytes')});return {status:r.status,...await r.json()}};
+ const upload=async(headers={},as=token)=>{const r=await fetch(base+'/api/import',{method:'POST',headers:{Origin:origin,Cookie:'onlyideas-local='+as,'Content-Type':'application/pdf','X-Request-Id':randomUUID(),'X-Paper-Sharing':'shared','X-Paper-Match-Confirm':hash(Buffer.from('%PDF- fixture bytes')),...headers},body:Buffer.from('%PDF- fixture bytes')});return {status:r.status,...await r.json()}};
  try{
   assert.equal((await upload({'X-Recovery-Job-Id':failed.id},otherToken)).status,404);
+  const uncertain=await upload({'X-Research-Id':card.id,'X-Paper-Match-Confirm':''});
+  assert.equal(uncertain.status,409);assert.equal(uncertain.code,'pdf_match_uncertain');assert.equal(store.jobs(owner.id).length,1);
+  assert.equal((await upload({'X-Research-Id':card.id,'X-Paper-Match-Confirm':'a-different-file'})).status,409);
   const results=await Promise.all([upload({'X-Research-Id':card.id}),upload({'X-Recovery-Job-Id':failed.id})]);
   assert.equal(results[0].status,202);assert.equal(results[1].status,202);assert.equal(results[0].job.id,results[1].job.id);
   const job=store.job(results[0].job.id);assert.equal(job.metadata.title,card.title);assert.equal(job.metadata.year,'2025');assert.equal(job.uploadSource,card.source);assert.equal(job.url,null);

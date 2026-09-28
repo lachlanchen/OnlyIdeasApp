@@ -6,11 +6,11 @@ export type Paper = { sharing?:string;provenance?:{licenseUrl?:string;changes?:s
 export type Comment = { id: string; author: string; login: string; text: string; quote: string; sectionId: string | null; paragraphId?:string; createdAt: string; canDelete: boolean; pending?: boolean }
 export type Job = { title?:string;source?:string;canUpload?:boolean;sharing?:string; id: string; kind: string; state: string; message: string; created: number; paperId?: string; artifactId?: string; creditCost?:number }
 export type Artifact = { segmentId?:string; id: string; kind: string; language: string; text: string; model: string; sectionId?: string }
-export class APIError extends Error { constructor(message: string, public status: number) { super(message) } }
+export class APIError extends Error { constructor(message: string, public status: number,public details:Record<string,unknown>={}) { super(message) } }
 export async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
   const res = await request(`/api${path}`, options)
   const data = await res.json().catch(() => ({ error: 'Connection interrupted. Please try again.' }))
-  if (!res.ok) throw new APIError(data.error || 'Could not complete this request.', res.status)
+  if (!res.ok) throw new APIError(data.error || 'Could not complete this request.', res.status,data)
   return data
 }
 export const post = <T,>(path: string, body: unknown) => api<T>(path, { method: 'POST', body: JSON.stringify(body) })

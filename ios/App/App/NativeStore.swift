@@ -63,6 +63,9 @@ struct Conversation: Codable, Identifiable {
   var title: String
 }
 struct FoundPaper: Codable, Identifiable {
+  var paperId:String?
+  var source:String?
+  var pdfUrl:String?
   var id: String
   var title: String
   var authors: String
@@ -82,7 +85,9 @@ struct AgentMessage: Codable, Identifiable {
   var attachments:[AgentAttachment]?
   var papers: [FoundPaper]?
   var jobId: String?
+  var actions:[AgentAction]?
 }
+struct AgentAction:Codable,Identifiable {var id:String;var kind:String;var state:String;var message:String;var title:String?;var jobId:String?;var paperId:String?;var artifactId:String?;var canUpload:Bool?;var sharing:String?}
 struct ReaderDocument: Codable {
   var paper: ResearchPaper
   var figures: [String: String]
@@ -153,6 +158,9 @@ final class ReadingStore: NSObject, ObservableObject,
   private var purchaseIntents:Task<Void,Never>?
   @Published var requestedPlanID:String?
   @Published var creditPrompt:String?
+  @Published var matchPrompt:String?
+  private var matchDecision:CheckedContinuation<Bool,Never>?
+  func resolveMatch(_ allowed:Bool){let pending=matchDecision;matchDecision=nil;matchPrompt=nil;pending?.resume(returning:allowed)}
   private var creditDecision:CheckedContinuation<Bool,Never>?
   var reportContext = ""
   private var appleFlow: (id: String, verifier: String)?
@@ -302,7 +310,7 @@ final class ReadingStore: NSObject, ObservableObject,
     guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
       let value = (try? JSONSerialization.jsonObject(with: bytes)) as? [String: Any]
       throw NSError(domain: "OnlyIdeasHTTP", code: (response as? HTTPURLResponse)?.statusCode ?? 0,
-        userInfo: [NSLocalizedDescriptionKey: value?["error"] as? String ?? "Connection interrupted. Please try again."])
+        userInfo: [NSLocalizedDescriptionKey: value?["error"] as? String ?? "Connection interrupted. Please try again.","response":value ?? [:]])
     }
     return bytes
   }
@@ -638,12 +646,23 @@ final class ReadingStore: NSObject, ObservableObject,
       var contextHeaders:[String:String]=[:]
       if let id=researchId {contextHeaders["X-Research-Id"]=id}
       if let id=recoveryJobId {contextHeaders["X-Recovery-Job-Id"]=id}
-      _ = try await request(
-        "/api/import", method: "POST", data: bytes,
-        headers: [
+      let importHeaders = [
           "Content-Type": "application/pdf", "X-Request-Id": UUID().uuidString.lowercased(),
           "X-Paper-Title": title, "X-Paper-Language": "en", "X-Paper-Sharing": shared ? "shared" : "private", "X-Credit-Limit":String(limit),
-        ].merging(contextHeaders){_,new in new})
+        ].merging(contextHeaders){_,new in new}
+      do {_ = try await request(
+        "/api/import", method: "POST", data: bytes,
+        headers: importHeaders)
+      } catch {
+        let response=(error as NSError).userInfo["response"] as? [String:Any] ?? [:]
+        guard response["code"] as? String == "pdf_match_uncertain",let confirmation=response["confirmation"] as? String else {throw error}
+        let identity=token
+        let allowed=await withCheckedContinuation { (continuation:CheckedContinuation<Bool,Never>) in
+          matchDecision=continuation;matchPrompt=T(error.localizedDescription)+"\n\n"+(response["expectedTitle"] as? String ?? "")
+        }
+        guard allowed,identity==token else{return}
+        _ = try await request("/api/import",method:"POST",data:bytes,headers:importHeaders.merging(["X-Paper-Match-Confirm":confirmation]){_,new in new})
+      }
       await loadJobs()
     } catch { self.error = error.localizedDescription }
   }
@@ -739,7 +758,7 @@ final class ReadingStore: NSObject, ObservableObject,
         conversationID = (r["chat"] as? [String: Any])?["id"] as? String
       }
       guard let id = conversationID else { throw failure(T("Could not start the conversation.")) }
-      _ = try await json("/api/chats/\(id)/messages", method: "POST", body: ["text": text, "attachments":draftAttachments.map(\.id), "language":UILanguage.current])
+      _ = try await json("/api/chats/\(id)/messages", method: "POST", body: ["text": text, "attachments":draftAttachments.map(\.id), "language":UILanguage.current,"agentActions":true,"sharing":sharedImports ? "shared":"private"])
       draftAttachments = []
       await loadConversation(id)
       await loadConversations()

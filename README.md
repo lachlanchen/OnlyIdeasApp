@@ -16,6 +16,11 @@ A configurable economical model creates reading guides and translations on reque
 
 ![OnlyIdeas reading room](evidence/library-desktop.png)
 
+<!-- agent19 -->
+1.0.2 (19): Ask the agent to find, download, transcribe, summarize, translate or save a paper. Approximate titles and DOIs work across research indexes, with a bounded public-source fallback and PDF identity checks. Saved results reopen from chat. Recommendations follow your research interests; change them in Your space. Android Back returns to the conversation.
+
+[1.0.2 (19)](docs/release-candidate-19.md)
+
 <!-- recovery17 -->
 Version 1.0.2 (17) adds separate Saved and Liked collections, activity, an inbox and reading preferences. Recover blocked downloads by uploading your PDF directly from a paper card or failed request. Translate a whole paper, paragraph or sentence; saved pieces are reused and equations and figures stay intact. Shared remains the default: verified supported open licenses can publish automatically, while other papers show pending review. Native daily reminders are optional; activity alerts currently refresh inside the app.
 

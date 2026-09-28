@@ -1,6 +1,23 @@
 import XCTest
 
 final class NativeUITests: XCTestCase {
+  func testSavedAgentResult() {
+    continueAfterFailure=false
+    let app=XCUIApplication()
+    app.launchArguments=["-onlyideas.native.language","en","-onlyideas.native.appearance","light","--onlyideas-space-qa"]
+    app.launchEnvironment["ONLYIDEAS_QA_ORIGIN"]="http://127.0.0.1:18649"
+    let path=URL(fileURLWithPath:NSHomeDirectory()).appendingPathComponent("Documents/onlyideas-qa-token")
+    guard let token=try? String(contentsOf:path,encoding:.utf8) else{XCTFail("Missing private QA token");return}
+    app.launchEnvironment["ONLYIDEAS_QA_TOKEN"]=token.trimmingCharacters(in:.whitespacesAndNewlines)
+    app.launch()
+    XCTAssertTrue(app.tabBars.buttons["Agent"].waitForExistence(timeout:20));app.tabBars.buttons["Agent"].tap()
+    app.buttons["Conversation history"].tap()
+    XCTAssertTrue(app.buttons["Agent result verification"].waitForExistence(timeout:15));app.buttons["Agent result verification"].tap()
+    XCTAssertTrue(app.buttons["Open result"].waitForExistence(timeout:15));app.buttons["Open result"].tap()
+    XCTAssertTrue(app.webViews.staticTexts["Saved reading result"].waitForExistence(timeout:30))
+    shot("Agent19-saved-result")
+    app.terminate()
+  }
   func testPieceTranslationControls() {
     continueAfterFailure=false
     let app=XCUIApplication()

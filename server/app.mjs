@@ -15,6 +15,8 @@ import { requestSharing } from './sharing.mjs';
 import { startWorker, inspectPDF } from './providers.mjs';
 import { nativeOrigins, nativeFlow, startNative, finishNative, redeemNative } from './native-auth.mjs';
 import { createChats } from './chat.mjs';
+import {createAgentActions} from './agent-actions.mjs';
+import {inspectPaperIdentity} from './pdf-identity.mjs';
 import { deleteAccount, visibleComments, acceptTerms, blocks } from './community.mjs';
 import { requestArtifact, visibleArtifacts, safeJob } from './artifacts.mjs';
 import { attachment, uploadAttachment } from './attachments.mjs';
@@ -33,7 +35,6 @@ export function createApp(store, config, { worker = true, provider = providerJSO
   const cookie = (name, value, seconds) => `${name}=${value}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${seconds}${secure ? '; Secure' : ''}`;
   seedCreditPublications(store, config);
   const stopWorker = worker ? startWorker(store, config) : () => {};
-  const chats = createChats(store, config);
   const discovery = createDiscovery(store,discoveryOptions);
   const social = createPaperSocial(store,discovery);
   const space=createReadingSpace(store,social,discovery);
@@ -68,6 +69,9 @@ export function createApp(store, config, { worker = true, provider = providerJSO
     reserveImport(store, config, job, creditLimit);
     return store.saveJob(job);
   });
+  const agentActions=createAgentActions(store,config,{enqueue,social});
+  const chats=createChats(store,config,agentActions);
+  const agentTimer=worker?setInterval(()=>agentActions.tick(),1500):null;agentTimer?.unref();
   const server = createServer(async (req, res) => {
     res.setHeader('X-Content-Type-Options', 'nosniff'); res.setHeader('Referrer-Policy', 'no-referrer');
     res.setHeader('X-Frame-Options', 'DENY'); res.setHeader('Cache-Control', 'no-store');
@@ -80,6 +84,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         requireValue(method === 'POST', 'Method not allowed.', 405);
         if (path === '/api/worker/claim') return response(res, chats.claim());
         if (path === '/api/worker/result') return response(res, chats.finish(await json(req)));
+        if (path === '/api/worker/paper') return response(res,chats.readPaper(await json(req)));
         requireValue(false, 'Not found.', 404);
       }
       const notification=path.match(/^\/api\/billing\/notifications\/(apple|google)$/);
@@ -92,7 +97,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
         res.setHeader('Vary', 'Origin');
         res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, POST, PUT, DELETE, OPTIONS');
-        res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type, X-OnlyIdeas-Client, X-Request-Id, X-Paper-Title, X-Paper-Language, X-Paper-Sharing, X-File-Name, X-Credit-Limit, X-Research-Id, X-Recovery-Job-Id');
+        res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type, X-OnlyIdeas-Client, X-Request-Id, X-Paper-Title, X-Paper-Language, X-Paper-Sharing, X-File-Name, X-Credit-Limit, X-Research-Id, X-Recovery-Job-Id, X-Paper-Match-Confirm');
       }
       if (method === 'OPTIONS') { requireValue(nativeOrigin, 'Origin not allowed.', 403); res.writeHead(204); return res.end(); }
       const native = nativeOrigin && req.headers['x-onlyideas-client'] === 'native';
@@ -137,10 +142,10 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         const body=await json(req),card=discovery.item(body.id,user);
         if(card.paperId)return response(res,{paperId:card.paperId,reused:true});
         const recovering=recoveryJob(store,user.id,'r:'+card.id);if(recovering&&recovering.state!=='failed')return response(res,{job:safeJob(recovering)},202);
-        requireValue(card.pdfUrl,'This source has no direct open PDF. Open its source page or upload your copy.');
+        const sourceURL=card.pdfUrl||card.source;requireValue(sourceURL,'Open the source page or upload your copy.');
         requireValue(config.mathpix?.appKey,'PDF conversion is not connected yet.',503);
         const sharing=body.sharing==='private'?'private':'shared';
-        const job=enqueue(user,{kind:'import',sharing,creditLimit:body.creditLimit,url:card.pdfUrl,sourcePage:card.source,downloadSources:card.downloadSources||[],discoveryId:card.id,dedupe:`import:${hash(card.pdfUrl)}`,metadata:{...paperMetadata(card),title:card.title,authors:card.authors,language:'en',category:card.discipline||'Research',license:'private'}});
+        const job=enqueue(user,{kind:'import',sharing,creditLimit:body.creditLimit,url:sourceURL,sourcePage:card.source,downloadSources:card.downloadSources||[],discoveryId:card.id,dedupe:`import:${hash(sourceURL)}`,metadata:{...paperMetadata(card),title:card.title,authors:card.authors,language:'en',category:card.discipline||'Research',license:'private'}});
         if(job.state==='failed')return response(res,{error:job.message,job:safeJob(job),source:card.source,code:job.errorCode||'import_failed'},409);
         return response(res,{job:safeJob(job),paperId:job.paperId},202);
       }
@@ -275,13 +280,19 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         requireValue(Object.hasOwn(languages, metadata.language || 'en'), 'Choose a supported language.');
         const dedupe = `import:${hash(bytes || link)}`;
         if (bytes) { const dir = join(store.directory, 'jobs', requestId); await mkdir(dir, { recursive: true, mode: 0o700 }); await writeFile(join(dir, 'source.pdf'), bytes, { mode: 0o600 }); }
-        let job;
+        let job,identity;
         try {
+          if(context&&bytes){
+            identity=await inspectPaperIdentity(join(store.directory,'jobs',requestId,'source.pdf'),metadata);
+            const uncertain=identity.state==='uncertain',confirmed=req.headers['x-paper-match-confirm']===hash(bytes);
+            if(identity.state==='mismatch'||uncertain&&!confirmed){await rm(join(store.directory,'jobs',requestId),{recursive:true,force:true});return response(res,{error:uncertain?'We could not verify this PDF’s title. Check that it matches the selected paper before continuing.':'This PDF does not appear to match the selected paper. Choose the correct PDF, or import it as a separate paper.',code:uncertain?'pdf_match_uncertain':'pdf_match_mismatch',expectedTitle:metadata.title,observedTitle:identity.title,confirmation:uncertain?hash(bytes):undefined},409);}
+            if(uncertain&&confirmed)identity={...identity,state:'user_confirmed'};
+          }
           const cached = reusablePaper(store,user.id,{url:link,sourceDigest:bytes?hash(bytes):undefined});
           if (!cached) requireValue(config.mathpix?.appKey, 'PDF conversion is not connected yet. Import Markdown in the meantime.', 503);
           if (!cached && bytes && config.credits?.enabled === true && sharing !== 'shared') pages = await inspectPDF(join(store.directory,'jobs',requestId,'source.pdf'),config.maxPages || 30);
           job = creditTransaction(store,()=>{const prior=activeRecovery(store,user.id,context);if(prior)return prior;
-          const queued = enqueue(user, { id: requestId, dedupe, kind: 'import', sharing, url: link, creditLimit, pages, sourceDigest:bytes?hash(bytes):undefined, uploadSource:context?.source, metadata: { ...paperMetadata(metadata), title: metadata.title, authors: String(metadata.authors || ''), language: metadata.language || 'en', license: 'private', category: String(metadata.category || 'Research') } });
+          const queued = enqueue(user, { id: requestId, dedupe, kind: 'import', sharing, url: link, creditLimit, pages, sourceDigest:bytes?hash(bytes):undefined, uploadSource:context?.source,paperIdentity:identity, metadata: { ...paperMetadata(metadata), title: metadata.title, authors: String(metadata.authors || ''), language: metadata.language || 'en', license: 'private', category: String(metadata.category || 'Research') } });
           bindRecovery(store,user.id,context,queued);return queued;});
         }
         catch (error) { if (bytes) await rm(join(store.directory, 'jobs', requestId), { recursive: true, force: true }); throw error; }
@@ -384,6 +395,6 @@ export function createApp(store, config, { worker = true, provider = providerJSO
     } catch (e) { if (!res.headersSent) response(res, { error: e instanceof AppError ? e.message : 'Something went wrong. Please try again.' }, e instanceof AppError ? e.status : 500); else res.end(); }
   });
   server.requestTimeout = 60_000; server.headersTimeout = 15_000;
-  server.on('close', () => {stopWorker();billing.stop();});
+  server.on('close', () => {stopWorker();billing.stop();if(agentTimer)clearInterval(agentTimer);});
   return server;
 }

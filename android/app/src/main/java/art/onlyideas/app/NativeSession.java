@@ -20,6 +20,7 @@ import org.json.JSONObject;
 final class NativeSession {
   static final class HttpError extends Exception {
     final int status;
+    JSONObject details = new JSONObject();
     HttpError(int status, String message) { super(message); this.status = status; }
   }
   static final String ORIGIN = "https://agent.onlyideas.art";
@@ -148,7 +149,7 @@ final class NativeSession {
                     .optString("error", message);
           } catch (Exception ignored) {
           }
-          throw new HttpError(code, message);
+          HttpError error=new HttpError(code,message);try{error.details=new JSONObject(new String(data,StandardCharsets.UTF_8));}catch(Exception ignored){}throw error;
         }
         return data;
       }

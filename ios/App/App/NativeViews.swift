@@ -69,6 +69,9 @@ struct NativeReadingApp: View {
     .onChange(of:store.account?.id){id in if id==nil {ReadingReminder.cancel();store.inboxUnread=0}}
     .onReceive(Timer.publish(every:30,on:.main,in:.common).autoconnect()){_ in guard let id=store.account?.id,UIApplication.shared.applicationState == .active else{return};Task{if let r=try? await store.json("/api/inbox"),store.account?.id==id {store.inboxUnread=r["unread"]as?Int ?? 0}}}
     .onReceive(NotificationCenter.default.publisher(for:Notification.Name("OnlyIdeas.OpenSpace"))){_ in spaceSection="daily";tab=3;UserDefaults.standard.removeObject(forKey:"onlyideas.open.daily")}
+    .onReceive(NotificationCenter.default.publisher(for:Notification.Name("OnlyIdeas.Ask"))){event in
+      guard let text=event.object as? String else{return};tab=1;Task{store.newConversation();await store.send(text)}
+    }
     .onAppear{if UserDefaults.standard.bool(forKey:"onlyideas.open.daily"){spaceSection="daily";tab=3;UserDefaults.standard.removeObject(forKey:"onlyideas.open.daily")}}
     #if DEBUG
     .onReceive(NotificationCenter.default.publisher(for: Notification.Name("OnlyIdeas.QA.Tab"))) { event in
@@ -87,6 +90,10 @@ struct NativeReadingApp: View {
       Button(T("Cancel"),role:.cancel) {store.resolveCreditPrompt(false)}
       Button(T("Continue")) {store.resolveCreditPrompt(true)}
     } message: {Text(store.creditPrompt ?? "")}
+    .alert(T("Check paper match"),isPresented:Binding(get:{store.matchPrompt != nil},set:{if !$0 {store.resolveMatch(false)}})) {
+      Button(T("Cancel"),role:.cancel){store.resolveMatch(false)}
+      Button(T("This PDF matches")){store.resolveMatch(true)}
+    } message:{Text(store.matchPrompt ?? "")}
   }
 }
 struct NativeSignIn: View {
@@ -147,7 +154,10 @@ struct NativeLibrary: View {
           Label(T("Offline · cached papers"), systemImage: "arrow.down.circle.fill").font(.body)
             .foregroundColor(.secondary)
         }
-        Picker(T("Library"),selection:$browseResearch){Text(T("Latest open research")).tag(true);Text(T("Reading library")).tag(false)}.pickerStyle(.segmented)
+        Picker(T("Library"),selection:$browseResearch){Text(T("Research for you")).tag(true);Text(T("Reading library")).tag(false)}.pickerStyle(.segmented)
+        if !query.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty {
+          Button {NotificationCenter.default.post(name:Notification.Name("OnlyIdeas.Ask"),object:query)} label:{Label(T("Ask the agent"),systemImage:"arrow.up.message").frame(maxWidth:.infinity,alignment:.leading)}.buttonStyle(.bordered)
+        }
         if browseResearch && !query.isEmpty {ForEach(Array(visible.prefix(3))){paper in NavigationLink(destination:NativePaper(paper:paper)){PaperRow(paper:paper,downloaded:store.isDownloaded(paper.id))}.buttonStyle(.plain)}}
         if browseResearch {ResearchDiscovery(query:$query,requests:{requests=true})}
         if !browseResearch {
@@ -185,7 +195,7 @@ struct NativeLibrary: View {
         if let id = event.object as? String, store.papers.contains(where: { $0.id == id }) { browseResearch=false;selectedPaper = id }
       }
       #endif
-      .searchable(text: $query, prompt:T("Search all research"))
+      .searchable(text: $query, prompt:T("Find a paper or ask to fetch it…"))
       .toolbar {
         ToolbarItem(placement:.navigationBarLeading) {
           Button {options=true} label: {Text(T(store.sharedImports ? "Shared":"Only me")).font(.subheadline.weight(.semibold)).frame(minHeight:44)}.accessibilityLabel(T("Sharing & credits"))
@@ -411,23 +421,41 @@ struct AgentBubble: View {
           Text(paper.title).font(.title3.weight(.semibold))
           Text(paper.authors).font(.body).foregroundColor(.secondary).lineLimit(3)
           DisclosureGroup(T("Read abstract")) { Text(paper.summary).font(.body).padding(.top, 8) }
-          Label(T(store.sharedImports ? "Shared after review":"Only me"),systemImage:store.sharedImports ? "globe":"lock").font(.caption).foregroundColor(.secondary)
-          Button {
-            Task {
-              await store.importFound(paper, shared: store.sharedImports)
-              requests = true
-            }
-          } label: {
-            Label(T("Convert & add"), systemImage: "arrow.down.doc").font(.headline).padding(
-              .vertical, 5)
-          }.buttonStyle(.borderedProminent)
+          if let id=paper.paperId {
+            NavigationLink(destination:NativePaper(paper:ResearchPaper(id:id,title:paper.title))) {Label(T("Open paper"),systemImage:"book")}.buttonStyle(.borderedProminent)
+          } else {
+            Label(T(store.sharedImports ? "Shared after review":"Only me"),systemImage:store.sharedImports ? "globe":"lock").font(.caption).foregroundColor(.secondary)
+            Button {Task {await store.importFound(paper,shared:store.sharedImports);requests=true}} label: {Label(T("Fetch & read"),systemImage:"arrow.down.doc").font(.headline).padding(.vertical,5)}.buttonStyle(.borderedProminent)
+            NativePDFRecovery(researchId:paper.id,shared:store.sharedImports){requests=true}
+          }
+          if let source=paper.source,let url=URL(string:source),url.scheme=="https" {Link(T("Source"),destination:url)}
         }.padding(14).background(Color(.secondarySystemGroupedBackground)).cornerRadius(16)
       }
       if message.jobId != nil { Button(T("View conversion")) { requests = true }.font(.headline) }
+      ForEach(message.actions ?? []) { action in
+        VStack(alignment:.leading,spacing:8){
+          Text(action.title ?? "").font(.headline)
+          HStack {if ["queued","running"].contains(action.state){ProgressView()};Text(T(action.message)).font(.subheadline)}
+          if action.state == "completed",let id=action.paperId {
+            if let artifactId=action.artifactId {NavigationLink(destination:NativeAgentResult(paperID:id,artifactID:artifactId)){Label(T("Open result"),systemImage:"doc.text")}.buttonStyle(.borderedProminent)}
+            else {NavigationLink(destination:NativePaper(paper:ResearchPaper(id:id,title:action.title ?? ""))){Label(T("Open paper"),systemImage:"book")}.buttonStyle(.borderedProminent)}
+          }
+          if action.canUpload == true,let job=action.jobId {NativePDFRecovery(recoveryJobId:job,shared:action.sharing == "shared"){requests=true}}
+          if action.jobId != nil {Button(T("Your requests")){requests=true}}
+        }.padding(12).frame(maxWidth:.infinity,alignment:.leading).background(accent.opacity(0.06)).cornerRadius(14)
+      }
     }.padding(message.role == "user" ? 18 : 0)
       .frame(maxWidth: .infinity, alignment: .leading)
       .background(message.role == "user" ? accent.opacity(0.09) : Color.clear).cornerRadius(20)
   }
+}
+struct NativeAgentResult:View {
+ @EnvironmentObject var store:ReadingStore
+ let paperID:String;let artifactID:String
+ @State private var document:ReaderDocument?
+ @State private var artifact:ReadingArtifact?
+ @State private var notice=""
+ var body:some View {Group{if let document,let artifact{NativeArtifact(document:document,artifact:artifact)}else if !notice.isEmpty{Text(T(notice)).padding()}else{ProgressView()}}.task{do{let d=try await store.loadPaper(ResearchPaper(id:paperID,title:""));let result=try await store.json("/api/papers/\(paperID)/artifacts");let a=try store.decoded([ReadingArtifact].self,result["artifacts"] ?? []).first{$0.id==artifactID};guard let a else{throw store.failure(T("This saved result is no longer available."))};document=d;artifact=a}catch{notice=error.localizedDescription}}}
 }
 struct NativeProfile: View {
   @EnvironmentObject var store: ReadingStore
@@ -1245,7 +1273,7 @@ struct ResearchDiscovery: View {
   var children:[ResearchCategory] {fields.first{$0.id==discipline}?.children ?? []}
   var body:some View {
     VStack(alignment:.leading,spacing:12) {
-      HStack {Text(T(query.isEmpty ? "Latest open research":"Search research")).font(.title2.bold());Spacer();Button {filters.toggle()}label:{Image(systemName:"slider.horizontal.3").frame(width:44,height:44)}.accessibilityLabel(T("Filters"));Button {if store.account==nil {Task{await store.signIn()}}else{saved.toggle()}} label:{Image(systemName:saved ? "star.fill":"star").frame(width:44,height:44)}.accessibilityLabel(T("Saved"))}
+      HStack {Text(T(query.isEmpty ? "Research for you":"Search research")).font(.title2.bold());Spacer();Button {filters.toggle()}label:{Image(systemName:"slider.horizontal.3").frame(width:44,height:44)}.accessibilityLabel(T("Filters"));Button {if store.account==nil {Task{await store.signIn()}}else{saved.toggle()}} label:{Image(systemName:saved ? "star.fill":"star").frame(width:44,height:44)}.accessibilityLabel(T("Saved"))}
       if filters {filterControls}
       Text(T("Tap a paper to fetch and convert it. Existing papers open immediately. Shared imports enter publication review.")).font(.caption).foregroundColor(.secondary)
       ForEach(hits) { hit in
@@ -1293,7 +1321,6 @@ struct ResearchDiscovery: View {
   func choose(_ hit:DiscoveryPaper) async {
     if let id=hit.paperId ?? (hit.ref?.hasPrefix("r-")==false ? hit.ref:nil){selected=ResearchPaper(id:id,title:hit.title);showPaper=true;return}
     guard store.account != nil else {await store.signIn();return}
-    guard let pdf=hit.pdfUrl,!pdf.isEmpty else {store.error=T("No direct PDF. Open the source or upload your copy.");return}
     importing=hit.id;defer{importing=""}
     do{let r=try await store.json("/api/discovery/import",method:"POST",body:["id":hit.id,"sharing":"shared"]);if let id=r["paperId"]as?String {selected=ResearchPaper(id:id,title:hit.title);showPaper=true}else{await store.loadJobs();requests()}}catch{store.error=error.localizedDescription;await store.loadJobs();requests()}
   }
