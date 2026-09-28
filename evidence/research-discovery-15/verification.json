@@ -16,7 +16,7 @@
     "Watch": "Companion included in qualified iOS archive; transfer baseline from build13, no Watch behavior change in15"
   },
   "server": {
-    "release": "09cd6626a910a1b1",
+    "release": "538763aeaabee1f1",
     "basePackageSHA256": "8d2cb626fa81eb938bb519c9caef7bc4bb5d265ee9eac6e86e5ed55109597b14",
     "patchPackageSHA256": "09cd6626a910a1b1bf51def3b22378dd3a16a9e264cad9e499f3aedf8156ef75",
     "migration": "additive public metadata cache and paper social tables",
@@ -55,7 +55,16 @@
       "Intermittent upstream OpenAlex anonymous search 429 and arXiv 406; cached/partial results and notices shown",
       "arXiv fallback uses verified arXiv repository in OpenAlex only when no incompatible category/journal filter",
       "Shared imports still require publication review; open access is not automatic republication permission"
-    ]
+    ],
+    "discoveryRelease": "09cd6626a910a1b1",
+    "webPatch": {
+      "sourceCommit": "14be7439d0d8628f50a1eccf241100b80b862697",
+      "sha256": "538763aeaabee1f121f16e8ed566f7de4024f507ffe84fed791f2f8cdfcc9584",
+      "release": "538763aeaabee1f1",
+      "bundle": "/assets/index-B3rSDqNT.js",
+      "scope": "web favorites consistency only; native build15 unchanged",
+      "checks": "65 tests and renderer/web build passed; card save visible in Saved sidebar, reader unsave removes it, profile count sync, sign-out clears saved state; final bundle verified live"
+    }
   },
   "apple": {
     "IOS": {
@@ -65,7 +74,8 @@
       "reviewState": "WAITING_FOR_REVIEW",
       "versionState": "WAITING_FOR_REVIEW",
       "submittedAt": "2026-09-28T00:13:37.471Z",
-      "releaseType": "AFTER_APPROVAL"
+      "releaseType": "AFTER_APPROVAL",
+      "observedAt": "2026-09-28T00:32:34.446335+00:00"
     },
     "MAC_OS": {
       "versionId": "bdda5b63-93cb-4321-bf88-e979f6cec6ca",
@@ -74,7 +84,8 @@
       "reviewState": "WAITING_FOR_REVIEW",
       "versionState": "WAITING_FOR_REVIEW",
       "submittedAt": "2026-09-28T00:13:53.336Z",
-      "releaseType": "AFTER_APPROVAL"
+      "releaseType": "AFTER_APPROVAL",
+      "observedAt": "2026-09-28T00:32:36.344487+00:00"
     }
   },
   "testflight": [
@@ -104,12 +115,12 @@
   "google": {
     "build": 15,
     "internal": "Available to internal testers",
-    "production": "Changes in review; automatic quick checks running",
+    "production": "In review; automatic quick checks completed",
     "rollout": 1,
     "countries": 176,
     "restOfWorld": true,
     "managedPublishing": false,
-    "observedAt": "2026-09-28T00:21:19.132245+00:00"
+    "observedAt": "2026-09-28T00:34:46.971963+00:00"
   },
   "deferred": [
     "EchoMind friend forwarding",

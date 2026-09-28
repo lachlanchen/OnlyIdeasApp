@@ -19,7 +19,10 @@ submitted for production review on 2026-09-28 UTC. Supersedes build 14.
 checks cover mobile and desktop, hierarchical filters, immediate typo-tolerant
 local matches, Save, Like and a moderated whole-paper comment in an isolated
 database. The discussion overlay keeps its composer visible above navigation;
-the mobile page does not scroll horizontally.
+the mobile page does not scroll horizontally. A final web consistency check also
+verified that card saves appear in the sidebar, reader unsaves remove them, the
+profile count updates and signing out clears the account view. All web favorites
+now use the same cloud API. Native build 15 is unchanged.
 
 Two native iOS XCTest cases pass, covering discovery, filters, local search,
 paper and paragraph discussions, translation and attachment controls. Signed
@@ -34,7 +37,8 @@ behavior ships in this build.
 
 ## Live data and discovery
 
-The immutable server release is `09cd6626a910a1b1`. A candidate using a copy of
+The immutable server release is `538763aeaabee1f1`, including discovery from
+`09cd6626a910a1b1` and a web-only favorites follow-up from `14be743`. A candidate using a copy of
 the real database passed live research metadata, taxonomy and access checks.
 Two readers reused the existing public physics paper with Mathpix disabled.
 The production switch preserved existing bodies, figures, accounts, private
@@ -60,7 +64,7 @@ Existing store screenshots, privacy declarations and reviewer access are retaine
 ## Google Play
 
 Signed 1.0.2 (15) is available to internal testers. Production submission is listed
-under Changes in review, with automatic quick checks running. Full rollout retains
+under Changes in review; automatic quick checks have completed. Full rollout retains
 176 selected countries plus the rest of world; managed publishing is off.
 Approval and public availability are not yet claimed.
 
