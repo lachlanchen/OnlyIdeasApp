@@ -64,6 +64,8 @@ public class MainActivity extends AppCompatActivity {
       chatMessages = new JSONArray(),
       jobs = new JSONArray();
   private String page = "library", chatId = "", agentStatus = "", quote = "", lastMessages = "";
+  private String uploadResearch="",uploadRecovery="",uploadOwner="";
+  private boolean recoveryShared=true;
   private boolean busy = false, refreshingChat = false, offline = false, shareUpload = true;
   private volatile int authEpoch = 0;
   private int ink, muted, bg, surface, soft, green, readerRequest = 0;
@@ -92,6 +94,7 @@ public class MainActivity extends AppCompatActivity {
   public void onCreate(Bundle saved) {
     androidx.core.splashscreen.SplashScreen.installSplashScreen(this);
     super.onCreate(saved);
+    if(saved!=null){uploadResearch=saved.getString("uploadResearch","");uploadRecovery=saved.getString("uploadRecovery","");uploadOwner=saved.getString("uploadOwner","");recoveryShared=saved.getBoolean("recoveryShared",true);}
     getOnBackPressedDispatcher().addCallback(this, navigateBack);
     setTheme(art.onlyideas.app.R.style.AppTheme_NoActionBar);
     androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(
@@ -1448,12 +1451,14 @@ public class MainActivity extends AppCompatActivity {
     reader.loadUrl("https://appassets.androidplatform.net/assets/public/native-reader.html");
   }
 
+  String paperAttribution(JSONObject p){JSONObject proof=p.optJSONObject("provenance");return proof==null?"":p.optString("license")+" · "+proof.optString("licenseUrl")+" · "+proof.optString("changes");}
   void renderDocument(WebView view) {
     try {
       JSONObject payload =
           new JSONObject()
               .put("mmd", document.getJSONObject("paper").optString("mmd"))
               .put("figures", document.getJSONObject("figures"))
+              .put("attribution",paperAttribution(document.optJSONObject("paper")))
               .put("fontSize", scaledReaderSize()).put("comments",!derived).put("commentLabel",t("Discuss paragraph")).put("language",document.optJSONObject("paper").optString("language","en"))
               .put(
                   "dark",
@@ -1661,7 +1666,7 @@ public class MainActivity extends AppCompatActivity {
     final String id=document.optJSONObject("paper").optString("id");
     job(()->api.json("/api/papers/"+id+"/artifacts","GET",null),response->{
       JSONArray artifacts=response.optJSONArray("artifacts");String[] codes={"en","zh-Hans","zh-Hant","ja","ko","ar","es","fr","de","ru","vi"};String[] names={"English","简体中文","繁體中文","日本語","한국어","العربية","Español","Français","Deutsch","Русский","Tiếng Việt"};
-      Map<String,JSONObject> ready=new HashMap<>();if(artifacts!=null)for(int i=0;i<artifacts.length();i++){JSONObject a=artifacts.optJSONObject(i);if(a.optString("kind").equals("translation")&&(a.isNull("sectionId")||a.optString("sectionId").isEmpty()))ready.put(a.optString("language"),a);}
+      Map<String,JSONObject> ready=new HashMap<>();if(artifacts!=null)for(int i=0;i<artifacts.length();i++){JSONObject a=artifacts.optJSONObject(i);if(a.optString("kind").equals("translation")&&(a.isNull("sectionId")||a.optString("sectionId").isEmpty())&&(a.isNull("segmentId")||a.optString("segmentId").isEmpty()))ready.put(a.optString("language"),a);}
       for(int i=0;i<codes.length;i++)if(ready.containsKey(codes[i]))names[i]+=" ✓";
       new AlertDialog.Builder(this).setTitle(t("Read in another language")).setItems(names,(d,n)->{if(ready.containsKey(codes[n])){showArtifact(ready.get(codes[n]));return;}if(account==null){signIn();return;}job(()->api.json("/api/papers/"+id+"/assist","POST",new JSONObject().put("kind","translation").put("language",codes[n])),r->{toast(t("Translation requested. Existing work is reused."));loadJobs(true);});}).setNegativeButton(t("Done"),null).show();
     });
@@ -1670,6 +1675,24 @@ public class MainActivity extends AppCompatActivity {
   void showArtifact(JSONObject artifact) {
     try { JSONObject next=new JSONObject(document.toString());JSONObject p=next.getJSONObject("paper");p.put("mmd",artifact.getString("text")).put("revision",artifact.getString("id")).put("language",artifact.getString("language"));document=next;derived=true;showReader(); }
     catch(Exception e){alert(e.getMessage());}
+  }
+
+  void pieceTranslation(String paperID) {
+    job(()->api.json("/api/papers/"+paperID+"/segments","GET",null),r->{
+      JSONArray paragraphs=r.optJSONArray("segments");if(paragraphs==null||paragraphs.length()==0)return;
+      LinearLayout c=column();c.setPadding(dp(18),dp(12),dp(18),dp(12));ScrollView scroll=new ScrollView(this);scroll.addView(c);
+      caption(c,t("Only missing pieces use the model. Saved translations are reused."));
+      String[] codes={"en","zh-Hans","zh-Hant","ja","ko","ar","es","fr","de","ru","vi"};String[] names={"English","简体中文","繁體中文","日本語","한국어","العربية","Español","Français","Deutsch","Русский","Tiếng Việt"};
+      Spinner language=new Spinner(this);language.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,names));language.setSelection(1);language.setContentDescription(t("Language"));c.addView(language);
+      ArrayList<String> labels=new ArrayList<>();for(int i=0;i<paragraphs.length();i++){String text=paragraphs.optJSONObject(i).optString("text");labels.add((i+1)+". "+text.substring(0,Math.min(90,text.length())));}
+      Spinner paragraph=new Spinner(this);paragraph.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,labels));paragraph.setContentDescription(t("Paragraph"));c.addView(paragraph);
+      Spinner sentence=new Spinner(this);sentence.setContentDescription(t("Sentence"));c.addView(sentence);TextView source=text("",16,false);source.setMaxLines(6);source.setEllipsize(android.text.TextUtils.TruncateAt.END);c.addView(source);
+      paragraph.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener(){public void onNothingSelected(android.widget.AdapterView<?> p){}public void onItemSelected(android.widget.AdapterView<?> p,View v,int n,long id){JSONObject item=paragraphs.optJSONObject(n);JSONArray sentences=item.optJSONArray("sentences");ArrayList<String> names=new ArrayList<>();names.add(t("Entire paragraph"));for(int i=0;i<sentences.length();i++){String s=sentences.optJSONObject(i).optString("text");names.add((i+1)+". "+s.substring(0,Math.min(90,s.length())));}sentence.setAdapter(new ArrayAdapter<>(MainActivity.this,android.R.layout.simple_spinner_dropdown_item,names));source.setText(item.optString("text"));}});
+      sentence.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener(){public void onNothingSelected(android.widget.AdapterView<?> p){}public void onItemSelected(android.widget.AdapterView<?> p,View v,int n,long id){JSONObject item=paragraphs.optJSONObject(paragraph.getSelectedItemPosition());source.setText(n==0?item.optString("text"):item.optJSONArray("sentences").optJSONObject(n-1).optString("text"));}});
+      AlertDialog dialog=new AlertDialog.Builder(this).setTitle(t("Translate a paragraph or sentence")).setView(scroll).setNegativeButton(t("Done"),null).create();
+      c.addView(button(t("Translate this passage"),true,()->{if(account==null){signIn();return;}JSONObject p=paragraphs.optJSONObject(paragraph.getSelectedItemPosition());String segment=sentence.getSelectedItemPosition()>0?p.optJSONArray("sentences").optJSONObject(sentence.getSelectedItemPosition()-1).optString("id"):p.optString("id");
+        job(()->api.json("/api/papers/"+paperID+"/assist","POST",new JSONObject().put("kind","translation").put("language",codes[language.getSelectedItemPosition()]).put("segmentId",segment)),result->{JSONObject j=result.optJSONObject("job");if(j!=null&&j.optString("state").equals("completed")){job(()->api.json("/api/papers/"+paperID+"/artifacts","GET",null),a->{JSONArray list=a.optJSONArray("artifacts");for(int i=0;i<list.length();i++){JSONObject artifact=list.optJSONObject(i);if(artifact.optString("id").equals(j.optString("artifactId"))){dialog.dismiss();showArtifact(artifact);return;}}});}else loadJobs(true);});}));dialog.show();
+    });
   }
 
   void readingTools() {
@@ -1689,6 +1712,7 @@ public class MainActivity extends AppCompatActivity {
           LinearLayout c = column();
           c.setPadding(dp(22), dp(18), dp(22), dp(22));
           scroll.addView(c);
+          c.addView(button(t("Translate a paragraph or sentence"),false,()->pieceTranslation(id)));
           title(c, t("Private notes"), 22);
           gap(c, 12);
           EditText notes = new EditText(this);
@@ -1896,7 +1920,9 @@ public class MainActivity extends AppCompatActivity {
                       refresh();
                     } else if (j.optString("state").equals("failed")) {
                       new AlertDialog.Builder(this)
+                          .setTitle(j.optString("title",t("Your requests")))
                           .setMessage(t(j.optString("message")))
+                          .setNeutralButton(j.optBoolean("canUpload")?t("Upload my PDF"):t("Open source"),(x,y)->{if(j.optBoolean("canUpload"))recoverPDF("",j.optString("id"),j.optString("sharing").equals("shared"));else if(j.optString("source").startsWith("https://"))startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(j.optString("source"))));})
                           .setNegativeButton(t("Close"), null)
                           .setPositiveButton(
                               t("Try again"),
@@ -1918,18 +1944,23 @@ public class MainActivity extends AppCompatActivity {
   }
 
   @Override
+  protected void onSaveInstanceState(Bundle state){super.onSaveInstanceState(state);state.putString("uploadResearch",uploadResearch);state.putString("uploadRecovery",uploadRecovery);state.putString("uploadOwner",uploadOwner);state.putBoolean("recoveryShared",recoveryShared);}
+  void recoverPDF(String research,String recovery,boolean shared){if(account==null){signIn();return;}uploadResearch=research;uploadRecovery=recovery;uploadOwner=account.optString("id");recoveryShared=shared;Intent pick=new Intent(Intent.ACTION_OPEN_DOCUMENT);pick.setType("application/pdf");pick.addCategory(Intent.CATEGORY_OPENABLE);startActivityForResult(pick,44);}
+  @Override
   protected void onActivityResult(int request, int result, Intent data) {
     super.onActivityResult(request, result, data);
-    if ((request != 42 && request != 43) || result != RESULT_OK || data == null || data.getData() == null) return;
+    if ((request != 42 && request != 43 && request != 44) || result != RESULT_OK || data == null || data.getData() == null) return;
+    if(request==44&&(account==null||!account.optString("id").equals(uploadOwner))){toast(t("Sign in"));return;}
     Uri uri = data.getData();
     String name="";
     try(var cursor=getContentResolver().query(uri,null,null,null,null)){if(cursor!=null&&cursor.moveToFirst()){int col=cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME);if(col>=0)name=cursor.getString(col);}}catch(Exception ignored){}
-    final boolean shared=shareUpload;
-    authorizeImport(shared,request==42||name.toLowerCase(Locale.ROOT).endsWith(".pdf")||"application/pdf".equals(getContentResolver().getType(uri)),0,limit->uploadPicked(uri,request,shared,limit));
+    final boolean shared=request==44?recoveryShared:shareUpload;
+    authorizeImport(shared,request!=43||name.toLowerCase(Locale.ROOT).endsWith(".pdf")||"application/pdf".equals(getContentResolver().getType(uri)),0,limit->uploadPicked(uri,request,shared,limit));
   }
 
   void uploadPicked(Uri uri,int request,boolean shared,int creditLimit) {
     busy = true;
+    final String research=uploadResearch,recovery=uploadRecovery;
     job(
         () -> {
           ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -1953,6 +1984,7 @@ public class MainActivity extends AppCompatActivity {
           Map<String, String> headers = new HashMap<>();
           headers.put("X-Paper-Sharing",shared?"shared":"private");headers.put("X-Credit-Limit",String.valueOf(creditLimit));
           if(request==43){headers.put("X-File-Name",java.net.URLEncoder.encode(title,"UTF-8").replace("+","%20"));return api.bytes("/api/attachments","POST",out.toByteArray(),"application/octet-stream",headers);}
+          if(request==44){if(!recovery.isEmpty())headers.put("X-Recovery-Job-Id",recovery);else headers.put("X-Research-Id",research);}
           headers.put("X-Request-Id", UUID.randomUUID().toString());
           headers.put(
               "X-Paper-Title", java.net.URLEncoder.encode(title, "UTF-8").replace("+", "%20"));
@@ -1996,8 +2028,8 @@ public class MainActivity extends AppCompatActivity {
   void researchLoad(int p,int g){if(p<1||g!=researchGeneration||researchLoading||!page.equals("library"))return;researchLoading=true;researchNotice.setText(t("Finding research…"));researchMore.setEnabled(false);int epoch=authEpoch;Map<String,String> params=new LinkedHashMap<>(researchOptions);params.put("q",researchQuery);params.put("page",String.valueOf(p));boolean saved=researchSaved;
     io.execute(()->{try{android.net.Uri.Builder uri=new android.net.Uri.Builder().path(saved?"/api/saved":"/api/discovery");for(Map.Entry<String,String> e:params.entrySet())uri.appendQueryParameter(e.getKey(),e.getValue());JSONObject result=api.json(uri.build().toString(),"GET",null);handler.post(()->{if(g!=researchGeneration||epoch!=authEpoch||!page.equals("library"))return;researchLoading=false;researchNotice.setText(result.optBoolean("stale")?t("Showing cached research results."):result.optJSONArray("unavailable")!=null&&result.optJSONArray("unavailable").length()>0?t("Some research indexes are temporarily unavailable."):"");JSONArray hits=result.optJSONArray("papers");if(hits!=null)for(int i=0;i<hits.length();i++){JSONObject hit=hits.optJSONObject(i);if(hit!=null&&researchIDs.add(hit.optString("id")))researchCard(hit);}researchPage=result.optInt("nextPage",0);researchMore.setEnabled(true);researchMore.setVisibility(researchPage>0?View.VISIBLE:View.GONE);if(researchIDs.isEmpty()&&researchNotice.getText().length()==0)researchNotice.setText(t("No papers found. Try broader keywords or fewer filters."));});}catch(Exception error){handler.post(()->{if(g!=researchGeneration||epoch!=authEpoch||!page.equals("library"))return;researchLoading=false;researchNotice.setText(error.getMessage());researchPage=p;researchMore.setText(t("Try again"));researchMore.setEnabled(true);researchMore.setVisibility(View.VISIBLE);});}});
   }
-  void researchCard(JSONObject p){LinearLayout card=card();caption(card,researchMetadata(p));TextView heading=text(p.optString("title"),18,true);heading.setPadding(0,dp(8),0,dp(8));heading.setOnClickListener(v->researchChoose(p));card.addView(heading);caption(card,p.optString("authors"));if(!p.optString("summary").isEmpty()){TextView summary=text(p.optString("summary"),15,false);summary.setMaxLines(3);summary.setEllipsize(android.text.TextUtils.TruncateAt.END);card.addView(summary);}if(!p.optString("doi").isEmpty())caption(card,"DOI "+p.optString("doi"));LinearLayout actions=row();actions.addView(button(t(p.has("paperId")?"Open paper":"Fetch & read"),false,()->researchChoose(p)),new LinearLayout.LayoutParams(0,-2,1));actions.addView(button(t("Source"),false,()->{String source=p.optString("source");if(source.startsWith("https://"))startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(source)));}));card.addView(actions);socialActions(card,p.optString("ref","r-"+p.optString("id")),p.optString("title"));addCard(researchList,card);}
-  void researchChoose(JSONObject p){if(!p.optString("fetchUnavailable").isEmpty()){new AlertDialog.Builder(this).setTitle(t("Source unavailable")).setMessage(t(p.optString("fetchUnavailable"))).setPositiveButton(t("Open source"),(d,w)->startActivity(new Intent(Intent.ACTION_VIEW,android.net.Uri.parse(p.optString("source"))))).setNegativeButton(t("Done"),null).show();return;}String id=p.optString("paperId");if(id.isEmpty()&&p.has("ref")&&!p.optString("ref").startsWith("r-"))id=p.optString("ref");if(!id.isEmpty()){try{openPaper(new JSONObject().put("id",id).put("title",p.optString("title")));}catch(Exception ignored){}return;}if(account==null){signIn();return;}if(p.optString("pdfUrl").isEmpty()){toast(t("No direct PDF. Open the source or upload your copy."));return;}job(()->api.json("/api/discovery/import","POST",new JSONObject().put("id",p.optString("id")).put("sharing","shared")),r->{if(!r.optString("paperId").isEmpty()){try{openPaper(new JSONObject().put("id",r.optString("paperId")).put("title",p.optString("title")));}catch(Exception ignored){}}else loadJobs(true);});}
+  void researchCard(JSONObject p){LinearLayout card=card();caption(card,researchMetadata(p));TextView heading=text(p.optString("title"),18,true);heading.setPadding(0,dp(8),0,dp(8));heading.setOnClickListener(v->researchChoose(p));card.addView(heading);caption(card,p.optString("authors"));if(!p.optString("summary").isEmpty()){TextView summary=text(p.optString("summary"),15,false);summary.setMaxLines(3);summary.setEllipsize(android.text.TextUtils.TruncateAt.END);card.addView(summary);}if(!p.optString("doi").isEmpty())caption(card,"DOI "+p.optString("doi"));LinearLayout actions=row();actions.addView(button(t(p.has("paperId")?"Open paper":"Fetch & read"),false,()->researchChoose(p)),new LinearLayout.LayoutParams(0,-2,1));actions.addView(button(t("Source"),false,()->{String source=p.optString("source");if(source.startsWith("https://"))startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(source)));}));card.addView(actions);if(!p.has("paperId"))card.addView(button(t("Upload my PDF"),false,()->recoverPDF(p.optString("id"),"",true)));socialActions(card,p.optString("ref","r-"+p.optString("id")),p.optString("title"));addCard(researchList,card);}
+  void researchChoose(JSONObject p){String id=p.optString("paperId");if(id.isEmpty()&&p.has("ref")&&!p.optString("ref").startsWith("r-"))id=p.optString("ref");if(!id.isEmpty()){try{openPaper(new JSONObject().put("id",id).put("title",p.optString("title")));}catch(Exception ignored){}return;}if(account==null){signIn();return;}if(p.optString("pdfUrl").isEmpty()){toast(t("No direct PDF. Open the source or upload your copy."));return;}job(()->api.json("/api/discovery/import","POST",new JSONObject().put("id",p.optString("id")).put("sharing","shared")),r->{if(!r.optString("paperId").isEmpty()){try{openPaper(new JSONObject().put("id",r.optString("paperId")).put("title",p.optString("title")));}catch(Exception ignored){}}else loadJobs(true);});}
   void researchFilters(){LinearLayout c=column();c.setPadding(dp(20),dp(8),dp(20),dp(8));ScrollView scroll=new ScrollView(this);scroll.addView(c);Map<String,String> draft=new LinkedHashMap<>(researchOptions);String[] providers={"all","openalex","arxiv"};Spinner source=new Spinner(this);source.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,new String[]{t("All research"),"OpenAlex","arXiv"}));caption(c,t("Source"));c.addView(source);LinearLayout category=column();c.addView(category);Runnable categories=()->{category.removeAllViews();JSONArray tree=researchTaxonomy.optJSONArray(draft.getOrDefault("source","all").equals("arxiv")?"arxiv":"openalex");if(tree==null)return;ArrayList<String> names=new ArrayList<>(List.of(t("All disciplines"))),ids=new ArrayList<>(List.of(""));for(int i=0;i<tree.length();i++){JSONObject f=tree.optJSONObject(i);names.add(f.optString("name"));ids.add(f.optString("id"));}Spinner first=new Spinner(this),second=new Spinner(this);caption(category,t("Primary discipline"));category.addView(first);caption(category,t("Secondary discipline"));category.addView(second);first.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,names));first.setSelection(Math.max(0,ids.indexOf(draft.getOrDefault("discipline",""))));first.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){public void onNothingSelected(AdapterView<?> v){}public void onItemSelected(AdapterView<?> v,View view,int pos,long id){String prev=draft.getOrDefault("discipline","");draft.put("discipline",ids.get(pos));if(!prev.equals(ids.get(pos)))draft.put("subdiscipline","");JSONArray children=pos>0?tree.optJSONObject(pos-1).optJSONArray("children"):new JSONArray();ArrayList<String> subNames=new ArrayList<>(List.of(t("All disciplines"))),subIDs=new ArrayList<>(List.of(""));if(children!=null)for(int j=0;j<children.length();j++){subNames.add(children.optJSONObject(j).optString("name"));subIDs.add(children.optJSONObject(j).optString("id"));}second.setAdapter(new ArrayAdapter<>(MainActivity.this,android.R.layout.simple_spinner_dropdown_item,subNames));second.setSelection(Math.max(0,subIDs.indexOf(draft.getOrDefault("subdiscipline",""))));second.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){public void onNothingSelected(AdapterView<?> v){}public void onItemSelected(AdapterView<?> v,View view,int n,long id){draft.put("subdiscipline",subIDs.get(n));}});}});};source.setSelection(Math.max(0,Arrays.asList(providers).indexOf(draft.getOrDefault("source","all"))));source.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){public void onNothingSelected(AdapterView<?> v){}public void onItemSelected(AdapterView<?> v,View view,int pos,long id){if(!draft.getOrDefault("source","all").equals(providers[pos])){draft.remove("discipline");draft.remove("subdiscipline");}draft.put("source",providers[pos]);categories.run();}});
     Map<String,EditText> inputs=new LinkedHashMap<>();for(String key:List.of("from","to","journal")){caption(c,t(key.equals("from")?"From year":key.equals("to")?"To year":"Journal"));EditText edit=new EditText(this);edit.setSingleLine(true);edit.setText(draft.getOrDefault(key,""));if(!key.equals("journal"))edit.setInputType(InputType.TYPE_CLASS_NUMBER);c.addView(edit);inputs.put(key,edit);}Spinner order=new Spinner(this);order.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,new String[]{t("Relevance"),t("Newest first")}));order.setSelection("latest".equals(draft.get("sort"))?1:0);caption(c,t("Sort"));c.addView(order);
     new AlertDialog.Builder(this).setTitle(t("Filters")).setView(scroll).setPositiveButton(t("Apply"),(d,w)->{researchOptions.clear();researchOptions.putAll(draft);for(String key:inputs.keySet())researchOptions.put(key,inputs.get(key).getText().toString());researchOptions.put("sort",order.getSelectedItemPosition()==1?"latest":"relevance");researchReset();}).setNeutralButton(t("Clear filters"),(d,w)->{researchOptions.clear();researchReset();}).setNegativeButton(t("Cancel"),null).show();
@@ -2017,7 +2049,7 @@ public class MainActivity extends AppCompatActivity {
     LinearLayout results=column();c.addView(results);caption(results,t("Loading…"));
     job(()->api.json("/api/"+spaceTab,"GET",null),r->{if(!page.equals("space")||generation!=spaceGeneration||epoch!=authEpoch)return;results.removeAllViews();
       JSONArray list=r.optJSONArray("papers"),events=r.optJSONArray("events");if(events==null)events=r.optJSONArray("notifications");
-      if(list!=null)for(int i=0;i<list.length();i++){JSONObject p=list.optJSONObject(i);if(p==null)continue;LinearLayout card=card();title(card,p.optString("title"),18);caption(card,researchMetadata(p));caption(card,p.optString("authors"));card.addView(button(t(!p.optString("paperId").isEmpty()||(p.has("ref")&&!p.optString("ref").startsWith("r-"))?"Open paper":"Fetch & read"),false,()->researchChoose(p)));socialActions(card,p.optString("ref","r-"+p.optString("id")),p.optString("title"));results.addView(card);}
+      if(list!=null)for(int i=0;i<list.length();i++){JSONObject p=list.optJSONObject(i);if(p==null)continue;LinearLayout card=card();title(card,p.optString("title"),18);caption(card,researchMetadata(p));caption(card,p.optString("authors"));card.addView(button(t(!p.optString("paperId").isEmpty()||(p.has("ref")&&!p.optString("ref").startsWith("r-"))?"Open paper":"Fetch & read"),false,()->researchChoose(p)));if(!p.has("paperId")&&p.optString("ref","r-").startsWith("r-"))card.addView(button(t("Upload my PDF"),false,()->recoverPDF(p.optString("id"),"",true)));socialActions(card,p.optString("ref","r-"+p.optString("id")),p.optString("title"));results.addView(card);}
       if(events!=null){JSONArray entries=events;if(spaceTab.equals("inbox")&&r.optInt("unread")>0)results.addView(button(t("Mark all read"),false,()->job(()->{JSONArray idsRead=new JSONArray();for(int i=0;i<entries.length();i++)idsRead.put(entries.getJSONObject(i).getString("id"));return api.json("/api/inbox","PUT",new JSONObject().put("ids",idsRead));},v->showSpace())));
         for(int i=0;i<events.length();i++){JSONObject e=events.optJSONObject(i);if(e==null)continue;LinearLayout card=card();String kind=e.optString("kind");String label=kind.equals("comment")?"New comment":kind.equals("like")?"New like":kind.equals("fetch")?"Paper request":kind.equals("saved")?(e.optBoolean("active")?"Saved":"Removed from Saved"):(e.optBoolean("active")?"Liked":"Removed from Liked");caption(card,(e.has("read")&&!e.optBoolean("read")?"● ":"")+t(label)+" · "+java.text.DateFormat.getDateTimeInstance(java.text.DateFormat.SHORT,java.text.DateFormat.SHORT).format(new java.util.Date(e.optLong("created"))));title(card,e.optString("title"),17);if(e.has("actor"))caption(card,e.optString("actor"));if(e.has("message"))caption(card,t(e.optString("message")));String ref=e.optString("ref");
           if(!ref.isEmpty())card.addView(button(t("Open paper"),false,()->{if(e.has("read")&&!e.optBoolean("read"))job(()->api.json("/api/inbox","PUT",new JSONObject().put("ids",new JSONArray().put(e.optString("id")))),v->{});if(ref.startsWith("r-"))job(()->api.json("/api/discovery/item/"+ref.substring(2),"GET",null),v->{JSONObject p=v.optJSONObject("paper");if(p!=null)new AlertDialog.Builder(this).setTitle(p.optString("title")).setMessage(researchMetadata(p)).setPositiveButton(t("Fetch & read"),(d,w)->researchChoose(p)).setNeutralButton(t("Comment"),(d,w)->itemDiscussion(ref,p.optString("title"),false)).setNegativeButton(t("Done"),null).show();});else openPaper(object("id",ref));}));

@@ -1,9 +1,12 @@
+import {verifySourceLicense} from './source-license.mjs';
 import {unlimitedAllowance,allowanceAccount,conversionAllowance} from './allowances.mjs';
 import { readFile, writeFile, mkdir, rm, rename } from 'node:fs/promises';
 import { join } from 'node:path';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { AppError, requireValue, makePaper, hash, languages } from './domain.mjs';
+import {translatePieces,segmentSource} from './translation-pieces.mjs';
+import { completeRecovery } from './import-recovery.mjs';
 import { providerJSON } from './network.mjs';
 import { downloadPaperPDF } from './paper-download.mjs';
 import { requestSharing } from './sharing.mjs';
@@ -37,13 +40,16 @@ export async function mathpix(job, config, store) {
     // An interrupted/ambiguous POST must be reconciled manually, never billed twice.
     requireValue(!job.submittedAt, 'The conversion was submitted, but its receipt is uncertain. Contact support before retrying.', 409);
     if (job.url) {
+      job.message='Finding an accessible PDF…';store.saveJob(job);
       const {bytes,url:downloadedFrom} = await downloadPaperPDF(job);job.downloadedFrom=downloadedFrom;
       requireValue(bytes.subarray(0, 5).toString() === '%PDF-', 'This URL did not return a PDF. Try the direct PDF link or upload.');
       await writeFile(pdfFile, bytes, { mode: 0o600 });
       job.sourceDigest = hash(bytes); store.saveJob(job);
       store.db.prepare('UPDATE credit_candidates SET digest=? WHERE paper=? AND owner=?').run(hash(bytes),job.id,job.owner);
     }
-    job.sourceDigest ||= hash(await readFile(pdfFile)); store.saveJob(job);
+    job.sourceDigest ||= hash(await readFile(pdfFile));
+    if(job.sharing==='shared'&&!job.sourceLicenseChecked){job.sourceLicense=await verifySourceLicense(job);job.sourceLicenseChecked=true;}
+    store.saveJob(job);
     const sameFile = reusablePaper(store,job.owner,{sourceDigest:job.sourceDigest},job.id);
     if (sameFile) { await rm(pdfFile,{force:true}); return {paperId:sameFile.id,reused:true}; }
     job.pages = await inspectPDF(pdfFile, config.maxPages || 30);
@@ -89,6 +95,8 @@ export async function mathpix(job, config, store) {
     await writeFile(target, asset.data, { mode: 0o600 });
   }
   const paper = makePaper({ ...job.metadata, id: paperId, mmd, owner: job.owner, source: job.url || job.metadata.source || '', assets: assets.map(({ path, bytes }) => ({ path, bytes })) });
+  if (job.uploadSource) { paper.source=job.uploadSource; paper.provenance={source:job.uploadSource,userSupplied:true,retrieval:'user-upload'}; }
+  if(job.sourceLicense&&!job.uploadSource){paper.license=job.sourceLicense.license;paper.provenance=job.sourceLicense;}
   store.savePaper(paper);
   requestSharing(store, paper, job.sharing);
   await rm(pdfFile, { force: true }); // Temporary source removed only after durable successful conversion.
@@ -103,9 +111,15 @@ export async function generateArtifact(job, config, store, provider = providerJS
   requireValue(model?.url&&model?.name,'The reading assistant is not connected yet.',503);
   const section=job.sectionId?p.sections.find(s=>s.id===job.sectionId):null;
   requireValue(!job.sectionId||section,'This passage no longer exists.');
-  const text=section?.text||p.mmd;
+  const text=segmentSource(p,job.segmentId)||section?.text||p.mmd;
   requireValue(text.length<=250_000,'Choose a section for this request; the whole paper is too long.');
-  const translation=job.kind==='translation', protectedSource=translationChunks(text);
+  if(job.kind==='translation') {
+    const translated=await translatePieces(job,p,text,config,store,provider);
+    const artifact={id:job.id,paperId:p.id,revision:p.revision,kind:job.kind,visibility:job.visibility||'private',sectionId:job.sectionId||null,segmentId:job.segmentId||null,language:job.language,text:translated,model:model.name,createdAt:new Date().toISOString(),generated:true};
+    store.requireActive(job.owner);requireValue(!job.lease||store.job(job.id)?.lease===job.lease,'This request is no longer active.',409);
+    store.db.prepare('INSERT OR REPLACE INTO artifacts VALUES(?,?,?)').run(job.id,job.owner,JSON.stringify(artifact));return {artifactId:job.id};
+  }
+  const translation=false, protectedSource=translationChunks(text);
   const chunks=translation?protectedSource.chunks:[text.slice(0,80_000)];
   requireValue(chunks.length<=(config.maxTranslationChunks||60),'Choose a smaller section to translate.');
   const directory=join(store.directory,'jobs',job.id), checkpoint=join(directory,'translation.json');
@@ -214,6 +228,7 @@ export function startWorker(store, config) {
           finishImportCredits(store,job,job.state==='completed');
           if(job.kind==='publish'&&job.state==='completed') rewardPublication(store,job);
           store.saveJob(job);
+          completeRecovery(store,job);
         });
         else if (store.db.prepare('SELECT id FROM deleted_accounts WHERE id=?').get(job.owner)) {
           await rm(join(store.directory, 'jobs', job.id), { recursive: true, force: true });

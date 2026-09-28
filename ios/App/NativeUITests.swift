@@ -1,6 +1,25 @@
 import XCTest
 
 final class NativeUITests: XCTestCase {
+  func testPieceTranslationControls() {
+    continueAfterFailure=false
+    let app=XCUIApplication()
+    app.launchArguments=["-onlyideas.native.language","en","-onlyideas.native.appearance","light","--onlyideas-space-qa"]
+    app.launchEnvironment["ONLYIDEAS_QA_ORIGIN"]="http://127.0.0.1:18649"
+    let path=URL(fileURLWithPath:NSHomeDirectory()).appendingPathComponent("Documents/onlyideas-qa-token")
+    guard let token=try? String(contentsOf:path,encoding:.utf8) else{XCTFail("Missing private QA token");return}
+    app.launchEnvironment["ONLYIDEAS_QA_TOKEN"]=token.trimmingCharacters(in:.whitespacesAndNewlines)
+    app.launch()
+    XCTAssertTrue(app.tabBars.buttons["Your space"].waitForExistence(timeout:20));app.tabBars.buttons["Your space"].tap()
+    XCTAssertTrue(app.buttons["Liked"].waitForExistence(timeout:15));app.buttons["Liked"].tap()
+    XCTAssertTrue(app.buttons["Open paper"].firstMatch.waitForExistence(timeout:15));app.buttons["Open paper"].firstMatch.tap()
+    XCTAssertTrue(app.webViews.buttons["Discuss paragraph"].firstMatch.waitForExistence(timeout:40))
+    app.buttons["Reading options"].tap();app.buttons["Notes, guides & translation"].tap()
+    let link=app.buttons["Translate a paragraph or sentence"];if !link.isHittable {app.swipeUp()};XCTAssertTrue(link.waitForExistence(timeout:15));link.tap()
+    XCTAssertTrue(app.buttons["Translate this passage"].waitForExistence(timeout:15));shot("Recovery17-piece-controls")
+    XCTAssertTrue(app.staticTexts["Only missing pieces use the model. Saved translations are reused."].exists)
+    app.terminate()
+  }
   func testReadingSpacePreferences() {
     continueAfterFailure=false
     let app=XCUIApplication()

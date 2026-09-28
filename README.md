@@ -16,6 +16,12 @@ A configurable economical model creates reading guides and translations on reque
 
 ![OnlyIdeas reading room](evidence/library-desktop.png)
 
+<!-- recovery17 -->
+Version 1.0.2 (17) adds separate Saved and Liked collections, activity, an inbox and reading preferences. Recover blocked downloads by uploading your PDF directly from a paper card or failed request. Translate a whole paper, paragraph or sentence; saved pieces are reused and equations and figures stay intact. Shared remains the default: verified supported open licenses can publish automatically, while other papers show pending review. Native daily reminders are optional; activity alerts currently refresh inside the app.
+
+[1.0.2 (17)](docs/paper-recovery-and-translation.md)
+
+
 ## Quick start
 
 Read the operations guide before connecting provider credentials. Keep configuration outside Git, in a protected file.

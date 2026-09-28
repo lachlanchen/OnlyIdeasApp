@@ -12,7 +12,9 @@ export class Store {
     mkdirSync(directory, { recursive: true, mode: 0o700 });
     this.directory = directory;
     this.db = new DatabaseSync(join(directory, 'state.sqlite'));
-    this.db.exec(`PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;
+    this.db.exec('PRAGMA busy_timeout=15000; PRAGMA journal_mode=WAL; BEGIN IMMEDIATE;');
+    try {
+    this.db.exec(`
       CREATE TABLE IF NOT EXISTS papers(id TEXT PRIMARY KEY, owner TEXT NOT NULL, visibility TEXT NOT NULL, body TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS sessions(id TEXT PRIMARY KEY, user TEXT NOT NULL, expires INTEGER NOT NULL);
       CREATE TABLE IF NOT EXISTS oauth(id TEXT PRIMARY KEY, body TEXT NOT NULL, expires INTEGER NOT NULL);
@@ -21,6 +23,7 @@ export class Store {
       CREATE TABLE IF NOT EXISTS notes(owner TEXT NOT NULL, paper TEXT NOT NULL, body TEXT NOT NULL, PRIMARY KEY(owner,paper));
       CREATE TABLE IF NOT EXISTS artifact_requests(key TEXT PRIMARY KEY, paper TEXT NOT NULL, revision TEXT NOT NULL, job TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS job_subscriptions(owner TEXT NOT NULL, job TEXT NOT NULL, PRIMARY KEY(owner,job));
+      CREATE TABLE IF NOT EXISTS import_recoveries(owner TEXT NOT NULL, reference TEXT NOT NULL, job TEXT NOT NULL, PRIMARY KEY(owner,reference));
       CREATE TABLE IF NOT EXISTS attachments(id TEXT PRIMARY KEY, owner TEXT NOT NULL, digest TEXT NOT NULL, body TEXT NOT NULL, UNIQUE(owner,digest));
       CREATE TABLE IF NOT EXISTS artifacts(id TEXT PRIMARY KEY, owner TEXT NOT NULL, body TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS reports(id TEXT PRIMARY KEY, owner TEXT NOT NULL, body TEXT NOT NULL);
@@ -35,6 +38,8 @@ export class Store {
     initReadingSpace(this);
     initBilling(this);
     creditTransaction(this, () => initImportReuse(this));
+    this.db.exec('COMMIT');
+    } catch(error) { try {this.db.exec('ROLLBACK')} finally {this.db.close()} throw error; }
   }
   active(id) { return !this.db.prepare('SELECT id FROM deleted_accounts WHERE id=?').get(id) && !this.db.prepare('SELECT id FROM suspensions WHERE id=?').get(id); }
   requireActive(id) { requireValue(this.active(id), 'This account is no longer available.', 403); }

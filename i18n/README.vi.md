@@ -16,6 +16,12 @@ Mô hình tiết kiệm có thể cấu hình sẽ tạo hướng dẫn đọc v
 
 ![OnlyIdeas reading room](../evidence/library-desktop.png)
 
+<!-- recovery17 -->
+Phiên bản 1.0.2 (17) thêm danh sách đã lưu và đã thích riêng biệt, lịch sử hoạt động, hộp thư và tùy chọn đọc. Khi tải xuống bị chặn, bạn có thể tải PDF của mình lên ngay từ thẻ bài báo hoặc yêu cầu thất bại. Dịch toàn bài, đoạn văn hoặc câu, tái sử dụng phần đã dịch và giữ nguyên công thức, hình ảnh. Chia sẻ vẫn là mặc định: bài có giấy phép mở được hỗ trợ và đã xác minh có thể tự động công bố; bài khác hiển thị đang chờ duyệt. Nhắc đọc hằng ngày trên thiết bị là tùy chọn; thông báo hoạt động hiện được cập nhật trong ứng dụng.
+
+[1.0.2 (17)](../docs/paper-recovery-and-translation.md)
+
+
 ## Bắt đầu nhanh
 
 Đọc hướng dẫn vận hành trước khi kết nối thông tin xác thực. Giữ cấu hình trong tệp được bảo vệ, bên ngoài Git.

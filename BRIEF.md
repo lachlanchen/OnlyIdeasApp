@@ -172,3 +172,26 @@ are disabled only for server-provisioned owner accounts. Ordinary accounts keep
 their limits. Exact authenticated IDs come from private operator configuration;
 clients cannot grant exemptions. Keep file limits, deduplication, source access
 checks and uncertain-provider-receipt protection.
+
+## Contextual recovery and shared translations · 2026-09-28
+
+The owner requested stronger fetching, a PDF upload action on indexed paper items
+and failed requests, and reusable paragraph/sentence translation. Recovery keeps
+server-resolved bibliographic context and original requests; exact-file reuse and
+provider receipt protection remain. An uploaded file's claimed source never
+becomes a trusted global source alias. Retry temporary upstream failures within
+a total deadline, refresh exact indexed work locations and follow citation PDF
+metadata; offer manual upload when repositories deny automatic access.
+
+New Shared indexed imports with a directly verified CC BY 4.0, CC BY-SA 4.0 or
+CC0 1.0 article license may publish automatically after successful conversion,
+with source, attribution, license and conversion notice. The source page must
+identify the downloaded PDF. Other Shared imports display pending review;
+existing Only me content and private comments never become public automatically.
+Once published, the transcript and moderated discussions are shared across readers.
+
+Translate a whole paper, section, paragraph or sentence. Store durable sentence
+pieces keyed by paper revision, language and visibility, and assemble larger
+requests from those pieces. Equations and figures stay unchanged; if the model
+alters preservation markers, translate only intervening prose. Private translation
+caches remain private after a paper is shared.

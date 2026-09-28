@@ -1,0 +1,49 @@
+{
+  "version": "1.0.2",
+  "build": 17,
+  "serverTests": 80,
+  "rendererAndWebBuild": "passed",
+  "androidLintAndSignedBuild": "passed",
+  "iosPassageControlsXCTest": "passed",
+  "iosMacArchiveExportValidateUpload": "passed",
+  "serverPackageSHA256": "793dbf0eafcd66cfa55be4df60e3dad202d3ab5df9492aa2ec440cc447c01fd8",
+  "workerPackageSHA256": "d0047e45de7c8b65368d33b97ca670b5ec39ba59da253348aa728326d4107da3",
+  "databasePreserved": true,
+  "translation": {
+    "state": "completed",
+    "public": true,
+    "mathExpressionsUnchanged": 185,
+    "figuresUnchanged": 3,
+    "uniqueCachedPieces": 355,
+    "characters": 16218
+  },
+  "appleInternal": [
+    {
+      "platform": "MAC_OS",
+      "id": "afd59211-e86e-447c-bda4-ae961c302844",
+      "version": "1.0.2",
+      "build": "17",
+      "processing": "VALID",
+      "internal": "IN_BETA_TESTING"
+    },
+    {
+      "platform": "IOS",
+      "id": "f9ab9b01-1360-4563-82c6-193bf1b9472e",
+      "version": "1.0.2",
+      "build": "17",
+      "processing": "VALID",
+      "internal": "IN_BETA_TESTING"
+    }
+  ],
+  "googleInternal": "Available to internal testers",
+  "productionReview": {
+    "apple": "build15 remains pending; successor held for owner-requested agent and search changes",
+    "google": "build15 in review; build17 draft, not sent"
+  },
+  "artifacts": {
+    "ipa": "eea1f7f0c70bfce2b66bc35fd05fa860490328fed4d33d120e15b0590c6d2dd1",
+    "macPkg": "1f940070d8f6a7f10c7f0060c74e27a98c2a8249e5d2e90118dcd8ed8c6a07d8",
+    "aab": "95c64b9b4be85d1806482e6d2f19018b001f8530dc84a5817063264da96532f1",
+    "apk": "c0d329473ecd8d5068fa1f7f9ce62a27bd7fcddf77b0b1ce92c159b6105a295f"
+  }
+}

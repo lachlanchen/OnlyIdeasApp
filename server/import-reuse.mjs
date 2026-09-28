@@ -36,7 +36,9 @@ export function indexPaper(store, paper) {
   // receipts and user-supplied metadata cannot add aliases to someone else's work.
   const original = job?.owner === paper.owner && ['import', 'attachment'].includes(job.kind) ? job : null;
   const digest = original?.sourceDigest || store.db.prepare('SELECT digest FROM credit_candidates WHERE paper=? AND owner=?').get(paper.id, paper.owner)?.digest;
-  const keys = new Set([...importKeys({ url: paper.source, mmd: paper.mmd, sourceDigest: digest }), sourceKey(paper.provenance?.source)]);
+  // An uploaded PDF's selected article is a claim, not a global source alias.
+  const claimed=paper.provenance?.userSupplied===true;
+  const keys = new Set([...importKeys({ url: claimed?null:paper.source, mmd: paper.mmd, sourceDigest: digest }), !claimed&&sourceKey(paper.provenance?.source)]);
   store.db.prepare('DELETE FROM paper_import_keys WHERE paper=?').run(paper.id);
   for (const key of keys) if (key) store.db.prepare('INSERT OR IGNORE INTO paper_import_keys VALUES(?,?)').run(key, paper.id);
 }

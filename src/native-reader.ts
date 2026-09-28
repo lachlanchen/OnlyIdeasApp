@@ -3,7 +3,7 @@ import { paragraphActions } from './paragraphs'
 import DOMPurify from 'dompurify'
 import './native-reader.css'
 const rendererUrl = './native-math.js'
-type DocumentData = { mmd: string; figures?: Record<string,string>; fontSize?: number; dark?: boolean; comments?:boolean; commentLabel?:string; language?:string }
+type DocumentData = { attribution?:string; mmd: string; figures?: Record<string,string>; fontSize?: number; dark?: boolean; comments?:boolean; commentLabel?:string; language?:string }
 const host = window as unknown as { markdownToHTML: (s: string,o: object)=>string; OnlyIdeasRender:(p:DocumentData)=>void; OnlyIdeasStyle:(size:number,dark:boolean)=>void; webkit?: {messageHandlers:{onlyideas:{postMessage:(s:object)=>void}}}; NativeReader?:{selection:(s:string)=>void;ready?:()=>void;paragraph?:(quote:string,id:string)=>void} }
 const root=document.getElementById('paper')!
 host.OnlyIdeasStyle=(size,dark)=>{document.documentElement.style.setProperty('--size',`${Math.max(15,Math.min(72,size))}px`);document.documentElement.dataset.theme=dark?'dark':'light'}
@@ -17,6 +17,7 @@ host.OnlyIdeasRender=p=>{
   for(const a of root.querySelectorAll('a')) {const href=a.getAttribute('href')||'';if(!href.startsWith('#'))a.removeAttribute('href')}
   root.dir=p.language==='ar'?'rtl':'ltr'
   if(p.comments)paragraphActions(root,p.commentLabel||'Discuss paragraph',(quote,paragraphId)=>{host.webkit?.messageHandlers.onlyideas.postMessage({action:'paragraph',quote,paragraphId});host.NativeReader?.paragraph?.(quote,paragraphId)})
+  if(p.attribution){const credit=document.createElement('footer');credit.className='source-attribution';credit.textContent=p.attribution;root.append(credit)}
   host.webkit?.messageHandlers.onlyideas.postMessage({watchProse:watchProse(root)})
   root.dataset.ready='true'
 }

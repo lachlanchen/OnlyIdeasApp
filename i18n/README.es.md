@@ -16,6 +16,12 @@ Un modelo económico configurable crea guías de lectura y traducciones cuando s
 
 ![OnlyIdeas reading room](../evidence/library-desktop.png)
 
+<!-- recovery17 -->
+La versión 1.0.2 (17) añade listas separadas de guardados y favoritos, actividad, bandeja de entrada y preferencias de lectura. Si una descarga se bloquea, sube tu PDF desde la ficha o la solicitud fallida. Traduce el artículo completo, un párrafo o una frase reutilizando traducciones guardadas y conservando ecuaciones y figuras. Compartir sigue siendo la opción predeterminada: las licencias abiertas compatibles verificadas permiten publicar automáticamente; los demás artículos quedan pendientes de revisión. Los recordatorios diarios del dispositivo son opcionales; las alertas de actividad se actualizan dentro de la aplicación.
+
+[1.0.2 (17)](../docs/paper-recovery-and-translation.md)
+
+
 ## Inicio rápido
 
 Lee la guía de operaciones antes de conectar credenciales. Guarda la configuración en un archivo protegido fuera de Git.

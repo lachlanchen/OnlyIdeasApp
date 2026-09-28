@@ -29,3 +29,5 @@ article>*{max-width:100%;min-width:0}
 #paper img{display:block;margin:12px auto;max-width:100%}
 :root{--ink:#1d2544;--bg:#fcfdff;--accent:#5745ce;--soft:#eaeaff}:root[data-theme=dark]{--ink:#edf0ff;--bg:#111629;--accent:#b7adff;--soft:#2a3455}
 .paragraph-comment{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;margin-inline-start:5px;padding:5px;border:1px solid transparent;border-radius:50%;vertical-align:middle;background:var(--soft);color:var(--accent);opacity:.8;cursor:pointer;touch-action:manipulation;user-select:none}.paragraph-comment:focus-visible{outline:2px solid var(--accent)}
+
+.source-attribution{font-size:.8em;line-height:1.5;opacity:.75;margin-top:2em;border-top:1px solid #8885;padding-top:1em;overflow-wrap:anywhere}

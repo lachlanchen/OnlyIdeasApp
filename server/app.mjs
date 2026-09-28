@@ -1,3 +1,5 @@
+import {paperSegments,segmentSource} from './translation-pieces.mjs';
+import {uploadContext,activeRecovery,bindRecovery,canUploadForJob,recoveryJob} from './import-recovery.mjs';
 import {unlimitedAllowance,countsAsRequest} from './allowances.mjs';
 import {createReadingSpace,recordActivity} from './reading-space.mjs';
 import { createPaperSocial } from './paper-social.mjs';
@@ -90,7 +92,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
         res.setHeader('Vary', 'Origin');
         res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, POST, PUT, DELETE, OPTIONS');
-        res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type, X-OnlyIdeas-Client, X-Request-Id, X-Paper-Title, X-Paper-Language, X-Paper-Sharing, X-File-Name, X-Credit-Limit');
+        res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type, X-OnlyIdeas-Client, X-Request-Id, X-Paper-Title, X-Paper-Language, X-Paper-Sharing, X-File-Name, X-Credit-Limit, X-Research-Id, X-Recovery-Job-Id');
       }
       if (method === 'OPTIONS') { requireValue(nativeOrigin, 'Origin not allowed.', 403); res.writeHead(204); return res.end(); }
       const native = nativeOrigin && req.headers['x-onlyideas-client'] === 'native';
@@ -134,6 +136,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         requireUser();limit(`import:${user.id}`,10);
         const body=await json(req),card=discovery.item(body.id,user);
         if(card.paperId)return response(res,{paperId:card.paperId,reused:true});
+        const recovering=recoveryJob(store,user.id,'r:'+card.id);if(recovering&&recovering.state!=='failed')return response(res,{job:safeJob(recovering)},202);
         requireValue(card.pdfUrl,'This source has no direct open PDF. Open its source page or upload your copy.');
         requireValue(config.mathpix?.appKey,'PDF conversion is not connected yet.',503);
         const sharing=body.sharing==='private'?'private':'shared';
@@ -258,6 +261,8 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         const requestId = req.headers['x-request-id']; requireValue(uuid.test(requestId || ''), 'A request ID is required.');
         const previousRequest = store.job(requestId); if (previousRequest) { requireValue(previousRequest.owner === user.id, 'Request ID unavailable.', 409); return response(res, { job: previousRequest }, 202); }
         const isPDF = req.headers['content-type'] === 'application/pdf';
+        const context=uploadContext(store,discovery,user,req.headers);
+        requireValue(!context||isPDF,'Choose a PDF for this paper.');
         let metadata, link = null, bytes, sharing = 'private', creditLimit, pages;
         if (isPDF) {
           bytes = await readBody(req, 20_000_000); requireValue(bytes.subarray(0, 5).toString() === '%PDF-', 'Choose a valid PDF.');
@@ -265,6 +270,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
           creditLimit = Number(req.headers['x-credit-limit']);
           metadata = { title: decodeURIComponent(req.headers['x-paper-title'] || 'My paper'), language: req.headers['x-paper-language'] || 'en' };
         } else { const body = await json(req); metadata = body; sharing = body.sharing === 'shared' ? 'shared' : 'private'; creditLimit=body.creditLimit; link = body.url; requireValue(typeof link === 'string' && link.length <= 2000 && link.startsWith('https://'), 'Enter a direct HTTPS PDF link.'); }
+        if(context){metadata=context.metadata;sharing=context.sharing||sharing;const prior=activeRecovery(store,user.id,context);if(prior)return response(res,{job:safeJob(prior)},202);}
         requireValue(typeof metadata.title === 'string' && metadata.title.trim() && metadata.title.length <= 300, 'Add a paper title.');
         requireValue(Object.hasOwn(languages, metadata.language || 'en'), 'Choose a supported language.');
         const dedupe = `import:${hash(bytes || link)}`;
@@ -274,7 +280,9 @@ export function createApp(store, config, { worker = true, provider = providerJSO
           const cached = reusablePaper(store,user.id,{url:link,sourceDigest:bytes?hash(bytes):undefined});
           if (!cached) requireValue(config.mathpix?.appKey, 'PDF conversion is not connected yet. Import Markdown in the meantime.', 503);
           if (!cached && bytes && config.credits?.enabled === true && sharing !== 'shared') pages = await inspectPDF(join(store.directory,'jobs',requestId,'source.pdf'),config.maxPages || 30);
-          job = enqueue(user, { id: requestId, dedupe, kind: 'import', sharing, url: link, creditLimit, pages, sourceDigest:bytes?hash(bytes):undefined, metadata: { ...paperMetadata(metadata), title: metadata.title, authors: String(metadata.authors || ''), language: metadata.language || 'en', license: 'private', category: String(metadata.category || 'Research') } });
+          job = creditTransaction(store,()=>{const prior=activeRecovery(store,user.id,context);if(prior)return prior;
+          const queued = enqueue(user, { id: requestId, dedupe, kind: 'import', sharing, url: link, creditLimit, pages, sourceDigest:bytes?hash(bytes):undefined, uploadSource:context?.source, metadata: { ...paperMetadata(metadata), title: metadata.title, authors: String(metadata.authors || ''), language: metadata.language || 'en', license: 'private', category: String(metadata.category || 'Research') } });
+          bindRecovery(store,user.id,context,queued);return queued;});
         }
         catch (error) { if (bytes) await rm(join(store.directory, 'jobs', requestId), { recursive: true, force: true }); throw error; }
         if (bytes && (job.reused || job.id !== requestId)) await rm(join(store.directory,'jobs',requestId),{recursive:true,force:true});
@@ -282,10 +290,11 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         return response(res, { job }, 202);
       }
       if (path === '/api/jobs' && method === 'GET') { requireUser(); return response(res, { jobs: store.jobs(user.id).filter(j=>{const p=j.paperId?store.paper(j.paperId):null;return j.owner===user.id||(p&&store.active(p.owner)&&!store.blocked(user.id,p.owner)&&(p.owner===user.id||p.visibility==='public'));}).map(safeJob) }); }
-      const matchPaper = path.match(/^\/api\/papers\/([\w-]+)(?:\/(comments|notes|assist|publish|artifacts|export))?$/);
+      const matchPaper = path.match(/^\/api\/papers\/([\w-]+)(?:\/(comments|notes|assist|publish|artifacts|export|segments))?$/);
       if (matchPaper) {
         const p = paperFor(matchPaper[1]), action = matchPaper[2];
         if (!action && method === 'GET') return response(res, { paper: { ...p, isOwner: p.owner === user?.id, owner: undefined } });
+        if(action==='segments'&&method==='GET')return response(res,{segments:paperSegments(p.mmd,p.language).filter(s=>s.display.length>=30&&s.translatable).map(s=>({...s,text:s.display,sentences:s.sentences.filter(x=>x.display).map(x=>({...x,text:x.display}))}))});
         if (action === 'export' && method === 'GET') { res.writeHead(200, { 'Content-Type': 'text/markdown; charset=utf-8', 'Content-Disposition': `attachment; filename="${p.id}.mmd"` }); return res.end(p.mmd); }
         if (action === 'comments' && method === 'GET') return response(res, { comments: visibleComments(store, p.id, user) });
         if (action === 'comments' && method === 'POST') {
@@ -309,7 +318,9 @@ export function createApp(store, config, { worker = true, provider = providerJSO
           requireUser(); requireValue(config.model?.url, 'The reading assistant is not connected yet.', 503); const b = await json(req);
           requireValue(['digest', 'translation'].includes(b.kind) && Object.hasOwn(languages, b.language), 'Choose a reading action and language.');
           requireValue(!b.sectionId || p.sections.some(s => s.id === b.sectionId), 'Choose a section in this paper.');
-          const job = requestArtifact(store, config, user, p, { kind:b.kind, language:b.language, sectionId:b.sectionId||null }); return response(res, { job:safeJob(job) }, job.state==='completed'?200:202);
+          requireValue(!b.segmentId||b.kind==='translation'&&!b.sectionId,'Choose either a passage or a section.');
+          if(b.segmentId)segmentSource(p,b.segmentId);
+          const job = requestArtifact(store, config, user, p, { kind:b.kind, language:b.language, sectionId:b.sectionId||null,segmentId:b.segmentId||null }); return response(res, { job:safeJob(job) }, job.state==='completed'?200:202);
         }
         if (action === 'artifacts' && method === 'GET') return response(res, { artifacts: visibleArtifacts(store,p,user) });
         if (action === 'publish' && method === 'POST') {
@@ -343,8 +354,10 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         requireValue(j.state === 'failed', 'This request is already running or complete.', 409);
         requireValue(!((j.kind === 'import' || j.kind==='attachment') && j.submittedAt && !j.pdfId), 'The conversion receipt is uncertain. Contact support before retrying to avoid another charge.', 409);
         requireValue(!j.ocrSubmittedAt || j.ocrText!==undefined || j.ocrResult, 'The image conversion receipt is uncertain. Contact support before retrying to avoid another charge.',409);
-        requireValue((j.retries || 0) < 3, 'Please contact support before retrying again.', 429);
+        requireValue(canUploadForJob(j) || (j.retries || 0) < 3, 'Please contact support before retrying again.', 429);
         const consent = await json(req);
+        const recovering=recoveryJob(store,user.id,'job:'+j.id)||(j.discoveryId?recoveryJob(store,user.id,'r:'+j.discoveryId):null);
+        if(recovering&&recovering.state!=='failed')return response(res,{ok:true,job:safeJob(recovering)},202);
         creditTransaction(store, () => {
           const current=store.job(j.id);requireValue(current?.state==='failed','This request is already running or complete.',409);
           retryImportCredits(store,current,consent.creditLimit);

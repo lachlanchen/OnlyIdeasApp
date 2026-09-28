@@ -16,6 +16,12 @@ Un modèle économique configurable produit des guides de lecture et des traduct
 
 ![OnlyIdeas reading room](../evidence/library-desktop.png)
 
+<!-- recovery17 -->
+La version 1.0.2 (17) ajoute des listes distinctes de documents enregistrés et aimés, un historique, une boîte de réception et des préférences de lecture. En cas de téléchargement bloqué, importez votre PDF depuis la fiche ou la demande échouée. Traduisez un article entier, un paragraphe ou une phrase en réutilisant les traductions enregistrées et en conservant équations et figures. Le partage reste activé par défaut : une licence ouverte compatible vérifiée permet la publication automatique, sinon le document attend une validation. Les rappels quotidiens sur l’appareil sont facultatifs ; les alertes d’activité sont actualisées dans l’application.
+
+[1.0.2 (17)](../docs/paper-recovery-and-translation.md)
+
+
 ## Démarrage
 
 Consultez le guide d’exploitation avant de connecter les services. Gardez la configuration dans un fichier protégé, hors de Git.

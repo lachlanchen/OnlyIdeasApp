@@ -636,7 +636,16 @@
     "Open For you to explore research matching your interests.": "Open For you to explore research matching your interests.",
     "Preferences saved. Enable notifications in system settings for reminders.": "Preferences saved. Enable notifications in system settings for reminders.",
     "This repository blocks automatic PDF downloads. Open the source page or upload your PDF.": "This repository blocks automatic PDF downloads. Open the source page or upload your PDF.",
-    "Daily reminders are delivered by the native app. Activity appears in your inbox.": "Daily reminders are delivered by the native app. Activity appears in your inbox."
+    "Daily reminders are delivered by the native app. Activity appears in your inbox.": "Daily reminders are delivered by the native app. Activity appears in your inbox.",
+    "Upload my PDF": "Upload my PDF",
+    "Translate a paragraph or sentence": "Translate a paragraph or sentence",
+    "Paragraph": "Paragraph",
+    "Sentence": "Sentence",
+    "Entire paragraph": "Entire paragraph",
+    "Open translation": "Open translation",
+    "Only missing pieces use the model. Saved translations are reused.": "Only missing pieces use the model. Saved translations are reused.",
+    "Shared — pending review": "Shared — pending review",
+    "Sharing the verified open-access paper": "Sharing the verified open-access paper"
   },
   "zh-Hans": {
     "Choose a valid PDF.": "请选择有效的 PDF。",
@@ -1275,7 +1284,16 @@
     "Open For you to explore research matching your interests.": "打开“为你推荐”，探索感兴趣的研究。",
     "Preferences saved. Enable notifications in system settings for reminders.": "偏好已保存。请在系统设置中允许通知，以接收提醒。",
     "This repository blocks automatic PDF downloads. Open the source page or upload your PDF.": "此资料库限制自动下载 PDF。请打开来源页面或上传 PDF。",
-    "Daily reminders are delivered by the native app. Activity appears in your inbox.": "打开应用时，可以在消息中查看动态。"
+    "Daily reminders are delivered by the native app. Activity appears in your inbox.": "打开应用时，可以在消息中查看动态。",
+    "Upload my PDF": "上传我的 PDF",
+    "Translate a paragraph or sentence": "翻译段落或句子",
+    "Paragraph": "段落",
+    "Sentence": "句子",
+    "Entire paragraph": "整个段落",
+    "Open translation": "打开译文",
+    "Only missing pieces use the model. Saved translations are reused.": "仅翻译尚未完成的片段，已有译文会直接复用。",
+    "Shared — pending review": "已申请共享，待审核",
+    "Sharing the verified open-access paper": "正在共享已验证开放许可的论文"
   },
   "zh-Hant": {
     ". Public comments are reviewed.": "公開評論會經過審核。",
@@ -1914,7 +1932,16 @@
     "Open For you to explore research matching your interests.": "開啟「為你推薦」，探索感興趣的研究。",
     "Preferences saved. Enable notifications in system settings for reminders.": "偏好已儲存。請在系統設定中允許通知，以接收提醒。",
     "This repository blocks automatic PDF downloads. Open the source page or upload your PDF.": "此資料庫限制自動下載 PDF。請開啟來源頁面或上傳 PDF。",
-    "Daily reminders are delivered by the native app. Activity appears in your inbox.": "開啟應用程式時，可以在訊息中查看動態。"
+    "Daily reminders are delivered by the native app. Activity appears in your inbox.": "開啟應用程式時，可以在訊息中查看動態。",
+    "Upload my PDF": "上傳我的 PDF",
+    "Translate a paragraph or sentence": "翻譯段落或句子",
+    "Paragraph": "段落",
+    "Sentence": "句子",
+    "Entire paragraph": "整個段落",
+    "Open translation": "開啟譯文",
+    "Only missing pieces use the model. Saved translations are reused.": "僅翻譯尚未完成的片段，已有譯文會直接重用。",
+    "Shared — pending review": "已申請共享，待審核",
+    "Sharing the verified open-access paper": "正在共享已驗證開放授權的論文"
   },
   "ja": {
     ". Public comments are reviewed.": "公開コメントは審査されます。",
@@ -2553,7 +2580,16 @@
     "Open For you to explore research matching your interests.": "「おすすめ」で関心に合う研究を探しましょう。",
     "Preferences saved. Enable notifications in system settings for reminders.": "設定を保存しました。リマインダーを受け取るにはシステム設定で通知を許可してください。",
     "This repository blocks automatic PDF downloads. Open the source page or upload your PDF.": "このリポジトリはPDFの自動ダウンロードを制限しています。掲載元を開くかPDFをアップロードしてください。",
-    "Daily reminders are delivered by the native app. Activity appears in your inbox.": "アプリを開くと受信箱でアクティビティを確認できます。"
+    "Daily reminders are delivered by the native app. Activity appears in your inbox.": "アプリを開くと受信箱でアクティビティを確認できます。",
+    "Upload my PDF": "自分のPDFをアップロード",
+    "Translate a paragraph or sentence": "段落・文を翻訳",
+    "Paragraph": "段落",
+    "Sentence": "文",
+    "Entire paragraph": "段落全体",
+    "Open translation": "翻訳を開く",
+    "Only missing pieces use the model. Saved translations are reused.": "未翻訳の部分だけを翻訳し、保存済みの訳を再利用します。",
+    "Shared — pending review": "共有申請済み・審査待ち",
+    "Sharing the verified open-access paper": "利用許諾を確認した論文を共有中"
   },
   "ko": {
     ". Public comments are reviewed.": "공개 댓글은 검토됩니다.",
@@ -3192,7 +3228,16 @@
     "Open For you to explore research matching your interests.": "맞춤 추천에서 관심 있는 연구를 살펴보세요.",
     "Preferences saved. Enable notifications in system settings for reminders.": "설정이 저장되었습니다. 알림을 받으려면 시스템 설정에서 알림을 허용하세요.",
     "This repository blocks automatic PDF downloads. Open the source page or upload your PDF.": "이 저장소는 PDF 자동 다운로드를 제한합니다. 출처 페이지를 열거나 PDF를 업로드하세요.",
-    "Daily reminders are delivered by the native app. Activity appears in your inbox.": "앱을 열면 알림함에서 활동을 확인할 수 있습니다."
+    "Daily reminders are delivered by the native app. Activity appears in your inbox.": "앱을 열면 알림함에서 활동을 확인할 수 있습니다.",
+    "Upload my PDF": "내 PDF 업로드",
+    "Translate a paragraph or sentence": "문단 또는 문장 번역",
+    "Paragraph": "문단",
+    "Sentence": "문장",
+    "Entire paragraph": "전체 문단",
+    "Open translation": "번역 열기",
+    "Only missing pieces use the model. Saved translations are reused.": "번역되지 않은 부분만 처리하고 저장된 번역을 재사용합니다.",
+    "Shared — pending review": "공유 요청됨 · 검토 대기",
+    "Sharing the verified open-access paper": "공개 라이선스가 확인된 논문 공유 중"
   },
   "ar": {
     ". Public comments are reviewed.": "التعليقات العامة تخضع للمراجعة.",
@@ -3831,7 +3876,16 @@
     "Open For you to explore research matching your interests.": "افتح «لك» لاستكشاف أبحاث تناسب اهتماماتك.",
     "Preferences saved. Enable notifications in system settings for reminders.": "تم الحفظ. فعّل الإشعارات في إعدادات النظام لتلقي التذكيرات.",
     "This repository blocks automatic PDF downloads. Open the source page or upload your PDF.": "يمنع هذا المستودع التنزيل التلقائي لملفات PDF. افتح صفحة المصدر أو ارفع ملفك.",
-    "Daily reminders are delivered by the native app. Activity appears in your inbox.": "يظهر النشاط في الوارد عند فتح التطبيق."
+    "Daily reminders are delivered by the native app. Activity appears in your inbox.": "يظهر النشاط في الوارد عند فتح التطبيق.",
+    "Upload my PDF": "رفع ملف PDF الخاص بي",
+    "Translate a paragraph or sentence": "ترجمة فقرة أو جملة",
+    "Paragraph": "فقرة",
+    "Sentence": "جملة",
+    "Entire paragraph": "الفقرة كاملة",
+    "Open translation": "فتح الترجمة",
+    "Only missing pieces use the model. Saved translations are reused.": "تُترجم الأجزاء الناقصة فقط وتُعاد استخدام الترجمات المحفوظة.",
+    "Shared — pending review": "مشاركة — قيد المراجعة",
+    "Sharing the verified open-access paper": "جارٍ نشر الورقة ذات الترخيص المفتوح الموثق"
   },
   "fr": {
     ". Public comments are reviewed.": ". Les commentaires publics sont examinés.",
@@ -4470,7 +4524,16 @@
     "Open For you to explore research matching your interests.": "Ouvrez Pour vous pour explorer vos sujets de recherche favoris.",
     "Preferences saved. Enable notifications in system settings for reminders.": "Préférences enregistrées. Activez les notifications système pour recevoir les rappels.",
     "This repository blocks automatic PDF downloads. Open the source page or upload your PDF.": "Ce dépôt bloque les téléchargements PDF automatiques. Ouvrez la source ou importez votre PDF.",
-    "Daily reminders are delivered by the native app. Activity appears in your inbox.": "L’activité apparaît dans votre boîte de réception à l’ouverture de l’app."
+    "Daily reminders are delivered by the native app. Activity appears in your inbox.": "L’activité apparaît dans votre boîte de réception à l’ouverture de l’app.",
+    "Upload my PDF": "Importer mon PDF",
+    "Translate a paragraph or sentence": "Traduire un paragraphe ou une phrase",
+    "Paragraph": "Paragraphe",
+    "Sentence": "Phrase",
+    "Entire paragraph": "Paragraphe entier",
+    "Open translation": "Ouvrir la traduction",
+    "Only missing pieces use the model. Saved translations are reused.": "Seuls les passages manquants sont traduits. Les traductions enregistrées sont réutilisées.",
+    "Shared — pending review": "Partagé — en attente de validation",
+    "Sharing the verified open-access paper": "Partage de l’article à licence ouverte vérifiée"
   },
   "de": {
     ". Public comments are reviewed.": "Öffentliche Kommentare werden geprüft.",
@@ -5109,7 +5172,16 @@
     "Open For you to explore research matching your interests.": "Entdecke unter Für dich Forschung zu deinen Interessen.",
     "Preferences saved. Enable notifications in system settings for reminders.": "Gespeichert. Aktiviere Benachrichtigungen in den Systemeinstellungen für Erinnerungen.",
     "This repository blocks automatic PDF downloads. Open the source page or upload your PDF.": "Dieses Archiv blockiert automatische PDF-Downloads. Öffne die Quelle oder lade dein PDF hoch.",
-    "Daily reminders are delivered by the native app. Activity appears in your inbox.": "Aktivitäten erscheinen beim Öffnen der App im Posteingang."
+    "Daily reminders are delivered by the native app. Activity appears in your inbox.": "Aktivitäten erscheinen beim Öffnen der App im Posteingang.",
+    "Upload my PDF": "Mein PDF hochladen",
+    "Translate a paragraph or sentence": "Absatz oder Satz übersetzen",
+    "Paragraph": "Absatz",
+    "Sentence": "Satz",
+    "Entire paragraph": "Ganzer Absatz",
+    "Open translation": "Übersetzung öffnen",
+    "Only missing pieces use the model. Saved translations are reused.": "Nur fehlende Teile werden übersetzt. Gespeicherte Übersetzungen werden wiederverwendet.",
+    "Shared — pending review": "Geteilt — Prüfung ausstehend",
+    "Sharing the verified open-access paper": "Artikel mit bestätigter offener Lizenz wird geteilt"
   },
   "es": {
     ". Public comments are reviewed.": "Los comentarios públicos se revisan.",
@@ -5748,7 +5820,16 @@
     "Open For you to explore research matching your interests.": "Abre Para ti y explora investigaciones de tu interés.",
     "Preferences saved. Enable notifications in system settings for reminders.": "Preferencias guardadas. Activa las notificaciones del sistema para recibir recordatorios.",
     "This repository blocks automatic PDF downloads. Open the source page or upload your PDF.": "Este repositorio bloquea la descarga automática de PDF. Abre la fuente o sube tu PDF.",
-    "Daily reminders are delivered by the native app. Activity appears in your inbox.": "La actividad aparece en tu bandeja al abrir la app."
+    "Daily reminders are delivered by the native app. Activity appears in your inbox.": "La actividad aparece en tu bandeja al abrir la app.",
+    "Upload my PDF": "Subir mi PDF",
+    "Translate a paragraph or sentence": "Traducir un párrafo o una frase",
+    "Paragraph": "Párrafo",
+    "Sentence": "Frase",
+    "Entire paragraph": "Párrafo completo",
+    "Open translation": "Abrir traducción",
+    "Only missing pieces use the model. Saved translations are reused.": "Solo se traducen las partes pendientes. Se reutilizan las traducciones guardadas.",
+    "Shared — pending review": "Compartido — pendiente de revisión",
+    "Sharing the verified open-access paper": "Compartiendo el artículo con licencia abierta verificada"
   },
   "ru": {
     ". Public comments are reviewed.": "Публичные комментарии проходят проверку.",
@@ -6387,7 +6468,16 @@
     "Open For you to explore research matching your interests.": "Откройте «Для вас» и изучайте исследования по интересам.",
     "Preferences saved. Enable notifications in system settings for reminders.": "Настройки сохранены. Включите уведомления в настройках системы для напоминаний.",
     "This repository blocks automatic PDF downloads. Open the source page or upload your PDF.": "Этот репозиторий блокирует автоматическое скачивание PDF. Откройте источник или загрузите свой PDF.",
-    "Daily reminders are delivered by the native app. Activity appears in your inbox.": "Активность появляется во входящих при открытии приложения."
+    "Daily reminders are delivered by the native app. Activity appears in your inbox.": "Активность появляется во входящих при открытии приложения.",
+    "Upload my PDF": "Загрузить мой PDF",
+    "Translate a paragraph or sentence": "Перевести абзац или предложение",
+    "Paragraph": "Абзац",
+    "Sentence": "Предложение",
+    "Entire paragraph": "Весь абзац",
+    "Open translation": "Открыть перевод",
+    "Only missing pieces use the model. Saved translations are reused.": "Переводятся только недостающие части. Готовые переводы используются повторно.",
+    "Shared — pending review": "Общий доступ — ожидает проверки",
+    "Sharing the verified open-access paper": "Публикация статьи с подтверждённой открытой лицензией"
   },
   "vi": {
     ". Public comments are reviewed.": "Bình luận công khai sẽ được kiểm duyệt.",
@@ -7026,6 +7116,15 @@
     "Open For you to explore research matching your interests.": "Mở Dành cho bạn để khám phá nghiên cứu phù hợp.",
     "Preferences saved. Enable notifications in system settings for reminders.": "Đã lưu. Bật thông báo trong cài đặt hệ thống để nhận lời nhắc.",
     "This repository blocks automatic PDF downloads. Open the source page or upload your PDF.": "Kho này chặn tải PDF tự động. Mở trang nguồn hoặc tải PDF của bạn lên.",
-    "Daily reminders are delivered by the native app. Activity appears in your inbox.": "Hoạt động xuất hiện trong hộp thư khi bạn mở ứng dụng."
+    "Daily reminders are delivered by the native app. Activity appears in your inbox.": "Hoạt động xuất hiện trong hộp thư khi bạn mở ứng dụng.",
+    "Upload my PDF": "Tải PDF của tôi lên",
+    "Translate a paragraph or sentence": "Dịch đoạn văn hoặc câu",
+    "Paragraph": "Đoạn văn",
+    "Sentence": "Câu",
+    "Entire paragraph": "Toàn bộ đoạn văn",
+    "Open translation": "Mở bản dịch",
+    "Only missing pieces use the model. Saved translations are reused.": "Chỉ dịch phần còn thiếu. Bản dịch đã lưu được dùng lại.",
+    "Shared — pending review": "Chia sẻ — đang chờ duyệt",
+    "Sharing the verified open-access paper": "Đang chia sẻ bài báo có giấy phép mở đã xác minh"
   }
 }

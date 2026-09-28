@@ -2,7 +2,9 @@ import {unlimitedAllowance,countsAsRequest} from './allowances.mjs';
 import { randomUUID } from 'node:crypto';
 import { hash, requireValue } from './domain.mjs';
 
-export const safeJob = j => ({ id:j.id, kind:j.kind, state:j.state, message:j.message, created:j.created, paperId:j.paperId, artifactId:j.artifactId, creditCost:j.credit?.amount || 0 });
+export const safeJob = j => ({ id:j.id, kind:j.kind, state:j.state, message:j.message, created:j.created, paperId:j.paperId, artifactId:j.artifactId, creditCost:j.credit?.amount || 0,
+  title:j.metadata?.title, source:j.sourcePage || j.url, sharing:j.sharing,
+  canUpload:j.kind==='import' && j.state==='failed' && !!j.url && !j.submittedAt && !j.pdfId });
 export function visibleArtifacts(store, paper, user) {
   return store.db.prepare("SELECT owner,body FROM artifacts WHERE json_extract(body,'$.paperId')=?").all(paper.id)
     .filter(r => paper.visibility === 'public' || r.owner === user?.id)
@@ -12,19 +14,20 @@ export function visibleArtifacts(store, paper, user) {
 // translation has one job across accounts and processes; private text never shares.
 export function requestArtifact(store, config, user, paper, fields) {
   const db=store.db;
-  const key=hash(JSON.stringify(['artifact-v3',paper.id,paper.revision,fields.kind,fields.language,fields.sectionId||'',paper.visibility==='public'?'public':user.id]));
+  const key=hash(JSON.stringify(['artifact-v3',paper.id,paper.revision,fields.kind,fields.language,fields.sectionId||'',fields.segmentId||'',paper.visibility==='public'?'public':user.id]));
   db.exec('BEGIN IMMEDIATE');
   try {
-    const previous=visibleArtifacts(store,paper,user).find(a=>a.visibility===paper.visibility&&a.kind===fields.kind&&a.language===fields.language&&(a.sectionId||'')===(fields.sectionId||''));
+    const previous=visibleArtifacts(store,paper,user).find(a=>a.visibility===paper.visibility&&a.kind===fields.kind&&a.language===fields.language&&(a.sectionId||'')===(fields.sectionId||'')&&(a.segmentId||'')===(fields.segmentId||''));
     let job=store.job(db.prepare('SELECT job FROM artifact_requests WHERE key=?').get(key)?.job || '');
     // Also join in-flight jobs created before v3 or a model configuration change.
     if (!job) job=db.prepare('SELECT j.body FROM artifact_requests r JOIN jobs j ON j.id=r.job WHERE r.paper=? AND r.revision=?').all(paper.id,paper.revision)
-      .map(r=>JSON.parse(r.body)).find(j=>j.kind===fields.kind&&j.language===fields.language&&(j.sectionId||'')===(fields.sectionId||'')&&j.visibility===paper.visibility&&(paper.visibility==='public'||j.owner===user.id));
+      .map(r=>JSON.parse(r.body)).find(j=>j.kind===fields.kind&&j.language===fields.language&&(j.sectionId||'')===(fields.sectionId||'')&&(j.segmentId||'')===(fields.segmentId||'')&&j.visibility===paper.visibility&&(paper.visibility==='public'||j.owner===user.id));
     if(!job) {
       requireValue(unlimitedAllowance(config,user.id) || store.jobs(user.id).filter(j=>j.created>Date.now()-86400_000&&countsAsRequest(j)).length < (config.maxJobsPerUserPerDay||20), 'Today’s request allowance is full. Try tomorrow.',429);
       job={id:randomUUID(),requestedBy:user.id,owner:paper.visibility==='public'?paper.owner:user.id,dedupe:key,created:Date.now(),state:previous?'completed':'queued',message:previous?'Ready':'Waiting to start',paperId:paper.id,revision:paper.revision,visibility:paper.visibility,...fields,...(previous?{artifactId:previous.id}:{})};
       store.saveJob(job);
     }
+    if(job.state==='failed'&&fields.kind==='translation'&&((job.retries||0)<3||unlimitedAllowance(config,user.id))){job.state='queued';job.message='Waiting to resume';job.retries=(job.retries||0)+1;store.saveJob(job);}
     db.prepare('INSERT OR REPLACE INTO artifact_requests VALUES(?,?,?,?)').run(key,paper.id,paper.revision,job.id);
     db.prepare('INSERT OR IGNORE INTO job_subscriptions VALUES(?,?)').run(user.id,job.id);
     db.exec('COMMIT');return job;
@@ -38,7 +41,16 @@ export function translationChunks(text, max=5000) {
   let prefix='OI'+hash(text).slice(0,12)+'_';while(text.includes('⟦'+prefix))prefix+='x';
   const tokenPattern=new RegExp('⟦'+prefix+'(\\d{6})⟧','g');
   const pattern=/```[\s\S]*?```|\\begin\{(equation\*?|align\*?|gather\*?|math|displaymath)\}[\s\S]*?\\end\{\1\}|\$\$[\s\S]*?\$\$|\\\[[\s\S]*?\\\]|\\\([\s\S]*?\\\)|(?<!\\)\$(?!\$)(?:\\.|[^$\n])+?(?<!\\)\$|!\[[^\]]*\]\([^\n)]+\)|\\includegraphics(?:\[[^\]]*\])?\{[^}]+\}|\\(?:cite|ref|label)\{[^}]+\}|https?:\/\/[^\s<>"})]+/g;
-  const masked=text.replace(pattern,value=>{const token=`⟦${prefix}${String(protectedText.length).padStart(6,'0')}⟧`;protectedText.push(value);return token;});
+  const protect=value=>{const token=`⟦${prefix}${String(protectedText.length).padStart(6,'0')}⟧`;protectedText.push(value);return token;};
+  // Author/title metadata often contains deeply nested TeX affiliation braces.
+  // Keep these structural blocks intact instead of sending command fragments.
+  const metadata=/\\(?:author|title|affiliation|address|date|email|section|subsection|subsubsection|footnotetext|captionsetup)\*?\{/g;let prepared='',cursor=0,match;
+  while((match=metadata.exec(text))){let depth=1,end=metadata.lastIndex;for(;end<text.length&&depth;end++){if(text[end-1]==='\\')continue;if(text[end]==='{')depth++;else if(text[end]==='}')depth--;}if(depth)break;prepared+=text.slice(cursor,match.index)+protect(text.slice(match.index,end));cursor=end;metadata.lastIndex=end;}
+  prepared+=text.slice(cursor);
+  const structured=prepared.replace(/\\(?:begin|end)\{(?:abstract|figure\*?|table\*?|tabular|itemize|enumerate)\}|\\(?:centering|hline|maketitle)\b/g,protect);
+  // Keep TeX command names and grouping syntax intact while translating captions
+  // and formatted prose inside them. Math/metadata have already been protected.
+  const masked=structured.replace(pattern,protect).replace(/\\(?:[A-Za-z]+\*?|[^A-Za-z\s])|[{}]/g,protect);
   const chunks=[];let current='';
   for(const block of masked.split(/(\n\s*\n)/)) {
     let rest=block;

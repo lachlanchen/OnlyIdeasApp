@@ -13,14 +13,16 @@ export function reviewedSource(url) {
 export function requestSharing(store, paper, sharing = 'private') {
   if (!paper || sharing !== 'shared' || paper.visibility === 'public') return null;
   store.requireActive(paper.owner);
-  const proof = reviewedSource(paper.source);
+  const proof = paper.provenance?.userSupplied ? null : reviewedSource(paper.source);
   if (proof) {
     paper.title = proof.title; paper.authors = proof.authors; paper.license = proof.license;
     paper.provenance = { source: proof.source, licenseUrl: proof.licenseUrl, checked: '2026-09-27', changes: 'PDF converted to reflowable Mathpix Markdown; figures retained. Check equations against the source.' };
   }
-  paper.sharing = 'awaiting_review'; store.savePaper(paper);
+  const origin=store.job(paper.id);
+  const verified=origin?.owner===paper.owner&&!origin.uploadSource&&origin.sourceLicense?.verification==='indexed-source-license'&&origin.sourceLicense.license===paper.license;
+  paper.sharing = verified?'publishing':'awaiting_review'; store.savePaper(paper);
   const dedupe = `publish:${paper.id}:${paper.revision}`;
   const existing = store.existing(paper.owner, dedupe);
   if (existing) return existing;
-  return store.saveJob({ id: randomUUID(), owner: paper.owner, kind: 'publish', paperId: paper.id, dedupe, created: Date.now(), state: 'awaiting_review', message: proof ? 'Shared library · waiting for source and community review' : 'Shared library · source permission needs review before publication' });
+  return store.saveJob({ id: randomUUID(), owner: paper.owner, kind: 'publish', paperId: paper.id, dedupe, created: Date.now(), state: verified?'queued':'awaiting_review', reviewed:!!verified, message: verified?'Sharing the verified open-access paper':proof ? 'Shared library · waiting for source and community review' : 'Shared library · source permission needs review before publication' });
 }

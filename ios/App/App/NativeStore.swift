@@ -17,6 +17,9 @@ struct ResearchPaper: Codable, Identifiable {
   var year:String?
   var journal:String?
   var doi:String?
+  var provenance:PaperProvenance?
+  var license:String?
+  var sharing:String?
   var visibility: String?
   var mmd: String?
   var revision: String?
@@ -27,7 +30,7 @@ struct ResearchCategory:Codable,Identifiable {var id:String;var name:String}
 struct ResearchDiscipline:Codable,Identifiable {var id:String;var name:String;var children:[ResearchCategory]}
 struct DiscoveryPaper:Codable,Identifiable {
  var id:String;var title:String;var authors:String;var source:String
- var fetchUnavailable:String?;var summary:String?;var pdfUrl:String?;var paperId:String?;var year:String?;var journal:String?;var doi:String?;var discipline:String?;var subdiscipline:String?;var index:String?;var ref:String?
+ var failedJobId:String?;var fetchUnavailable:String?;var summary:String?;var pdfUrl:String?;var paperId:String?;var year:String?;var journal:String?;var doi:String?;var discipline:String?;var subdiscipline:String?;var index:String?;var ref:String?
  var metadata:String {[discipline,subdiscipline,year,journal].compactMap{$0}.filter{!$0.isEmpty}.joined(separator:" · ")}
 }
 func researchMatches(_ query:String,_ text:String)->Bool {
@@ -37,6 +40,7 @@ func researchMatches(_ query:String,_ text:String)->Bool {
  }
 }
 struct ReadingArtifact: Codable, Identifiable {
+  var segmentId:String?
   var sectionId:String?
   var id: String
   var text: String
@@ -93,6 +97,10 @@ struct ReadingJob: Codable, Identifiable {
   var message: String
   var paperId: String?
   var creditCost: Int?
+  var title:String?
+  var source:String?
+  var sharing:String?
+  var canUpload:Bool?
 }
 struct ReadingCredits: Decodable {
   struct Policy: Decodable { var publication:Int; var rewardPerDay:Int }
@@ -609,7 +617,7 @@ final class ReadingStore: NSObject, ObservableObject,
     try saveCached(saved)
     objectWillChange.send()
   }
-  func importPDF(_ url: URL, shared: Bool = true) async {
+  func importPDF(_ url: URL, shared: Bool = true, researchId:String? = nil, recoveryJobId:String? = nil) async {
     guard account != nil else {
       await signIn()
       return
@@ -627,12 +635,15 @@ final class ReadingStore: NSObject, ObservableObject,
       let title =
         url.deletingPathExtension().lastPathComponent.addingPercentEncoding(
           withAllowedCharacters: .urlQueryAllowed) ?? "Paper"
+      var contextHeaders:[String:String]=[:]
+      if let id=researchId {contextHeaders["X-Research-Id"]=id}
+      if let id=recoveryJobId {contextHeaders["X-Recovery-Job-Id"]=id}
       _ = try await request(
         "/api/import", method: "POST", data: bytes,
         headers: [
           "Content-Type": "application/pdf", "X-Request-Id": UUID().uuidString.lowercased(),
           "X-Paper-Title": title, "X-Paper-Language": "en", "X-Paper-Sharing": shared ? "shared" : "private", "X-Credit-Limit":String(limit),
-        ])
+        ].merging(contextHeaders){_,new in new})
       await loadJobs()
     } catch { self.error = error.localizedDescription }
   }
@@ -861,3 +872,8 @@ extension ReadingStore {
     } catch {purchaseNotice=error.localizedDescription}
   }
 }
+
+struct TranslationPiece:Codable,Identifiable {var id:String;var text:String}
+struct TranslationParagraph:Codable,Identifiable {var id:String;var text:String;var sentences:[TranslationPiece]}
+
+struct PaperProvenance:Codable {var licenseUrl:String?;var changes:String?}

@@ -218,7 +218,7 @@ struct PaperRow: View {
     VStack(alignment: .leading, spacing: 7) {
       HStack {
         Text(paper.language?.uppercased() ?? "PAPER").font(.caption.weight(.bold))
-        Text(T(paper.visibility == "private" ? "Private" : "Reading room")).font(.caption)
+        Text(T(paper.sharing == "awaiting_review" ? "Shared — pending review" : paper.visibility == "private" ? "Private" : "Reading room")).font(.caption)
         Spacer()
         if downloaded { Image(systemName: "pin.fill").font(.caption) }
         Image(systemName: "chevron.right").font(.caption)
@@ -641,6 +641,7 @@ struct NativeRequests: View {
               T(["import","attachment"].contains(job.kind) ? "Conversion requests" : "Your requests"),
               systemImage: job.state == "completed" ? "checkmark.circle.fill" : "clock"
             ).font(.headline)
+            if let title=job.title {Text(title).font(.headline)}
             Text(T(job.message)).font(.body).foregroundColor(.secondary)
             if let id = job.paperId, job.state == "completed" {
               NavigationLink(
@@ -650,6 +651,8 @@ struct NativeRequests: View {
                     ?? ResearchPaper(id: id, title: "Your paper")))
             }
             if job.state == "failed" {
+              if job.canUpload==true {NativePDFRecovery(recoveryJobId:job.id,shared:job.sharing=="shared")}
+              if let source=job.source,source.hasPrefix("https://"),let url=URL(string:source) {Link(T("Open source"),destination:url)}
               Button(T("Try again")) {
                 Task {
                   do {
@@ -774,7 +777,7 @@ struct NativePaper: View {
     }
     .sheet(isPresented:$languages) {if let document {NativeLanguages(document:document)}}
     .sheet(isPresented: $readingTools) {
-      if let document = document { NativeReadingTools(document: document) }
+      if let document = document { NativeReadingTools(document: document,selectedQuote:quote) }
     }
     .sheet(isPresented: $discussion) {
       NativeDiscussion(paper: document?.paper ?? paper, quote: quote, paragraphId:paragraph)
@@ -833,6 +836,7 @@ struct NativeDocument: UIViewRepresentable {
       if revision != identity {
         let data: [String: Any] = [
           "mmd": parent.document.paper.mmd ?? "", "figures": parent.document.figures,
+          "attribution":[parent.document.paper.license,parent.document.paper.provenance?.licenseUrl,parent.document.paper.provenance?.changes].compactMap{$0}.filter{$0 != "private"}.joined(separator:" · "),
           "fontSize": parent.size, "dark": parent.dark, "language":parent.document.paper.language ?? "en", "comments":parent.onParagraph != nil, "commentLabel":T("Discuss paragraph"),
         ]
         if let bytes = try? JSONSerialization.data(withJSONObject: data),
@@ -1004,6 +1008,7 @@ struct NativeReadingTools: View {
   @EnvironmentObject var store: ReadingStore
   @Environment(\.dismiss) var dismiss
   let document: ReaderDocument
+  var selectedQuote:String = ""
   @State private var notes = ""
   @State private var language = "zh-Hans"
   @State private var section = ""
@@ -1023,6 +1028,7 @@ struct NativeReadingTools: View {
             T("Private notes"))
           Button(T("Save notes")) { Task { await saveNotes() } }.disabled(pending)
         }
+        Section {NavigationLink(T("Translate a paragraph or sentence")){NativePieceTranslation(document:document,selectedQuote:selectedQuote)}}
         Section(T("Read in another way")) {
           Picker(T("Language"), selection: $language) {
             ForEach(languages, id: \.0) { value in Text(value.1).bold().tag(value.0) }
@@ -1163,7 +1169,7 @@ struct NativeLanguages: View {
     .task { while !Task.isCancelled {await load();try? await Task.sleep(nanoseconds:3_000_000_000)} }
   }
   func load() async {
-    do {let result=try await store.json("/api/papers/\(document.paper.id)/artifacts");artifacts=try store.decoded([ReadingArtifact].self,result["artifacts"] ?? []).filter{$0.kind=="translation"&&($0.sectionId ?? "").isEmpty}
+    do {let result=try await store.json("/api/papers/\(document.paper.id)/artifacts");artifacts=try store.decoded([ReadingArtifact].self,result["artifacts"] ?? []).filter{$0.kind=="translation"&&($0.sectionId ?? "").isEmpty&&($0.segmentId ?? "").isEmpty}
       if let ready=artifacts.first(where:{$0.language==requested}){requested="";requestedJob="";notice="Ready";selected=ready}
       else if !requestedJob.isEmpty {
         await store.loadJobs()
@@ -1251,6 +1257,7 @@ struct ResearchDiscovery: View {
           if let summary=hit.summary,!summary.isEmpty {Text(summary).font(.subheadline).lineLimit(3)}
           HStack {Text(hit.doi.map{"DOI "+$0} ?? hit.index ?? "").font(.caption2).foregroundColor(.secondary).lineLimit(1);Spacer();if let source=URL(string:hit.source) {Link(T("Source"),destination:source).font(.caption)}}
           Button {Task{await choose(hit)}}label:{Label(T(importing==hit.id ? "Adding your paper…":hit.paperId != nil ? "Open paper":"Fetch & read"),systemImage:"arrow.right")}.disabled(importing==hit.id)
+          if hit.paperId==nil && hit.ref?.hasPrefix("r-") != false {NativePDFRecovery(researchId:hit.id,done:requests)}
           NativePaperActions(reference:hit.ref ?? "r-"+hit.id,title:hit.title)
         }.padding(14).background(Color(.secondarySystemGroupedBackground)).cornerRadius(14)
       }
@@ -1284,12 +1291,11 @@ struct ResearchDiscovery: View {
     }catch{if generation==id && !Task.isCancelled {notice=error.localizedDescription}}
   }
   func choose(_ hit:DiscoveryPaper) async {
-    if let unavailable=hit.fetchUnavailable {store.error=T(unavailable);return}
     if let id=hit.paperId ?? (hit.ref?.hasPrefix("r-")==false ? hit.ref:nil){selected=ResearchPaper(id:id,title:hit.title);showPaper=true;return}
     guard store.account != nil else {await store.signIn();return}
     guard let pdf=hit.pdfUrl,!pdf.isEmpty else {store.error=T("No direct PDF. Open the source or upload your copy.");return}
     importing=hit.id;defer{importing=""}
-    do{let r=try await store.json("/api/discovery/import",method:"POST",body:["id":hit.id,"sharing":"shared"]);if let id=r["paperId"]as?String {selected=ResearchPaper(id:id,title:hit.title);showPaper=true}else{await store.loadJobs();requests()}}catch{store.error=error.localizedDescription}
+    do{let r=try await store.json("/api/discovery/import",method:"POST",body:["id":hit.id,"sharing":"shared"]);if let id=r["paperId"]as?String {selected=ResearchPaper(id:id,title:hit.title);showPaper=true}else{await store.loadJobs();requests()}}catch{store.error=error.localizedDescription;await store.loadJobs();requests()}
   }
 }
 struct NativePaperActions:View {
@@ -1394,6 +1400,7 @@ struct NativeReadingSpace:View {
    Button{Task{await choose(p)}}label:{Text(p.title).font(.headline).multilineTextAlignment(.leading).foregroundColor(.primary)}
    Text(p.authors).font(.caption).foregroundColor(.secondary)
    Button(T(p.paperId != nil || p.ref?.hasPrefix("r-")==false ? "Open paper":"Fetch & read")){Task{await choose(p)}}
+   if p.paperId==nil && p.ref?.hasPrefix("r-") != false {NativePDFRecovery(researchId:p.id,done:{requests=true})}
    NativePaperActions(reference:p.ref ?? "r-"+p.id,title:p.title)
   }.padding(14).background(Color(.secondarySystemGroupedBackground)).cornerRadius(16)
  }
@@ -1433,4 +1440,59 @@ struct NativeReadingPreferences:View {
   Button(T("Save preferences")){Task{await save()}}.disabled(!ready)
  }.navigationTitle(T("Interests & notifications")).toolbar{Button(T("Done")){dismiss()}}.task{do{let r=try await store.json("/api/preferences");prefs=try store.decoded(ReadingPreferences.self,r["preferences"] ?? [:]);let tax=try await store.json("/api/discovery/taxonomy");fields=try store.decoded([ResearchDiscipline].self,tax["openalex"] ?? []);let parts=prefs.dailyTime.split(separator:":").compactMap{Int($0)};if parts.count==2{time=Calendar.current.date(bySettingHour:parts[0],minute:parts[1],second:0,of:Date()) ?? Date()};ready=true}catch{notice=error.localizedDescription}}}
  func save()async{do{let c=Calendar.current.dateComponents([.hour,.minute],from:time);prefs.dailyTime=String(format:"%02d:%02d",c.hour ?? 9,c.minute ?? 0);prefs.timezone=TimeZone.current.identifier;let body=try JSONSerialization.jsonObject(with:JSONEncoder().encode(prefs));_ = try await store.json("/api/preferences",method:"PUT",body:body);let enabled=await ReadingReminder.configure(prefs);notice=prefs.dailyEnabled && !enabled ? "Preferences saved. Enable notifications in system settings for reminders.":"Preferences saved"}catch{notice=error.localizedDescription}}
+}
+
+struct NativePDFRecovery:View {
+ @EnvironmentObject var store:ReadingStore
+ var researchId:String? = nil
+ var recoveryJobId:String? = nil
+ var shared:Bool = true
+ var done:()->Void = {}
+ @State private var picker=false
+ var body:some View {
+  Button {if store.account==nil {Task{await store.signIn()}}else{picker=true}} label:{Label(T("Upload my PDF"),systemImage:"doc.badge.arrow.up")}
+   .disabled(store.busy)
+   .fileImporter(isPresented:$picker,allowedContentTypes:[.pdf]) {result in
+    switch result {
+     case .success(let url):Task{await store.importPDF(url,shared:shared,researchId:researchId,recoveryJobId:recoveryJobId);done()}
+     case .failure(let error):store.error=error.localizedDescription
+    }
+   }
+ }
+}
+
+struct NativePieceTranslation:View {
+ @EnvironmentObject var store:ReadingStore
+ let document:ReaderDocument
+ var selectedQuote:String = ""
+ @State private var paragraphs:[TranslationParagraph]=[]
+ @State private var paragraph=""
+ @State private var sentence=""
+ @State private var language="zh-Hans"
+ @State private var results:[ReadingArtifact]=[]
+ @State private var pending=false
+ @State private var notice=""
+ var selected:TranslationParagraph? {paragraphs.first{$0.id==paragraph}}
+ var segment:String {sentence.isEmpty ? paragraph:sentence}
+ var ready:ReadingArtifact? {results.first{$0.kind=="translation"&&$0.language==language&&$0.segmentId==segment}}
+ var body:some View {
+  Form {
+   Section {Text(T("Only missing pieces use the model. Saved translations are reused."))}
+   Section {
+    Picker(T("Language"),selection:$language){ForEach(UILanguage.choices,id:\.0){value in Text(value.1).tag(value.0)}}
+    Picker(T("Paragraph"),selection:$paragraph){ForEach(paragraphs){p in Text(String(p.text.prefix(90))).tag(p.id)}}.onChange(of:paragraph){_ in sentence=""}
+    Picker(T("Sentence"),selection:$sentence){Text(T("Entire paragraph")).tag("");ForEach(selected?.sentences ?? []){s in Text(String(s.text.prefix(90))).tag(s.id)}}
+    if let p=selected {DisclosureGroup(T("This passage")){Text(sentence.isEmpty ? p.text : p.sentences.first{$0.id==sentence}?.text ?? "").textSelection(.enabled)}}
+   }
+   Section {
+    if let artifact=ready {NavigationLink(T("Open translation")){NativeArtifact(document:document,artifact:artifact)}}
+    else {Button(T("Translate this passage")){Task{await translate()}}.disabled(segment.isEmpty||pending)}
+    if !notice.isEmpty {Text(T(notice))}
+   }
+  }.navigationTitle(T("Translate a paragraph or sentence")).navigationBarTitleDisplayMode(.inline)
+   .task {do{let r=try await store.json("/api/papers/\(document.paper.id)/segments");paragraphs=try store.decoded([TranslationParagraph].self,r["segments"] ?? []);paragraph=(paragraphs.first{!selectedQuote.isEmpty&&$0.text.contains(String(selectedQuote.prefix(80)))} ?? paragraphs.first)?.id ?? "";await refresh()}catch{notice=error.localizedDescription}}
+   .task {while !Task.isCancelled {try? await Task.sleep(nanoseconds:3_000_000_000);if !Task.isCancelled {await refresh()}}}
+ }
+ func refresh()async{do{let r=try await store.json("/api/papers/\(document.paper.id)/artifacts");results=try store.decoded([ReadingArtifact].self,r["artifacts"] ?? [])}catch{notice=error.localizedDescription}}
+ func translate()async{guard store.account != nil else{await store.signIn();return};pending=true;defer{pending=false};do{let r=try await store.json("/api/papers/\(document.paper.id)/assist",method:"POST",body:["kind":"translation","language":language,"segmentId":segment]);let job=r["job"]as?[String:Any];notice=job?["state"]as?String=="failed" ? job?["message"]as?String ?? "" : "Translation requested. Existing work is reused.";await refresh();await store.loadJobs()}catch{notice=error.localizedDescription}}
 }

@@ -113,3 +113,25 @@ visible items read. `GET/PUT /preferences` returns `{preferences}` containing
 independently authenticated OnlyIdeas account for all personal endpoints. Never
 cache one user's inbox/favorites for another account. Daily notifications are
 native local reminders; do not advertise remote push from these endpoints.
+
+## Build 17 recovery and translation extension
+
+Research cards and failed requests can offer **Upload my PDF**. Send binary PDF
+content to `POST /api/import` with exactly one server-issued context header:
+`X-Research-Id` for an indexed card or `X-Recovery-Job-Id` for an owned failed URL
+import. Preserve the existing sharing choice and credit consent. The server
+validates ownership, source metadata, completed conversions and uncertain provider
+receipts. A user-supplied file's claimed source is never a trusted global alias.
+
+`GET /api/papers/:id/segments` provides display-ready paragraphs and sentence IDs.
+Pass a selected `segmentId` to `/assist` with `kind: "translation"` and a supported
+language; do not combine it with `sectionId`. IDs resolve against canonical server
+text. Filter segment artifacts out of the full-paper language picker. Whole-paper,
+section, paragraph and sentence requests reuse cached sentence pieces by revision,
+language and visibility; private pieces do not become public with a later publish.
+
+Default new fetches to Shared. Supported source-verified licenses allow automatic
+publication after conversion; other requests show awaiting review. Public papers
+have one shared transcript, reusable translations and moderated discussions across
+accounts. Only me papers, private notes and agent conversations remain private.
+See [recovery and translation contract](paper-recovery-and-translation.md).

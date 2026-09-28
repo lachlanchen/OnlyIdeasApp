@@ -16,6 +16,12 @@ Ein konfigurierbares, kostengünstiges Modell erstellt auf Anfrage Lesehilfen un
 
 ![OnlyIdeas reading room](../evidence/library-desktop.png)
 
+<!-- recovery17 -->
+Version 1.0.2 (17) ergänzt getrennte Listen für gespeicherte und mit Gefällt mir markierte Artikel, Aktivitäten, Posteingang und Lesevorlieben. Bei blockierten Downloads lässt sich die eigene PDF direkt auf der Artikelkarte oder beim fehlgeschlagenen Auftrag hochladen. Übersetzungen ganzer Artikel, Absätze oder Sätze verwenden gespeicherte Teile erneut und erhalten Formeln und Abbildungen. Teilen bleibt die Vorgabe: bestätigte unterstützte offene Lizenzen erlauben automatische Veröffentlichung, andere Artikel warten auf Prüfung. Tägliche Geräteerinnerungen sind optional; Aktivitätshinweise werden derzeit innerhalb der App aktualisiert.
+
+[1.0.2 (17)](../docs/paper-recovery-and-translation.md)
+
+
 ## Schnellstart
 
 Vor dem Einrichten von Zugangsdaten die Betriebsanleitung lesen. Die Konfiguration gehört in eine geschützte Datei außerhalb von Git.

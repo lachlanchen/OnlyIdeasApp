@@ -1,5 +1,6 @@
 import { searchIndexes, searchOptions, taxonomy } from './research-indexes.mjs';
 import { hash,requireValue } from './domain.mjs';
+import { recoveryJob } from './import-recovery.mjs';
 import { reusablePaper } from './import-reuse.mjs';
 export function createDiscovery(store,{search=searchIndexes}={}) {
  const db=store.db;
@@ -7,7 +8,7 @@ export function createDiscovery(store,{search=searchIndexes}={}) {
  CREATE TABLE IF NOT EXISTS discovery_items(id TEXT PRIMARY KEY,body TEXT NOT NULL,updated INTEGER NOT NULL);`);
  db.exec('CREATE TABLE IF NOT EXISTS paper_items(id TEXT PRIMARY KEY,body TEXT NOT NULL)');
  const pending=new Map();let requests=[];
- const identify=(p,user)=>{const existing=reusablePaper(store,user?.id||'',{url:p.pdfUrl})||reusablePaper(store,user?.id||'',{url:p.source});const failed=user&&!existing?db.prepare("SELECT body FROM jobs WHERE owner=? AND state='failed' AND json_extract(body,'$.url')=? ORDER BY created DESC LIMIT 1").get(user.id,p.pdfUrl):null;const job=failed?JSON.parse(failed.body):null;const denied=job&&!job.pdfId&&(job.errorCode==='source_access_denied'||/HTTP (401|403)/.test(job.message||''));return {...p,...(existing?{paperId:existing.id}:{}),...(denied?{fetchUnavailable:'This repository blocks automatic PDF downloads. Open the source page or upload your PDF.'}:{})}};
+ const identify=(p,user)=>{const recovered=user?recoveryJob(store,user.id,'r:'+p.id):null;const existing=(recovered?.state==='completed'?store.paper(recovered.paperId):null)||reusablePaper(store,user?.id||'',{url:p.pdfUrl})||reusablePaper(store,user?.id||'',{url:p.source});const failed=user&&!existing?db.prepare("SELECT body FROM jobs WHERE owner=? AND state='failed' AND json_extract(body,'$.url')=? ORDER BY created DESC LIMIT 1").get(user.id,p.pdfUrl):null;const job=failed?JSON.parse(failed.body):null;const denied=job&&!job.pdfId&&(job.errorCode==='source_access_denied'||/HTTP (401|403)/.test(job.message||''));return {...p,...(existing?{paperId:existing.id}:{}),...(recovered&&recovered.state!=='failed'?{recoveryJobId:recovered.id}:{}),...(denied?{failedJobId:job.id,fetchUnavailable:'This repository blocks automatic PDF downloads. Open the source page or upload your PDF.'}:{})}};
  return {
  taxonomy,identify,
  item(id,user){const row=db.prepare('SELECT body FROM discovery_items WHERE id=?').get(id);requireValue(row,'Refresh the search and select a paper.',404);return identify(JSON.parse(row.body),user)},
