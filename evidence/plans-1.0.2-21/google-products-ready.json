@@ -1,0 +1,111 @@
+{
+  "at": "2026-09-28T07:07:27.277Z",
+  "actualPurchaseTest": false,
+  "products": [
+    {
+      "product": "onlyideas_reader_monthly",
+      "localizations": 11,
+      "englishBenefits": [
+        "200 transcription pages per paid month",
+        "60 new-paper fetches per paid month",
+        "200 credits; 40 agent messages per day",
+        "Existing papers and cached reading free"
+      ],
+      "basePlans": [
+        {
+          "id": "monthly",
+          "state": "ACTIVE",
+          "USA": {
+            "currencyCode": "USD",
+            "units": "2",
+            "nanos": 990000000
+          },
+          "regions": 173,
+          "allowResubscribe": "RESUBSCRIBE_STATE_INACTIVE"
+        }
+      ],
+      "offers": [
+        {
+          "id": "seven-day-trial",
+          "state": "ACTIVE",
+          "phases": [
+            {
+              "duration": "P7D",
+              "recurrenceCount": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "product": "onlyideas_researcher_monthly",
+      "localizations": 11,
+      "englishBenefits": [
+        "1,200 transcription pages per paid month",
+        "300 new-paper fetches per paid month",
+        "1,200 credits; 80 agent messages daily",
+        "Existing papers and cached reading free"
+      ],
+      "basePlans": [
+        {
+          "id": "monthly",
+          "state": "ACTIVE",
+          "USA": {
+            "currencyCode": "USD",
+            "units": "14",
+            "nanos": 990000000
+          },
+          "regions": 173,
+          "allowResubscribe": "RESUBSCRIBE_STATE_INACTIVE"
+        }
+      ],
+      "offers": [
+        {
+          "id": "seven-day-trial",
+          "state": "ACTIVE",
+          "phases": [
+            {
+              "duration": "P7D",
+              "recurrenceCount": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "product": "onlyideas_studio_monthly",
+      "localizations": 11,
+      "englishBenefits": [
+        "2,600 transcription pages per paid month",
+        "700 new-paper fetches per paid month",
+        "2,600 credits; 160 agent messages daily",
+        "Existing papers and cached reading free"
+      ],
+      "basePlans": [
+        {
+          "id": "monthly",
+          "state": "ACTIVE",
+          "USA": {
+            "currencyCode": "USD",
+            "units": "29",
+            "nanos": 990000000
+          },
+          "regions": 173,
+          "allowResubscribe": "RESUBSCRIBE_STATE_INACTIVE"
+        }
+      ],
+      "offers": [
+        {
+          "id": "seven-day-trial",
+          "state": "ACTIVE",
+          "phases": [
+            {
+              "duration": "P7D",
+              "recurrenceCount": 1
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+[
+  {
+    "id": "6816715367",
+    "productId": "art.onlyideas.reader.monthly",
+    "state": "READY_TO_SUBMIT",
+    "screenshotState": {
+      "errors": null,
+      "warnings": null,
+      "state": "COMPLETE"
+    }
+  },
+  {
+    "id": "6816715106",
+    "productId": "art.onlyideas.researcher.monthly",
+    "state": "READY_TO_SUBMIT",
+    "screenshotState": {
+      "errors": null,
+      "warnings": null,
+      "state": "COMPLETE"
+    }
+  },
+  {
+    "id": "6816715136",
+    "productId": "art.onlyideas.studio.monthly",
+    "state": "READY_TO_SUBMIT",
+    "screenshotState": {
+      "errors": null,
+      "warnings": null,
+      "state": "COMPLETE"
+    }
+  }
+]

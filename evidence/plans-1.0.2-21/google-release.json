@@ -1,0 +1,11 @@
+{
+  "observedAt": "2026-09-28T07:08:59.825022+00:00",
+  "version": "1.0.2",
+  "build": 21,
+  "internal": "AVAILABLE_TO_INTERNAL_TESTERS",
+  "production": "IN_REVIEW",
+  "managedPublishing": false,
+  "rolloutPercent": 100,
+  "countriesIncludingRestOfWorld": 177,
+  "actualPurchaseTest": false
+}

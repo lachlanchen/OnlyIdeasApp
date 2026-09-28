@@ -128,8 +128,9 @@ QA without changing costs for installed older clients.
 - Google authenticated Pub/Sub push URL: `/api/billing/notifications/google`;
   configure exact `billing.google.pushAudience` and `pushServiceAccount`. Verify
   the Google OIDC token and email before reading a notification.
-- `GET /api/billing` returns the signed-in owner's catalog, account binding and
-  status. `POST /api/billing/apple` accepts only `signedTransaction` as purchase
+- `GET /api/billing` exposes the public plan catalog. Account binding requires
+  an eligible authenticated account; subscription status is private to the signed-in
+  account. `POST /api/billing/apple` accepts only `signedTransaction` as purchase
   evidence; Google accepts `purchaseToken`. All other claimed amounts/owners are
   ignored. Account-bound proof is required for delivery and restore.
 
@@ -173,3 +174,11 @@ is at period end. Web checkout is never offered inside native store apps.
 The OnlyIdeas webhook route is `POST /api/billing/notifications/stripe`.
 Keep it disabled at Stripe until the matching server config and sandbox
 qualification are ready. Never use a live card charge as a substitute for testing.
+
+## Build 21 billing setup status
+
+Profile → Plans & usage is visible on all four clients. Apple products are now
+READY_TO_SUBMIT; Google base plans and seven-day trial offers are ACTIVE. General
+checkout is still disabled pending real purchase qualification, and Stripe
+sandbox access is pending. Store activation is not evidence of a successful
+purchase. See [the current receipt](release-candidate-21.md).

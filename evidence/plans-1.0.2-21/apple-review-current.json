@@ -1,0 +1,16 @@
+{
+  "IOS": {
+    "version": "1.0.2",
+    "state": "WAITING_FOR_REVIEW",
+    "releaseType": "AFTER_APPROVAL",
+    "build": "20",
+    "buildId": "5f40ad7a-8b9d-48a6-a233-c8ff9bed5cdb"
+  },
+  "MAC_OS": {
+    "version": "1.0.2",
+    "state": "WAITING_FOR_REVIEW",
+    "releaseType": "AFTER_APPROVAL",
+    "build": "20",
+    "buildId": "30789204-12ef-4fc1-b8bf-8101a00ae235"
+  }
+}

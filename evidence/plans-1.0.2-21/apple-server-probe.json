@@ -1,0 +1,11 @@
+{
+  "environment": "Sandbox",
+  "attempts": [
+    {
+      "date": 1790579038612,
+      "result": "SUCCESS"
+    }
+  ],
+  "actualPurchaseTest": false,
+  "productionApiStatus": 401
+}

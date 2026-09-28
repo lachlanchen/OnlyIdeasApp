@@ -26,5 +26,44 @@ build and release lint passed; real native Profile → Plans shows all three pla
 iOS XCTest confirms the visible entry and disabled coming-soon purchase actions.
 PWA/server deployed with original papers, credits, holds and config preserved.
 Physical Mac mini plans presentation also passed; signed iOS/Watch and universal
-Mac archives are built. Android 21 is available internally and iOS 21 is VALID in
-TestFlight. Mac processing and formal review replacement are in progress.
+Mac archives are built. Both Apple builds are VALID and IN_BETA_TESTING. Android
+21 is available internally and its production release is in review. The PWA is
+live. Apple production review still contains build 20 on iOS and Mac; build 21
+has not replaced it. Approval or public availability is not claimed.
+
+## Subscription setup checkpoint
+
+Store setup advanced after the owner clarified that visible plans must lead to
+working purchases:
+
+- Apple: all three products are now READY_TO_SUBMIT. Genuine build 21 screenshots
+  are uploaded; they show the staged screen and must be replaced with the actual
+  working purchase screen after sandbox qualification. Products are not submitted.
+- Google: all three monthly base plans and P7D trial offers are ACTIVE. Verified
+  US prices remain 2.99 / 14.99 / 29.99. English benefits now include approved page
+  and fetch allowances; the 11 existing listing localizations remain. The app's
+  existing owner-only purchase rollout is unchanged.
+- Apple signed sandbox TEST notification: provider delivery SUCCESS, replay HTTP200.
+  This verifies notification transport, not a purchase. Production TEST API still
+  returns 401 before the app's first production release.
+- Stripe: live catalog is staged; cloud checkout and webhook remain disabled.
+  Sandbox access is pending dashboard verification. No charge was made.
+
+Real provider purchase, restore, renewal and refund tests remain outstanding on
+all platforms. The retained Android test phone has no Google Play account yet.
+Do not enable ordinary-user checkout or claim billing is ready based on UI,
+metadata, store activation or notification tests alone. Complete qualification
+before submitting the first Apple subscriptions with the app version.
+
+Apple permits sandbox testing before review; the first auto-renewable subscription
+must be submitted with an app version and its subscription group. See
+[Apple submission instructions](https://developer.apple.com/help/app-store-connect/manage-submissions-to-app-review/submit-an-in-app-purchase/)
+and [sandbox overview](https://developer.apple.com/help/app-store-connect/test-in-app-purchases/overview-of-testing-in-sandbox/).
+Apple staff states that production API access requires a production release;
+that is consistent with this app's current 401, but does not establish that
+production purchase verification has passed:
+[Apple Commerce Engineer response](https://developer.apple.com/forums/thread/806452).
+
+Sanitized receipts are in `evidence/plans-1.0.2-21/`. Original library, account,
+credit, quota and discussion data are preserved. No new general billing rollout
+or payment credential installation occurred in this checkpoint.
