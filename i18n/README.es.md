@@ -16,6 +16,13 @@ Un modelo económico configurable crea guías de lectura y traducciones cuando s
 
 ![OnlyIdeas reading room](../evidence/library-desktop.png)
 
+<!-- distribution20260930 -->
+**Distribución · 30 de septiembre de 2026**
+
+Mac 1.0.2 (20) está disponible en App Store. Mac 1.0.3 (22) e iOS/Watch 1.0.2 (21) esperan revisión, con publicación automática tras la aprobación. Android 1.0.2 (21) está en revisión para 177 países y regiones. Las compras de suscripciones aún no están abiertas al público; consulta el registro de publicación.
+
+[Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?mt=12) · [2026-09-30](../docs/distribution-20260930.md)
+
 <!-- plans21 -->
 1.0.2 (21): El perfil siempre muestra los planes y el uso, incluso sin iniciar sesión o cuando no se puede comprar. Los tres planes y sus cuotas aparecen en iOS, Android, Mac y PWA. La activación de pagos sigue pendiente de validar las compras en pruebas.
 

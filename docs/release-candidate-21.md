@@ -18,7 +18,14 @@ transcription pages and 60 / 300 / 700 fetches. Eligible seven-day trial remains
 staged until real sandbox qualification. Existing papers and cached translations
 remain free. All new interface text is localized in 11 languages.
 
-## Verification and availability
+## Latest distribution update
+
+On 2026-09-30 HKT, iOS/Watch21 replaced the pending20 review and is Waiting for
+Review. Mac20 is publicly available; the same qualified client changes from Mac21
+were rebuilt as 1.0.3(22), uploaded to TestFlight and submitted for review. Google21
+remains in review with automatic publishing. See the [current release record](distribution-20260930.md).
+
+## Verification and availability (2026-09-28 checkpoint)
 
 102 tests passed, including anonymous plan discovery with protected checkout and
 no account-row creation. Renderer and production web build passed. Signed Android

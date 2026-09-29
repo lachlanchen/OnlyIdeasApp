@@ -16,6 +16,13 @@ OnlyIdeas는 연구 논문을 함께 읽는 공간입니다. PDF나 공개 접�
 
 ![OnlyIdeas reading room](../evidence/library-desktop.png)
 
+<!-- distribution20260930 -->
+**배포 현황 · 2026년 9월 30일**
+
+Mac 1.0.2 (20)은 App Store에서 이용할 수 있습니다. Mac 1.0.3 (22)과 iOS/Watch 1.0.2 (21)은 심사 대기 중이며 승인 후 자동 출시됩니다. Android 1.0.2 (21)은 177개 국가 및 지역을 대상으로 심사 중입니다. 일반 사용자용 구독 구매는 아직 준비 중입니다. 자세한 내용은 출시 기록을 확인하세요.
+
+[Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?mt=12) · [2026-09-30](../docs/distribution-20260930.md)
+
 <!-- plans21 -->
 1.0.2 (21): 프로필에 요금제 및 사용량이 항상 표시됩니다. 로그인 전이나 결제가 불가능한 경우에도 iOS, Android, Mac, PWA에서 세 요금제와 할당량을 볼 수 있습니다. 유료 기능은 샌드박스 구매 검증 후 활성화됩니다.
 

@@ -1,0 +1,15 @@
+{
+  "checkedAt": "2026-09-29T23:08:06.471883+00:00",
+  "package": "art.onlyideas.app",
+  "appId": "4974173414823223936",
+  "version": "1.0.2",
+  "build": 21,
+  "state": "IN_REVIEW",
+  "managedPublishing": false,
+  "releaseAction": "Start full rollout",
+  "countries": 177,
+  "restOfWorld": true,
+  "pendingUnsubmittedChanges": false,
+  "desktop": "http://127.0.0.1:6190/vnc.html",
+  "evidence": "google-review21.png"
+}

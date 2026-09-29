@@ -1,0 +1,23 @@
+{
+  "checkedAt": "2026-09-29T23:16:15.757729+00:00",
+  "sourceBase": "5a0ab1015830fb91ceb0a5f0623fb4f6ef1d5464",
+  "macVersion": "1.0.3",
+  "macBuild": 22,
+  "architectures": [
+    "x86_64",
+    "arm64"
+  ],
+  "codesign": "verified --deep --strict",
+  "archive": "SUCCEEDED",
+  "export": "SUCCEEDED",
+  "appleValidation": "SUCCEEDED",
+  "appleUpload": "SUCCEEDED",
+  "pkgSha256": "65a48cde624e7c17cd4fc5475ca2a9210dd2239b5bb5dfdffcd1acefbbb8954d",
+  "testsPassed": 103,
+  "testsFailed": 0,
+  "renderer": "passed",
+  "webBuild": "passed",
+  "nativeBehavior": "unchanged from qualified 21; version-only Mac rebuild",
+  "databaseReset": false,
+  "billingActivation": false
+}

@@ -16,6 +16,13 @@ Ein konfigurierbares, kostengünstiges Modell erstellt auf Anfrage Lesehilfen un
 
 ![OnlyIdeas reading room](../evidence/library-desktop.png)
 
+<!-- distribution20260930 -->
+**Veröffentlichung · 30. September 2026**
+
+Mac 1.0.2 (20) ist im App Store verfügbar. Mac 1.0.3 (22) und iOS/Watch 1.0.2 (21) warten auf die Prüfung und werden nach der Freigabe automatisch veröffentlicht. Android 1.0.2 (21) wird für 177 Länder und Regionen geprüft. Abonnementkäufe sind noch nicht allgemein freigeschaltet; Einzelheiten stehen im Veröffentlichungsbericht.
+
+[Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?mt=12) · [2026-09-30](../docs/distribution-20260930.md)
+
 <!-- plans21 -->
 1.0.2 (21): Das Profil zeigt Tarife und Nutzung jetzt immer an, auch vor der Anmeldung oder bei nicht verfügbarem Kauf. Alle drei Tarife und Kontingente sind auf iOS, Android, Mac und PWA sichtbar. Zahlungen werden erst nach erfolgreichen Sandbox-Kauftests aktiviert.
 

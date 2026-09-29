@@ -16,6 +16,13 @@ OnlyIdeas 是共享的論文閱讀空間。匯入 PDF 或開放取用的 PDF 連
 
 ![OnlyIdeas reading room](../evidence/library-desktop.png)
 
+<!-- distribution20260930 -->
+**發佈狀態 · 2026年9月30日**
+
+Mac 1.0.2 (20) 已在 App Store 上架。Mac 1.0.3 (22) 和 iOS/Watch 1.0.2 (21) 已提交並等待審核，通過後自動發佈。Android 1.0.2 (21) 正在審核，涵蓋177個國家及地區。一般使用者的訂閱購買仍未開放；詳情見發佈記錄。
+
+[Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?mt=12) · [2026-09-30](../docs/distribution-20260930.md)
+
 <!-- plans21 -->
 1.0.2 (21)：個人檔案現在一律顯示「方案與用量」，登入前或暫時無法購買時也能查看。iOS、Android、Mac 和 PWA 均展示三個已確認方案及配額。付費功能仍須完成沙盒購買驗證後開放。
 

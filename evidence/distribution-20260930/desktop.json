@@ -1,0 +1,21 @@
+{
+  "checkedAt": "2026-09-29T23:20:20.699762+00:00",
+  "profileIsolated": true,
+  "sourceBrowserPidPreserved": 3627617,
+  "portsLoopbackOnly": [
+    5990,
+    6190,
+    9490
+  ],
+  "display": ":190",
+  "noVncHttp": 200,
+  "windowGeometry": "1600x1000+0+0",
+  "repeatStart": "same owned runtime",
+  "stopStart": "passed after TIME_WAIT reuse fix",
+  "persistentCookieRestart": "synthetic probe passed after graceful Chrome close fix",
+  "googleAuthenticatedConsole": "verified before provider session later expired",
+  "googleAuthAfterRestart": "not retained; source also signed out",
+  "runtimeStopped": true,
+  "profileRetained": true,
+  "finalProfileContainsCopiedSyncTokens": false
+}
