@@ -1,0 +1,44 @@
+{
+  "checkedAt": "2026-09-30T01:38:49.099Z",
+  "sourceSha256": "69da5e21aa43cdb1ab5232b4820c4a77d174d3bec10f3a6a8bc85d0817267eb8",
+  "approvedPreviewIdentical": true,
+  "opaqueExportsChecked": 27,
+  "roundMasksChecked": 5,
+  "appleArtworkMatches": true,
+  "webEmbeddedArtworkMatches": true,
+  "androidMarkBoundsAt4x": {
+    "minX": 111,
+    "minY": 109,
+    "maxX": 320,
+    "maxY": 319
+  },
+  "androidSafeBoundsAt4x": [
+    84,
+    84,
+    348,
+    348
+  ],
+  "artwork": "assets/brand/onlyideas-flow-master.png",
+  "approval": "Owner approved the displayed OnlyIdeas flowing icon and requested replacement on 2026-09-30.",
+  "validation": {
+    "npmRunCheck": "PASS: 103 tests, renderer checks, TypeScript and production web/native-reader build",
+    "pandoc": "3.11 from /home/lachlan/.local/share/pandoc/3.11/bin (shell default 2.12 lacks --sandbox)",
+    "androidResources": "PASS: :app:processDebugResources; 85 tasks, 8 seconds",
+    "exporterSyntax": "PASS"
+  },
+  "distribution": {
+    "sourceAssetsReplaced": true,
+    "newNativeBinaryUploaded": false,
+    "liveWebDeployment": false,
+    "storeReviewChanged": false
+  },
+  "platforms": [
+    "web",
+    "iOS",
+    "iPadOS",
+    "watchOS",
+    "macOS",
+    "Android",
+    "Google Play listing asset"
+  ]
+}

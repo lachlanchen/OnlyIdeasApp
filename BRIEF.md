@@ -86,6 +86,15 @@ Cloud notes and discussions still require a connection. Preserve the live databa
 The existing O/i icon receives a teal–blue–violet gradient and warm gold dot;
 remove the overlapping upper-right idea stroke.
 
+## Approved icon replacement · 2026-09-30
+
+The owner approved the relaxed, flowing O/idea mark shown in the design preview
+and requested replacement of the old icon. Use the exact approved image: a
+teal–blue–violet flowing mark with a warm gold dot on ivory. It is the common
+source for web, iOS/iPadOS, Watch, Mac, Android, splash and store assets. Keep the
+export pipeline consistent so subsequent builds cannot regenerate the old mark.
+Existing store binaries require a new build to display the replacement.
+
 ## Database credits amendment · 2026-09-28
 
 The owner chose ordinary database reading credits, like EchoMind. Credits are

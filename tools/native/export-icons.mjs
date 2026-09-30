@@ -1,32 +1,56 @@
+// Package the owner-approved artwork; never redraw or enlarge the master.
 import sharp from 'sharp'
 import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
+
 const root = new URL('../../', import.meta.url)
-const source = await readFile(new URL('assets/brand/onlyideas-icon.svg', root), 'utf8')
-async function png(path, size, svg = source) {
+const source = await readFile(new URL('assets/brand/onlyideas-flow-master.png', root))
+const paper = '#fdfaf0'
+const metadata = await sharp(source).metadata()
+if (metadata.width < 1024 || metadata.height !== metadata.width) throw new Error('Icon master must be square and at least 1024 pixels.')
+
+async function save(path, pipeline) {
   const url = new URL(path, root)
   await mkdir(new URL('.', url), { recursive: true })
-  // Rasterize the vector at the requested output resolution. Never enlarge a PNG.
-  let pipeline = sharp(Buffer.from(svg), { density: size / Number(svg.match(/width="(\d+)"/)[1]) * 72 }).resize(size, size)
-  if (!path.endsWith('ic_launcher_round.png')) pipeline = pipeline.flatten({ background: '#347fe4' })
   await pipeline.png().toFile(fileURLToPath(url))
 }
-await png('assets/brand/onlyideas-icon-1024.png', 1024)
-await png('ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png', 1024)
-await png('store/google/icon.png', 512)
-await writeFile(new URL('public/mark.svg', root), source)
-for (const [density, size] of Object.entries({ mdpi: 48, hdpi: 72, xhdpi: 96, xxhdpi: 144, xxxhdpi: 192 })) {
-  await png(`android/app/src/main/res/mipmap-${density}/ic_launcher.png`, size)
-  const round = source.replace('<defs>', '<defs><clipPath id="circle"><circle cx="512" cy="512" r="512"/></clipPath>').replace('<rect width=', '<g clip-path="url(#circle)"><rect width=').replace('</svg>', '</g></svg>')
-  await png(`android/app/src/main/res/mipmap-${density}/ic_launcher_round.png`, size, round)
+async function png(path, size) {
+  if (size > metadata.width) throw new Error(`Refusing to enlarge icon for ${path}`)
+  await save(path, sharp(source).resize(size, size).flatten({ background: paper }))
 }
-const paths = source.match(/<g id="mark">([\s\S]*?)<\/g>/)[1]
-const vectorPaths = paths.trim().replaceAll('<path ', '<path android:').replaceAll(' d=', ' android:pathData=').replaceAll(' fill=', ' android:fillColor=').replaceAll(' stroke=', ' android:strokeColor=').replaceAll(' stroke-width=', ' android:strokeWidth=').replaceAll(' stroke-linecap=', ' android:strokeLineCap=').replaceAll('android:d=', 'android:pathData=').replaceAll('android:fillColor="none"', 'android:fillColor="#00000000"')
-const vector = `<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="108dp" android:height="108dp" android:viewportWidth="1024" android:viewportHeight="1024">${vectorPaths}</vector>\n`
-await writeFile(new URL('android/app/src/main/res/drawable/onlyideas_foreground.xml', root), vector)
-await writeFile(new URL('android/app/src/main/res/drawable/onlyideas_mark.xml', root), vector.replace('><path', '><path android:fillColor="#347fe4" android:pathData="M180 0H844Q1024 0 1024 180V844Q1024 1024 844 1024H180Q0 1024 0 844V180Q0 0 180 0Z"/><path'))
-const splash = `<svg xmlns="http://www.w3.org/2000/svg" width="2732" height="2732" viewBox="0 0 2732 2732"><rect width="2732" height="2732" fill="#f6f4ed"/><svg x="1110" y="1110" width="512" height="512" viewBox="0 0 1024 1024">${source.replace(/<svg[^>]*>|<\/svg>/g,'')}</svg></svg>`
-await png('ios/App/App/Assets.xcassets/Splash.imageset/splash-2732x2732.png',2732,splash)
-console.log('Exported crisp OnlyIdeas icons from the vector master.')
+for (const [path, size] of [
+  ['assets/brand/onlyideas-icon-1024.png', 1024],
+  ['ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png', 1024],
+  ['watch/OnlyIdeasWatch/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png', 1024],
+  ['store/google/icon.png', 512],
+  ['public/mark-512.png', 512],
+  ['public/apple-touch-icon.png', 180],
+  ['android/app/src/main/res/drawable-nodpi/onlyideas_artwork.png', 512],
+]) await png(path, size)
 
-await writeFile(new URL('android/app/src/main/res/drawable/onlyideas_background.xml', root), '<vector xmlns:android="http://schemas.android.com/apk/res/android" xmlns:aapt="http://schemas.android.com/aapt" android:width="108dp" android:height="108dp" android:viewportWidth="1024" android:viewportHeight="1024"><path android:pathData="M0 0H1024V1024H0Z"><aapt:attr name="android:fillColor"><gradient android:type="linear" android:startX="0" android:startY="0" android:endX="1024" android:endY="1024"><item android:offset="0" android:color="#0dc9b8"/><item android:offset="0.48" android:color="#347fe4"/><item android:offset="1" android:color="#7949d8"/></gradient></aapt:attr></path></vector>\n')
+// Preserve existing URLs and web UI references using a self-contained SVG image.
+// External image references inside an <img>-loaded SVG are blocked by browsers.
+const web = await readFile(new URL('public/mark-512.png', root))
+const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="OnlyIdeas"><image width="512" height="512" href="data:image/png;base64,${web.toString('base64')}"/></svg>\n`
+await writeFile(new URL('public/mark.svg', root), svg)
+await writeFile(new URL('assets/brand/onlyideas-icon.svg', root), svg)
+
+for (const [density, scale] of Object.entries({ mdpi: 1, hdpi: 1.5, xhdpi: 2, xxhdpi: 3, xxxhdpi: 4 })) {
+  const dir = `android/app/src/main/res/mipmap-${density}`
+  const size = 48 * scale
+  await png(`${dir}/ic_launcher.png`, size)
+  const circle = Buffer.from(`<svg width="${size}" height="${size}"><circle cx="${size / 2}" cy="${size / 2}" r="${size / 2}" fill="white"/></svg>`)
+  await save(`${dir}/ic_launcher_round.png`, sharp(source).resize(size, size).ensureAlpha().composite([{ input: circle, blend: 'dest-in' }]))
+  // Android masks a 108dp layer to its central viewport. The approved image has
+  // its own whitespace; this inset keeps its complete mark inside the safe area.
+  const foreground = await sharp(source).resize(72 * scale, 72 * scale).toBuffer()
+  await save(`${dir}/ic_launcher_foreground.png`, sharp({ create: { width: 108 * scale, height: 108 * scale, channels: 3, background: paper } }).composite([{ input: foreground, gravity: 'center' }]))
+}
+await writeFile(new URL('android/app/src/main/res/drawable/onlyideas_foreground.xml', root), '<bitmap xmlns:android="http://schemas.android.com/apk/res/android" android:src="@mipmap/ic_launcher_foreground" android:gravity="fill" android:filter="true"/>\n')
+await writeFile(new URL('android/app/src/main/res/drawable/onlyideas_mark.xml', root), '<bitmap xmlns:android="http://schemas.android.com/apk/res/android" android:src="@drawable/onlyideas_artwork" android:gravity="fill" android:filter="true"/>\n')
+await writeFile(new URL('android/app/src/main/res/drawable/onlyideas_background.xml', root), `<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle"><solid android:color="${paper}"/></shape>\n`)
+
+const splashMark = await sharp(source).resize(512, 512).toBuffer()
+await save('ios/App/App/Assets.xcassets/Splash.imageset/splash-2732x2732.png', sharp({ create: { width: 2732, height: 2732, channels: 3, background: paper } }).composite([{ input: splashMark, gravity: 'center' }]))
+await import('./export-mac-icon.mjs')
+console.log('Exported approved OnlyIdeas artwork for web, iOS, Watch, Mac, Android and Google Play.')
