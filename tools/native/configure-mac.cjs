@@ -17,8 +17,8 @@ o.PBXFileReference['504EC3041FED79650016851F'].path = 'OnlyIdeas.app';
 for (const key of ['504EC3171FED79650016851F','504EC3181FED79650016851F']) {
   const b = o.XCBuildConfiguration[key].buildSettings;
   Object.assign(b, {
-    // Mac 1.0.2 has shipped; preserve its independent successor version.
-    CURRENT_PROJECT_VERSION:'22', MARKETING_VERSION:'1.0.3',
+    // Shared successor includes the approved icon on every Apple platform.
+    CURRENT_PROJECT_VERSION:'23', MARKETING_VERSION:'1.0.4',
     PRODUCT_NAME:'OnlyIdeas', INFOPLIST_FILE:'App/MacInfo.plist',
     SUPPORTS_MACCATALYST:'YES', DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER:'NO',
     SUPPORTED_PLATFORMS:'"macosx"', MACOSX_DEPLOYMENT_TARGET:'13.0',
