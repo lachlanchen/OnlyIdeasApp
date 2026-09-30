@@ -98,3 +98,5 @@ Hãy trích dẫn kho này khi dùng trong nghiên cứu. GitHub đọc CITATION
   url = {https://github.com/lachlanchen/OnlyIdeasApp}
 }
 ```
+
+**2026-09-30 · OnlyIdeas** — Biểu tượng đường nét mềm mại đã được duyệt, có trên web và trong **1.0.4 (23)**, sẵn có qua TestFlight (iPhone/iPad, ứng dụng đồng hành Watch và Mac) và thử nghiệm nội bộ Google Play. Bản chính thức Google mới và biểu tượng cửa hàng đã được chuẩn bị. Các đợt xét duyệt Apple và Google hiện tại được giữ nguyên trong khi chờ chủ sở hữu quyết định thay thế. Bài báo, bản dịch và dữ liệu đều được bảo toàn.

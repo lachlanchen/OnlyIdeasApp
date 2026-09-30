@@ -71,3 +71,28 @@ Existing Google/Stripe sandbox results are recorded in the build21 report.
 Sanitized [submission and qualification receipts](../evidence/distribution-20260930/)
 record exact Apple build/review IDs, Google status and package hash. These are
 submission receipts, not a claim that the pending updates have passed review.
+
+## Approved icon update — 1.0.4 (23)
+
+The approved flowing icon is packaged for iPhone/iPad, the Watch companion,
+Mac, Android and web. Both Apple builds are VALID and IN_BETA_TESTING in the
+existing internal group. Google Play confirms build 23 is available to internal
+testers. Signed packages and provider upload receipts are retained privately.
+
+The production Google build (100% of all 177 configured territories plus rest
+of world) and its new listing icon are staged, not submitted. The app icon’s AI
+provenance is declared; screenshots and the existing feature graphic are retained.
+Apple iOS 1.0.2 (21), Mac 1.0.3 (22), and Google 1.0.2 (21) reviews remain intact
+pending the owner’s choice about replacing queued reviews. A new installed
+production icon therefore still depends on approval and installing the update.
+
+The web icon and Apple home-screen icon are already live and byte-verified. A
+bounded immutable release changed only three icon assets and the home-screen
+link in the existing HTML. Backend and all other web assets match the preceding
+release. The service was not restarted; its database, credit configuration,
+subscriptions and real papers were preserved.
+
+Validation: 103 tests, renderer checks, TypeScript/web/native-reader build,
+Android release lint and signed APK/AAB builds, Apple signed archives, export,
+provider validation and upload. No new physical device claim is made for this
+artwork-only update. See `evidence/icon-replacement-20260930/distribution.json`.

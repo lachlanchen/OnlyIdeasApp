@@ -98,3 +98,5 @@ Cite this repository when using it in research. GitHub reads CITATION.cff to off
   url = {https://github.com/lachlanchen/OnlyIdeasApp}
 }
 ```
+
+**2026-09-30 · OnlyIdeas** — The approved flowing icon is live on the web and included in **1.0.4 (23)**, available in TestFlight (iPhone/iPad, Watch companion and Mac) and Google Play internal testing. The new Google production build and store icon are staged. Existing Apple and Google production reviews remain unchanged pending the owner’s replacement decision. Papers, translations and database records were preserved.

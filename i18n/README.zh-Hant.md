@@ -98,3 +98,5 @@ npm run dev
   url = {https://github.com/lachlanchen/OnlyIdeasApp}
 }
 ```
+
+**2026-09-30 · OnlyIdeas** — 獲核可的流動圖示已於網頁端上線，並納入 **1.0.4 (23)**，可透過 TestFlight（iPhone/iPad、Watch 配套應用程式及 Mac）與 Google Play 內部測試取得。新的 Google 正式版與商店圖示已備妥。等待擁有者決定是否替換期間，保留現有 Apple 與 Google 正式版審查。論文、譯文及資料庫紀錄均已保留。

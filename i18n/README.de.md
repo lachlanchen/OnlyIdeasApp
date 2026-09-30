@@ -98,3 +98,5 @@ Bei wissenschaftlicher Nutzung dieses Repository zitieren. GitHub liest CITATION
   url = {https://github.com/lachlanchen/OnlyIdeasApp}
 }
 ```
+
+**2026-09-30 · OnlyIdeas** — Das freigegebene fließende Symbol ist im Web aktiv und in **1.0.4 (23)** enthalten, verfügbar über TestFlight (iPhone/iPad, Watch-Begleitapp und Mac) sowie im internen Google-Play-Test. Der neue Google-Produktionsbuild und das Store-Symbol sind vorbereitet. Die laufenden Apple- und Google-Prüfungen bleiben bis zur Entscheidung des Eigentümers unverändert. Artikel, Übersetzungen und Datenbankeinträge wurden erhalten.

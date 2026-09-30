@@ -98,3 +98,5 @@ npm run dev
   url = {https://github.com/lachlanchen/OnlyIdeasApp}
 }
 ```
+
+**2026-09-30 · OnlyIdeas** — 승인된 유려한 아이콘이 웹과 **1.0.4 (23)** 에 적용되었습니다. TestFlight(iPhone/iPad, Watch 보조 앱, Mac)와 Google Play 내부 테스트에서 이용할 수 있습니다. 새 Google 정식 빌드와 스토어 아이콘은 준비되었습니다. 소유자가 교체 여부를 결정할 때까지 기존 Apple 및 Google 정식 심사를 유지합니다. 논문, 번역, 데이터베이스 기록은 보존되었습니다.

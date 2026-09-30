@@ -98,3 +98,5 @@ Cita este repositorio si lo utilizas en investigación. GitHub lee CITATION.cff 
   url = {https://github.com/lachlanchen/OnlyIdeasApp}
 }
 ```
+
+**2026-09-30 · OnlyIdeas** — El icono fluido aprobado ya está en la web y en **1.0.4 (23)**, disponible en TestFlight (iPhone/iPad, aplicación complementaria Watch y Mac) y en pruebas internas de Google Play. La nueva versión de producción de Google y su icono están preparadas. Las revisiones actuales de Apple y Google se mantienen hasta que el propietario decida si las sustituye. Se conservaron los artículos, las traducciones y los registros de la base de datos.

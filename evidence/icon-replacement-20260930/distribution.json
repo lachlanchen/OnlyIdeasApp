@@ -1,0 +1,32 @@
+{
+  "version": "1.0.4",
+  "build": 23,
+  "sourceCommit": "ac10181",
+  "testflight": [
+    {
+      "platform": "IOS",
+      "id": "ba2c9c4f-9496-43cb-99b7-905c84391c1a",
+      "version": "1.0.4",
+      "build": "23",
+      "processing": "VALID",
+      "internal": "IN_BETA_TESTING"
+    },
+    {
+      "platform": "MAC_OS",
+      "id": "bbdea815-f41b-45e5-b46c-3d6f8f6dfe83",
+      "version": "1.0.4",
+      "build": "23",
+      "processing": "VALID",
+      "internal": "IN_BETA_TESTING"
+    }
+  ],
+  "googleInternal": "Available to internal testers",
+  "googleProduction": "Prepared for full rollout; not sent for review",
+  "web": {
+    "mark.svg": "6f37b3458d2b8932510a16274ee6a78e8bcd84620e30690683989248b2da1c05",
+    "mark-512.png": "e73c91c44bd926af7fca40fbd3c8059044ceadca5fedd95e151315e0a49d5d12",
+    "apple-touch-icon.png": "d285d02f24d1ebe9f7ea90fa5c5e1d6f5aa0aaebfb4eacfe88bf0d1d5ebd9aea"
+  },
+  "aabSha256": "3e695ba2454377f39edd12494d777be3bb97db883c452baada81573cc1c91409",
+  "checks": "103 tests, renderer, TypeScript/web build, Android release lint and signed packages passed"
+}

@@ -98,3 +98,5 @@ npm run dev
   url = {https://github.com/lachlanchen/OnlyIdeasApp}
 }
 ```
+
+**2026-09-30 · OnlyIdeas** — 承認された流れる形のアイコンをウェブに公開しました。**1.0.4 (23)** にも含まれ、TestFlight（iPhone/iPad、Watch コンパニオン、Mac）と Google Play 内部テストで利用できます。新しい Google 製品版とストアアイコンは準備済みです。差し替えについて所有者が判断するまで、既存の Apple と Google の製品版審査を維持します。論文、翻訳、データベースの記録は保持しています。

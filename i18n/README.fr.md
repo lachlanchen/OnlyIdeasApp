@@ -98,3 +98,5 @@ Citez ce dépôt si vous l’utilisez dans vos recherches. GitHub exploite CITAT
   url = {https://github.com/lachlanchen/OnlyIdeasApp}
 }
 ```
+
+**2026-09-30 · OnlyIdeas** — L’icône fluide approuvée est en ligne et intégrée à **1.0.4 (23)**, disponible dans TestFlight (iPhone/iPad, compagnon Watch et Mac) et en test interne Google Play. La nouvelle version de production Google et son icône sont préparées. Les examens Apple et Google en cours restent inchangés dans l’attente de la décision du propriétaire. Les articles, traductions et données ont été préservés.

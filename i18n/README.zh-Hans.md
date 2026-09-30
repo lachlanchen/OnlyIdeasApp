@@ -98,3 +98,5 @@ npm run dev
   url = {https://github.com/lachlanchen/OnlyIdeasApp}
 }
 ```
+
+**2026-09-30 · OnlyIdeas** — 获批的流动图标已在网页端上线，并纳入 **1.0.4 (23)**，可通过 TestFlight（iPhone/iPad、Watch 配套应用及 Mac）和 Google Play 内部测试获取。新的 Google 正式版和商店图标已准备好。等待所有者决定是否替换期间，保留现有 Apple 和 Google 正式版审核。论文、译文与数据库记录均已保留。
