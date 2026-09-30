@@ -27,11 +27,11 @@ export async function downloadPaperPDF(job,{download=downloadPublic,pause=ms=>ne
   if(result.bytes.length<2_000_000)for(const pdf of citationPDFs(result.bytes.toString(),result.url)){const found=await attempt(pdf);if(found)return found}
   last=new AppError('The source supplied a web page instead of a PDF.');
  }catch(e){last=e;blocked ||= e.upstreamStatus===403||e.upstreamStatus===401||/HTTP (401|403)/.test(e.message)}}
- async function landing(url){url=safe(url);if(!url||pages.has(url)||pages.size>=3||now()>=deadline)return;pages.add(url);try{
+ async function landing(url){url=safe(url);if(!url||attempted.has(url)||pages.has(url)||pages.size>=3||now()>=deadline)return;pages.add(url);try{
   const result=await get(url,2_000_000,12000);
   if(result.bytes.subarray(0,5).toString()==='%PDF-')return result;
   for(const pdf of citationPDFs(result.bytes.toString(),result.url)){const found=await attempt(pdf);if(found)return found}
- }catch(e){last=e}}
+ }catch(e){last=e;blocked ||= e.upstreamStatus===403||e.upstreamStatus===401||/HTTP (401|403)/.test(e.message)}}
  for(const url of [...new Set([job.url,...(job.downloadSources||[])])].slice(0,4)){const result=await attempt(url);if(result)return result}
  // Refresh the exact index ID/DOI; never choose a different paper by title.
  const work=/^https:\/\/openalex\.org\/W\d+$/.test(job.metadata?.metadataSource||'')?job.metadata.metadataSource:null;

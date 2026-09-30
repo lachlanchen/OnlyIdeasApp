@@ -1,6 +1,7 @@
 import {researchTerms} from './library-search.mjs';
 const normalize=s=>String(s||'').normalize('NFKD').replace(/\p{M}/gu,'').toLowerCase();
 export const doiIn=text=>String(text||'').match(/\b10\.\d{4,9}\/[^\s<>"?#]+/i)?.[0]?.replace(/[.,;]+$/,'').toLowerCase()||'';
+export const arxivIn=text=>String(text||'').trim().match(/^(?:(?:https?:\/\/(?:www\.)?arxiv\.org\/(?:abs|pdf)\/)|(?:https?:\/\/doi\.org\/)?10\.48550\/arxiv\.|arxiv:\s*)?(\d{4}\.\d{4,5}(?:v\d+)?|[a-z-]+(?:\.[A-Z]{2})?\/\d{7}(?:v\d+)?)(?:\.pdf)?$/i)?.[1]||'';
 function similar(a,b){
  if(a===b||a.length>=5&&b.length>=5&&(a.startsWith(b)||b.startsWith(a)))return true;
  if(Math.min(a.length,b.length)<5||Math.abs(a.length-b.length)>1)return false;

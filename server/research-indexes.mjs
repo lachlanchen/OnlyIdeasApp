@@ -1,8 +1,9 @@
 import { readFileSync } from 'node:fs';
+import {setTimeout as pause} from 'node:timers/promises';
 import { downloadPublic } from './network.mjs';
 import { requireValue,hash } from './domain.mjs';
 import {queryCrossref} from './crossref.mjs';
-import {rankResearch,doiIn} from './research-ranking.mjs';
+import {rankResearch,doiIn,arxivIn} from './research-ranking.mjs';
 export const taxonomy=JSON.parse(readFileSync(new URL('./disciplines.json',import.meta.url)));
 const plain=v=>String(v||'').replace(/<[^>]*>/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#(\d+);/g,(_,n)=>String.fromCodePoint(Math.min(Number(n),0x10ffff))).replace(/\s+/g,' ').trim();
 const field=(entry,name)=>plain(entry.match(new RegExp(`<${name}(?:\\s[^>]*)?>([\\s\\S]*?)</${name}>`))?.[1]);
@@ -43,8 +44,37 @@ export function searchOptions(raw={}) {
 }
 // One outbound arXiv request at a time, at least three seconds apart.
 let arxivTail=Promise.resolve(),lastArxiv=0;
-async function arxivDownload(url,download){const run=arxivTail.catch(()=>{}).then(async()=>{const delay=Math.max(0,3100-(Date.now()-lastArxiv));if(delay)await new Promise(r=>setTimeout(r,delay));lastArxiv=Date.now();return download(url,{maxBytes:2_000_000,timeout:15000})});arxivTail=run.then(()=>{},()=>{});return run}
-export async function queryArxiv(o,download=downloadPublic) {
+async function arxivDownload(url,download,signal){
+ const run=arxivTail.catch(()=>{}).then(async()=>{
+  signal?.throwIfAborted();
+  const delay=Math.max(0,3100-(Date.now()-lastArxiv));
+  if(delay)await pause(delay,undefined,{signal});
+  signal?.throwIfAborted();lastArxiv=Date.now();return download(url,{maxBytes:2_000_000,timeout:15000});
+ });arxivTail=run.then(()=>{},()=>{});return run;
+}
+// Exact arXiv links use the repository's own citation metadata. This avoids
+// broad keyword matches and an unrelated work when a user pastes a DOI/PDF URL.
+export async function queryArxivExact(id,download=downloadPublic) {
+ const requestedSource='https://arxiv.org/abs/'+id;
+ let bytes;try{bytes=await download(requestedSource,{maxBytes:2_000_000,timeout:8000})}catch(e){if(e.upstreamStatus===404)return {papers:[],hasMore:false};throw e}
+ const html=bytes.toString();
+ const metadata=new Map();
+ for(const [tag] of html.matchAll(/<meta\b[^>]*>/gi)) {
+  const attributes=Object.fromEntries([...tag.matchAll(/([\w:-]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/g)].map(m=>[m[1].toLowerCase(),m[2]??m[3]]));
+  const name=(attributes.name||attributes.property)?.toLowerCase();if(name&&attributes.content)metadata.set(name,[...(metadata.get(name)||[]),plain(attributes.content)]);
+ }
+ const first=key=>metadata.get(key)?.[0]||'';
+ requireValue(first('citation_arxiv_id').toLowerCase().replace(/v\d+$/,'')===id.toLowerCase().replace(/v\d+$/,'') && (!/v\d+$/.test(id)||html.includes('arXiv:'+id)),'The repository returned a different paper.',502);
+ requireValue(first('citation_title'),'The repository did not supply a paper title.',502);
+ const observed=arxivIn(first('og:url'))||html.match(/<strong>\s*arXiv:([\w./-]+)\s*<\/strong>/i)?.[1]||'';
+ const resolved=arxivIn(observed)&&observed.replace(/v\d+$/,'').toLowerCase()===id.replace(/v\d+$/,'').toLowerCase()?observed:id;
+ const source='https://arxiv.org/abs/'+resolved;
+ const paper={id:hash(source).slice(0,24),title:first('citation_title').slice(0,300),authors:(metadata.get('citation_author')||[]).join(', ').slice(0,500),summary:first('citation_abstract').slice(0,1800),pdfUrl:'https://arxiv.org/pdf/'+resolved,source,year:first('citation_date').slice(0,4),publicationDate:first('citation_date').replaceAll('/','-'),doi:first('citation_doi')||'10.48550/arXiv.'+id.replace(/v\d+$/,''),journal:first('citation_journal_title'),index:'arxiv',type:'preprint',metadataSource:source};
+ return {papers:[paper],hasMore:false};
+}
+export async function queryArxiv(o,download=downloadPublic,signal) {
+ const exactArxiv=arxivIn(o.q);
+ if(exactArxiv)return queryArxivExact(exactArxiv,download);
  const terms=o.q.replace(/[^\p{L}\p{N}\s-]/gu,' ').trim().split(/\s+/).filter(Boolean).slice(0,14);
  const clauses=[];if(terms.length)clauses.push(terms.map(t=>`all:${t}`).join(' AND '));
  if(o.subdiscipline)clauses.push(`cat:${o.subdiscipline}`);
@@ -53,7 +83,7 @@ export async function queryArxiv(o,download=downloadPublic) {
  if(o.from||o.to)clauses.push(`submittedDate:[${o.from||'1991'}01010000 TO ${o.to||new Date().getUTCFullYear()}12312359]`);
  if(!clauses.length)clauses.push('all:*');
  const url=new URL('https://export.arxiv.org/api/query');url.search=new URLSearchParams({search_query:clauses.join(' AND '),...(o.page>1?{start:String((o.page-1)*12)}:{}),max_results:'12',...(o.sort==='latest'?{sortBy:'submittedDate',sortOrder:'descending'}:{})}).toString().replaceAll('%3A',':');
- try {const xml=(await arxivDownload(url.href,download)).toString(),papers=parseArxiv(xml),total=Number(xml.match(/<opensearch:totalResults[^>]*>(\d+)</)?.[1]||0);return {papers,hasMore:o.page*12<total};}
+ try {const xml=(await arxivDownload(url.href,download,signal)).toString(),papers=parseArxiv(xml),total=Number(xml.match(/<opensearch:totalResults[^>]*>(\d+)</)?.[1]||0);return {papers,hasMore:o.page*12<total};}
  catch(error){
   // OpenAlex also indexes arXiv itself. Preserve repository restriction; don't
   // silently approximate arXiv category or journal filters in another taxonomy.
@@ -66,6 +96,13 @@ async function indexBytes(url,options,download){
  for(let attempt=0;;attempt++){try{return await download(url,options)}catch(e){if(attempt||![500,502,503,504].includes(e.upstreamStatus))throw e;await new Promise(r=>setTimeout(r,300));}}
 }
 export async function queryOpenAlex(o,download=downloadPublic) {
+ const exact=doiIn(o.q);
+ if(exact&&!o.repository){
+  const url='https://api.openalex.org/works/'+encodeURIComponent('https://doi.org/'+exact);
+  let bytes;try{bytes=await indexBytes(url,{maxBytes:3_500_000,timeout:10000},download)}catch(e){if(e.upstreamStatus===404)return {papers:[],hasMore:false};throw e}
+  const work=JSON.parse(bytes.toString());
+  return {papers:doiIn(work.doi)===exact?parseOpenAlex({results:[work]},null,true):[],hasMore:false};
+ }
  const filters=[...(!o.q?['is_oa:true','has_pdf_url:true']:[]),'type:article|preprint|review','to_publication_date:'+new Date().toISOString().slice(0,10)];
  if(o.repository)filters.push('locations.source.id:'+o.repository);
  if(o.discipline)filters.push('primary_topic.field.id:'+o.discipline);
@@ -75,12 +112,23 @@ export async function queryOpenAlex(o,download=downloadPublic) {
  const url=new URL('https://api.openalex.org/works');url.search=new URLSearchParams({filter:filters.join(','),per_page:'12',page:String(o.page),select:'id,title,authorships,publication_year,publication_date,primary_topic,primary_location,best_oa_location,locations,abstract_inverted_index,doi,type,open_access',...(o.q?{search:o.q}:{}),...(o.sort==='latest'?{sort:'publication_date:desc'}:{})});
  const data=JSON.parse((await indexBytes(url.href,{maxBytes:3_500_000,timeout:10000},download)).toString());return {papers:parseOpenAlex(data,o.repository,!!o.q),hasMore:o.page*12<(data.meta?.count||0)};
 }
-export async function searchIndexes(raw={},download=downloadPublic) {
- const o=searchOptions(raw);const names=o.source==='arxiv'?['arxiv']:o.source==='openalex'||o.discipline||o.subdiscipline?['openalex']:o.q?(doiIn(o.q)?['crossref','openalex']:['crossref','openalex','arxiv']):o.journal?['openalex']:['openalex','arxiv'];
- const results=await Promise.allSettled(names.map(n=>n==='arxiv'?queryArxiv(o,download):n==='crossref'?queryCrossref(o,download):queryOpenAlex(o,download)));
+export async function searchIndexes(raw={},download=downloadPublic,{timeout=8000}={}) {
+ // A slow provider must not hold all completed search results hostage. The
+ // shared deadline cancels real sockets and queued arXiv work, not just the UI.
+ const controller=new AbortController(),deadline=Date.now()+timeout;
+ let rejectDeadline;
+ const expired=new Promise((_,reject)=>{rejectDeadline=reject});
+ const timer=setTimeout(()=>{const error=new Error('Research index deadline');controller.abort(error);rejectDeadline(error)},timeout);
+ const bounded=(url,options={})=>{controller.signal.throwIfAborted();return download(url,{...options,deadline,signal:controller.signal})};
+ try {
+ const o=searchOptions(raw);const names=o.source==='arxiv'?['arxiv']:o.source==='openalex'||o.discipline||o.subdiscipline?['openalex']:o.q?(arxivIn(o.q)?['arxiv']:doiIn(o.q)?['crossref','openalex']:['crossref','openalex','arxiv']):o.journal?['openalex']:['openalex','arxiv'];
+ const results=await Promise.allSettled(names.map(n=>Promise.race([n==='arxiv'?queryArxiv(o,bounded,controller.signal):n==='crossref'?queryCrossref(o,bounded):queryOpenAlex(o,bounded),expired])));
  const papers=[],seen=new Set(),unavailable=[];let hasMore=false,ok=0;
  results.forEach((r,i)=>{if(r.status==='rejected'){unavailable.push(names[i]);return}ok++;if(r.value.fallback)unavailable.push(names[i]);hasMore ||= r.value.hasMore;for(const p of r.value.papers){const key=p.doi?.toLowerCase()||p.source;if(!seen.has(key)){papers.push(p);seen.add(key)}else{const index=papers.findIndex(x=>(x.doi?.toLowerCase()||x.source)===key);if(index>=0&&p.pdfUrl&&!papers[index].pdfUrl)papers[index]={...papers[index],...p};}}});
  requireValue(ok,'Research indexes are temporarily unavailable. Try again shortly.',503);
  if(o.sort==='latest')papers.sort((a,b)=>b.publicationDate.localeCompare(a.publicationDate));
- return {papers:o.sort==='relevance'?rankResearch(papers,o.q):papers,nextPage:hasMore&&o.page<100?o.page+1:null,unavailable,sources:names};
+ const exactDOI=doiIn(o.q),exactArxiv=arxivIn(o.q);
+ const matched=exactArxiv?papers.filter(p=>arxivIn(p.source).replace(/v\d+$/,'')===exactArxiv.replace(/v\d+$/,'')):exactDOI?papers.filter(p=>doiIn(p.doi||p.source)===exactDOI):papers;
+ return {papers:o.sort==='relevance'?rankResearch(matched,o.q):matched,nextPage:hasMore&&o.page<100?o.page+1:null,unavailable,sources:names};
+ } finally {clearTimeout(timer)}
 }

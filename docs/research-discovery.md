@@ -46,3 +46,13 @@ an import merely by visiting. Withdrawal checks precede social reads and writes.
 
 [EchoMind adapter handoff](echomind-onlyideas-adapter.md) covers the later mini app
 and friend-forwarding integration. No EchoMind session is implicitly accepted.
+
+## Exact references and latency · 2026-09-30
+
+DOIs use exact records instead of full-text mentions. arXiv DOI, abstract and PDF
+links use repository citation metadata and the observed canonical revision, so an
+already converted revision can open immediately. Explicit revisions stay distinct.
+Combined provider work has an eight-second deadline with socket/queue cancellation;
+completed results survive another provider timing out. Crossref figure components
+and datasets no longer appear as standalone papers. Download recovery avoids
+fetching a denied URL twice when it is also the source page.

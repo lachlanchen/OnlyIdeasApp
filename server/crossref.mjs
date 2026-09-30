@@ -5,7 +5,7 @@ import {researchTerms} from './library-search.mjs';
 const plain=v=>String(v||'').replace(/<[^>]*>/g,' ').replace(/&amp;/g,'&').replace(/\s+/g,' ').trim();
 export function parseCrossref(data){
  const items=data.message?.items||(data.message?.DOI?[data.message]:[]);
- return items.flatMap(p=>{const doi=doiIn(p.DOI);if(!doi||!p.title?.[0])return [];
+ return items.flatMap(p=>{if(['component','dataset','journal','journal-issue','journal-volume','reference-entry','peer-review'].includes(p.type))return [];const doi=doiIn(p.DOI);if(!doi||!p.title?.[0])return [];
   const source='https://doi.org/'+doi,parts=p.published?.['date-parts']?.[0]||p['published-online']?.['date-parts']?.[0]||[];
   // Crossref links describe file formats, not access rights. Resolve the source
   // through the regular open-download path before claiming a readable PDF.
@@ -17,6 +17,7 @@ export async function queryCrossref(o,download=downloadPublic){
  if(!doi){const filters=[];if(o.from)filters.push('from-pub-date:'+o.from+'-01-01');if(o.to)filters.push('until-pub-date:'+o.to+'-12-31');
   url.search=new URLSearchParams({'query.bibliographic':researchTerms(o.q).join(' ')||o.q,rows:'12',offset:String((o.page-1)*12),...(filters.length?{filter:filters.join(',')}:{}),...(o.journal?{'query.container-title':o.journal}:{}),...(o.sort==='latest'?{sort:'published',order:'desc'}:{})});
  }
- const data=JSON.parse((await download(url.href,{timeout:12000,maxBytes:3_500_000})).toString());
+ let bytes;try{bytes=await download(url.href,{timeout:12000,maxBytes:3_500_000})}catch(e){if(doi&&e.upstreamStatus===404)return {papers:[],hasMore:false};throw e}
+ const data=JSON.parse(bytes.toString());
  return {papers:parseCrossref(data),hasMore:!doi&&o.page*12<(data.message?.['total-results']||0)};
 }

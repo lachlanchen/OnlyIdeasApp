@@ -10,6 +10,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = scene as? UIWindowScene else { return }
         #if targetEnvironment(macCatalyst)
+        UITabBar.appearance().isHidden = true
         windowScene.sizeRestrictions?.minimumSize = CGSize(width: 820, height: 600)
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--onlyideas-mac-qa") {
@@ -126,7 +127,7 @@ import WebKit
     private var started = false
     private var checks: [String] = []
     private var result: [String: Any] = [:]
-    private let output = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("MacQA", isDirectory: true)
+    private let output = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("OnlyIdeasQA-watch24/Evidence", isDirectory: true)
     init() { let store = ReadingStore(); self.store = store; super.init(rootView: NativeReadingApp(qaStore: store)) }
     @MainActor required dynamic init?(coder: NSCoder) { fatalError("QA has no storyboard") }
     override func viewDidAppear(_ animated: Bool) {
@@ -168,6 +169,14 @@ import WebKit
             try check("Live or previously cached public library", store.papers.allSatisfy { $0.visibility == "public" })
             result["offline"] = store.offline
             result["titles"] = store.papers.map(\.title)
+            if !ProcessInfo.processInfo.arguments.contains("--onlyideas-native-offline") {
+                let began=Date()
+                let found=try await store.json("/api/discovery?q=event%20camera%20flow%20cytometry&source=all")
+                let papers=found["papers"] as? [[String:Any]] ?? []
+                try check("Live research search returns paper metadata", !papers.isEmpty)
+                result["searchSeconds"]=Date().timeIntervalSince(began)
+                result["searchTitles"]=papers.prefix(5).compactMap{$0["title"] as? String}
+            }
             try snapshot("library")
             NotificationCenter.default.post(name: Notification.Name("OnlyIdeas.QA.Tab"), object: 1)
             await pause(); try snapshot("agent")

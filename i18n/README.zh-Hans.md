@@ -16,6 +16,13 @@ OnlyIdeas 是共享的论文阅读空间。导入 PDF 或开放获取的 PDF 链
 
 ![OnlyIdeas reading room](../evidence/library-desktop.png)
 
+<!-- watchsearch24 -->
+**手表与搜索 · 构建 24**
+
+通过配对的 iPhone，将公开论文摘录以原文、译文或交错模式发送到手表，并复用已下载的译文。macOS 12 及以上版本已在四台 Mac 上通过在线与离线阅读测试。精确 DOI/arXiv 搜索复用已有转录；慢速索引有时限，下载受限时仍可打开来源或上传 PDF。
+
+[24](../docs/watch-search-24.md)
+
 <!-- distribution20260930 -->
 **发布状态 · 2026年9月30日**
 

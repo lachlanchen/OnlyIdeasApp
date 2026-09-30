@@ -6,6 +6,15 @@ import UniformTypeIdentifiers
 import WebKit
 import PhotosUI
 
+#if targetEnvironment(macCatalyst)
+private struct MacTabBarHidden: ViewModifier {
+  @ViewBuilder func body(content:Content)->some View {
+    if #available(iOS 16.0, *) { content.toolbar(.hidden,for:.tabBar) }
+    else { content }
+  }
+}
+#endif
+
 private let ideaGradient = LinearGradient(colors: [Color(red:0.0,green:0.49,blue:0.60), Color(red:0.22,green:0.41,blue:0.88), Color(red:0.48,green:0.27,blue:0.83)], startPoint:.topLeading,endPoint:.bottomTrailing)
 private let accent = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? UIColor(red:0.72,green:0.68,blue:1,alpha:1) : UIColor(red:0.34,green:0.27,blue:0.81,alpha:1) })
 struct NativeReadingApp: View {
@@ -32,12 +41,12 @@ struct NativeReadingApp: View {
       // Keep each navigation history and in-progress composer while changing sections.
       TabView(selection: $tab) {
         NavigationView { NativeLibrary(profile: { tab = 2 }) }.id(store.account?.id ?? "public")
-          .navigationViewStyle(.stack).toolbar(.hidden, for: .tabBar).tag(0)
+          .navigationViewStyle(.stack).modifier(MacTabBarHidden()).tag(0)
         NavigationView { NativeAgent() }.navigationViewStyle(.stack)
-          .toolbar(.hidden, for: .tabBar).tag(1)
-        NavigationView { NativeReadingSpace(initialSection:spaceSection) }.navigationViewStyle(.stack).toolbar(.hidden, for: .tabBar).tag(3)
+          .modifier(MacTabBarHidden()).tag(1)
+        NavigationView { NativeReadingSpace(initialSection:spaceSection) }.navigationViewStyle(.stack).modifier(MacTabBarHidden()).tag(3)
         NavigationView { NativeProfile() }.navigationViewStyle(.stack)
-          .toolbar(.hidden, for: .tabBar).tag(2)
+          .modifier(MacTabBarHidden()).tag(2)
       }
     }
     #else
@@ -732,7 +741,8 @@ struct NativePaper: View {
   @State private var readingTools = false
   @State private var languages = false
   @State private var watchNotice: String?
-  @State private var watchProse = ""
+  @State private var watchEditions: [String:String] = [:]
+  @State private var watchLanguage = ""
   var body: some View {
     VStack(spacing: 0) {
       if let document = document {
@@ -742,6 +752,7 @@ struct NativePaper: View {
               Button(name){readLanguage=code;readingMode="interlaced";Task{await refreshReading()}}
             }} label:{Label(UILanguage.choices.first{$0.0==readLanguage}?.1 ?? readLanguage,systemImage:"character.bubble").font(.subheadline.bold())}
             Spacer()
+            watchControl
             if readingMode != "original",reading?.complete != true {
               Button(T("Fetch remaining translation")){translationTask=Task{await fetchReading()}}.font(.caption).disabled(translationPending)
             }
@@ -752,7 +763,7 @@ struct NativePaper: View {
         }.padding(.horizontal,14).padding(.vertical,6)
         NativeDocument(
           document: document, size: store.readingSize * readingScale, dark: scheme == .dark,
-          quote: $quote, reading:reading,mode:readingMode,onParagraph:{q,id in quote=q;paragraph=id;discussion=true},onSelection:{_ in paragraph=""}, onWatchProse:{watchProse=$0})
+          quote: $quote, reading:reading,mode:readingMode,onParagraph:{q,id in quote=q;paragraph=id;discussion=true},onSelection:{_ in paragraph=""}, onWatchEditions:{editions,language in watchEditions=editions;watchLanguage=language})
       } else {
         ProgressView(T("Opening your paper…")).font(.title3).frame(
           maxWidth: .infinity, maxHeight: .infinity)
@@ -790,22 +801,7 @@ struct NativePaper: View {
             } catch { store.error = error.localizedDescription }
           }
           Button(T("Read in another language")) { readingMode = "interlaced" }
-          #if !targetEnvironment(macCatalyst)
-          if UIDevice.current.userInterfaceIdiom == .phone, let document, document.owner == "public", document.paper.visibility == "public" {
-            Button {
-              guard let excerpt = PaperWatchExcerpt.make(id: paper.id, title: document.paper.title,
-                authors: document.paper.authors ?? "", markdown: "",
-                selection: quote.isEmpty ? watchProse : quote, isPublic: true) else {
-                watchNotice = "Select a short text passage to send. Equations and figures stay in the full reader."
-                return
-              }
-              do {
-                try WatchSender.shared.save(excerpt)
-                watchNotice = "Excerpt queued. Open OnlyIdeas on your paired Apple Watch to read it offline."
-              } catch { watchNotice = error.localizedDescription }
-            } label: { Label(T("Send excerpt to Watch"), systemImage: "applewatch") }
-          }
-          #endif
+
           Button(T("Notes, guides & translation")) { readingTools = true }
           Button(T("Discuss this paper")) { paragraph="";quote="";discussion = true }
         } label: {
@@ -835,6 +831,8 @@ struct NativePaper: View {
       }
       await refreshReading()
     }
+    .onChange(of:readingMode) {_ in quote=""}
+    .onChange(of:readLanguage) {_ in quote=""}
     .onDisappear {translationTask?.cancel();translationTask=nil}
     #if DEBUG
     .onReceive(NotificationCenter.default.publisher(for:Notification.Name("OnlyIdeas.QA.ReaderMode"))) {event in
@@ -852,6 +850,47 @@ struct NativePaper: View {
     .alert("Apple Watch", isPresented: Binding(get: { watchNotice != nil }, set: { if !$0 { watchNotice = nil } })) {
       Button(T("OK")) { watchNotice = nil }
     } message: { Text(T(watchNotice ?? "")) }
+  }
+  var watchLoading: Bool {
+    #if !targetEnvironment(macCatalyst)
+    return UIDevice.current.userInterfaceIdiom == .phone && document?.owner == "public" && watchEditions.isEmpty
+    #else
+    return false
+    #endif
+  }
+  @ViewBuilder var watchControl: some View {
+    Menu {
+      #if !targetEnvironment(macCatalyst)
+      if UIDevice.current.userInterfaceIdiom == .phone {
+        if document?.owner == "public", document?.paper.visibility == "public" {
+          ForEach(["original","translation","interlaced"],id:\.self) { mode in
+            Button(T(mode.capitalized)) { sendToWatch(mode) }.accessibilityIdentifier("watch.edition."+mode)
+              .disabled(watchEditions[mode]?.isEmpty != false || (mode != "original" && (watchLanguage != readLanguage || (reading?.translated ?? 0) == 0 || watchEditions["translation"]?.isEmpty != false)))
+          }
+          if !quote.isEmpty { Button(T("Selected text")) { sendToWatch(readingMode,selection:quote) } }
+          Text(T("Uses downloaded text. Fetch a translation in the reader first."))
+        } else { Text(T("Only public papers can be sent to Watch.")) }
+      } else { Text(T("Send from OnlyIdeas on the iPhone paired with your Watch.")) }
+      #else
+      Text(T("Send from OnlyIdeas on the iPhone paired with your Watch."))
+      #endif
+    } label: { HStack {Label(T("Send to Watch"),systemImage:"applewatch");if watchLoading {ProgressView()}}.font(.subheadline) }
+    .disabled(watchLoading)
+    .accessibilityIdentifier("reader.sendToWatch")
+  }
+  func sendToWatch(_ mode:String, selection:String? = nil) {
+    #if !targetEnvironment(macCatalyst)
+    guard let document, document.owner == "public", document.paper.visibility == "public" else {return}
+    let text=selection ?? watchEditions[mode] ?? ""
+    let language=mode == "original" ? (document.paper.language ?? "en") : readLanguage
+    let detail=T(mode.capitalized)+" · "+language+(mode == "original" ? "" : " · "+T("AI translation"))
+    guard let excerpt=PaperWatchExcerpt.make(id:paper.id,title:document.paper.title,
+      authors:detail,markdown:"",selection:text,isPublic:true) else {
+      watchNotice="Select a short text passage to send. Equations and figures stay in the full reader.";return
+    }
+    do {try WatchSender.shared.save(excerpt);watchNotice="Excerpt queued. Open OnlyIdeas on your paired Apple Watch to read it offline."}
+    catch {watchNotice=error.localizedDescription}
+    #endif
   }
   func refreshReading() async {
     guard let document else {return}
@@ -886,7 +925,7 @@ struct NativeDocument: UIViewRepresentable {
   var mode:String = "original"
   var onParagraph:((String,String)->Void)? = nil
   var onSelection:((String)->Void)? = nil
-  var onWatchProse:((String)->Void)? = nil
+  var onWatchEditions:(([String:String],String)->Void)? = nil
   func makeCoordinator() -> Coordinator { Coordinator(self) }
   func makeUIView(context: Context) -> WKWebView {
     let c = WKWebViewConfiguration()
@@ -950,7 +989,9 @@ struct NativeDocument: UIViewRepresentable {
     func userContentController(
       _ userContentController: WKUserContentController, didReceive message: WKScriptMessage
     ) {
-      if let data = message.body as? [String: Any], let prose = data["watchProse"] as? String { parent.onWatchProse?(prose) }
+      if let data = message.body as? [String: Any], let editions = data["watchEditions"] as? [String:String] {
+        parent.onWatchEditions?(editions,data["watchLanguage"] as? String ?? "")
+      }
       if let data = message.body as? [String: Any], let quote = data["quote"] as? String {
         parent.quote = quote
         if data["action"] as? String == "paragraph", let id = data["paragraphId"] as? String { parent.onParagraph?(quote,id) } else { parent.onSelection?(quote) }

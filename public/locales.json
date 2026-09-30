@@ -694,7 +694,12 @@
     "Planned price: {price} / month": "Planned price: {price} / month",
     "Subscriptions are coming soon. You can keep reading for free.": "Subscriptions are coming soon. You can keep reading for free.",
     "Eligible subscribers get a 7-day trial when plans become available.": "Eligible subscribers get a 7-day trial when plans become available.",
-    "Unable to load plans. Try again.": "Unable to load plans. Try again."
+    "Unable to load plans. Try again.": "Unable to load plans. Try again.",
+    "Send to Watch": "Send to Watch",
+    "Selected text": "Selected text",
+    "Uses downloaded text. Fetch a translation in the reader first.": "Uses downloaded text. Fetch a translation in the reader first.",
+    "Only public papers can be sent to Watch.": "Only public papers can be sent to Watch.",
+    "Send from OnlyIdeas on the iPhone paired with your Watch.": "Send from OnlyIdeas on the iPhone paired with your Watch."
   },
   "zh-Hans": {
     "Choose a valid PDF.": "请选择有效的 PDF。",
@@ -1391,7 +1396,12 @@
     "Planned price: {price} / month": "计划价格：{price} / 月",
     "Subscriptions are coming soon. You can keep reading for free.": "订阅即将推出。您可以继续免费阅读。",
     "Eligible subscribers get a 7-day trial when plans become available.": "套餐开放后，符合条件的订阅者可享受7天试用。",
-    "Unable to load plans. Try again.": "无法加载套餐，请重试。"
+    "Unable to load plans. Try again.": "无法加载套餐，请重试。",
+    "Send to Watch": "发送到手表",
+    "Selected text": "所选文字",
+    "Uses downloaded text. Fetch a translation in the reader first.": "使用已下载的文字。请先在阅读器中获取翻译。",
+    "Only public papers can be sent to Watch.": "仅公开论文可以发送到手表。",
+    "Send from OnlyIdeas on the iPhone paired with your Watch.": "请在与手表配对的 iPhone 上使用 OnlyIdeas 发送。"
   },
   "zh-Hant": {
     ". Public comments are reviewed.": "公開評論會經過審核。",
@@ -2088,7 +2098,12 @@
     "Planned price: {price} / month": "預定價格：{price} / 月",
     "Subscriptions are coming soon. You can keep reading for free.": "訂閱即將推出。您可以繼續免費閱讀。",
     "Eligible subscribers get a 7-day trial when plans become available.": "方案開放後，符合資格的訂閱者可享7天試用。",
-    "Unable to load plans. Try again.": "無法載入方案，請重試。"
+    "Unable to load plans. Try again.": "無法載入方案，請重試。",
+    "Send to Watch": "傳送到手錶",
+    "Selected text": "所選文字",
+    "Uses downloaded text. Fetch a translation in the reader first.": "使用已下載的文字。請先在閱讀器中取得翻譯。",
+    "Only public papers can be sent to Watch.": "僅公開論文可以傳送到手錶。",
+    "Send from OnlyIdeas on the iPhone paired with your Watch.": "請在與手錶配對的 iPhone 上使用 OnlyIdeas 傳送。"
   },
   "ja": {
     ". Public comments are reviewed.": "公開コメントは審査されます。",
@@ -2785,7 +2800,12 @@
     "Planned price: {price} / month": "予定価格：{price} / 月",
     "Subscriptions are coming soon. You can keep reading for free.": "サブスクリプションは近日公開です。引き続き無料で読めます。",
     "Eligible subscribers get a 7-day trial when plans become available.": "プラン公開後、対象の方は7日間無料でお試しいただけます。",
-    "Unable to load plans. Try again.": "プランを読み込めませんでした。もう一度お試しください。"
+    "Unable to load plans. Try again.": "プランを読み込めませんでした。もう一度お試しください。",
+    "Send to Watch": "Watchに送信",
+    "Selected text": "選択したテキスト",
+    "Uses downloaded text. Fetch a translation in the reader first.": "ダウンロード済みのテキストを使用します。先にリーダーで翻訳を取得してください。",
+    "Only public papers can be sent to Watch.": "公開論文のみWatchに送信できます。",
+    "Send from OnlyIdeas on the iPhone paired with your Watch.": "WatchとペアリングしたiPhoneのOnlyIdeasから送信してください。"
   },
   "ko": {
     ". Public comments are reviewed.": "공개 댓글은 검토됩니다.",
@@ -3482,7 +3502,12 @@
     "Planned price: {price} / month": "예정 가격: 월 {price}",
     "Subscriptions are coming soon. You can keep reading for free.": "구독 서비스가 곧 시작됩니다. 계속 무료로 읽을 수 있습니다.",
     "Eligible subscribers get a 7-day trial when plans become available.": "요금제가 출시되면 대상 구독자는 7일 무료 체험을 이용할 수 있습니다.",
-    "Unable to load plans. Try again.": "요금제를 불러올 수 없습니다. 다시 시도해 주세요."
+    "Unable to load plans. Try again.": "요금제를 불러올 수 없습니다. 다시 시도해 주세요.",
+    "Send to Watch": "Watch로 보내기",
+    "Selected text": "선택한 텍스트",
+    "Uses downloaded text. Fetch a translation in the reader first.": "다운로드한 텍스트를 사용합니다. 먼저 리더에서 번역을 가져오세요.",
+    "Only public papers can be sent to Watch.": "공개 논문만 Watch로 보낼 수 있습니다.",
+    "Send from OnlyIdeas on the iPhone paired with your Watch.": "Watch와 페어링된 iPhone의 OnlyIdeas에서 보내세요."
   },
   "ar": {
     ". Public comments are reviewed.": "التعليقات العامة تخضع للمراجعة.",
@@ -4179,7 +4204,12 @@
     "Planned price: {price} / month": "السعر المخطط: {price} شهريًا",
     "Subscriptions are coming soon. You can keep reading for free.": "الاشتراكات متاحة قريبًا. يمكنك متابعة القراءة مجانًا.",
     "Eligible subscribers get a 7-day trial when plans become available.": "يحصل المشتركون المؤهلون على تجربة لمدة 7 أيام عند إتاحة الخطط.",
-    "Unable to load plans. Try again.": "تعذر تحميل الخطط. حاول مجددًا."
+    "Unable to load plans. Try again.": "تعذر تحميل الخطط. حاول مجددًا.",
+    "Send to Watch": "إرسال إلى الساعة",
+    "Selected text": "النص المحدد",
+    "Uses downloaded text. Fetch a translation in the reader first.": "يستخدم النص الذي تم تنزيله. احصل على الترجمة في القارئ أولاً.",
+    "Only public papers can be sent to Watch.": "يمكن إرسال الأبحاث العامة فقط إلى الساعة.",
+    "Send from OnlyIdeas on the iPhone paired with your Watch.": "أرسل من OnlyIdeas على جهاز iPhone المقترن بساعتك."
   },
   "fr": {
     ". Public comments are reviewed.": ". Les commentaires publics sont examinés.",
@@ -4876,7 +4906,12 @@
     "Planned price: {price} / month": "Prix prévu : {price} / mois",
     "Subscriptions are coming soon. You can keep reading for free.": "Les abonnements arrivent bientôt. Vous pouvez continuer à lire gratuitement.",
     "Eligible subscribers get a 7-day trial when plans become available.": "Les abonnés éligibles auront un essai de 7 jours à la disponibilité des forfaits.",
-    "Unable to load plans. Try again.": "Impossible de charger les forfaits. Réessayez."
+    "Unable to load plans. Try again.": "Impossible de charger les forfaits. Réessayez.",
+    "Send to Watch": "Envoyer à la Watch",
+    "Selected text": "Texte sélectionné",
+    "Uses downloaded text. Fetch a translation in the reader first.": "Utilise le texte téléchargé. Récupérez d’abord une traduction dans le lecteur.",
+    "Only public papers can be sent to Watch.": "Seuls les articles publics peuvent être envoyés à la Watch.",
+    "Send from OnlyIdeas on the iPhone paired with your Watch.": "Envoyez depuis OnlyIdeas sur l’iPhone jumelé à votre Watch."
   },
   "de": {
     ". Public comments are reviewed.": "Öffentliche Kommentare werden geprüft.",
@@ -5573,7 +5608,12 @@
     "Planned price: {price} / month": "Geplanter Preis: {price} / Monat",
     "Subscriptions are coming soon. You can keep reading for free.": "Abonnements sind bald verfügbar. Du kannst weiterhin kostenlos lesen.",
     "Eligible subscribers get a 7-day trial when plans become available.": "Berechtigte Abonnenten erhalten bei Verfügbarkeit der Tarife eine 7-tägige Testphase.",
-    "Unable to load plans. Try again.": "Tarife konnten nicht geladen werden. Bitte erneut versuchen."
+    "Unable to load plans. Try again.": "Tarife konnten nicht geladen werden. Bitte erneut versuchen.",
+    "Send to Watch": "An die Watch senden",
+    "Selected text": "Ausgewählter Text",
+    "Uses downloaded text. Fetch a translation in the reader first.": "Verwendet heruntergeladenen Text. Lade zuerst eine Übersetzung im Reader.",
+    "Only public papers can be sent to Watch.": "Nur öffentliche Artikel können an die Watch gesendet werden.",
+    "Send from OnlyIdeas on the iPhone paired with your Watch.": "Sende über OnlyIdeas auf dem mit deiner Watch gekoppelten iPhone."
   },
   "es": {
     ". Public comments are reviewed.": "Los comentarios públicos se revisan.",
@@ -6270,7 +6310,12 @@
     "Planned price: {price} / month": "Precio previsto: {price} al mes",
     "Subscriptions are coming soon. You can keep reading for free.": "Las suscripciones llegarán pronto. Puedes seguir leyendo gratis.",
     "Eligible subscribers get a 7-day trial when plans become available.": "Los suscriptores que cumplan los requisitos tendrán 7 días de prueba cuando se lancen los planes.",
-    "Unable to load plans. Try again.": "No se pudieron cargar los planes. Inténtalo de nuevo."
+    "Unable to load plans. Try again.": "No se pudieron cargar los planes. Inténtalo de nuevo.",
+    "Send to Watch": "Enviar al Watch",
+    "Selected text": "Texto seleccionado",
+    "Uses downloaded text. Fetch a translation in the reader first.": "Usa el texto descargado. Obtén primero una traducción en el lector.",
+    "Only public papers can be sent to Watch.": "Solo se pueden enviar artículos públicos al Watch.",
+    "Send from OnlyIdeas on the iPhone paired with your Watch.": "Envía desde OnlyIdeas en el iPhone enlazado con tu Watch."
   },
   "ru": {
     ". Public comments are reviewed.": "Публичные комментарии проходят проверку.",
@@ -6967,7 +7012,12 @@
     "Planned price: {price} / month": "Планируемая цена: {price} в месяц",
     "Subscriptions are coming soon. You can keep reading for free.": "Подписки скоро появятся. Вы можете продолжать читать бесплатно.",
     "Eligible subscribers get a 7-day trial when plans become available.": "После запуска тарифов доступным пользователям будет предложен пробный период на 7 дней.",
-    "Unable to load plans. Try again.": "Не удалось загрузить тарифы. Попробуйте ещё раз."
+    "Unable to load plans. Try again.": "Не удалось загрузить тарифы. Попробуйте ещё раз.",
+    "Send to Watch": "Отправить на Watch",
+    "Selected text": "Выбранный текст",
+    "Uses downloaded text. Fetch a translation in the reader first.": "Используется загруженный текст. Сначала получите перевод в режиме чтения.",
+    "Only public papers can be sent to Watch.": "На Watch можно отправлять только общедоступные статьи.",
+    "Send from OnlyIdeas on the iPhone paired with your Watch.": "Отправляйте из OnlyIdeas на iPhone, сопряжённом с Watch."
   },
   "vi": {
     ". Public comments are reviewed.": "Bình luận công khai sẽ được kiểm duyệt.",
@@ -7664,6 +7714,11 @@
     "Planned price: {price} / month": "Giá dự kiến: {price} / tháng",
     "Subscriptions are coming soon. You can keep reading for free.": "Gói đăng ký sắp ra mắt. Bạn vẫn có thể đọc miễn phí.",
     "Eligible subscribers get a 7-day trial when plans become available.": "Người đăng ký đủ điều kiện sẽ được dùng thử 7 ngày khi các gói ra mắt.",
-    "Unable to load plans. Try again.": "Không thể tải các gói. Vui lòng thử lại."
+    "Unable to load plans. Try again.": "Không thể tải các gói. Vui lòng thử lại.",
+    "Send to Watch": "Gửi đến Watch",
+    "Selected text": "Văn bản đã chọn",
+    "Uses downloaded text. Fetch a translation in the reader first.": "Dùng văn bản đã tải. Hãy lấy bản dịch trong trình đọc trước.",
+    "Only public papers can be sent to Watch.": "Chỉ có thể gửi bài báo công khai đến Watch.",
+    "Send from OnlyIdeas on the iPhone paired with your Watch.": "Gửi từ OnlyIdeas trên iPhone đã ghép đôi với Watch."
   }
 }

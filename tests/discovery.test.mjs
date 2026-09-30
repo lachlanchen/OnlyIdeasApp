@@ -35,3 +35,58 @@ test('direct arXiv imports gain a searchable title from their actual transcript 
  assert.equal(transcriptTitle('Owner chosen title','# Extracted title'),'Owner chosen title');
  assert.equal(transcriptTitle('arXiv 1207.2376','No declared title'),'arXiv 1207.2376');
 });
+
+test('slow indexes are cancelled while completed bibliographic results remain available',async()=>{
+ const {searchIndexes}=await import('../server/research-indexes.mjs');let cancelled=false;
+ const start=Date.now();const result=await searchIndexes({q:'quantum memory'},async(url,options)=>{
+  if(url.includes('crossref'))return Buffer.from(JSON.stringify({message:{items:[{DOI:'10.1234/memory',title:['Quantum memory'],type:'journal-article'}]}}));
+  return new Promise((resolve,reject)=>{options.signal.addEventListener('abort',()=>{cancelled=true;reject(options.signal.reason)},{once:true})});
+ },{timeout:100});
+ assert.equal(result.papers[0].title,'Quantum memory');assert.ok(result.unavailable.includes('openalex'));assert.equal(cancelled,true);assert.ok(Date.now()-start<2000);
+});
+test('Crossref figure and dataset records do not masquerade as research papers',async()=>{
+ const {parseCrossref}=await import('../server/crossref.mjs');
+ const items=['component','dataset','journal-article','posted-content'].map(type=>({type,DOI:'10.1234/'+type,title:[type]}));
+ assert.deepEqual(parseCrossref({message:{items}}).map(x=>x.type),['journal-article','posted-content']);
+});
+
+test('pasted arXiv URLs and DOIs resolve exact repository metadata rather than keyword lookalikes',async()=>{
+ const {searchIndexes}=await import('../server/research-indexes.mjs');const {arxivIn}=await import('../server/research-ranking.mjs');
+ assert.equal(arxivIn('https://arxiv.org/pdf/2205.01833v2.pdf'),'2205.01833v2');
+ const result=await searchIndexes({q:'10.48550/arXiv.2205.01833'},async url=>{assert.equal(url,'https://arxiv.org/abs/2205.01833');return Buffer.from('<meta name="citation_title" content="Actual title"><meta name="citation_author" content="A. Author"><meta name="citation_arxiv_id" content="2205.01833"><meta name="citation_date" content="2022/05/04">')});
+ assert.equal(result.papers.length,1);assert.equal(result.papers[0].title,'Actual title');assert.equal(result.papers[0].pdfUrl,'https://arxiv.org/pdf/2205.01833');
+});
+test('unknown DOI never returns papers that merely mention it in their abstracts',async()=>{
+ const {searchIndexes}=await import('../server/research-indexes.mjs');
+ const result=await searchIndexes({q:'10.1234/unknown'},async url=>Buffer.from(JSON.stringify(url.includes('crossref')?{message:{DOI:'10.1234/lookalike',title:['Unrelated']}}:{id:'https://openalex.org/W9',doi:'https://doi.org/10.1234/lookalike',title:'Unrelated'})));
+ assert.deepEqual(result.papers,[]);
+});
+
+test('versioned arXiv links accept canonical citation IDs only with the requested version on the page',async()=>{
+ const {queryArxivExact}=await import('../server/research-indexes.mjs');
+ const html='<meta name="citation_arxiv_id" content="2205.01833"><meta name="citation_title" content="Exact paper"><strong>arXiv:2205.01833v2</strong>';
+ const result=await queryArxivExact('2205.01833v2',async()=>Buffer.from(html));assert.equal(result.papers[0].pdfUrl,'https://arxiv.org/pdf/2205.01833v2');
+ await assert.rejects(queryArxivExact('2205.01833v1',async()=>Buffer.from(html)),/different paper/);
+});
+
+test('unversioned arXiv search retains the observed revision for exact transcript reuse',async()=>{
+ const {queryArxivExact}=await import('../server/research-indexes.mjs');
+ const r=await queryArxivExact('2205.01833',async()=>Buffer.from('<meta name="citation_arxiv_id" content="2205.01833"><meta name="citation_title" content="Paper"><meta property="og:url" content="https://arxiv.org/abs/2205.01833v2">'));
+ assert.equal(r.papers[0].source,'https://arxiv.org/abs/2205.01833v2');assert.equal(r.papers[0].pdfUrl,'https://arxiv.org/pdf/2205.01833v2');
+});
+
+test('an exact arXiv revision does not open a different cached revision',async()=>{
+ const f=fixture();try{
+ f.store.savePaper({...makePaper({id:randomUUID(),owner:'owner',title:'Existing paper',source:'https://arxiv.org/abs/2205.01833v2',mmd:'Version two'}),visibility:'public'});
+ const d=createDiscovery(f.store,{search:async()=>({papers:[],nextPage:null})});
+ assert.equal((await d.find({q:'https://arxiv.org/abs/2205.01833v1'})).papers.length,0);
+ assert.equal((await d.find({q:'https://arxiv.org/abs/2205.01833v2'})).papers.length,1);
+ }finally{f.close()}
+});
+
+test('unknown exact identifiers return no match rather than a misleading provider outage',async()=>{
+ const {searchIndexes}=await import('../server/research-indexes.mjs');
+ for(const q of ['10.1234/nonexistent','arxiv:9999.99999']){
+ const result=await searchIndexes({q},async()=>{const e=Error('HTTP 404');e.upstreamStatus=404;throw e});assert.deepEqual(result.papers,[]);assert.deepEqual(result.unavailable,[]);
+ }
+});

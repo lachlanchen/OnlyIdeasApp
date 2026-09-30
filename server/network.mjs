@@ -7,7 +7,8 @@ export function isPublicIP(value) {
   try { return ipaddr.process(value).range() === 'unicast'; } catch { return false; }
 }
 // Pin the vetted DNS address in the socket. Revalidate every redirect.
-export async function downloadPublic(input, { maxBytes = 20_000_000, redirects = 4, resolver = lookup, timeout = 45_000, withMetadata = false, deadline = Date.now()+timeout } = {}) {
+export async function downloadPublic(input, { maxBytes = 20_000_000, redirects = 4, resolver = lookup, timeout = 45_000, withMetadata = false, signal, deadline = Date.now()+timeout } = {}) {
+  signal?.throwIfAborted();
   let url;
   try { url = new URL(input); } catch { throw new AppError('Enter a complete HTTPS PDF link.'); }
   requireValue(url.protocol === 'https:' && !url.username && !url.password && (!url.port || url.port === '443'), 'Use a public HTTPS URL without credentials or a custom port.');
@@ -17,11 +18,11 @@ export async function downloadPublic(input, { maxBytes = 20_000_000, redirects =
   requireValue(addresses.length && addresses.every(a => isPublicIP(a.address)), 'This address is not a public download source.');
   const chosen = addresses.find(a=>a.family===4) || addresses[0];
   return new Promise((resolve, reject) => {
-    const req = https.get(url, { headers: { 'User-Agent': 'OnlyIdeas/0.1 (+https://onlyideas.art)', 'Accept-Encoding': 'identity', 'Accept':'application/pdf, text/html;q=0.9, application/json;q=0.8, */*;q=0.5' }, lookup: (_host, options, cb) => options.all ? cb(null, [chosen]) : cb(null, chosen.address, chosen.family) }, res => {
+    const req = https.get(url, { signal, headers: { 'User-Agent': 'OnlyIdeas/0.1 (+https://onlyideas.art)', 'Accept-Encoding': 'identity', 'Accept':'application/pdf, text/html;q=0.9, application/json;q=0.8, */*;q=0.5' }, lookup: (_host, options, cb) => options.all ? cb(null, [chosen]) : cb(null, chosen.address, chosen.family) }, res => {
       if ([301, 302, 303, 307, 308].includes(res.statusCode)) {
         res.resume();
         if (!redirects || !res.headers.location) return reject(new AppError('Too many redirects from this source.'));
-        downloadPublic(new URL(res.headers.location, url).href, { maxBytes, redirects: redirects - 1, resolver, timeout, withMetadata, deadline }).then(resolve, reject); return;
+        downloadPublic(new URL(res.headers.location, url).href, { maxBytes, redirects: redirects - 1, resolver, timeout, withMetadata, signal, deadline }).then(resolve, reject); return;
       }
       if (res.statusCode !== 200) { res.resume(); const error=new AppError(`The source returned HTTP ${res.statusCode}. Try uploading your copy.`);error.upstreamStatus=res.statusCode;error.retryAfterMs=Math.min(1200,Math.max(0,Number(res.headers['retry-after']||0)*1000));reject(error); return; }
       const chunks = []; let size = 0;

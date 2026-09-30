@@ -1,0 +1,51 @@
+{
+  "date": "2026-09-30",
+  "automatedTests": 114,
+  "macs": {
+    "3040": {
+      "online": true,
+      "offlineColdLaunch": true,
+      "interlacedPairs": 33,
+      "visibleInterlacedFigures": 3,
+      "noHorizontalOverflow": true,
+      "searchSeconds": 0.050660014152526855
+    },
+    "7050": {
+      "online": true,
+      "offlineColdLaunch": true,
+      "interlacedPairs": 33,
+      "visibleInterlacedFigures": 3,
+      "noHorizontalOverflow": true,
+      "searchSeconds": 1.3526860475540161
+    },
+    "mini": {
+      "online": true,
+      "offlineColdLaunch": true,
+      "interlacedPairs": 33,
+      "visibleInterlacedFigures": 3,
+      "noHorizontalOverflow": true,
+      "searchSeconds": 3.509263038635254
+    },
+    "kvm": {
+      "online": true,
+      "offlineColdLaunch": true,
+      "interlacedPairs": 33,
+      "visibleInterlacedFigures": 3,
+      "noHorizontalOverflow": true,
+      "searchSeconds": 4.048105955123901
+    }
+  },
+  "watch": {
+    "schema": 1,
+    "papers": 1,
+    "paper": "1075aa33-5c53-442c-99b8-4678be1c40de",
+    "title": "Measuring holographic entanglement entropy on a quantum simulator",
+    "edition": "Interlaced \u00b7 zh-Hans \u00b7 AI translation",
+    "blocks": 2,
+    "bytes": 2390,
+    "containsOriginal": true,
+    "containsChinese": true,
+    "offlineRelaunchWithPhoneShutdown": true
+  },
+  "productionPaperRecordsPreserved": 20
+}

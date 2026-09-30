@@ -47,7 +47,7 @@ struct WatchLibrary: View {
                     VStack(alignment: .leading, spacing: 10) {
                         Image(systemName: "books.vertical.fill").font(.largeTitle).foregroundStyle(.cyan)
                         Text("A little reading, anywhere").font(.headline)
-                        Text("Open a shared paper on your iPhone and choose Send excerpt to Watch. Your latest three excerpts stay here offline.")
+                        Text("Open a shared paper on your iPhone and choose Send to Watch. Your latest three excerpts stay here offline.")
                             .font(.footnote).foregroundStyle(.secondary)
                     }.padding(.vertical, 6)
                 }

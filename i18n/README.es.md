@@ -16,6 +16,13 @@ Un modelo económico configurable crea guías de lectura y traducciones cuando s
 
 ![OnlyIdeas reading room](../evidence/library-desktop.png)
 
+<!-- watchsearch24 -->
+**Watch y búsqueda · compilación 24**
+
+Envía extractos de artículos públicos al Watch como original, traducción o texto intercalado desde el iPhone enlazado. Se reutilizan las traducciones descargadas. macOS 12 o posterior superó pruebas de lectura con y sin conexión en los cuatro Mac del propietario. Las búsquedas exactas por DOI/arXiv reutilizan textos existentes; los índices lentos tienen un plazo límite y las descargas bloqueadas permiten abrir la fuente o subir un PDF.
+
+[24](../docs/watch-search-24.md)
+
 <!-- distribution20260930 -->
 **Distribución · 30 de septiembre de 2026**
 

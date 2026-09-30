@@ -196,10 +196,17 @@ final class ReadingStore: NSObject, ObservableObject,
     #endif
     return .shared
   }()
+  private var isNativeQA: Bool {
+    #if DEBUG
+    return ProcessInfo.processInfo.arguments.contains("--onlyideas-mac-qa")
+    #else
+    return false
+    #endif
+  }
   private let tokenAccount = "capacitor-storage_onlyideas.session.v1"
   private var folder: URL {
     var u = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-      .appendingPathComponent("OnlyIdeasDownloads", isDirectory: true)
+      .appendingPathComponent(isNativeQA ? "OnlyIdeasQA-watch24" : "OnlyIdeasDownloads", isDirectory: true)
     try? FileManager.default.createDirectory(at: u, withIntermediateDirectories: true)
     var values = URLResourceValues()
     values.isExcludedFromBackup = true
@@ -209,7 +216,7 @@ final class ReadingStore: NSObject, ObservableObject,
   override init() {
     super.init()
     clearExports()
-    if let data = keychainRead(tokenAccount),
+    if !isNativeQA, let data = keychainRead(tokenAccount),
       let value = try? JSONDecoder().decode(String.self, from: data)
     {
       token = value

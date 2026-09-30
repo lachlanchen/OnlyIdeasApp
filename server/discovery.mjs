@@ -4,7 +4,7 @@ import { hash,requireValue } from './domain.mjs';
 import { recoveryJob } from './import-recovery.mjs';
 import { reusablePaper } from './import-reuse.mjs';
 import {interestTopics} from './research-focus.mjs';
-import {researchScore} from './research-ranking.mjs';
+import {researchScore,arxivIn,doiIn} from './research-ranking.mjs';
 export function createDiscovery(store,{search=searchIndexes}={}) {
  const db=store.db;
  db.exec(`CREATE TABLE IF NOT EXISTS discovery_pages(key TEXT PRIMARY KEY,body TEXT NOT NULL,updated INTEGER NOT NULL);
@@ -26,7 +26,7 @@ export function createDiscovery(store,{search=searchIndexes}={}) {
     return {papers:papers.slice(0,12),focused:true,interests:topics,nextPage:page<12?page+1:null,unavailable:[...new Set(results.flatMap(r=>r.status==='fulfilled'?r.value.unavailable||[]:['research']))],stale:results.some(r=>r.status==='fulfilled'&&r.value.stale)};
    }
   }
-  const o=searchOptions(raw),key=hash(JSON.stringify(['discovery-v3',o])),row=db.prepare('SELECT * FROM discovery_pages WHERE key=?').get(key);
+  const o=searchOptions(raw),key=hash(JSON.stringify(['discovery-v6',o])),row=db.prepare('SELECT * FROM discovery_pages WHERE key=?').get(key);
   const ttl=o.q?600_000:3600_000;let data;
   if(row&&Date.now()-row.updated<ttl)data=JSON.parse(row.body);
   else {
@@ -44,7 +44,11 @@ export function createDiscovery(store,{search=searchIndexes}={}) {
    })().finally(()=>pending.delete(key)));
    data=await pending.get(key);
   }
-  const local=o.q&&o.page===1?matchLibrary(libraryCards(store,user).filter(p=>matchesFilters(p,o)),o.q):[];
+  const exactArxiv=arxivIn(o.q),exactDOI=doiIn(o.q);
+  const local=o.q&&o.page===1?matchLibrary(libraryCards(store,user).filter(p=>matchesFilters(p,o)),o.q).filter(p=>{
+   if(exactArxiv){const id=arxivIn(p.source);return /v\d+$/.test(exactArxiv)?id===exactArxiv:id.replace(/v\d+$/,'')===exactArxiv;}
+   return !exactDOI||doiIn(p.doi||p.source)===exactDOI;
+  }):[];
   const online=data.papers.map(p=>identify(p,user));
   return {...data,papers:[...local,...online.filter(p=>!local.some(l=>l.paperId===p.paperId||l.source&&l.source===p.source))]};
  }

@@ -50,3 +50,11 @@ test('exact OpenAlex work refresh can recover via an OA landing page without tru
  const result=await downloadPaperPDF(job,{download:async u=>{if(u.endsWith('old.pdf'))throw Error('HTTP 403');if(u.includes('api.openalex'))return Buffer.from(JSON.stringify({id:'https://openalex.org/W123',locations:[{is_oa:false,pdf_url:'https://wrong.org/p.pdf'},{is_oa:true,landing_page_url:'https://repo.org/article'}]}));if(u.endsWith('/article'))return Buffer.from('<meta name="citation_pdf_url" content="/new.pdf">');assert.equal(u,'https://repo.org/new.pdf');return Buffer.from('%PDF-new')}});
  assert.equal(result.url,'https://repo.org/new.pdf');
 });
+
+test('a denied PDF that is also the source page is fetched only once',async()=>{
+ const calls=[];await assert.rejects(downloadPaperPDF({url:'https://repo.org/paper',sourcePage:'https://repo.org/paper'},{download:async u=>{calls.push(u);const e=Error('HTTP 403');e.upstreamStatus=403;throw e}}),e=>e.code==='source_access_denied');
+ assert.deepEqual(calls,['https://repo.org/paper']);
+});
+test('a blocked landing page retains the actionable upload recovery reason',async()=>{
+ await assert.rejects(downloadPaperPDF({sourcePage:'https://repo.org/blocked'},{download:async()=>{const e=Error('HTTP 403');e.upstreamStatus=403;throw e}}),e=>e.code==='source_access_denied');
+});

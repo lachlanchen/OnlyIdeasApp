@@ -100,18 +100,24 @@ final class NativeUITests: XCTestCase {
     let app=XCUIApplication()
     app.launchArguments=["-onlyideas.native.language","en","-onlyideas.native.appearance","light"]
     app.launch()
+    XCTAssertTrue(app.segmentedControls.buttons["Reading library"].waitForExistence(timeout:20))
+    app.segmentedControls.buttons["Reading library"].tap()
     let row=app.buttons.matching(NSPredicate(format:"label CONTAINS %@","Measuring holographic entanglement entropy on a quantum simulator")).firstMatch
     XCTAssertTrue(row.waitForExistence(timeout:30));row.tap()
     XCTAssertTrue(app.webViews.buttons["Discuss paragraph"].firstMatch.waitForExistence(timeout:45))
-    app.buttons["Reading options"].tap()
-    XCTAssertTrue(app.buttons["Send excerpt to Watch"].waitForExistence(timeout:5))
-    app.buttons["Send excerpt to Watch"].tap()
-    XCTAssertTrue(app.alerts.firstMatch.waitForExistence(timeout:10))
-    print("WATCH ALERT",app.alerts.firstMatch.debugDescription)
-    shot("Watch13-transfer-alert")
-    XCTAssertTrue(app.alerts.staticTexts["Excerpt queued. Open OnlyIdeas on your paired Apple Watch to read it offline."].waitForExistence(timeout:10))
-    shot("Watch13-transfer-confirmed")
-    app.alerts.buttons["OK"].tap()
+    XCTAssertTrue(app.buttons["reader.sendToWatch"].waitForExistence(timeout:10))
+    expectation(for:NSPredicate(format:"enabled == true"),evaluatedWith:app.buttons["reader.sendToWatch"]);waitForExpectations(timeout:45)
+    for edition in ["Original","Translation","Interlaced"] {
+      app.buttons["reader.sendToWatch"].tap()
+      let choice=app.buttons["watch.edition."+edition.lowercased()]
+      XCTAssertTrue(choice.waitForExistence(timeout:10))
+      let enabled=NSPredicate(format:"enabled == true")
+      expectation(for:enabled,evaluatedWith:choice);waitForExpectations(timeout:40)
+      choice.tap()
+      XCTAssertTrue(app.alerts.staticTexts["Excerpt queued. Open OnlyIdeas on your paired Apple Watch to read it offline."].waitForExistence(timeout:10))
+      shot("Watch24-"+edition)
+      app.alerts.buttons["OK"].tap()
+    }
   }
   func testElevenLanguagesAndThemes() {
     continueAfterFailure = false

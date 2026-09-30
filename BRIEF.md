@@ -275,3 +275,12 @@ through the original store or Stripe portal; do not add an in-app self-service
 refund action. Continue reconciling refunds/revocations issued by payment providers
 or store support so credits and access reflect authoritative payment status.
 Sandbox refund checks verify this backend behavior and never move real money.
+
+## Watch and Mac refinement · 2026-09-30
+
+The reader exposes Send to Watch with Original, Translation and Interlaced public
+prose editions from already downloaded text; private content and paid generation
+remain outside transfer. iPad/Mac explain the paired-iPhone requirement. Mac
+Catalyst supports macOS12+, qualified on the owner's3040,7050,Mini and KVM Macs.
+Exact research references preserve observed revisions for transcript reuse, and
+slow indexes have a cancellable shared deadline.
