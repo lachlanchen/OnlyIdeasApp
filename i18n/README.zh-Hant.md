@@ -17,7 +17,7 @@ OnlyIdeas 是共享的論文閱讀空間。匯入 PDF 或開放取用的 PDF 連
 ![OnlyIdeas reading room](../evidence/library-desktop.png)
 
 <!-- watchsearch24 -->
-**手錶與搜尋 · 組建 24**
+**手錶與搜尋 · TestFlight 1.0.4 (24)**
 
 透過配對的 iPhone，將公開論文摘錄以原文、譯文或交錯模式傳送到手錶，並重用已下載的譯文。macOS 12 及以上版本已在四台 Mac 上通過線上與離線閱讀測試。精確 DOI/arXiv 搜尋重用既有轉錄；慢速索引有時限，下載受限時仍可開啟來源或上傳 PDF。
 

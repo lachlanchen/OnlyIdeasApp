@@ -17,7 +17,7 @@ OnlyIdeas는 연구 논문을 함께 읽는 공간입니다. PDF나 공개 접�
 ![OnlyIdeas reading room](../evidence/library-desktop.png)
 
 <!-- watchsearch24 -->
-**Watch와 검색 · 빌드 24**
+**Watch와 검색 · TestFlight 1.0.4 (24)**
 
 페어링된 iPhone에서 공개 논문 발췌문을 원문, 번역 또는 교차 보기로 Watch에 보냅니다. 다운로드한 번역을 재사용합니다. macOS 12 이상은 소유자의 Mac 네 대에서 온라인 및 오프라인 읽기 테스트를 통과했습니다. 정확한 DOI/arXiv 검색은 기존 변환을 재사용합니다. 느린 검색에는 제한 시간이 있으며, 다운로드가 차단되면 원문 링크나 PDF 업로드를 이용할 수 있습니다.
 

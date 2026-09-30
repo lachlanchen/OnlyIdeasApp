@@ -17,7 +17,7 @@ OnlyIdeas は論文を一緒に読むための共有読書室です。PDF また
 ![OnlyIdeas reading room](../evidence/library-desktop.png)
 
 <!-- watchsearch24 -->
-**Watchと検索 · ビルド24**
+**Watchと検索 · TestFlight 1.0.4 (24)**
 
 ペアリングしたiPhoneから、公開論文の抜粋を原文・翻訳・交互表示でWatchへ送信できます。ダウンロード済みの翻訳を再利用します。macOS 12以降は所有者の4台のMacでオンライン・オフラインの読書テストに合格しました。DOI/arXivの完全一致検索は既存の変換結果を再利用します。遅い検索には制限時間があり、取得できない場合は出典やPDFアップロードを利用できます。
 

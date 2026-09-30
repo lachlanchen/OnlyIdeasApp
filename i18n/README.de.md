@@ -17,7 +17,7 @@ Ein konfigurierbares, kostengünstiges Modell erstellt auf Anfrage Lesehilfen un
 ![OnlyIdeas reading room](../evidence/library-desktop.png)
 
 <!-- watchsearch24 -->
-**Watch und Suche · Build 24**
+**Watch und Suche · TestFlight 1.0.4 (24)**
 
 Sende Auszüge öffentlicher Artikel als Original, Übersetzung oder abwechselnden Text vom gekoppelten iPhone an die Watch. Heruntergeladene Übersetzungen werden wiederverwendet. macOS 12 und neuer bestand Online- und Offline-Lesetests auf allen vier Macs des Besitzers. Die genaue DOI/arXiv-Suche nutzt vorhandene Texte; langsame Suchdienste haben ein Zeitlimit. Bei gesperrten Downloads bleiben Quelle und PDF-Upload verfügbar.
 

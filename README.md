@@ -17,7 +17,7 @@ A configurable economical model creates reading guides and translations on reque
 ![OnlyIdeas reading room](evidence/library-desktop.png)
 
 <!-- watchsearch24 -->
-**Watch and search · build 24**
+**Watch and search · TestFlight 1.0.4 (24)**
 
 Send public-paper excerpts to Watch as Original, Translation or Interlaced text using the paired iPhone. Downloaded translations are reused. macOS 12+ passed online and offline reader tests on all four owner Macs. Exact DOI/arXiv searches reuse known transcripts; slow indexes have a deadline, and denied downloads retain source/upload recovery.
 

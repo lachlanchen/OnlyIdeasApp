@@ -1,0 +1,62 @@
+{
+  "version": "1.0.4",
+  "build": 24,
+  "sourceCommit": "e08c39ef52ba1e31d6e5f25e6f574e2da8513d9b",
+  "packages": {
+    "ios-watch": {
+      "sha256": "3e639e3e53a69adfcb2ac51c7d9ec2ff7e3e3c526f0982e6df5a8f250417bdb5",
+      "bytes": 9769582
+    },
+    "macos": {
+      "sha256": "f6d46b46dc306e6de3bb35e46239a7ea8e5949935052342e84ac98f9f00b2bb7",
+      "bytes": 8906564
+    }
+  },
+  "testflight": [
+    {
+      "platform": "MAC_OS",
+      "id": "a85e103e-7a00-4734-a993-bc5eeb37eb4f",
+      "version": "1.0.4",
+      "build": "24",
+      "processing": "VALID",
+      "internal": "IN_BETA_TESTING"
+    },
+    {
+      "platform": "IOS",
+      "id": "bc8dd42f-227c-48d7-b2e5-94b83c28eff9",
+      "version": "1.0.4",
+      "build": "24",
+      "processing": "VALID",
+      "internal": "IN_BETA_TESTING"
+    }
+  ],
+  "backend": {
+    "packageSha256": "c16fdaef6122ef8f8997f16ea69bbf593f28bd622a10979c3ae73b09655998c9",
+    "existingPaperRecordsPreserved": 20,
+    "configurationAndIngressPreserved": true
+  },
+  "productionReviews": [
+    {
+      "id": "53318522-6714-443e-9a27-a6a70af81494",
+      "versionString": "1.0.3",
+      "platform": "MAC_OS",
+      "appStoreState": "WAITING_FOR_REVIEW",
+      "releaseType": "AFTER_APPROVAL"
+    },
+    {
+      "id": "2d1f64a6-4865-4e3c-bece-c28a74b6af9e",
+      "versionString": "1.0.2",
+      "platform": "IOS",
+      "appStoreState": "WAITING_FOR_REVIEW",
+      "releaseType": "AFTER_APPROVAL"
+    },
+    {
+      "id": "bdda5b63-93cb-4321-bf88-e979f6cec6ca",
+      "versionString": "1.0.2",
+      "platform": "MAC_OS",
+      "appStoreState": "READY_FOR_SALE",
+      "releaseType": "AFTER_APPROVAL"
+    }
+  ],
+  "qualification": "qualification.json"
+}

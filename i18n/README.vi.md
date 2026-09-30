@@ -17,7 +17,7 @@ Mô hình tiết kiệm có thể cấu hình sẽ tạo hướng dẫn đọc v
 ![OnlyIdeas reading room](../evidence/library-desktop.png)
 
 <!-- watchsearch24 -->
-**Watch và tìm kiếm · bản dựng 24**
+**Watch và tìm kiếm · TestFlight 1.0.4 (24)**
 
 Gửi trích đoạn bài báo công khai đến Watch qua iPhone đã ghép đôi, với bản gốc, bản dịch hoặc văn bản xen kẽ. Bản dịch đã tải được tái sử dụng. macOS 12 trở lên đã vượt qua kiểm tra đọc trực tuyến và ngoại tuyến trên cả bốn máy Mac của chủ sở hữu. Tìm kiếm DOI/arXiv chính xác tái sử dụng bản chuyển đổi có sẵn; chỉ mục chậm có thời hạn chờ, và khi tải bị chặn vẫn có thể mở nguồn hoặc tải PDF lên.
 

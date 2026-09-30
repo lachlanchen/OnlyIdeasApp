@@ -17,7 +17,7 @@ Un modèle économique configurable produit des guides de lecture et des traduct
 ![OnlyIdeas reading room](../evidence/library-desktop.png)
 
 <!-- watchsearch24 -->
-**Watch et recherche · version 24**
+**Watch et recherche · TestFlight 1.0.4 (24)**
 
 Envoyez des extraits d’articles publics à la Watch en version originale, traduite ou alternée depuis l’iPhone jumelé. Les traductions téléchargées sont réutilisées. macOS 12 et versions ultérieures ont passé les tests de lecture en ligne et hors ligne sur les quatre Mac du propriétaire. Les recherches exactes DOI/arXiv réutilisent les textes existants ; les index lents ont un délai maximal et un téléchargement bloqué permet d’ouvrir la source ou d’importer un PDF.
 
