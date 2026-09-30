@@ -28,6 +28,8 @@ OnlyIdeas 是共享的论文阅读空间。导入 PDF 或开放获取的 PDF 链
 
 Mac 1.0.3 (22) 已通过审核并自动发布，可在 Apple 的175个商店下载，美国售价0.99美元。更新正在同步，公开页面仍显示1.0.2。iOS/Watch 1.0.2 (21) 仍在审核，构建24可通过 TestFlight 内部测试获取。其他平台及订阅状态见发行记录。
 
+包含新图标的 Mac **1.0.4 (24)** 现已**等待审核**，通过后自动发布；现有 iOS 审核保持不变。
+
 [Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?mt=12) · [2026-10-01](../docs/distribution-20260930.md)
 
 <!-- plans21 -->

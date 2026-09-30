@@ -1,5 +1,24 @@
 # OnlyIdeas distribution
 
+## New Mac icon submitted · 1 October 2026 (Hong Kong)
+
+After the approved Mac release, the owner asked about the older production icon.
+**Mac 1.0.4 (24)** was submitted at **2026-09-30 23:24:20 UTC** and is now
+**WAITING_FOR_REVIEW**, with automatic release after approval. The exact existing
+TestFlight build was reused; Apple’s processed icon was downloaded and visually
+confirmed as the approved flowing cyan/blue/violet mark with the gold dot.
+
+Mac 1.0.3 (22) remains available. The existing **iOS 1.0.2 (21)** review is
+unchanged, still **WAITING_FOR_REVIEW**. No new iOS submission was made.
+Six existing Mac screenshots are complete, and reviewer access was preserved.
+No pricing, subscription, privacy, account or server change was made.
+
+The check passed **114 tests**, renderer checks and the production build. The
+initial shell selected Conda Pandoc 2.12, which lacks `--sandbox`; rerunning with
+the existing Pandoc 3.11 installation passed without code changes. Earlier native
+qualification covers online and offline reading on all four owner Macs.
+[Submission receipt and processed icon](../evidence/mac-icon-review-20261001/receipt.json).
+
 ## Mac approval and availability · 1 October 2026 (Hong Kong)
 
 App Store Connect now confirms **Mac 1.0.3 (22)** is `READY_FOR_SALE` /

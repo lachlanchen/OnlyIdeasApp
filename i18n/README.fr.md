@@ -28,6 +28,8 @@ Envoyez des extraits d’articles publics à la Watch en version originale, trad
 
 Mac 1.0.3 (22) a été publié automatiquement après validation et peut être téléchargé dans 175 boutiques Apple. Le prix aux États-Unis est de 0,99 USD. Les fiches publiques affichent encore 1.0.2 pendant la propagation de la mise à jour. iOS/Watch 1.0.2 (21) reste en cours de validation ; la version de test 24 est disponible en interne sur TestFlight. Consultez le suivi de publication pour les autres plateformes et les abonnements.
 
+Mac **1.0.4 (24)**, avec la nouvelle icône, est **en attente de validation**, avec publication automatique après approbation ; la validation iOS en cours reste inchangée.
+
 [Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?mt=12) · [2026-10-01](../docs/distribution-20260930.md)
 
 <!-- plans21 -->

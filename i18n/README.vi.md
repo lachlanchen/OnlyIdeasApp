@@ -28,6 +28,8 @@ Gửi trích đoạn bài báo công khai đến Watch qua iPhone đã ghép đ�
 
 Mac 1.0.3 (22) đã tự động phát hành sau khi được duyệt và có thể tải tại 175 cửa hàng Apple. Giá tại Mỹ là 0,99 USD. Trang công khai vẫn hiển thị 1.0.2 trong khi bản cập nhật được đồng bộ. iOS/Watch 1.0.2 (21) vẫn đang xét duyệt; bản dựng 24 có sẵn cho thử nghiệm nội bộ qua TestFlight. Xem hồ sơ phát hành để biết trạng thái các nền tảng khác và gói đăng ký.
 
+Mac **1.0.4 (24)** với biểu tượng mới đang **chờ xét duyệt** và sẽ tự động phát hành sau khi được duyệt; hồ sơ iOS hiện tại không thay đổi.
+
 [Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?mt=12) · [2026-10-01](../docs/distribution-20260930.md)
 
 <!-- plans21 -->

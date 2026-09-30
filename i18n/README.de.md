@@ -28,6 +28,8 @@ Sende Auszüge öffentlicher Artikel als Original, Übersetzung oder abwechselnd
 
 Mac 1.0.3 (22) wurde nach der Freigabe automatisch veröffentlicht und ist in 175 Apple Stores zum Download verfügbar. Der US-Preis beträgt 0,99 USD. Die öffentlichen Einträge zeigen während der Aktualisierung noch 1.0.2. iOS/Watch 1.0.2 (21) wird weiterhin geprüft; Build 24 ist intern über TestFlight verfügbar. Der Veröffentlichungsbericht enthält den Status der anderen Plattformen und Abonnements.
 
+Mac **1.0.4 (24)** mit dem neuen Symbol **wartet auf Prüfung** und wird nach Freigabe automatisch veröffentlicht; die laufende iOS-Prüfung bleibt unverändert.
+
 [Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?mt=12) · [2026-10-01](../docs/distribution-20260930.md)
 
 <!-- plans21 -->

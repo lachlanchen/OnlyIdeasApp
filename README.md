@@ -28,6 +28,8 @@ Send public-paper excerpts to Watch as Original, Translation or Interlaced text 
 
 Mac 1.0.3 (22) has been released automatically after approval and is downloadable in 175 Apple storefronts. The US price is $0.99. Public listings still show 1.0.2 while the update propagates. iOS/Watch 1.0.2 (21) remains in review; build 24 is available internally through TestFlight. See the release record for other platform and subscription status.
 
+Mac **1.0.4 (24)**, including the new icon, is now **waiting for review**, with automatic release after approval; the existing iOS review is unchanged.
+
 [Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?mt=12) · [2026-10-01](docs/distribution-20260930.md)
 
 <!-- plans21 -->
