@@ -1,0 +1,54 @@
+{
+  "checkedAt": "2026-09-30T00:42:33.676312+00:00",
+  "app": "OnlyIdeas",
+  "appleAppId": "6816392935",
+  "bundleId": "art.onlyideas.app",
+  "requestedDownloadPrice": {
+    "currency": "USD",
+    "amount": "0.99",
+    "platforms": [
+      "Apple",
+      "Google Play"
+    ]
+  },
+  "apple": {
+    "mutationAccepted": true,
+    "baseTerritory": "USA",
+    "price": "0.99",
+    "effectiveStart": null,
+    "endDate": null,
+    "automaticallyEqualizedTerritories": 174,
+    "manualPricePoint": "eyJzIjoiNjgxNjM5MjkzNSIsInQiOiJVU0EiLCJwIjoiMTAwMTAifQ",
+    "platformScope": "Shared Apple app record: iOS/iPadOS/macOS and bundled Watch companion",
+    "versions": [
+      {
+        "platform": "MAC_OS",
+        "versionString": "1.0.3",
+        "appVersionState": "WAITING_FOR_REVIEW"
+      },
+      {
+        "platform": "IOS",
+        "versionString": "1.0.2",
+        "appVersionState": "WAITING_FOR_REVIEW"
+      },
+      {
+        "platform": "MAC_OS",
+        "versionString": "1.0.2",
+        "appVersionState": "READY_FOR_DISTRIBUTION"
+      }
+    ],
+    "publicUSMacPriceAtLastCheck": "Free; propagation pending"
+  },
+  "google": {
+    "package": "art.onlyideas.app",
+    "appId": "4974173414823223936",
+    "changed": false,
+    "status": "FREE_TO_PAID_NOT_ALLOWED",
+    "reason": "After owner sign-in, App pricing confirms that this app is available for free and cannot be changed to paid.",
+    "constraint": "Permanent free-to-paid restriction; not a temporary review editing lock.",
+    "lastObservedReview": "IN_REVIEW for production 1.0.2 (21), observed 2026-09-30T00:42Z",
+    "managedPublishing": false,
+    "pendingUnsubmittedChanges": false
+  },
+  "scope": "Download pricing only. No review cancellation, subscription changes or country availability changes."
+}

@@ -2,7 +2,7 @@
 
 | Platform | Public version | Latest qualified submission |
 | --- | --- | --- |
-| Mac | **1.0.2 (20)**, free, App Store | **1.0.3 (22)**, Waiting for Review |
+| Mac | **1.0.2 (20)**, App Store; US$0.99 configured, storefront propagation pending | **1.0.3 (22)**, Waiting for Review |
 | iPhone/iPad and Watch companion | Not yet confirmed public | **1.0.2 (21)**, Waiting for Review |
 | Android | Not yet confirmed public | **1.0.2 (21)**, In review |
 
@@ -11,6 +11,25 @@ The US and Hong Kong public lookups both return `mac-software` version1.0.2,
 released at 2026-09-29 22:39:32 UTC. The shared app ID alone does not establish
 that the iOS version is public. Apple released Mac automatically after approval;
 no additional manual release action was required.
+
+## Download pricing update
+
+At 00:35 UTC on 30 September, the owner requested a **US$0.99 download price**
+across Apple and Google. Apple accepted an immediate, indefinite US$0.99 base
+price for the shared OnlyIdeas app record, with automatically equalized prices
+for the other 174 storefronts. The API readback confirms the price; both pending
+Apple reviews remain `WAITING_FOR_REVIEW`. The public US Mac lookup still showed
+Free during propagation. This download fee is separate from subscriptions.
+
+After the owner signed in, Google App pricing confirmed at 00:42 UTC that
+OnlyIdeas is already available for free and cannot be changed to paid. Google
+[does not allow an app already offered for free to become paid](https://support.google.com/googleplay/android-developer/answer/6334373?hl=en).
+This is a permanent listing restriction, rather than an editing lock during
+review. Production **1.0.2 (21)** remains in review with managed publishing off;
+no Google pricing or review change was made. A replacement paid package or an
+in-app fee would need a separate owner decision. The dedicated browser was
+closed gracefully after evidence capture, retaining the private sign-in profile.
+[Pricing receipt](../evidence/pricing-20260930/receipt.json).
 
 ## Latest updates submitted
 
