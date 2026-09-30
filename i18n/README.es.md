@@ -24,11 +24,11 @@ Envía extractos de artículos públicos al Watch como original, traducción o t
 [24](../docs/watch-search-24.md)
 
 <!-- distribution20260930 -->
-**Distribución · 30 de septiembre de 2026**
+**Distribución · 1 de octubre de 2026**
 
-Mac 1.0.2 (20) está disponible en App Store. Mac 1.0.3 (22) e iOS/Watch 1.0.2 (21) esperan revisión, con publicación automática tras la aprobación. Android 1.0.2 (21) está en revisión para 177 países y regiones. Las compras de suscripciones aún no están abiertas al público; consulta el registro de publicación.
+Mac 1.0.3 (22) se ha publicado automáticamente tras la aprobación y está disponible para descargar en 175 tiendas de Apple. El precio en EE. UU. es de 0,99 USD. Las fichas públicas aún muestran 1.0.2 mientras se propaga la actualización. iOS/Watch 1.0.2 (21) sigue en revisión; la compilación 24 está disponible internamente en TestFlight. Consulta el registro de publicación para conocer el estado de otras plataformas y suscripciones.
 
-[Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?mt=12) · [2026-09-30](../docs/distribution-20260930.md)
+[Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?mt=12) · [2026-10-01](../docs/distribution-20260930.md)
 
 <!-- plans21 -->
 1.0.2 (21): El perfil siempre muestra los planes y el uso, incluso sin iniciar sesión o cuando no se puede comprar. Los tres planes y sus cuotas aparecen en iOS, Android, Mac y PWA. La activación de pagos sigue pendiente de validar las compras en pruebas.

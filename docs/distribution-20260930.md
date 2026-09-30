@@ -1,4 +1,25 @@
-# OnlyIdeas distribution · 30 September 2026
+# OnlyIdeas distribution
+
+## Mac approval and availability · 1 October 2026 (Hong Kong)
+
+App Store Connect now confirms **Mac 1.0.3 (22)** is `READY_FOR_SALE` /
+`READY_FOR_DISTRIBUTION`, with `downloadable: true`. Its existing
+`AFTER_APPROVAL` setting released it automatically; no manual release request
+was needed. All **175 Apple storefronts** report available, and availability
+in new territories is enabled.
+
+The public US and Hong Kong lookups confirm OnlyIdeas can be purchased for
+**US$0.99 / HK$8**. They still display version 1.0.2 while the approved update
+propagates. This is a confirmed store release, not a claim that every public
+storefront already displays 1.0.3. [Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?mt=12).
+
+The iOS 1.0.2 (21) review still reports `WAITING_FOR_REVIEW`. The newer
+1.0.4 (24) remains the recorded internal TestFlight candidate; it was not
+promoted by this Mac availability check. No source build, server, account,
+pricing, subscription, database or other platform submission was changed.
+No GUI or native runtime was started. [Verified receipt](../evidence/mac-release-20261001/receipt.json).
+
+## Historical distribution snapshot · 30 September 2026
 
 | Platform | Public version | Latest qualified submission |
 | --- | --- | --- |

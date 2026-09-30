@@ -24,11 +24,11 @@ Sende Auszüge öffentlicher Artikel als Original, Übersetzung oder abwechselnd
 [24](../docs/watch-search-24.md)
 
 <!-- distribution20260930 -->
-**Veröffentlichung · 30. September 2026**
+**Veröffentlichung · 1. Oktober 2026**
 
-Mac 1.0.2 (20) ist im App Store verfügbar. Mac 1.0.3 (22) und iOS/Watch 1.0.2 (21) warten auf die Prüfung und werden nach der Freigabe automatisch veröffentlicht. Android 1.0.2 (21) wird für 177 Länder und Regionen geprüft. Abonnementkäufe sind noch nicht allgemein freigeschaltet; Einzelheiten stehen im Veröffentlichungsbericht.
+Mac 1.0.3 (22) wurde nach der Freigabe automatisch veröffentlicht und ist in 175 Apple Stores zum Download verfügbar. Der US-Preis beträgt 0,99 USD. Die öffentlichen Einträge zeigen während der Aktualisierung noch 1.0.2. iOS/Watch 1.0.2 (21) wird weiterhin geprüft; Build 24 ist intern über TestFlight verfügbar. Der Veröffentlichungsbericht enthält den Status der anderen Plattformen und Abonnements.
 
-[Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?mt=12) · [2026-09-30](../docs/distribution-20260930.md)
+[Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?mt=12) · [2026-10-01](../docs/distribution-20260930.md)
 
 <!-- plans21 -->
 1.0.2 (21): Das Profil zeigt Tarife und Nutzung jetzt immer an, auch vor der Anmeldung oder bei nicht verfügbarem Kauf. Alle drei Tarife und Kontingente sind auf iOS, Android, Mac und PWA sichtbar. Zahlungen werden erst nach erfolgreichen Sandbox-Kauftests aktiviert.

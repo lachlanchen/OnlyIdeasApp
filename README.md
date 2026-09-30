@@ -24,11 +24,11 @@ Send public-paper excerpts to Watch as Original, Translation or Interlaced text 
 [24](docs/watch-search-24.md)
 
 <!-- distribution20260930 -->
-**Distribution · 30 September 2026**
+**Distribution · 1 October 2026**
 
-Mac 1.0.2 (20) is available on the App Store. Mac 1.0.3 (22) and iOS/Watch 1.0.2 (21) are waiting for review, with automatic release after approval. Android 1.0.2 (21) is in review for 177 countries/regions. General subscription purchases remain staged; see the release record.
+Mac 1.0.3 (22) has been released automatically after approval and is downloadable in 175 Apple storefronts. The US price is $0.99. Public listings still show 1.0.2 while the update propagates. iOS/Watch 1.0.2 (21) remains in review; build 24 is available internally through TestFlight. See the release record for other platform and subscription status.
 
-[Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?mt=12) · [2026-09-30](docs/distribution-20260930.md)
+[Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?mt=12) · [2026-10-01](docs/distribution-20260930.md)
 
 <!-- plans21 -->
 1.0.2 (21): Profile now always shows Plans & usage, even before sign-in or when checkout is unavailable. View all three approved plans and quotas on iOS, Android, Mac and PWA. Paid activation still requires sandbox purchase qualification.

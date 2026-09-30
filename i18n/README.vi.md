@@ -24,11 +24,11 @@ Gửi trích đoạn bài báo công khai đến Watch qua iPhone đã ghép đ�
 [24](../docs/watch-search-24.md)
 
 <!-- distribution20260930 -->
-**Phát hành · 30 tháng 9 năm 2026**
+**Phát hành · 1 tháng 10 năm 2026**
 
-Mac 1.0.2 (20) đã có trên App Store. Mac 1.0.3 (22) và iOS/Watch 1.0.2 (21) đang chờ xét duyệt, tự động phát hành sau khi được chấp thuận. Android 1.0.2 (21) đang được xét duyệt cho 177 quốc gia và khu vực. Chức năng mua gói đăng ký chưa mở cho mọi người; xem bản ghi phát hành.
+Mac 1.0.3 (22) đã tự động phát hành sau khi được duyệt và có thể tải tại 175 cửa hàng Apple. Giá tại Mỹ là 0,99 USD. Trang công khai vẫn hiển thị 1.0.2 trong khi bản cập nhật được đồng bộ. iOS/Watch 1.0.2 (21) vẫn đang xét duyệt; bản dựng 24 có sẵn cho thử nghiệm nội bộ qua TestFlight. Xem hồ sơ phát hành để biết trạng thái các nền tảng khác và gói đăng ký.
 
-[Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?mt=12) · [2026-09-30](../docs/distribution-20260930.md)
+[Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?mt=12) · [2026-10-01](../docs/distribution-20260930.md)
 
 <!-- plans21 -->
 1.0.2 (21): Hồ sơ luôn hiển thị gói và mức sử dụng, kể cả trước khi đăng nhập hoặc khi chưa thể thanh toán. Cả ba gói cùng hạn mức xuất hiện trên iOS, Android, Mac và PWA. Tính năng trả phí vẫn cần được kiểm chứng bằng giao dịch thử nghiệm.

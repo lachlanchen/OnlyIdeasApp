@@ -1,0 +1,37 @@
+{
+  "checkedAt": "2026-09-30T23:12:24.490239+00:00",
+  "appId": "6816392935",
+  "bundleId": "art.onlyideas.app",
+  "platform": "MAC_OS",
+  "version": "1.0.3",
+  "build": "22",
+  "versionId": "53318522-6714-443e-9a27-a6a70af81494",
+  "state": "READY_FOR_SALE",
+  "appVersionState": "READY_FOR_DISTRIBUTION",
+  "downloadable": true,
+  "releaseType": "AFTER_APPROVAL",
+  "action": "Verified existing automatic release; no store mutation was required.",
+  "availableTerritories": 175,
+  "availableInNewTerritories": true,
+  "publicLookups": [
+    {
+      "country": "us",
+      "kind": "mac-software",
+      "version": "1.0.2",
+      "price": 0.99,
+      "currency": "USD",
+      "trackViewUrl": "https://apps.apple.com/us/app/onlyideas/id6816392935?mt=12&uo=4"
+    },
+    {
+      "country": "hk",
+      "kind": "mac-software",
+      "version": "1.0.2",
+      "price": 8.0,
+      "currency": "HKD",
+      "trackViewUrl": "https://apps.apple.com/hk/app/onlyideas/id6816392935?mt=12&uo=4"
+    }
+  ],
+  "publicVersionPropagation": "Public lookup still returns 1.0.2; App Store Connect confirms 1.0.3 is released and downloadable.",
+  "latestTestFlight": "1.0.4 (24), not promoted to production in this operation",
+  "iosReview": "1.0.2 (21) WAITING_FOR_REVIEW"
+}
