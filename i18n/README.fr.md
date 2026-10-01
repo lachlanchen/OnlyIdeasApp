@@ -24,15 +24,13 @@ Envoyez des extraits d’articles publics à la Watch en version originale, trad
 [24](../docs/watch-search-24.md)
 
 <!-- distribution20260930 -->
-**Distribution · 1er octobre 2026**
+**2026-10-02 · OnlyIdeas**
 
-Mac 1.0.3 (22) a été publié automatiquement après validation et peut être téléchargé dans 175 boutiques Apple. Le prix aux États-Unis est de 0,99 USD. Les fiches publiques affichent encore 1.0.2 pendant la propagation de la mise à jour. iOS/Watch 1.0.2 (21) reste en cours de validation ; la version de test 24 est disponible en interne sur TestFlight. Consultez le suivi de publication pour les autres plateformes et les abonnements.
-
-Mac **1.0.4 (24)**, avec la nouvelle icône, est **en attente de validation**, avec publication automatique après approbation ; la validation iOS en cours reste inchangée.
+**Mac 1.0.4 (24) est publié avec la nouvelle icône.** Vérifié sur les App Store américain et hongkongais ; disponible dans 175 boutiques, à 0,99 USD aux États-Unis. Compatible avec macOS 12 et versions ultérieures. iOS/Watch 1.0.2 (21) attend toujours sa validation ; la soumission existante est inchangée.
 
 Le site et la PWA installée proposent des liens facultatifs vers les boutiques adaptées à votre appareil. Vous pouvez continuer à lire ici ; les boutons sont activés après vérification de la disponibilité publique.
 
-[Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?mt=12) · [2026-10-01](../docs/distribution-20260930.md)
+[Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?platform=mac) · [2026-10-02](../docs/distribution-20260930.md)
 
 <!-- plans21 -->
 1.0.2 (21) : Le profil affiche toujours les forfaits et leur utilisation, même sans connexion ou lorsque le paiement est indisponible. Les trois forfaits et leurs quotas sont visibles sur iOS, Android, Mac et PWA. Les paiements restent soumis à la validation des achats en environnement de test.

@@ -24,15 +24,13 @@ Gửi trích đoạn bài báo công khai đến Watch qua iPhone đã ghép đ�
 [24](../docs/watch-search-24.md)
 
 <!-- distribution20260930 -->
-**Phát hành · 1 tháng 10 năm 2026**
+**2026-10-02 · OnlyIdeas**
 
-Mac 1.0.3 (22) đã tự động phát hành sau khi được duyệt và có thể tải tại 175 cửa hàng Apple. Giá tại Mỹ là 0,99 USD. Trang công khai vẫn hiển thị 1.0.2 trong khi bản cập nhật được đồng bộ. iOS/Watch 1.0.2 (21) vẫn đang xét duyệt; bản dựng 24 có sẵn cho thử nghiệm nội bộ qua TestFlight. Xem hồ sơ phát hành để biết trạng thái các nền tảng khác và gói đăng ký.
-
-Mac **1.0.4 (24)** với biểu tượng mới đang **chờ xét duyệt** và sẽ tự động phát hành sau khi được duyệt; hồ sơ iOS hiện tại không thay đổi.
+**Mac 1.0.4 (24) đã phát hành công khai với biểu tượng mới.** Đã xác minh trên App Store Mỹ và Hồng Kông; có tại 175 cửa hàng, giá tại Mỹ là 0,99 USD. Hỗ trợ macOS 12 trở lên. iOS/Watch 1.0.2 (21) vẫn chờ xét duyệt; hồ sơ hiện tại không thay đổi.
 
 Trang web và PWA đã cài đặt có liên kết cửa hàng tùy chọn phù hợp với thiết bị. Bạn có thể tiếp tục đọc tại đây; nút cửa hàng chỉ được bật sau khi xác minh ứng dụng đã phát hành công khai.
 
-[Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?mt=12) · [2026-10-01](../docs/distribution-20260930.md)
+[Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?platform=mac) · [2026-10-02](../docs/distribution-20260930.md)
 
 <!-- plans21 -->
 1.0.2 (21): Hồ sơ luôn hiển thị gói và mức sử dụng, kể cả trước khi đăng nhập hoặc khi chưa thể thanh toán. Cả ba gói cùng hạn mức xuất hiện trên iOS, Android, Mac và PWA. Tính năng trả phí vẫn cần được kiểm chứng bằng giao dịch thử nghiệm.

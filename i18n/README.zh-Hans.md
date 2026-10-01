@@ -24,15 +24,13 @@ OnlyIdeas 是共享的论文阅读空间。导入 PDF 或开放获取的 PDF 链
 [24](../docs/watch-search-24.md)
 
 <!-- distribution20260930 -->
-**发行 · 2026年10月1日**
+**2026-10-02 · OnlyIdeas**
 
-Mac 1.0.3 (22) 已通过审核并自动发布，可在 Apple 的175个商店下载，美国售价0.99美元。更新正在同步，公开页面仍显示1.0.2。iOS/Watch 1.0.2 (21) 仍在审核，构建24可通过 TestFlight 内部测试获取。其他平台及订阅状态见发行记录。
-
-包含新图标的 Mac **1.0.4 (24)** 现已**等待审核**，通过后自动发布；现有 iOS 审核保持不变。
+**Mac 1.0.4 (24) 已携新图标正式上架。** 已在美国和香港 App Store 确认，覆盖175个商店，美国售价0.99美元，支持 macOS 12 及以上版本。iOS/Watch 1.0.2 (21) 仍在等待审核，现有提交保持不变。
 
 网页版和已安装的 PWA 提供适合当前设备的可选商店链接，也可以继续在这里阅读。只有确认正式上架后，才会启用对应的商店按钮。
 
-[Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?mt=12) · [2026-10-01](../docs/distribution-20260930.md)
+[Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?platform=mac) · [2026-10-02](../docs/distribution-20260930.md)
 
 <!-- plans21 -->
 1.0.2 (21)：个人资料现在始终显示“套餐与用量”，登录前或暂时无法购买时也可查看。在 iOS、Android、Mac 和 PWA 上展示三个已确认套餐及配额。付费功能仍须完成沙盒购买验证后开放。

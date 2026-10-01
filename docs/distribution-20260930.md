@@ -1,5 +1,25 @@
 # OnlyIdeas distribution
 
+## Mac 1.0.4 released · 2 October 2026 (Hong Kong)
+
+**OnlyIdeas Mac 1.0.4 (24)** is publicly available. Apple completed review
+`694e3cb4-3edc-4021-a114-4c4239aa9c79` and automatically released the exact
+qualified build at **2026-10-01 23:31:09 UTC**. App Store Connect confirms
+`READY_FOR_SALE` / `READY_FOR_DISTRIBUTION` and `downloadable: true`.
+
+Both US and Hong Kong public lookups show **1.0.4**, priced at **US$0.99 / HK$8**.
+All **175 storefronts** report available, new territories are enabled, and there
+is no phased release. The public App Store icon was downloaded and visually
+verified as the approved cyan/blue/violet mark with the gold dot. The PWA's
+Mac App Store link is already enabled and was verified live.
+
+[Get OnlyIdeas for Mac](https://apps.apple.com/app/onlyideas/id6816392935?platform=mac) ·
+[Release receipt and public icon](../evidence/mac-release-20261002/receipt.json).
+
+No manual release request, new upload or server deployment was needed.
+The existing iOS 1.0.2 (21) review still reports `WAITING_FOR_REVIEW`.
+Earlier submissions and qualification details below are historical snapshots.
+
 ## New Mac icon submitted · 1 October 2026 (Hong Kong)
 
 After the approved Mac release, the owner asked about the older production icon.

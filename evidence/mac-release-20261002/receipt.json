@@ -1,0 +1,60 @@
+{
+  "checkedAt": "2026-10-01T23:39:14.896477+00:00",
+  "appId": "6816392935",
+  "bundleId": "art.onlyideas.app",
+  "platform": "MAC_OS",
+  "version": "1.0.4",
+  "build": 24,
+  "versionId": "bba07e3d-610e-4d4c-89cc-c0825326f358",
+  "buildId": "a85e103e-7a00-4734-a993-bc5eeb37eb4f",
+  "reviewId": "694e3cb4-3edc-4021-a114-4c4239aa9c79",
+  "reviewState": "COMPLETE",
+  "appStoreState": "READY_FOR_SALE",
+  "appVersionState": "READY_FOR_DISTRIBUTION",
+  "downloadable": true,
+  "releaseType": "AFTER_APPROVAL",
+  "releasedAt": "2026-10-01T23:31:09Z",
+  "action": "Verified existing automatic release after approval; no manual release request or new upload required.",
+  "availability": {
+    "total": 175,
+    "available": 175,
+    "availableInNewTerritories": true,
+    "phasedRelease": null
+  },
+  "publicLookups": [
+    {
+      "country": "us",
+      "kind": "mac-software",
+      "version": "1.0.4",
+      "price": 0.99,
+      "currency": "USD",
+      "minimumOsVersion": "12.0",
+      "currentVersionReleaseDate": "2026-10-01T23:31:09Z",
+      "trackViewUrl": "https://apps.apple.com/us/app/onlyideas/id6816392935?mt=12&uo=4"
+    },
+    {
+      "country": "hk",
+      "kind": "mac-software",
+      "version": "1.0.4",
+      "price": 8.0,
+      "currency": "HKD",
+      "minimumOsVersion": "12.0",
+      "currentVersionReleaseDate": "2026-10-01T23:31:09Z",
+      "trackViewUrl": "https://apps.apple.com/hk/app/onlyideas/id6816392935?mt=12&uo=4"
+    }
+  ],
+  "publicIcon": {
+    "file": "public-icon.png",
+    "sha256": "00c59d71d649e024edb1235fecd198f52e111061126e04e42da1d42c82ccb143",
+    "visuallyVerified": "Approved flowing cyan/blue/violet mark with a gold dot on ivory."
+  },
+  "pwaMacStoreLinkEnabled": true,
+  "iosReview": "1.0.2 (21) WAITING_FOR_REVIEW, unchanged",
+  "sourceOrBackendChanged": false,
+  "qualification": "../watch-search-24/qualification.json",
+  "recordValidation": {
+    "npmRunCheck": "114 tests, renderer, TypeScript and web/native-reader build passed",
+    "readmes": "English and ten translations passed profile validation",
+    "gitDiffCheck": "passed"
+  }
+}

@@ -24,15 +24,13 @@ Envía extractos de artículos públicos al Watch como original, traducción o t
 [24](../docs/watch-search-24.md)
 
 <!-- distribution20260930 -->
-**Distribución · 1 de octubre de 2026**
+**2026-10-02 · OnlyIdeas**
 
-Mac 1.0.3 (22) se ha publicado automáticamente tras la aprobación y está disponible para descargar en 175 tiendas de Apple. El precio en EE. UU. es de 0,99 USD. Las fichas públicas aún muestran 1.0.2 mientras se propaga la actualización. iOS/Watch 1.0.2 (21) sigue en revisión; la compilación 24 está disponible internamente en TestFlight. Consulta el registro de publicación para conocer el estado de otras plataformas y suscripciones.
-
-Mac **1.0.4 (24)**, con el nuevo icono, está **pendiente de revisión**, con publicación automática tras la aprobación; la revisión de iOS sigue sin cambios.
+**Mac 1.0.4 (24) ya está publicado con el nuevo icono.** Verificado en las tiendas de EE. UU. y Hong Kong; disponible en 175 tiendas, a 0,99 USD en EE. UU. Compatible con macOS 12 y posteriores. iOS/Watch 1.0.2 (21) sigue esperando revisión; su envío no ha cambiado.
 
 La web y la PWA instalada ofrecen enlaces opcionales a la tienda según el dispositivo. Puedes seguir leyendo aquí; los botones se activan solo tras verificar la disponibilidad pública.
 
-[Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?mt=12) · [2026-10-01](../docs/distribution-20260930.md)
+[Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?platform=mac) · [2026-10-02](../docs/distribution-20260930.md)
 
 <!-- plans21 -->
 1.0.2 (21): El perfil siempre muestra los planes y el uso, incluso sin iniciar sesión o cuando no se puede comprar. Los tres planes y sus cuotas aparecen en iOS, Android, Mac y PWA. La activación de pagos sigue pendiente de validar las compras en pruebas.

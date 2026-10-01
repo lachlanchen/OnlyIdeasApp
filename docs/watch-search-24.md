@@ -43,7 +43,8 @@ The web/server suite passed 114 tests plus the compiled renderer and build.
 The server changes are deployed. All 20 existing paper records were preserved,
 along with account configuration and shared ingress. Apple iOS/Watch and universal Mac 1.0.4 (24) are VALID and available to the
 existing internal TestFlight group. On 1 October 2026 (Hong Kong), Mac build 24
-was submitted after Mac 22 had been released; it is WAITING_FOR_REVIEW with
-automatic release. The existing iOS build 21 review remains unchanged. See the
-[Mac submission](../evidence/mac-icon-review-20261001/receipt.json).
+was submitted after Mac 22 had been released. On 2 October (Hong Kong), Mac
+1.0.4 (24) is publicly released with the new icon in 175 storefronts. The existing
+iOS build 21 review remains unchanged. See the
+[Mac release](../evidence/mac-release-20261002/receipt.json).
 See the [release receipt](../evidence/watch-search-24/release.json).
