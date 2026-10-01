@@ -1,0 +1,50 @@
+{
+  "date": "2026-10-01",
+  "scope": "Headless real Chrome with mobile/desktop identities; anonymous API fixtures and simulated future public-store availability. No physical-device claim.",
+  "cases": [
+    {
+      "app": "OnlyIdeasApp",
+      "case": "ios-pending",
+      "passed": true
+    },
+    {
+      "app": "OnlyIdeasApp",
+      "case": "android-pending",
+      "passed": true
+    },
+    {
+      "app": "OnlyIdeasApp",
+      "case": "ios-pwa-public",
+      "passed": true
+    },
+    {
+      "app": "OnlyIdeasApp",
+      "case": "ipad-public",
+      "passed": true
+    },
+    {
+      "app": "OnlyIdeasApp",
+      "case": "android-public",
+      "passed": true
+    },
+    {
+      "app": "OnlyIdeasApp",
+      "case": "mac",
+      "passed": true
+    },
+    {
+      "app": "OnlyIdeasApp",
+      "case": "arabic",
+      "passed": true
+    }
+  ],
+  "liveAvailability": {
+    "ios": false,
+    "macos": true,
+    "android": false
+  },
+  "googlePublicStatus": 404,
+  "tests": {
+    "automated": 114
+  }
+}

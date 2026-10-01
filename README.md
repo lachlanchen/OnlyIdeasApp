@@ -30,6 +30,8 @@ Mac 1.0.3 (22) has been released automatically after approval and is downloadabl
 
 Mac **1.0.4 (24)**, including the new icon, is now **waiting for review**, with automatic release after approval; the existing iOS review is unchanged.
 
+Web and installed PWA readers offer optional, device-aware store links. You can keep reading here; store buttons are enabled only after public availability is verified.
+
 [Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?mt=12) · [2026-10-01](docs/distribution-20260930.md)
 
 <!-- plans21 -->

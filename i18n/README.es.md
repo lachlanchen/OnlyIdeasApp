@@ -30,6 +30,8 @@ Mac 1.0.3 (22) se ha publicado automáticamente tras la aprobación y está disp
 
 Mac **1.0.4 (24)**, con el nuevo icono, está **pendiente de revisión**, con publicación automática tras la aprobación; la revisión de iOS sigue sin cambios.
 
+La web y la PWA instalada ofrecen enlaces opcionales a la tienda según el dispositivo. Puedes seguir leyendo aquí; los botones se activan solo tras verificar la disponibilidad pública.
+
 [Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?mt=12) · [2026-10-01](../docs/distribution-20260930.md)
 
 <!-- plans21 -->

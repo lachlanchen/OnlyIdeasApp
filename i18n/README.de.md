@@ -30,6 +30,8 @@ Mac 1.0.3 (22) wurde nach der Freigabe automatisch veröffentlicht und ist in 17
 
 Mac **1.0.4 (24)** mit dem neuen Symbol **wartet auf Prüfung** und wird nach Freigabe automatisch veröffentlicht; die laufende iOS-Prüfung bleibt unverändert.
 
+Web und installierte PWA bieten optionale, zum Gerät passende Store-Links. Hier weiterlesen bleibt möglich; Store-Schaltflächen werden erst nach bestätigter öffentlicher Verfügbarkeit aktiviert.
+
 [Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?mt=12) · [2026-10-01](../docs/distribution-20260930.md)
 
 <!-- plans21 -->

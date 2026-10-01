@@ -30,6 +30,8 @@ Mac 1.0.3 (22) a été publié automatiquement après validation et peut être t
 
 Mac **1.0.4 (24)**, avec la nouvelle icône, est **en attente de validation**, avec publication automatique après approbation ; la validation iOS en cours reste inchangée.
 
+Le site et la PWA installée proposent des liens facultatifs vers les boutiques adaptées à votre appareil. Vous pouvez continuer à lire ici ; les boutons sont activés après vérification de la disponibilité publique.
+
 [Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?mt=12) · [2026-10-01](../docs/distribution-20260930.md)
 
 <!-- plans21 -->

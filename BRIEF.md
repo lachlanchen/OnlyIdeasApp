@@ -284,3 +284,11 @@ remain outside transfer. iPad/Mac explain the paired-iPhone requirement. Mac
 Catalyst supports macOS12+, qualified on the owner's3040,7050,Mini and KVM Macs.
 Exact research references preserve observed revisions for transcript reuse, and
 slow indexes have a cancellable shared deadline.
+
+## Web/PWA store access · 2026-10-01
+
+The owner requested Apple and Google store routing from the PWA. Provide gentle,
+dismissible device-aware suggestions and permanent store links in web Settings
+(Bunko) or Profile (OnlyIdeas). Installed PWAs retain this choice. Reading stays
+available; opening a store is explicit. Enable each destination only after its
+public platform release is verified. See `docs/pwa-store-links.md`.

@@ -699,7 +699,12 @@
     "Selected text": "Selected text",
     "Uses downloaded text. Fetch a translation in the reader first.": "Uses downloaded text. Fetch a translation in the reader first.",
     "Only public papers can be sent to Watch.": "Only public papers can be sent to Watch.",
-    "Send from OnlyIdeas on the iPhone paired with your Watch.": "Send from OnlyIdeas on the iPhone paired with your Watch."
+    "Send from OnlyIdeas on the iPhone paired with your Watch.": "Send from OnlyIdeas on the iPhone paired with your Watch.",
+    "Get the app": "Get the app",
+    "Read in the native app, or keep reading here.": "Read in the native app, or keep reading here.",
+    "Keep reading here": "Keep reading here",
+    "Open App Store": "Open App Store",
+    "Open Google Play": "Open Google Play"
   },
   "zh-Hans": {
     "Choose a valid PDF.": "请选择有效的 PDF。",
@@ -1401,7 +1406,12 @@
     "Selected text": "所选文字",
     "Uses downloaded text. Fetch a translation in the reader first.": "使用已下载的文字。请先在阅读器中获取翻译。",
     "Only public papers can be sent to Watch.": "仅公开论文可以发送到手表。",
-    "Send from OnlyIdeas on the iPhone paired with your Watch.": "请在与手表配对的 iPhone 上使用 OnlyIdeas 发送。"
+    "Send from OnlyIdeas on the iPhone paired with your Watch.": "请在与手表配对的 iPhone 上使用 OnlyIdeas 发送。",
+    "Get the app": "获取应用",
+    "Read in the native app, or keep reading here.": "使用原生应用阅读，也可以继续在这里阅读。",
+    "Keep reading here": "继续在这里阅读",
+    "Open App Store": "前往 App Store",
+    "Open Google Play": "前往 Google Play"
   },
   "zh-Hant": {
     ". Public comments are reviewed.": "公開評論會經過審核。",
@@ -2103,7 +2113,12 @@
     "Selected text": "所選文字",
     "Uses downloaded text. Fetch a translation in the reader first.": "使用已下載的文字。請先在閱讀器中取得翻譯。",
     "Only public papers can be sent to Watch.": "僅公開論文可以傳送到手錶。",
-    "Send from OnlyIdeas on the iPhone paired with your Watch.": "請在與手錶配對的 iPhone 上使用 OnlyIdeas 傳送。"
+    "Send from OnlyIdeas on the iPhone paired with your Watch.": "請在與手錶配對的 iPhone 上使用 OnlyIdeas 傳送。",
+    "Get the app": "取得應用程式",
+    "Read in the native app, or keep reading here.": "使用原生應用程式閱讀，也可以繼續在這裡閱讀。",
+    "Keep reading here": "繼續在這裡閱讀",
+    "Open App Store": "前往 App Store",
+    "Open Google Play": "前往 Google Play"
   },
   "ja": {
     ". Public comments are reviewed.": "公開コメントは審査されます。",
@@ -2805,7 +2820,12 @@
     "Selected text": "選択したテキスト",
     "Uses downloaded text. Fetch a translation in the reader first.": "ダウンロード済みのテキストを使用します。先にリーダーで翻訳を取得してください。",
     "Only public papers can be sent to Watch.": "公開論文のみWatchに送信できます。",
-    "Send from OnlyIdeas on the iPhone paired with your Watch.": "WatchとペアリングしたiPhoneのOnlyIdeasから送信してください。"
+    "Send from OnlyIdeas on the iPhone paired with your Watch.": "WatchとペアリングしたiPhoneのOnlyIdeasから送信してください。",
+    "Get the app": "アプリを入手",
+    "Read in the native app, or keep reading here.": "アプリで読むことも、このままウェブで読むこともできます。",
+    "Keep reading here": "ここで読み続ける",
+    "Open App Store": "App Store を開く",
+    "Open Google Play": "Google Play を開く"
   },
   "ko": {
     ". Public comments are reviewed.": "공개 댓글은 검토됩니다.",
@@ -3507,7 +3527,12 @@
     "Selected text": "선택한 텍스트",
     "Uses downloaded text. Fetch a translation in the reader first.": "다운로드한 텍스트를 사용합니다. 먼저 리더에서 번역을 가져오세요.",
     "Only public papers can be sent to Watch.": "공개 논문만 Watch로 보낼 수 있습니다.",
-    "Send from OnlyIdeas on the iPhone paired with your Watch.": "Watch와 페어링된 iPhone의 OnlyIdeas에서 보내세요."
+    "Send from OnlyIdeas on the iPhone paired with your Watch.": "Watch와 페어링된 iPhone의 OnlyIdeas에서 보내세요.",
+    "Get the app": "앱 받기",
+    "Read in the native app, or keep reading here.": "앱에서 읽거나 여기에서 계속 읽을 수 있습니다.",
+    "Keep reading here": "여기에서 계속 읽기",
+    "Open App Store": "App Store 열기",
+    "Open Google Play": "Google Play 열기"
   },
   "ar": {
     ". Public comments are reviewed.": "التعليقات العامة تخضع للمراجعة.",
@@ -4209,7 +4234,12 @@
     "Selected text": "النص المحدد",
     "Uses downloaded text. Fetch a translation in the reader first.": "يستخدم النص الذي تم تنزيله. احصل على الترجمة في القارئ أولاً.",
     "Only public papers can be sent to Watch.": "يمكن إرسال الأبحاث العامة فقط إلى الساعة.",
-    "Send from OnlyIdeas on the iPhone paired with your Watch.": "أرسل من OnlyIdeas على جهاز iPhone المقترن بساعتك."
+    "Send from OnlyIdeas on the iPhone paired with your Watch.": "أرسل من OnlyIdeas على جهاز iPhone المقترن بساعتك.",
+    "Get the app": "احصل على التطبيق",
+    "Read in the native app, or keep reading here.": "اقرأ في التطبيق أو تابع القراءة هنا.",
+    "Keep reading here": "متابعة القراءة هنا",
+    "Open App Store": "فتح App Store",
+    "Open Google Play": "فتح Google Play"
   },
   "fr": {
     ". Public comments are reviewed.": ". Les commentaires publics sont examinés.",
@@ -4911,7 +4941,12 @@
     "Selected text": "Texte sélectionné",
     "Uses downloaded text. Fetch a translation in the reader first.": "Utilise le texte téléchargé. Récupérez d’abord une traduction dans le lecteur.",
     "Only public papers can be sent to Watch.": "Seuls les articles publics peuvent être envoyés à la Watch.",
-    "Send from OnlyIdeas on the iPhone paired with your Watch.": "Envoyez depuis OnlyIdeas sur l’iPhone jumelé à votre Watch."
+    "Send from OnlyIdeas on the iPhone paired with your Watch.": "Envoyez depuis OnlyIdeas sur l’iPhone jumelé à votre Watch.",
+    "Get the app": "Obtenir l’application",
+    "Read in the native app, or keep reading here.": "Lisez dans l’application ou continuez ici.",
+    "Keep reading here": "Continuer à lire ici",
+    "Open App Store": "Ouvrir l’App Store",
+    "Open Google Play": "Ouvrir Google Play"
   },
   "de": {
     ". Public comments are reviewed.": "Öffentliche Kommentare werden geprüft.",
@@ -5613,7 +5648,12 @@
     "Selected text": "Ausgewählter Text",
     "Uses downloaded text. Fetch a translation in the reader first.": "Verwendet heruntergeladenen Text. Lade zuerst eine Übersetzung im Reader.",
     "Only public papers can be sent to Watch.": "Nur öffentliche Artikel können an die Watch gesendet werden.",
-    "Send from OnlyIdeas on the iPhone paired with your Watch.": "Sende über OnlyIdeas auf dem mit deiner Watch gekoppelten iPhone."
+    "Send from OnlyIdeas on the iPhone paired with your Watch.": "Sende über OnlyIdeas auf dem mit deiner Watch gekoppelten iPhone.",
+    "Get the app": "App herunterladen",
+    "Read in the native app, or keep reading here.": "In der App lesen oder hier weiterlesen.",
+    "Keep reading here": "Hier weiterlesen",
+    "Open App Store": "App Store öffnen",
+    "Open Google Play": "Google Play öffnen"
   },
   "es": {
     ". Public comments are reviewed.": "Los comentarios públicos se revisan.",
@@ -6315,7 +6355,12 @@
     "Selected text": "Texto seleccionado",
     "Uses downloaded text. Fetch a translation in the reader first.": "Usa el texto descargado. Obtén primero una traducción en el lector.",
     "Only public papers can be sent to Watch.": "Solo se pueden enviar artículos públicos al Watch.",
-    "Send from OnlyIdeas on the iPhone paired with your Watch.": "Envía desde OnlyIdeas en el iPhone enlazado con tu Watch."
+    "Send from OnlyIdeas on the iPhone paired with your Watch.": "Envía desde OnlyIdeas en el iPhone enlazado con tu Watch.",
+    "Get the app": "Obtener la app",
+    "Read in the native app, or keep reading here.": "Lee en la aplicación o sigue leyendo aquí.",
+    "Keep reading here": "Seguir leyendo aquí",
+    "Open App Store": "Abrir App Store",
+    "Open Google Play": "Abrir Google Play"
   },
   "ru": {
     ". Public comments are reviewed.": "Публичные комментарии проходят проверку.",
@@ -7017,7 +7062,12 @@
     "Selected text": "Выбранный текст",
     "Uses downloaded text. Fetch a translation in the reader first.": "Используется загруженный текст. Сначала получите перевод в режиме чтения.",
     "Only public papers can be sent to Watch.": "На Watch можно отправлять только общедоступные статьи.",
-    "Send from OnlyIdeas on the iPhone paired with your Watch.": "Отправляйте из OnlyIdeas на iPhone, сопряжённом с Watch."
+    "Send from OnlyIdeas on the iPhone paired with your Watch.": "Отправляйте из OnlyIdeas на iPhone, сопряжённом с Watch.",
+    "Get the app": "Скачать приложение",
+    "Read in the native app, or keep reading here.": "Читайте в приложении или продолжайте здесь.",
+    "Keep reading here": "Продолжить чтение здесь",
+    "Open App Store": "Открыть App Store",
+    "Open Google Play": "Открыть Google Play"
   },
   "vi": {
     ". Public comments are reviewed.": "Bình luận công khai sẽ được kiểm duyệt.",
@@ -7719,6 +7769,11 @@
     "Selected text": "Văn bản đã chọn",
     "Uses downloaded text. Fetch a translation in the reader first.": "Dùng văn bản đã tải. Hãy lấy bản dịch trong trình đọc trước.",
     "Only public papers can be sent to Watch.": "Chỉ có thể gửi bài báo công khai đến Watch.",
-    "Send from OnlyIdeas on the iPhone paired with your Watch.": "Gửi từ OnlyIdeas trên iPhone đã ghép đôi với Watch."
+    "Send from OnlyIdeas on the iPhone paired with your Watch.": "Gửi từ OnlyIdeas trên iPhone đã ghép đôi với Watch.",
+    "Get the app": "Tải ứng dụng",
+    "Read in the native app, or keep reading here.": "Đọc trong ứng dụng hoặc tiếp tục đọc tại đây.",
+    "Keep reading here": "Tiếp tục đọc tại đây",
+    "Open App Store": "Mở App Store",
+    "Open Google Play": "Mở Google Play"
   }
 }

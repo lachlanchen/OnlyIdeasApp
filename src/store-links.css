@@ -1,0 +1,8 @@
+.store-access{padding:20px;border:1px solid var(--line);border-radius:16px;background:var(--surface);color:var(--ink);min-width:0}
+.store-access h2{font-size:20px;margin:0 0 6px}.store-access p{color:var(--muted);margin:0 0 14px;font-size:15px}
+.store-access-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.store-access-actions a,.store-access-actions button,.store-pending{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:10px 14px;border-radius:10px;font-size:15px;line-height:1.4;max-width:100%;overflow-wrap:anywhere}
+.store-access-actions a{background:var(--green);color:var(--surface);font-weight:650}.store-access-actions button{border:1px solid var(--line)}
+.store-pending{border:1px solid var(--line);flex-wrap:wrap;color:var(--muted)}.store-pending small{font-size:13px}
+.store-suggestion{position:relative;margin:18px auto;max-width:calc(100% - 32px);width:960px;padding-inline-end:48px}
+.store-access-close{position:absolute;inset-inline-end:6px;top:6px;width:40px;height:40px;display:grid;place-items:center}

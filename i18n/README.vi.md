@@ -30,6 +30,8 @@ Mac 1.0.3 (22) đã tự động phát hành sau khi được duyệt và có th
 
 Mac **1.0.4 (24)** với biểu tượng mới đang **chờ xét duyệt** và sẽ tự động phát hành sau khi được duyệt; hồ sơ iOS hiện tại không thay đổi.
 
+Trang web và PWA đã cài đặt có liên kết cửa hàng tùy chọn phù hợp với thiết bị. Bạn có thể tiếp tục đọc tại đây; nút cửa hàng chỉ được bật sau khi xác minh ứng dụng đã phát hành công khai.
+
 [Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?mt=12) · [2026-10-01](../docs/distribution-20260930.md)
 
 <!-- plans21 -->
