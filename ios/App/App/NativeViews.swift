@@ -1346,7 +1346,7 @@ struct NativeSubscriptionSection:View {
                 if store.trialProducts.contains(product.id) {Text(T("7 days free, then {price} per month. Trial includes 50 pages and 10 fetches. Cancel before it ends to avoid payment.",["price":product.displayPrice])).font(.subheadline)}
                 Text(T("{credits} credits each month · {messages} agent messages daily",["credits":String(plan.credits),"messages":String(plan.agentTurns)])).font(.subheadline)
                 Button(T(catalog.plan==plan.id ? "Current plan":store.requestedPlanID==product.id ? "Continue":store.trialProducts.contains(product.id) ? "Start 7-day free trial":"Subscribe")) {Task {await store.purchase(product)}}
-                  .buttonStyle(.borderedProminent).disabled(store.purchaseBusy || !catalog.canSubscribe)
+                  .buttonStyle(.borderedProminent).disabled(store.purchaseBusy || catalog.newPurchaseEnabled != true)
               }.padding(.vertical,6)
             } else {
               VStack(alignment:.leading,spacing:8) {

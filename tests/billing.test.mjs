@@ -183,3 +183,32 @@ test('public plan discovery stays visible while purchases and account data stay 
  assert.equal(store.db.prepare('SELECT count(*) n FROM billing_accounts').get().n,0);
  const purchase=await fetch(base+'/api/billing/checkout',{method:'POST',headers:{Origin:'http://127.0.0.1:4182','Content-Type':'application/json'},body:JSON.stringify({plan:'reader'})});assert.equal(purchase.status,401);
 });
+
+test('known purchases block new sales independently of displayed plan, age, provider and environment',async t=>{
+ const {hasBlockingPurchase,billingCatalog}=await import('../server/billing-ledger.mjs');
+ for(const platform of ['apple','google','stripe'])for(const environment of ['Sandbox','Production'])for(const state of ['active','grace','pending','paused']){
+  await t.test(`${platform}/${environment}/${state}`,t=>{
+   const {store}=fixture(t),product={apple:'art.onlyideas.reader.monthly',google:'onlyideas_reader_monthly',stripe:'onlyideas_reader_monthly_v1'}[platform];
+   const p=proof(store,{platform,environment,product,state,paid:false,observed:Date.now()-60*86400_000,purchased:Date.now()-61*86400_000,expires:['pending','paused'].includes(state)?0:Date.now()+86400_000});
+   applyVerifiedPurchase(store,p,'reader');
+   assert.equal(hasBlockingPurchase(store,'reader'),true);
+   // Simulate absent display-period data: the purchase row still blocks sales.
+   store.db.prepare('DELETE FROM billing_periods').run();assert.equal(activePlan(store,'reader'),null);
+   const c=billingCatalog(store,{...config,billing:{enabled:true}},{id:'reader'},{apple:true,google:true,stripe:true});
+   assert.equal(c.plan,null);assert.equal(c.newPurchaseEnabled,false);assert.equal(c.canSubscribe,false);
+  });
+ }
+ for(const state of ['expired','revoked']){
+  const {store}=fixture(t);applyVerifiedPurchase(store,proof(store,{state,paid:false,revoked:state==='revoked'}),'reader');assert.equal(hasBlockingPurchase(store,'reader'),false);
+ }
+});
+
+test('closing new sales preserves verification/restore and defaults unqualified catalogs to unavailable',async t=>{
+ const {createBilling}=await import('../server/billing.mjs');const {billingCatalog}=await import('../server/billing-ledger.mjs');
+ const {store}=fixture(t),p=proof(store),cfg={...config,billing:{enabled:true,salesEnabled:false,allowSandbox:true,sandboxAccounts:['reader']}};
+ const billing=createBilling(store,cfg,{poll:false,verifiers:{ready:{apple:true},apple:async()=>p}});t.after(()=>billing.stop());
+ const c=billing.catalog({id:'reader'});assert.equal(c.enabled,true);assert.equal(c.providers.apple,true);assert.equal(c.newPurchaseEnabled,false);assert.equal(c.canSubscribe,false);
+ assert.equal((await billing.purchase('apple',{signedTransaction:'fixture'},{id:'reader'})).awarded,200);
+ assert.equal(billingCatalog(store,cfg,null,{apple:true}).newPurchaseEnabled,false);
+ assert.equal(billingCatalog(store,{...cfg,credits:{enabled:true,accounts:[]}},{id:'reader'},{apple:true}).newPurchaseEnabled,false);
+});

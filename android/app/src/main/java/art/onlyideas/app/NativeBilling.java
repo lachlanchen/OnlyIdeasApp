@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 /** Store UI never mints credits; the server verifies and acknowledges every purchase. */
 final class NativeBilling {
   interface Host {
+    default boolean canPurchase(String accountToken) { return false; }
     void products(List<ProductDetails> products);
     void deliver(String token, Runnable complete);
     void notice(String text);
@@ -23,6 +24,7 @@ final class NativeBilling {
     this.activity=activity;this.host=host;
     client=BillingClient.newBuilder(activity)
       .setListener((result,purchases)->activity.runOnUiThread(()->{
+        if(closed)return;
         if(result.getResponseCode()==BillingClient.BillingResponseCode.OK && purchases!=null)process(purchases);
         else if(result.getResponseCode()!=BillingClient.BillingResponseCode.USER_CANCELED)host.notice("The store is unavailable. Please try again.");
       }))
@@ -65,6 +67,9 @@ final class NativeBilling {
     return null;
   }
   void purchase(ProductDetails product,String accountToken) {
+    // Empty Play history is not permission. Recheck the app/server capability
+    // at the controller boundary, even if a stale enabled button calls us.
+    if(closed||accountToken==null||accountToken.isEmpty()||!host.canPurchase(accountToken))return;
     ProductDetails.SubscriptionOfferDetails offer=monthly(product,trialEligible);
     if(offer==null||!client.isReady()){host.notice("The store is unavailable. Please try again.");return;}
     BillingFlowParams flow=BillingFlowParams.newBuilder().setObfuscatedAccountId(accountToken)

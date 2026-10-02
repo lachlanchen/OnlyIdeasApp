@@ -48,3 +48,53 @@ test('new webhook formats resolve invoice and charge links through the pinned AP
  result=await deliver('charge.refunded',{id:'ch_paid',object:'charge',refunded:true});applyVerifiedPurchase(store,result.proofs[0],'reader');
  assert.equal(store.db.prepare("SELECT count(*) n FROM credit_ledger WHERE kind='purchase_refund'").get().n,1);
 });
+
+function nativePurchase(store){return applyVerifiedPurchase(store,{platform:'apple',environment:'Sandbox',accountToken:billingAccount(store,'reader'),receipt:randomUUID(),subscription:'native-subscription',product:'art.onlyideas.reader.monthly',observed:Date.now(),purchased:Date.now(),expires:Date.now()+86400_000,paid:true,revoked:false,state:'active'},'reader')}
+function checkoutProvider(store,{loseResponse=false,nativeDuringCreate=false,expiryFails=false}={}){
+ const calls=[];let creates=0,status='open';
+ return {calls,get creates(){return creates},get status(){return status},retryExpiry(){expiryFails=false},transport:async(url,options)=>{
+  const path=new URL(url).pathname,values=Object.fromEntries(new URLSearchParams(options.body));calls.push({path,method:options.method,values,key:options.headers['Idempotency-Key']});let data;
+  if(path==='/v1/prices/price_reader')data={id:'price_reader',active:true,livemode:false,currency:'usd',unit_amount:299,recurring:{interval:'month',interval_count:1}};
+  else if(path==='/v1/customers')data={id:'cus_reader'};
+  else if(path==='/v1/checkout/sessions'){
+   creates++;if(nativeDuringCreate){nativeDuringCreate=false;nativePurchase(store)}
+   if(loseResponse){loseResponse=false;throw Error('connection lost after provider creation')}
+   data={id:'cs_existing',url:'https://checkout.stripe.com/c/pay/existing',livemode:false};
+  }else if(path==='/v1/checkout/sessions/cs_existing'&&options.method==='GET')data={id:'cs_existing',livemode:false,status};
+  else if(path==='/v1/checkout/sessions/cs_existing/expire'){
+   if(expiryFails)return new Response('{}',{status:503});status='expired';data={id:'cs_existing',livemode:false,status};
+  }else throw Error('Unexpected '+options.method+' '+path);
+  return new Response(JSON.stringify(data));
+ }};
+}
+test('known native purchase rejects checkout before creating an operation or calling Stripe',async t=>{
+ const {store,config}=fixture(t),provider=checkoutProvider(store),stripe=createStripeBilling(store,config,provider);nativePurchase(store);
+ await assert.rejects(stripe.checkout({id:'reader'},'reader'),/existing subscription/);
+ assert.equal(provider.calls.length,0);assert.equal(store.db.prepare('SELECT count(*) n FROM billing_stripe_checkout').get().n,0);
+});
+test('saved checkout is expired when a native purchase arrives; failed expiry remains retryable',async t=>{
+ const {store,config}=fixture(t),provider=checkoutProvider(store,{expiryFails:true}),stripe=createStripeBilling(store,config,provider);
+ await stripe.checkout({id:'reader'},'reader');nativePurchase(store);
+ await assert.rejects(stripe.checkout({id:'reader'},'reader'),/unavailable/);
+ assert.equal(provider.status,'open');assert.equal(provider.creates,1);
+ provider.retryExpiry();await assert.rejects(stripe.checkout({id:'reader'},'reader'),/existing subscription/);
+ assert.equal(provider.status,'expired');assert.equal(provider.creates,1);
+ await assert.rejects(stripe.checkout({id:'reader'},'reader'),/existing subscription/);
+ assert.equal(provider.calls.filter(c=>c.path.endsWith('/expire')).length,2);
+});
+test('unknown checkout outcome recovers the original key and trial parameters before expiring after native purchase',async t=>{
+ const {store,config}=fixture(t),provider=checkoutProvider(store,{loseResponse:true}),stripe=createStripeBilling(store,config,provider);
+ await assert.rejects(stripe.checkout({id:'reader'},'reader'),/connection lost/);
+ nativePurchase(store);await assert.rejects(stripe.checkout({id:'reader'},'reader'),/existing subscription/);
+ const creates=provider.calls.filter(c=>c.path==='/v1/checkout/sessions');assert.equal(creates.length,2);
+ assert.equal(creates[0].key,creates[1].key);assert.deepEqual(creates[0].values,creates[1].values);assert.equal(creates[1].values['subscription_data[trial_period_days]'],'7');assert.equal(provider.status,'expired');
+});
+test('native purchase during checkout creation expires the new session instead of returning its URL',async t=>{
+ const {store,config}=fixture(t),provider=checkoutProvider(store,{nativeDuringCreate:true}),stripe=createStripeBilling(store,config,provider);
+ await assert.rejects(stripe.checkout({id:'reader'},'reader'),/existing subscription/);
+ assert.equal(provider.status,'expired');assert.equal(provider.creates,1);
+});
+test('sales closure rejects new Checkout while retaining the configured provider',async t=>{
+ const {store,config}=fixture(t);config.billing.salesEnabled=false;const provider=checkoutProvider(store),stripe=createStripeBilling(store,config,provider);
+ assert.equal(stripe.ready,true);await assert.rejects(stripe.checkout({id:'reader'},'reader'),/not available/);assert.equal(provider.calls.length,0);
+});

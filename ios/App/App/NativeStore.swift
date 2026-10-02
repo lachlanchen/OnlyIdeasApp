@@ -122,7 +122,7 @@ struct ReadingCredits: Decodable {
 struct SubscriptionCatalog: Decodable {
   struct Plan: Decodable, Identifiable {var id:String;var name:String;var credits:Int;var agentTurns:Int;var apple:String;var google:String;var pages:Int?;var fetches:Int?;var targetUSD:String?}
   struct Quota:Decodable {var enabled:Bool;var unlimited:Bool;var trial:Bool;var pages:Int;var fetches:Int;var remainingPages:Int;var remainingFetches:Int;var ends:Double}
-  var trialEligible:Bool?;var quota:Quota?
+  var trialEligible:Bool?;var quota:Quota?;var newPurchaseEnabled:Bool?
   struct Providers:Decodable {var apple:Bool;var google:Bool}
   var enabled:Bool;var accountToken:String?;var providers:Providers;var plans:[Plan];var plan:String?;var canSubscribe:Bool
 }
@@ -163,6 +163,7 @@ final class ReadingStore: NSObject, ObservableObject,
   @Published var trialProducts:Set<String>=[]
   @Published var purchaseBusy=false
   @Published var purchaseNotice:String?
+  private var subscriptionRequest=0
   private var purchaseUpdates:Task<Void,Never>?
   private var purchaseIntents:Task<Void,Never>?
   @Published var requestedPlanID:String?
@@ -238,7 +239,8 @@ final class ReadingStore: NSObject, ObservableObject,
     purchaseUpdates=Task { [weak self] in
       for await result in StoreKit.Transaction.updates {
         guard !Task.isCancelled else {break}
-        do {try await self?.deliverPurchase(result)} catch {self?.purchaseNotice=error.localizedDescription}
+        let identity=self?.token
+        do {try await self?.deliverPurchase(result)} catch {if identity==self?.token {self?.purchaseNotice=error.localizedDescription}}
       }
     }
   }
@@ -866,21 +868,22 @@ func T(_ key:String, _ values:[String:String] = [:]) -> String {
 extension ReadingStore {
   func loadSubscriptions() async {
     let identity=token
+    subscriptionRequest+=1;let generation=subscriptionRequest
     do {
       let catalog=try JSONDecoder().decode(SubscriptionCatalog.self,from:await request("/api/billing"))
-      guard identity==token else {return}
+      guard identity==token && generation==subscriptionRequest else {return}
       subscriptionCatalog=catalog
       guard catalog.enabled && catalog.providers.apple else {subscriptionProducts=[];return}
       let products=try await Product.products(for:catalog.plans.map(\.apple))
-      guard identity==token else {return}
+      guard identity==token && generation==subscriptionRequest else {return}
       subscriptionProducts=products.sorted {$0.price<$1.price}
       var eligible=Set<String>()
       if catalog.trialEligible==true {for product in products {
         if let subscription=product.subscription,let offer=subscription.introductoryOffer,offer.paymentMode == .freeTrial,offer.periodCount==1,
            (offer.period.unit == .week && offer.period.value==1 || offer.period.unit == .day && offer.period.value==7),await subscription.isEligibleForIntroOffer {eligible.insert(product.id)}
       }}
-      if identity==token {trialProducts=eligible}
-    } catch {if identity==token {subscriptionCatalog=nil;subscriptionProducts=[];purchaseNotice=T("Unable to load plans. Try again.")}}
+      if identity==token && generation==subscriptionRequest {trialProducts=eligible}
+    } catch {if identity==token && generation==subscriptionRequest {subscriptionCatalog=nil;subscriptionProducts=[];purchaseNotice=T("Unable to load plans. Try again.")}}
   }
   private func deliverPurchase(_ result:VerificationResult<StoreKit.Transaction>) async throws {
     guard case .verified(let transaction)=result else {throw failure(T("The store could not verify this purchase."))}
@@ -889,24 +892,35 @@ extension ReadingStore {
     _=try await request("/api/billing/apple",method:"POST",body:["signedTransaction":result.jwsRepresentation])
     guard identity==token else {return}
     await transaction.finish()
+    guard identity==token else {return}
     requestedPlanID=nil
     await loadCredits()
+    guard identity==token else {return}
     await loadSubscriptions()
+    guard identity==token else {return}
     purchaseNotice=T("Your purchases are up to date.")
   }
   func purchase(_ product:Product) async {
-    guard !purchaseBusy,let catalog=subscriptionCatalog,catalog.enabled,catalog.providers.apple,catalog.canSubscribe,
+    guard !purchaseBusy,let catalog=subscriptionCatalog,catalog.enabled,catalog.providers.apple,catalog.newPurchaseEnabled==true,
       let binding=catalog.accountToken.flatMap(UUID.init(uuidString:)),account != nil else {return}
     let identity=token;purchaseBusy=true;purchaseNotice=nil
     defer {purchaseBusy=false}
     do {
-      switch try await product.purchase(options:[.appAccountToken(binding)]) {
-      case .success(let result): if identity==token {try await deliverPurchase(result)}
+      // Refresh authorization before presenting StoreKit. Local empty history
+      // cannot override a purchase known to the server on another device/store.
+      let fresh=try JSONDecoder().decode(SubscriptionCatalog.self,from:await request("/api/billing"))
+      guard identity==token,fresh.enabled,fresh.providers.apple,
+        fresh.newPurchaseEnabled==true,fresh.accountToken==catalog.accountToken else {return}
+      subscriptionRequest+=1;subscriptionCatalog=fresh
+      let outcome=try await product.purchase(options:[.appAccountToken(binding)])
+      guard identity==token else {return}
+      switch outcome {
+      case .success(let result): try await deliverPurchase(result)
       case .pending: purchaseNotice=T("Payment is pending. Benefits will appear after the store confirms payment.")
       case .userCancelled: requestedPlanID=nil
       @unknown default: purchaseNotice=T("Please try restoring purchases.")
       }
-    } catch {purchaseNotice=error.localizedDescription}
+    } catch {if identity==token {purchaseNotice=error.localizedDescription}}
   }
   func restorePurchases() async {
     guard !purchaseBusy,account != nil else {return}
@@ -914,13 +928,18 @@ extension ReadingStore {
     defer {purchaseBusy=false}
     do {
       try await AppStore.sync()
+      guard identity==token else {return}
       for await result in StoreKit.Transaction.currentEntitlements {
         guard identity==token else {return}
         try await deliverPurchase(result)
       }
-      await loadSubscriptions();await loadCredits()
+      guard identity==token else {return}
+      await loadSubscriptions()
+      guard identity==token else {return}
+      await loadCredits()
+      guard identity==token else {return}
       purchaseNotice=T("Your purchases are up to date.")
-    } catch {purchaseNotice=error.localizedDescription}
+    } catch {if identity==token {purchaseNotice=error.localizedDescription}}
   }
 }
 

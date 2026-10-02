@@ -45,6 +45,8 @@ public class MainActivity extends AppCompatActivity {
   private NativeSession api;
   private NativeBilling billing;
   private JSONObject billingCatalog;
+  private int billingEpoch=-1,billingRequestGeneration=0;
+  private boolean billingChecking=false;
   private List<ProductDetails> billingProducts=List.of();
   private LinearLayout subscriptionContainer;
   private LinearLayout creditContainer;
@@ -597,23 +599,27 @@ public class MainActivity extends AppCompatActivity {
 
   void loadSubscriptions() {
     if(api==null)return;
-    int epoch=authEpoch;
+    int epoch=authEpoch,generation=++billingRequestGeneration;
     io.execute(()->{
       try {
         JSONObject catalog=api.json("/api/billing","GET",null);
         handler.post(()->{
-          if(isFinishing()||epoch!=authEpoch)return;
+          if(isFinishing()||epoch!=authEpoch||generation!=billingRequestGeneration)return;
           billingCatalog=catalog;
           if(!catalog.optBoolean("enabled")||!catalog.optJSONObject("providers").optBoolean("google")){renderSubscriptions();return;}
+          if(billing!=null&&billingEpoch!=epoch){billing.close();billing=null;billingProducts=List.of();billingChecking=false;}
+          billingEpoch=epoch;
           if(billing==null)billing=new NativeBilling(this,new NativeBilling.Host(){
-            public void products(List<ProductDetails> products){billingProducts=products;renderSubscriptions();}
-            public void notice(String value){purchaseNotice=t(value);renderSubscriptions();}
+            public boolean canPurchase(String binding){return epoch==authEpoch&&!isFinishing()&&billingCatalog!=null&&billingCatalog.optBoolean("enabled")&&billingCatalog.optBoolean("newPurchaseEnabled")&&billingCatalog.optJSONObject("providers").optBoolean("google")&&binding.equals(billingCatalog.optString("accountToken"));}
+            public void products(List<ProductDetails> products){if(epoch!=authEpoch||isFinishing())return;billingProducts=products;renderSubscriptions();}
+            public void notice(String value){if(epoch!=authEpoch||isFinishing())return;purchaseNotice=t(value);renderSubscriptions();}
             public void deliver(String token,Runnable complete){
-              int identity=authEpoch;
+              if(epoch!=authEpoch||isFinishing()){complete.run();return;}
+              int identity=epoch;String sessionToken=api.token();
               io.execute(()->{
                 try {
-                  JSONObject result=api.json("/api/billing/google","POST",object("purchaseToken",token));
-                  handler.post(()->{complete.run();if(identity!=authEpoch||isFinishing())return;billingCatalog=result;purchaseNotice=t("Your purchases are up to date.");if(page.equals("profile")&&creditContainer!=null&&result.optJSONObject("credits")!=null)renderCredits(creditContainer,result.optJSONObject("credits"));renderSubscriptions();});
+                  JSONObject result=billingRequest("/api/billing/google","POST",object("purchaseToken",token),sessionToken);
+                  handler.post(()->{complete.run();if(identity!=authEpoch||isFinishing())return;billingRequestGeneration++;billingCatalog=result;purchaseNotice=t("Your purchases are up to date.");if(page.equals("profile")&&creditContainer!=null&&result.optJSONObject("credits")!=null)renderCredits(creditContainer,result.optJSONObject("credits"));renderSubscriptions();});
                 }catch(Exception error){handler.post(()->{complete.run();if(identity!=authEpoch||isFinishing())return;purchaseNotice=error.getMessage();renderSubscriptions();});}
               });
             }
@@ -622,8 +628,23 @@ public class MainActivity extends AppCompatActivity {
           if(plans!=null)for(int i=0;i<plans.length();i++)ids.add(plans.optJSONObject(i).optString("google"));
           billing.trialEligible=catalog.optBoolean("trialEligible");billing.load(ids);renderSubscriptions();
         });
-      } catch(Exception error) {handler.post(()->{if(epoch==authEpoch&&!isFinishing()){purchaseNotice=t("Unable to load plans. Try again.");renderSubscriptions();}});}
+      } catch(Exception error) {handler.post(()->{if(epoch==authEpoch&&generation==billingRequestGeneration&&!isFinishing()){purchaseNotice=t("Unable to load plans. Try again.");renderSubscriptions();}});}
     });
+  }
+  private JSONObject billingRequest(String path,String method,JSONObject body,String sessionToken) throws Exception {
+    if(sessionToken==null||sessionToken.isEmpty())throw new Exception(t("Sign in to continue."));
+    return new JSONObject(new String(api.bytes(path,method,body==null?null:body.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8),"application/json",Map.of("Authorization","Bearer "+sessionToken)),java.nio.charset.StandardCharsets.UTF_8));
+  }
+  private void purchaseSubscription(ProductDetails product){
+    if(billingChecking||billing==null||billingCatalog==null)return;
+    final int epoch=authEpoch,generation=++billingRequestGeneration;final String sessionToken=api.token(),binding=billingCatalog.optString("accountToken");
+    billingChecking=true;renderSubscriptions();
+    io.execute(()->{try{
+      JSONObject fresh=billingRequest("/api/billing","GET",null,sessionToken);
+      handler.post(()->{if(epoch!=authEpoch||generation!=billingRequestGeneration||isFinishing())return;billingChecking=false;billingCatalog=fresh;renderSubscriptions();
+        if(billing!=null&&Objects.equals(sessionToken,api.token())&&binding.equals(fresh.optString("accountToken")))billing.purchase(product,binding);
+      });
+    }catch(Exception error){handler.post(()->{if(epoch!=authEpoch||generation!=billingRequestGeneration||isFinishing())return;billingChecking=false;purchaseNotice=error.getMessage();renderSubscriptions();});}});
   }
   void renderSubscriptions() {
     if(!page.equals("plans")||subscriptionContainer==null)return;
@@ -650,8 +671,8 @@ public class MainActivity extends AppCompatActivity {
       String price=phases.get(phases.size()-1).getFormattedPrice();
       if(trial)caption(card,t("7 days free, then {price} per month. Trial includes 50 pages and 10 fetches. Cancel before it ends to avoid payment.").replace("{price}",price));
       caption(card,t("{price} / month").replace("{price}",price));
-      Button buy=button(t(active.equals(plan.optString("id"))?"Current plan":trial?"Start 7-day free trial":"Subscribe"),true,()->billing.purchase(product,billingCatalog.optString("accountToken")));
-      buy.setEnabled(billingCatalog.optBoolean("canSubscribe"));card.addView(buy);
+      Button buy=button(t(active.equals(plan.optString("id"))?"Current plan":trial?"Start 7-day free trial":"Subscribe"),true,()->purchaseSubscription(product));
+      buy.setEnabled(!billingChecking&&billingCatalog.optBoolean("newPurchaseEnabled"));card.addView(buy);
     }
     if(plans!=null)for(int i=0;i<plans.length();i++) {
       JSONObject plan=plans.optJSONObject(i);boolean found=false;

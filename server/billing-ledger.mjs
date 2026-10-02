@@ -27,9 +27,14 @@ export function activePlan(store, owner) {
   const products = store.db.prepare("SELECT s.platform,s.product FROM billing_subscriptions s WHERE s.owner=? AND s.expires>? AND s.state IN ('active','grace') AND EXISTS (SELECT 1 FROM billing_periods p WHERE p.subscription=s.id AND p.owner=s.owner AND p.ends>s.purchased AND p.state IN ('active','grace'))").all(owner, Date.now());
   return products.map(p=>planForProduct(p.platform,p.product)).filter(Boolean).sort((a,b)=>b.agentTurns-a.agentTurns)[0] || null;
 }
+export function hasBlockingPurchase(store, owner) {
+  // Purchase eligibility uses known provider state, independently of the
+  // displayed plan or verification age. Canceled paid-through periods are
+  // normalized to active; unresolved holds/pending purchases can have no expiry.
+  return !!store.db.prepare("SELECT 1 FROM billing_subscriptions WHERE owner=? AND (state IN ('paused','pending') OR (state IN ('active','grace') AND expires>?)) LIMIT 1").get(owner,Date.now());
+}
 export function subscriptionSummary(store, owner) {
-  const existing=store.db.prepare("SELECT 1 FROM billing_subscriptions WHERE owner=? AND (state IN ('paused','pending') OR (state IN ('active','grace') AND expires>?)) LIMIT 1").get(owner,Date.now());
-  return { canSubscribe:!existing, plan:activePlan(store,owner)?.id || null,
+  return { canSubscribe:!hasBlockingPurchase(store,owner), plan:activePlan(store,owner)?.id || null,
     subscriptions:store.db.prepare('SELECT platform,product,expires,state FROM billing_subscriptions WHERE owner=? ORDER BY expires DESC').all(owner) };
 }
 
@@ -86,6 +91,8 @@ export function deleteBillingAccount(store, owner) {
 
 export function billingCatalog(store,config,user,ready={}) {
   const enabled=!!user && creditsEnabled(config,user.id) && config.billing?.enabled===true && (ready.apple===true || ready.google===true || ready.stripe===true);
-  return { enabled, providers:{apple:enabled&&ready.apple===true,google:enabled&&ready.google===true,stripe:enabled&&ready.stripe===true}, accountToken:enabled?billingAccount(store,user.id):null,
-    plans:plans.map(p=>({...p,trial:trialPolicy})),signInRequired:!user,trialEligible:user?trialEligible(store,user.id):false,quota:user?quotaSummary(store,config,user.id):null, ...(user?subscriptionSummary(store,user.id):{plan:null,canSubscribe:false,subscriptions:[]}) };
+  const summary=user?subscriptionSummary(store,user.id):{plan:null,canSubscribe:false,subscriptions:[]};
+  const newPurchaseEnabled=enabled&&config.billing?.salesEnabled!==false&&summary.canSubscribe;
+  return { enabled, newPurchaseEnabled, providers:{apple:enabled&&ready.apple===true,google:enabled&&ready.google===true,stripe:enabled&&ready.stripe===true}, accountToken:enabled?billingAccount(store,user.id):null,
+    plans:plans.map(p=>({...p,trial:trialPolicy})),signInRequired:!user,trialEligible:user?trialEligible(store,user.id):false,quota:user?quotaSummary(store,config,user.id):null, ...summary,canSubscribe:newPurchaseEnabled };
 }

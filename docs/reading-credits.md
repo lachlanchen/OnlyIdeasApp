@@ -177,6 +177,10 @@ qualification are ready. Never use a live card charge as a substitute for testin
 
 ## Build 21 billing setup status
 
+Source safeguards and subsequent qualification are tracked in
+[the 3 October billing receipt](billing-guards-20261003.md). The dated build 21
+provider results below remain historical observations.
+
 Profile → Plans & usage is visible on all four clients. Apple products are now
 READY_TO_SUBMIT; Google base plans and seven-day trial offers are ACTIVE. General
 checkout is still disabled. Real Stripe sandbox and Android Play test purchases,
