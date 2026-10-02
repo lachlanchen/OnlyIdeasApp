@@ -17,8 +17,8 @@ test('only a verified bound invoice grants quotas/credits; refunds revoke once a
  const {store,config}=fixture(t),accountToken=billingAccount(store,'reader');let refunded=false,bad=false,pending=false;
  store.db.exec('CREATE TABLE billing_stripe_customers(owner TEXT PRIMARY KEY,customer TEXT UNIQUE NOT NULL)');store.db.prepare('INSERT INTO billing_stripe_customers VALUES(?,?)').run('reader','cus_reader');
  const price={id:'price_reader',active:true,livemode:false,currency:'usd',unit_amount:299,recurring:{interval:'month',interval_count:1}},start=Math.floor(Date.now()/1000)-10,end=start+30*86400;
- const sub={id:'sub_reader',customer:'cus_reader',livemode:false,metadata:{app:'onlyideas',account_token:accountToken},status:'active',items:{data:[{quantity:1,price}]}},invoice={id:'in_paid',subscription:'sub_reader',customer:'cus_reader',livemode:false,status:'paid',amount_paid:299,currency:'usd',charge:'ch_paid',lines:{data:[{price:'price_reader',quantity:1,period:{start,end}}]}};
- const stripe=createStripeBilling(store,config,{transport:async(url)=>{const p=new URL(url).pathname;return new Response(JSON.stringify(p.startsWith('/v1/subscriptions/')?sub:p==='/v1/invoices'?{data:pending?[]:[{...invoice,customer:bad?'cus_other':'cus_reader'}]}:p==='/v1/charges/ch_paid'?{customer:'cus_reader',livemode:false,refunded}:{}))}});
+ const sub={id:'sub_reader',customer:'cus_reader',livemode:false,metadata:{app:'onlyideas',account_token:accountToken},status:'active',items:{data:[{quantity:1,price}]}},invoice={id:'in_paid',subscription:'sub_reader',customer:'cus_reader',livemode:false,status:'paid',amount_paid:299,amount_due:299,amount_remaining:0,subtotal:299,total:299,currency:'usd',charge:'ch_paid',lines:{data:[{price:'price_reader',currency:'usd',amount:299,subscription:'sub_reader',quantity:1,period:{start,end}}]}};
+ const stripe=createStripeBilling(store,config,{transport:async(url)=>{const p=new URL(url).pathname;return new Response(JSON.stringify(p.startsWith('/v1/subscriptions/')?sub:p==='/v1/invoices'?{data:pending?[]:[{...invoice,customer:bad?'cus_other':'cus_reader'}]}:p==='/v1/charges/ch_paid'?{id:'ch_paid',invoice:'in_paid',customer:'cus_reader',livemode:false,currency:'usd',paid:true,captured:true,status:'succeeded',amount:299,amount_captured:299,amount_refunded:refunded?299:0,refunded}:{}))}});
  let result=await stripe.verify('sub_reader');assert.equal(applyVerifiedPurchase(store,result.proofs[0],'reader').awarded,200);assert.equal(applyVerifiedPurchase(store,result.proofs[0],'reader').awarded,0);assert.equal(quotaSummary(store,config,'reader').pages,200);
  bad=true;await assert.rejects(stripe.verify('sub_reader'),/ownership/);bad=false;refunded=true;result=await stripe.verify('sub_reader');applyVerifiedPurchase(store,result.proofs[0],'reader');assert.equal(quotaSummary(store,config,'reader').pages,30);
  const raw=Buffer.from(JSON.stringify({livemode:false,type:'customer.subscription.updated',data:{object:{id:'sub_other',metadata:{app:'echomind'}}}}));assert.equal(await stripe.notification({headers:{'stripe-signature':sign(raw)}},raw),null);
@@ -30,11 +30,11 @@ test('new webhook formats resolve invoice and charge links through the pinned AP
  const start=Math.floor(Date.now()/1000)-10,end=start+30*86400;
  const price={id:'price_reader',active:true,livemode:false,currency:'usd',unit_amount:299,recurring:{interval:'month',interval_count:1}};
  const sub={id:'sub_reader',customer:'cus_reader',livemode:false,metadata:{app:'onlyideas',account_token:accountToken},status:'active',items:{data:[{quantity:1,price}]}};
- const invoice={id:'in_paid',subscription:'sub_reader',customer:'cus_reader',livemode:false,status:'paid',amount_paid:299,currency:'usd',charge:'ch_paid',lines:{data:[{price:'price_reader',quantity:1,period:{start,end}}]}};
+ const invoice={id:'in_paid',subscription:'sub_reader',customer:'cus_reader',livemode:false,status:'paid',amount_paid:299,amount_due:299,amount_remaining:0,subtotal:299,total:299,currency:'usd',charge:'ch_paid',lines:{data:[{price:'price_reader',currency:'usd',amount:299,subscription:'sub_reader',quantity:1,period:{start,end}}]}};
  let refunded=false;
  const stripe=createStripeBilling(store,config,{transport:async(url,options)=>{
   assert.equal(options.headers['Stripe-Version'],'2024-06-20');const path=new URL(url).pathname;calls.push(path);
-  const data=path==='/v1/invoices/in_paid'?invoice:path==='/v1/invoices'?{data:[invoice]}:path==='/v1/subscriptions/sub_reader'?sub:path==='/v1/charges/ch_paid'?{id:'ch_paid',invoice:'in_paid',customer:'cus_reader',livemode:false,refunded}:null;
+  const data=path==='/v1/invoices/in_paid'?invoice:path==='/v1/invoices'?{data:[invoice]}:path==='/v1/subscriptions/sub_reader'?sub:path==='/v1/charges/ch_paid'?{id:'ch_paid',invoice:'in_paid',customer:'cus_reader',livemode:false,currency:'usd',paid:true,captured:true,status:'succeeded',amount:299,amount_captured:299,amount_refunded:refunded?299:0,refunded}:null;
   assert.ok(data,'Unexpected provider request '+path);return new Response(JSON.stringify(data));
  }});
  store.db.prepare('INSERT INTO billing_stripe_customers VALUES(?,?)').run('reader','cus_reader');
@@ -97,4 +97,32 @@ test('native purchase during checkout creation expires the new session instead o
 test('sales closure rejects new Checkout while retaining the configured provider',async t=>{
  const {store,config}=fixture(t);config.billing.salesEnabled=false;const provider=checkoutProvider(store),stripe=createStripeBilling(store,config,provider);
  assert.equal(stripe.ready,true);await assert.rejects(stripe.checkout({id:'reader'},'reader'),/not available/);assert.equal(provider.calls.length,0);
+});
+
+test('full-price cash contract rejects underpayment, unverified settlement, and unrelated charge lineage',async t=>{
+ const cases={
+  discounted:({invoice})=>{invoice.total_discount_amounts=[{amount:100}];invoice.total=199;invoice.amount_paid=199;invoice.amount_due=199},
+  'credit balance funding':({invoice,charge})=>{invoice.amount_paid=199;invoice.amount_due=199;charge.amount=199;charge.amount_captured=199},
+  'marked paid without charge':({invoice})=>{invoice.charge=null},
+  'unrelated invoice charge':({charge})=>{charge.invoice='in_other'},
+  'unrelated customer charge':({charge})=>{charge.customer='cus_other'},
+  'unsettled charge':({charge})=>{charge.paid=false;charge.status='pending'},
+  'uncaptured authorization':({charge})=>{charge.captured=false;charge.amount_captured=0},
+  'small cash payment':({charge})=>{charge.amount=1;charge.amount_captured=1},
+  'wrong line amount':({invoice})=>{invoice.lines.data[0].amount=1},
+  'unrelated line subscription':({invoice})=>{invoice.lines.data[0].subscription='sub_other'},
+  'truncated invoice lines':({invoice})=>{invoice.lines.has_more=true},
+  'unqualified extra line':({invoice})=>{invoice.lines.data.push({...invoice.lines.data[0]})},
+ };
+ for(const [name,change] of Object.entries(cases))await t.test(name,async t=>{
+  const {store,config}=fixture(t),binding=billingAccount(store,'reader'),start=Math.floor(Date.now()/1000)-60;
+  const price={id:'price_reader',active:true,livemode:false,currency:'usd',unit_amount:299,recurring:{interval:'month',interval_count:1}};
+  const sub={id:'sub_reader',customer:'cus_reader',livemode:false,status:'active',metadata:{app:'onlyideas',account_token:binding},items:{data:[{quantity:1,price}]}};
+  const invoice={id:'in_paid',subscription:'sub_reader',customer:'cus_reader',livemode:false,status:'paid',currency:'usd',subtotal:299,total:299,amount_due:299,amount_paid:299,amount_remaining:0,charge:'ch_paid',lines:{data:[{price:'price_reader',subscription:'sub_reader',currency:'usd',quantity:1,amount:299,period:{start,end:start+30*86400}}]}};
+  const charge={id:'ch_paid',invoice:'in_paid',customer:'cus_reader',livemode:false,currency:'usd',paid:true,captured:true,status:'succeeded',amount:299,amount_captured:299,amount_refunded:0};change({invoice,charge});
+  const stripe=createStripeBilling(store,config,{transport:async url=>Response.json(new URL(url).pathname==='/v1/invoices'?{data:[invoice]}:new URL(url).pathname==='/v1/charges/ch_paid'?charge:sub)});
+  store.db.prepare('INSERT INTO billing_stripe_customers VALUES(?,?)').run('reader','cus_reader');
+  await assert.rejects(stripe.verify('sub_reader'));
+  assert.equal(store.db.prepare('SELECT count(*) n FROM credit_ledger').get().n,0);
+ });
 });

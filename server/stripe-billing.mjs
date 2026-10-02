@@ -56,12 +56,20 @@ export function createStripeBilling(store,config,{transport=fetch}={}){
   for(const invoice of invoices.data||[]){
    requireValue(stripeID(invoice.subscription)===id&&stripeID(invoice.customer)===stripeID(subscription.customer)&&invoice.livemode===live,'Invoice ownership mismatch.',409);
    if(invoice.status!=='paid'||invoice.amount_paid<=0)continue;
+   requireValue(!invoice.lines?.has_more,'Invoice history needs reconciliation.',503);
    const line=invoice.lines?.data?.find(l=>stripeID(l.price)===items[0].price.id&&!l.proration);
    if(!line)continue;
-   requireValue(invoice.currency==='usd'&&line.quantity===1&&Number.isSafeInteger(line.period?.start)&&Number.isSafeInteger(line.period?.end),'Invalid subscription invoice.',502);
+   const expected=Math.round(Number(plan.targetUSD)*100);
+   // Current Checkout sells full-price monthly plans. Discounts, credit-balance
+   // funding, prorations and upgrades need their own qualified lineage contract;
+   // an invoice marked paid is not by itself proof of this plan's payment.
+   requireValue(invoice.currency==='usd'&&line.currency==='usd'&&line.quantity===1&&line.amount===expected&&stripeID(line.subscription)===id&&invoice.lines.data.length===1&&invoice.subtotal===expected&&Number.isSafeInteger(invoice.total)&&invoice.total>=expected&&invoice.amount_due===invoice.total&&invoice.amount_paid===invoice.total&&invoice.amount_remaining===0&&!(invoice.total_discount_amounts||[]).some(d=>d.amount!==0)&&Number.isSafeInteger(line.period?.start)&&Number.isSafeInteger(line.period?.end)&&line.period.end>line.period.start&&line.period.end-line.period.start<=32*86400,'Subscription payment needs reconciliation.',409);
    const expires=line.period.end*1000,purchased=line.period.start*1000;
-   let revoked=invoice.post_payment_credit_notes_amount>=invoice.amount_paid;
-   if(invoice.charge){const charge=await api('GET','/charges/'+encodeURIComponent(stripeID(invoice.charge)));requireValue(stripeID(charge.customer)===stripeID(subscription.customer)&&charge.livemode===live,'Charge ownership mismatch.',409);revoked ||= charge.refunded===true||charge.disputed===true}
+   requireValue(/^ch_\w+$/.test(stripeID(invoice.charge)||''),'Subscription payment needs reconciliation.',409);
+   const charge=await api('GET','/charges/'+encodeURIComponent(stripeID(invoice.charge)));
+   requireValue(charge.id===stripeID(invoice.charge)&&stripeID(charge.invoice)===invoice.id&&stripeID(charge.customer)===stripeID(subscription.customer)&&charge.livemode===live,'Charge ownership mismatch.',409);
+   requireValue(charge.currency==='usd'&&charge.paid===true&&charge.captured===true&&charge.status==='succeeded'&&charge.amount===invoice.amount_paid&&charge.amount_captured===invoice.amount_paid&&Number.isSafeInteger(charge.amount_refunded)&&charge.amount_refunded>=0,'Subscription payment needs reconciliation.',409);
+   const revoked=(invoice.post_payment_credit_notes_amount||0)>0||charge.amount_refunded>0||charge.refunded===true||charge.disputed===true;
    proofs.push({...common,receipt:invoice.id,purchased,expires,paid:true,trial:false,revoked,state:revoked?'revoked':expires<=now||['canceled','unpaid','incomplete_expired','paused'].includes(subscription.status)?'expired':'active'});
   }
   return {proofs,source:{subscription:id,transaction:id,environment}};
