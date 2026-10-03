@@ -75,6 +75,12 @@ struct NativeReadingApp: View {
       if value != nil {tab=2;if store.account==nil {store.showSignIn=true}}
     }
     .task { await store.refresh() }
+    .onReceive(NotificationCenter.default.publisher(for: Notification.Name("OnlyIdeas.SignInReturn"))) { event in
+      if let url = event.object as? URL { store.handleSignInURL(url) }
+    }
+    .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
+      Task { await store.resumeSignIn() }
+    }
     .onChange(of:store.account?.id){id in if id==nil {ReadingReminder.cancel();store.inboxUnread=0}}
     .onReceive(Timer.publish(every:30,on:.main,in:.common).autoconnect()){_ in guard let id=store.account?.id,UIApplication.shared.applicationState == .active else{return};Task{if let r=try? await store.json("/api/inbox"),store.account?.id==id {store.inboxUnread=r["unread"]as?Int ?? 0}}}
     .onReceive(NotificationCenter.default.publisher(for:Notification.Name("OnlyIdeas.OpenSpace"))){_ in spaceSection="daily";tab=3;UserDefaults.standard.removeObject(forKey:"onlyideas.open.daily")}
@@ -110,21 +116,22 @@ struct NativeSignIn: View {
   @Environment(\.dismiss) var dismiss
   var body: some View {
     NavigationView {
+      ScrollView {
       VStack(alignment: .leading, spacing: 24) {
         Image(systemName: "books.vertical").font(.system(size: 48)).foregroundColor(accent)
-        Text(T("Your reading space")).font(.largeTitle.bold())
-        Text(T("Keep your papers and conversations together. Choose an account to continue.")).font(.title3)
+        Text(T("Your reading space")).font(.largeTitle.bold()).fixedSize(horizontal: false, vertical: true)
+        Text(T("Keep your papers and conversations together. Choose an account to continue.")).font(.title3).fixedSize(horizontal: false, vertical: true)
         Button { Task { await store.signInWithApple() } } label: {
           Label(T("Continue with Apple"), systemImage: "apple.logo").font(.headline).frame(maxWidth: .infinity).padding()
         }.buttonStyle(.borderedProminent).tint(.primary).disabled(store.signingIn)
         Button { Task { await store.signInWithGitHub() } } label: {
           Text(T("Continue with GitHub")).font(.headline).frame(maxWidth: .infinity).padding()
         }.buttonStyle(.bordered).disabled(store.signingIn)
-        Text(T("Use the same sign-in method to return to your account. Apple and GitHub accounts are separate.")).font(.footnote).foregroundColor(.secondary)
+        Text(T("Use the same sign-in method to return to your account. Apple and GitHub accounts are separate.")).font(.footnote).foregroundColor(.secondary).fixedSize(horizontal: false, vertical: true)
         Link(T("Privacy"), destination: URL(string: "https://lachlan.lazying.art/OnlyIdeasApp/privacy.html")!)
-        Spacer()
-      }.padding(28).toolbar { Button(T("Cancel")) { dismiss() } }
-    }
+      }.padding(28).frame(maxWidth: 560, alignment: .leading).frame(maxWidth: .infinity)
+      }.toolbar { Button(T("Cancel")) { dismiss() } }
+    }.navigationViewStyle(.stack)
   }
 }
 struct NativeLibrary: View {
@@ -491,6 +498,9 @@ struct NativeProfile: View {
               systemImage: "person.badge.key"
             ).font(.headline).padding(.vertical, 8)
           }.disabled(store.signingIn)
+          if store.githubSignInActive {
+            Button(T("Cancel")) { store.cancelGitHubSignIn() }
+          }
         }
       }
       Section {Button {plans=true} label: {Label(T("Plans & usage"),systemImage:"sparkles").font(.headline)}.accessibilityIdentifier("plans-entry")}

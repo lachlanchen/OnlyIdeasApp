@@ -36,6 +36,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+        for context in URLContexts {
+            NotificationCenter.default.post(name: Notification.Name("OnlyIdeas.SignInReturn"), object: context.url)
+        }
         #if !targetEnvironment(macCatalyst)
         SceneDelegateProxy.shared.scene(scene, openURLContexts: URLContexts)
         #endif

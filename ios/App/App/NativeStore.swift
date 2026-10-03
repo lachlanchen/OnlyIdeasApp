@@ -181,6 +181,18 @@ final class ReadingStore: NSObject, ObservableObject,
   @AppStorage("onlyideas.native.appearance") var appearance = "system"
   private var token: String?
   private var authentication: ASWebAuthenticationSession?
+  private var githubStartID: UUID?
+  var githubSignInActive: Bool { githubStartID != nil }
+  private lazy var githubRecovery = NativeOAuthRecovery { [weak self] flow, verifier in
+    guard let self else { throw CancellationError() }
+    let result = try await self.json("/api/auth/native/complete", method: "POST",
+                                     body: ["flow": flow, "verifier": verifier])
+    if result["pending"] as? Bool == true { return nil }
+    guard let token = result["token"] as? String, !token.isEmpty else {
+      throw self.failure(T("Sign-in is not complete. Please try again."))
+    }
+    return token
+  }
   private var origin:String {
     #if DEBUG
     if ProcessInfo.processInfo.arguments.contains("--onlyideas-space-qa"),let value=ProcessInfo.processInfo.environment["ONLYIDEAS_QA_ORIGIN"],let url=URL(string:value),url.scheme=="http",url.host=="127.0.0.1",url.port != nil {return value}
@@ -444,47 +456,63 @@ final class ReadingStore: NSObject, ObservableObject,
     showSignIn = false
     guard !signingIn else { return }
     signingIn = true
+    let startID = UUID(), originalToken = token
+    githubStartID = startID
     do {
       let verifier = Data((0..<32).map { _ in UInt8.random(in: 0...255) }).base64URLEncoded
       let challenge = Data(SHA256.hash(data: Data(verifier.utf8))).base64URLEncoded
       let flow = try await json(
         "/api/auth/native/start", method: "POST", body: ["challenge": challenge])
       guard let urlText = flow["url"] as? String, let url = URL(string: urlText),
-        url.host == "agent.onlyideas.art", let id = flow["flow"] as? String
+        url.scheme == "https", url.host == "agent.onlyideas.art", let id = flow["flow"] as? String
       else { throw failure(T("Could not start sign-in.")) }
+      guard githubStartID == startID, token == originalToken else { return }
+      githubRecovery.start(flow: id, verifier: verifier, accept: { [weak self] token in
+        guard let self, self.githubStartID == startID, self.token == originalToken else {
+          throw CancellationError()
+        }
+        try self.saveToken(token)
+        Task { await self.refresh() }
+      }, finish: { [weak self] error in
+        guard let self, self.githubStartID == startID else { return }
+        self.githubStartID = nil
+        self.signingIn = false
+        let session = self.authentication; self.authentication = nil
+        session?.cancel()
+        if let error, !(error is CancellationError) { self.error = T(error.localizedDescription) }
+      })
       authentication = ASWebAuthenticationSession(url: url, callbackURLScheme: "art.onlyideas.app")
       { [weak self] url, error in
         Task { @MainActor in
-          guard let self = self else { return }
-          defer {
-            self.signingIn = false
-            self.authentication = nil
-          }
-          guard error == nil, url?.host == "oauth" else {
-            if let error = error,
-              (error as NSError).code != ASWebAuthenticationSessionError.canceledLogin.rawValue
-            {
-              self.error = error.localizedDescription
+          guard let self, self.githubStartID == startID else { return }
+          if let url, error == nil {
+            if !self.githubRecovery.receive(url) {
+              self.githubRecovery.cancel(error: self.failure(T("Sign-in is not complete. Please try again.")))
             }
-            return
+          } else if let error {
+            let cancelled = (error as NSError).domain == ASWebAuthenticationSessionError.errorDomain
+              && (error as NSError).code == ASWebAuthenticationSessionError.canceledLogin.rawValue
+            self.githubRecovery.cancel(error: cancelled ? nil : error)
           }
-          do {
-            let result = try await self.json(
-              "/api/auth/native/complete", method: "POST", body: ["flow": id, "verifier": verifier])
-            guard let token = result["token"] as? String else {
-              throw self.failure(T("Sign-in is not complete. Please try again."))
-            }
-            try self.saveToken(token)
-            await self.refresh()
-          } catch { self.error = error.localizedDescription }
         }
       }
       authentication?.presentationContextProvider = self
       if authentication?.start() != true { throw failure(T("Could not open secure sign-in.")) }
     } catch {
+      guard githubStartID == startID else { return }
+      githubRecovery.cancel()
+      githubStartID = nil; authentication = nil
       self.error = error.localizedDescription
       signingIn = false
     }
+  }
+  func handleSignInURL(_ url: URL) { githubRecovery.receive(url) }
+  func resumeSignIn() async { await githubRecovery.check() }
+  func cancelGitHubSignIn() {
+    githubRecovery.cancel()
+    githubStartID = nil
+    signingIn = false
+    let session = authentication; authentication = nil; session?.cancel()
   }
   func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
     UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.flatMap(\.windows)
@@ -497,6 +525,7 @@ final class ReadingStore: NSObject, ObservableObject,
     } catch { self.error = error.localizedDescription }
   }
   func signOut() async {
+    cancelGitHubSignIn()
     _ = try? await json("/api/auth/logout", method: "POST", body: [:])
     try? saveToken(nil)
     account = nil
