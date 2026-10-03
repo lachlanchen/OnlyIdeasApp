@@ -3,6 +3,23 @@
 Requested by Lachlan on 2026-09-26. A quiet, social research library for reading
 papers, discussing passages and making ideas easier to understand across languages.
 
+## Optional shared identity direction · 2026-10-03
+
+The owner requested independent apps with optional LazyingArt login, while
+EchoMind owns the central issuer. OnlyIdeas owns its separate `onlyideas-server`
+client, `onlyideas-service` audience and exact HTTPS callback
+`https://agent.onlyideas.art/api/auth/lazyingart/callback`. Keep existing login,
+local accounts, private data and subscription ownership. Explicit linking needs
+fresh proof of both accounts, never an email match. Profile-only login may qualify
+separately from Bunko's GitHub legacy-link extension and Coin earnings.
+
+Canonical LAC accumulation is a later separately qualified Coin-owned settlement
+integration; existing OnlyIdeas database reading credits remain independent.
+Pending earning intents are not available LAC. No automatic wallet linking,
+credit conversion, shared subscription or cross-app discount is authorized by
+this direction. See [adapter preparation](docs/shared-profile-adapter.md) for
+the disabled implementation and remaining live qualification gates.
+
 ## First release
 
 - Responsive web reader, suitable for a later iOS/Android wrapper.
