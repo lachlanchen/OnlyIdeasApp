@@ -6,7 +6,7 @@ that Mac Catalyst's scene URL handler discarded incoming URLs. This identifies
 one missing return path; it does not prove that every stalled session had that
 same cause.
 
-The successor now routes scene callbacks into the native store. A small recovery
+The Apple 1.0.5 (26) successor source now routes scene callbacks into the native store. A small recovery
 controller binds the complete URL to the current PKCE flow, suppresses concurrent
 redemptions and checks the same flow every five seconds for at most ten minutes.
 Only the server can issue a session after successful consent. No provider login,
@@ -30,3 +30,7 @@ binary before production promotion; keep the submitted Google build25 review.
 
 Apple contracts: [ASWebAuthenticationSession](https://developer.apple.com/documentation/authenticationservices/aswebauthenticationsession)
 and [scene URL delivery](https://developer.apple.com/documentation/uikit/uiscenedelegate/scene(_:openurlcontexts:)).
+
+The Mac project generator now inherits the mobile marketing/build versions
+instead of resetting future generated projects to the old build24. Android25
+and its active review are unchanged.

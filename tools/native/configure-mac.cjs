@@ -18,7 +18,6 @@ for (const key of ['504EC3171FED79650016851F','504EC3181FED79650016851F']) {
   const b = o.XCBuildConfiguration[key].buildSettings;
   Object.assign(b, {
     // Shared successor includes the approved icon on every Apple platform.
-    CURRENT_PROJECT_VERSION:'24', MARKETING_VERSION:'1.0.4',
     PRODUCT_NAME:'OnlyIdeas', INFOPLIST_FILE:'App/MacInfo.plist',
     SUPPORTS_MACCATALYST:'YES', DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER:'NO',
     SUPPORTED_PLATFORMS:'"macosx"', MACOSX_DEPLOYMENT_TARGET:'12.0',
