@@ -10,7 +10,7 @@
 
 ## Thử nghiệm và xét duyệt mới nhất · 3 tháng 10 năm 2026
 
-Google Play 1.0.5 (25) và biểu tượng cửa hàng đã được duyệt đang chờ xét duyệt. Apple 1.0.5 (26) đã được tải lên để thử nghiệm nội bộ, cải thiện khôi phục đăng nhập gốc và cách hiển thị hướng dẫn đăng nhập. Bản Mac công khai vẫn là 1.0.4 (24); quy trình xét duyệt iOS 1.0.2 (21) hiện có được giữ nguyên. Chức năng mua gói đăng ký cho mọi người vẫn chưa bật trong khi hoàn tất thử nghiệm thanh toán Apple riêng cho OnlyIdeas. Các bài báo và tài khoản hiện có được bảo toàn.
+Google Play 1.0.5 (25), với biểu tượng đã duyệt, đã phát hành cho 100% người dùng và là bản Android mới nhất. Nâng cấp bản ký, đọc bài báo thật, khởi động lại ngoại tuyến và 160 kiểm thử đều đạt. Apple 1.0.5 (26) chỉ sửa việc trở lại sau đăng nhập trên Apple và đã có trên TestFlight; Mac 1.0.4 (24) đã phát hành, iOS 1.0.2 (21) còn xét duyệt. Bán đăng ký rộng rãi vẫn tắt trong khi chờ xác minh thanh toán riêng của ứng dụng. Giữ nguyên bài báo và tài khoản.
 
 [Google 25](../docs/release-candidate-25.md) · [Apple 26](../docs/native-sign-in-recovery-20261003.md)
 

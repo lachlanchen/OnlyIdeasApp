@@ -10,7 +10,7 @@
 
 ## Derniers tests et validation · 3 octobre 2026
 
-Google Play 1.0.5 (25) et l’icône approuvée sont en cours de vérification. Apple 1.0.5 (26) a été téléversé pour les tests internes, avec une récupération de connexion native et des explications plus lisibles. La version Mac publique reste 1.0.4 (24) ; la vérification existante d’iOS 1.0.2 (21) est conservée. Les achats d’abonnements pour le grand public restent désactivés pendant les tests de paiement Apple propres à OnlyIdeas. Les articles et comptes existants sont préservés.
+Google Play 1.0.5 (25), avec l’icône approuvée, est publié à 100 % et constitue la dernière version Android. La mise à niveau signée, la lecture d’un article réel, le redémarrage hors ligne et 160 tests ont réussi. Apple 1.0.5 (26) améliore uniquement le retour de connexion Apple et se trouve dans TestFlight ; Mac 1.0.4 (24) est public et iOS 1.0.2 (21) reste en examen. Les ventes générales d’abonnements attendent la validation des paiements de cette application. Articles et comptes sont conservés.
 
 [Google 25](../docs/release-candidate-25.md) · [Apple 26](../docs/native-sign-in-recovery-20261003.md)
 

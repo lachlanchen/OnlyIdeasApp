@@ -1,0 +1,18 @@
+{
+  "at": "2026-10-03T02:50:27Z",
+  "build": 25,
+  "configuration": "signed release APK on dedicated Android API34 emulator",
+  "upgradedFrom": 21,
+  "libraryAndAccountPreserved": true,
+  "realSharedPaper": "10.1038/s41534-019-0145-z",
+  "offlineColdStartReading": true,
+  "profilePlansLocalizedPricesObserved": true,
+  "purchaseAttempted": false,
+  "aabSHA256": "526321352ded5ee3f90cc433e6b1bd1b875a167e41966031cf4330d35c6dea9d",
+  "apkSHA256": "fc2b16c410c8ae554c30395e7ca69e13256346fb78dcfd1480c9b3b3e05d645c",
+  "source": "49a682cfe46595372925a682da63c64c2b9a369d",
+  "automatedTests": 160,
+  "googleProduction": "Available on Google Play; 100 percent rollout; no unpublished changes",
+  "apple26": "Apple-only native sign-in changes; no Android difference from build25",
+  "realPurchaseThisCheck": false
+}

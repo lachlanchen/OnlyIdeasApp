@@ -10,7 +10,7 @@
 
 ## Aktuelle Tests und Prüfung · 3. Oktober 2026
 
-Google Play 1.0.5 (25) und das freigegebene Store-Symbol werden geprüft. Apple 1.0.5 (26) wurde für interne Tests hochgeladen und verbessert die Wiederaufnahme der nativen Anmeldung sowie die Lesbarkeit des Anmeldetexts. Die öffentliche Mac-Version bleibt 1.0.4 (24); die bestehende Prüfung von iOS 1.0.2 (21) läuft weiter. Allgemeine Abonnementkäufe bleiben deaktiviert, bis die Apple-Zahlungstests für OnlyIdeas abgeschlossen sind. Vorhandene Artikel und Konten bleiben erhalten.
+Google Play 1.0.5 (25) mit dem freigegebenen Symbol ist zu 100 % veröffentlicht und die neueste Android-Version. Signiertes Upgrade, Lesen einer echten Publikation, Offline-Neustart und 160 Tests bestanden. Apple 1.0.5 (26) verbessert ausschließlich die Rückkehr nach der Apple-Anmeldung und ist in TestFlight; Mac 1.0.4 (24) ist öffentlich, iOS 1.0.2 (21) weiterhin in Prüfung. Allgemeine Abonnementverkäufe warten auf die eigene Zahlungsprüfung. Publikationen und Konten bleiben erhalten.
 
 [Google 25](../docs/release-candidate-25.md) · [Apple 26](../docs/native-sign-in-recovery-20261003.md)
 

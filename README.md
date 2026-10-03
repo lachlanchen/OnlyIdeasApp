@@ -10,7 +10,7 @@
 
 ## Latest testing and review · 3 October 2026
 
-Google Play 1.0.5 (25) and the approved store icon are in review. Apple 1.0.5 (26) is uploaded for internal testing with native sign-in recovery and clearer sign-in text. The current public Mac version remains 1.0.4 (24); the existing iOS 1.0.2 (21) review is preserved. General subscription purchases remain disabled while OnlyIdeas-specific Apple payment testing is completed. Existing papers and accounts are preserved.
+Google Play 1.0.5 (25), including the approved icon, is public at 100% rollout. It is the latest Android build. Signed Android upgrade, real-paper reading, offline restart and 160 tests passed. Apple 1.0.5 (26) adds Apple-only sign-in recovery and is in TestFlight; Mac 1.0.4 (24) is public and iOS 1.0.2 (21) remains in review. General subscription sales remain disabled pending app-specific payment qualification. Existing papers and accounts are preserved.
 
 [Google 25](docs/release-candidate-25.md) · [Apple 26](docs/native-sign-in-recovery-20261003.md)
 
