@@ -8,6 +8,12 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
+## Latest testing and review · 3 October 2026
+
+Google Play 1.0.5 (25) and the approved store icon are in review. Apple 1.0.5 (26) is uploaded for internal testing with native sign-in recovery and clearer sign-in text. The current public Mac version remains 1.0.4 (24); the existing iOS 1.0.2 (21) review is preserved. General subscription purchases remain disabled while OnlyIdeas-specific Apple payment testing is completed. Existing papers and accounts are preserved.
+
+[Google 25](docs/release-candidate-25.md) · [Apple 26](docs/native-sign-in-recovery-20261003.md)
+
 ## Overview
 
 OnlyIdeas is a shared reading room for research papers. Import a PDF or an open-access PDF link, preserve equations and figures with Mathpix, and discuss passages inside the reader. New imports default to Shared, with an Only me option. Publication follows source permission and community review; notes and agent conversations stay private.

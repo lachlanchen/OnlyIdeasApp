@@ -34,3 +34,15 @@ and [scene URL delivery](https://developer.apple.com/documentation/uikit/uiscene
 The Mac project generator now inherits the mobile marketing/build versions
 instead of resetting future generated projects to the old build24. Android25
 and its active review are unchanged.
+
+## Uploaded and available in TestFlight
+
+Apple **1.0.5 (26)** is now **VALID / IN_BETA_TESTING** for iPhone/iPad with
+paired Watch and for universal Mac. Both exact build IDs are present in the
+existing internal tester group, with updated testing notes. Signed archives,
+package versions and Apple validation/upload succeeded. The archive agent and
+upload processes are stopped. See [the artifact receipt](apple-testflight-26.json).
+
+The existing iOS21 production review and public Mac24 remain unchanged. Google25
+continues in review. The new Apple binary still needs a fresh native sign-in
+check and app-specific payment qualification before production promotion.

@@ -8,6 +8,12 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
+## 最新测试与审核 · 2026年10月3日
+
+Google Play 1.0.5 (25) 和已确认的商店图标正在审核。Apple 1.0.5 (26) 已上传用于内部测试，改进原生登录恢复和登录文字排版。Mac 正式版仍为 1.0.4 (24)，现有 iOS 1.0.2 (21) 审核予以保留。OnlyIdeas 专属 Apple 支付测试尚未完成，普通用户的订阅购买仍未启用。现有论文和账户均予保留。
+
+[Google 25](../docs/release-candidate-25.md) · [Apple 26](../docs/native-sign-in-recovery-20261003.md)
+
 ## 概览
 
 OnlyIdeas 是共享的论文阅读空间。导入 PDF 或开放获取的 PDF 链接，通过 Mathpix 保留公式和插图，并在阅读器内讨论段落。新导入默认选择“共享”，也可选择“仅自己”。公开前须审核来源授权和社区要求；笔记和智能体对话始终私密。

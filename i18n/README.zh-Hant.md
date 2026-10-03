@@ -8,6 +8,12 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
+## 最新測試與審查 · 2026年10月3日
+
+Google Play 1.0.5 (25) 和已確認的商店圖示正在審查。Apple 1.0.5 (26) 已上傳供內部測試，改善原生登入恢復和登入文字排版。Mac 正式版仍為 1.0.4 (24)，現有 iOS 1.0.2 (21) 審查予以保留。OnlyIdeas 專屬 Apple 付款測試尚未完成，一般使用者的訂閱購買仍未啟用。現有論文和帳戶均予保留。
+
+[Google 25](../docs/release-candidate-25.md) · [Apple 26](../docs/native-sign-in-recovery-20261003.md)
+
 ## 概覽
 
 OnlyIdeas 是共享的論文閱讀空間。匯入 PDF 或開放取用的 PDF 連結，透過 Mathpix 保留公式和插圖，並在閱讀器內討論段落。新匯入預設選擇「共享」，也可選擇「僅自己」。公開前須審核來源授權與社群要求；筆記和智慧代理對話始終私密。

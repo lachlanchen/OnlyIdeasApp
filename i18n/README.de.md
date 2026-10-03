@@ -8,6 +8,12 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
+## Aktuelle Tests und Prüfung · 3. Oktober 2026
+
+Google Play 1.0.5 (25) und das freigegebene Store-Symbol werden geprüft. Apple 1.0.5 (26) wurde für interne Tests hochgeladen und verbessert die Wiederaufnahme der nativen Anmeldung sowie die Lesbarkeit des Anmeldetexts. Die öffentliche Mac-Version bleibt 1.0.4 (24); die bestehende Prüfung von iOS 1.0.2 (21) läuft weiter. Allgemeine Abonnementkäufe bleiben deaktiviert, bis die Apple-Zahlungstests für OnlyIdeas abgeschlossen sind. Vorhandene Artikel und Konten bleiben erhalten.
+
+[Google 25](../docs/release-candidate-25.md) · [Apple 26](../docs/native-sign-in-recovery-20261003.md)
+
 ## Überblick
 
 OnlyIdeas ist ein gemeinsamer Leseraum für Forschungsarbeiten. PDF-Dateien oder frei zugängliche PDF-Links importieren, Formeln und Abbildungen mit Mathpix erhalten und Textstellen direkt im Reader besprechen. Neue Importe sind standardmäßig zum Teilen vorgesehen; Nur ich ist ebenfalls wählbar. Eine Veröffentlichung erfolgt nach Rechteprüfung und Moderation. Notizen und Agentengespräche bleiben privat.

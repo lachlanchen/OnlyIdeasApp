@@ -8,6 +8,12 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
+## 最新のテストと審査 · 2026年10月3日
+
+Google Play の 1.0.5 (25) と承認済みストアアイコンは審査中です。Apple 1.0.5 (26) は内部テスト用にアップロード済みで、ネイティブログインの復帰処理と説明文の表示を改善しています。Mac の公開版は引き続き 1.0.4 (24) で、iOS 1.0.2 (21) の既存審査も維持しています。OnlyIdeas 専用の Apple 決済テストが完了するまで、一般向けのサブスクリプション購入は無効です。既存の論文とアカウントは保持されます。
+
+[Google 25](../docs/release-candidate-25.md) · [Apple 26](../docs/native-sign-in-recovery-20261003.md)
+
 ## 概要
 
 OnlyIdeas は論文を一緒に読むための共有読書室です。PDF またはオープンアクセスの PDF リンクを取り込み、Mathpix で数式と図を保持し、本文の一節について話し合えます。新規取り込みは「共有」が初期設定で、「自分のみ」も選べます。公開には利用許諾とコミュニティ審査が必要です。ノートとエージェントとの会話は非公開です。

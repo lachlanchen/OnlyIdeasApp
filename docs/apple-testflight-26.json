@@ -1,0 +1,53 @@
+{
+  "verifiedAt": "2026-10-03T02:26:51.375842+00:00",
+  "version": "1.0.5",
+  "build": 26,
+  "source": "5647308",
+  "apple": [
+    {
+      "platform": "IOS",
+      "id": "c0120b50-6c3a-475f-95ca-c54d0c16fa09",
+      "version": "1.0.5",
+      "build": "26",
+      "processing": "VALID",
+      "internal": "IN_BETA_TESTING"
+    },
+    {
+      "platform": "MAC_OS",
+      "id": "54ff026f-6f93-49ca-bc39-66983f9db869",
+      "version": "1.0.5",
+      "build": "26",
+      "processing": "VALID",
+      "internal": "IN_BETA_TESTING"
+    }
+  ],
+  "existingInternalGroupVerified": true,
+  "sha256": {
+    "iosIPA": "eefa165a5b5d7c4e9a68f4e10f8fd639136062f79176406e15c5a82936cec81c",
+    "macPKG": "5ee20e9378ee6a3580569ae02bffbe16db9cd8e595023b757c874746a8dc55b4"
+  },
+  "macArchitectures": [
+    "x86_64",
+    "arm64"
+  ],
+  "validation": [
+    "160 project tests, renderer, TypeScript and build",
+    "Swift callback/proof binding, duplicate suppression, pending recovery, cancellation, expiry, network retry",
+    "Universal Catalyst unsigned compile",
+    "Signed iOS/Watch and universal Mac archives/export",
+    "Apple altool validation and upload",
+    "Apple VALID/IN_BETA_TESTING and existing internal group readback"
+  ],
+  "notYetVerified": [
+    "Fresh real native OAuth recovery with build26",
+    "Actual OnlyIdeas StoreKit purchase lifecycle"
+  ],
+  "productionReviewChanged": false,
+  "google25ReviewPreserved": true,
+  "salesEnabledForGeneralUsers": false,
+  "runtimeCleanup": {
+    "archiveAgentStopped": true,
+    "uploadsFinished": true,
+    "noMacDesktopControl": true
+  }
+}

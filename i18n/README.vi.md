@@ -8,6 +8,12 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
+## Thử nghiệm và xét duyệt mới nhất · 3 tháng 10 năm 2026
+
+Google Play 1.0.5 (25) và biểu tượng cửa hàng đã được duyệt đang chờ xét duyệt. Apple 1.0.5 (26) đã được tải lên để thử nghiệm nội bộ, cải thiện khôi phục đăng nhập gốc và cách hiển thị hướng dẫn đăng nhập. Bản Mac công khai vẫn là 1.0.4 (24); quy trình xét duyệt iOS 1.0.2 (21) hiện có được giữ nguyên. Chức năng mua gói đăng ký cho mọi người vẫn chưa bật trong khi hoàn tất thử nghiệm thanh toán Apple riêng cho OnlyIdeas. Các bài báo và tài khoản hiện có được bảo toàn.
+
+[Google 25](../docs/release-candidate-25.md) · [Apple 26](../docs/native-sign-in-recovery-20261003.md)
+
 ## Tổng quan
 
 OnlyIdeas là phòng đọc chung dành cho bài nghiên cứu. Nhập PDF hoặc liên kết PDF truy cập mở, giữ công thức và hình ảnh bằng Mathpix rồi thảo luận ngay trong trình đọc. Nội dung nhập mới mặc định chọn Chia sẻ, với tùy chọn Chỉ mình tôi. Việc công bố cần kiểm tra quyền sử dụng và duyệt cộng đồng; ghi chú và hội thoại với tác nhân vẫn riêng tư.
