@@ -8,11 +8,11 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
-## 最新测试与审核 · 2026年10月3日
+## 最新测试与审核 · 2026年10月6日
 
-Google Play 1.0.5 (25) 已全量发布，包含已确认的图标，也是最新 Android 版本。签名版升级、真实论文阅读、离线重启及 160 项测试均已通过。Apple 1.0.5 (26) 仅改进 Apple 登录恢复，已进入 TestFlight；Mac 1.0.4 (24) 已发布，iOS 1.0.2 (21) 仍在审核。普通用户的订阅销售须待本应用支付验证完成后启用。现有论文和账户均予保留。
+Apple 依据 4.3/4.2.6 拒绝了 iOS 1.0.2 (21)，要求先说明情况再重新提交。我们已回答全部九个问题并附上真实阅读器截图，正等待 Apple 回复。最新 Apple 1.0.5 (26) 仍在 TestFlight；Mac 1.0.4 (24) 已发布。Android 1.0.5 (25) 于 10月3日确认公开发布。本次 174 项测试、渲染验证和生产构建均通过。普通用户订阅销售仍未启用，现有论文和账户保留。
 
-[Google 25](../docs/release-candidate-25.md) · [Apple 26](../docs/native-sign-in-recovery-20261003.md)
+[Google 25](../docs/release-candidate-25.md) · [Apple 26](../docs/app-review-20261006.json)
 
 ## 概览
 

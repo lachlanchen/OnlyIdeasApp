@@ -8,11 +8,11 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
-## Latest testing and review · 3 October 2026
+## Latest testing and review · 6 October 2026
 
-Google Play 1.0.5 (25), including the approved icon, is public at 100% rollout. It is the latest Android build. Signed Android upgrade, real-paper reading, offline restart and 160 tests passed. Apple 1.0.5 (26) adds Apple-only sign-in recovery and is in TestFlight; Mac 1.0.4 (24) is public and iOS 1.0.2 (21) remains in review. General subscription sales remain disabled pending app-specific payment qualification. Existing papers and accounts are preserved.
+Apple rejected iOS 1.0.2 (21) under 4.3/4.2.6 and requested clarification before resubmission. We answered all nine questions with genuine reader screenshots; the response is awaiting Apple review. Latest Apple 1.0.5 (26) remains in TestFlight; Mac 1.0.4 (24) is public. Android 1.0.5 (25) was verified public on 3 October. Fresh checks passed 174 tests, renderer validation and the production build. General subscription sales remain disabled, and existing papers and accounts are preserved.
 
-[Google 25](docs/release-candidate-25.md) · [Apple 26](docs/native-sign-in-recovery-20261003.md)
+[Google 25](docs/release-candidate-25.md) · [Apple 26](docs/app-review-20261006.json)
 
 ## Overview
 

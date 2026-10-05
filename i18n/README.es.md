@@ -8,11 +8,11 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
-## Últimas pruebas y revisión · 3 de octubre de 2026
+## Últimas pruebas y revisión · 6 de octubre de 2026
 
-Google Play 1.0.5 (25), con el icono aprobado, ya está publicado para el 100% de los usuarios y es la última versión Android. Pasaron la actualización firmada, la lectura de un artículo real, el reinicio sin conexión y 160 pruebas. Apple 1.0.5 (26) solo mejora el retorno del inicio de sesión en Apple y está en TestFlight; Mac 1.0.4 (24) es público e iOS 1.0.2 (21) sigue en revisión. Las ventas generales de suscripciones esperan la validación de pagos propia. Se conservan artículos y cuentas.
+Apple rechazó iOS 1.0.2 (21) según 4.3/4.2.6 y pidió aclaraciones antes de volver a enviarlo. Respondimos las nueve preguntas con capturas reales del lector y esperamos su respuesta. Apple 1.0.5 (26) sigue en TestFlight; Mac 1.0.4 (24) está publicado. Android 1.0.5 (25) se verificó público el 3 de octubre. Pasaron las 174 pruebas, la validación del renderizador y la compilación de producción. Las ventas generales de suscripciones siguen desactivadas; se conservan los artículos y las cuentas existentes.
 
-[Google 25](../docs/release-candidate-25.md) · [Apple 26](../docs/native-sign-in-recovery-20261003.md)
+[Google 25](../docs/release-candidate-25.md) · [Apple 26](../docs/app-review-20261006.json)
 
 ## Descripción
 

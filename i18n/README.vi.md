@@ -8,11 +8,11 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
-## Thử nghiệm và xét duyệt mới nhất · 3 tháng 10 năm 2026
+## Kiểm thử và xét duyệt mới nhất · 6 tháng 10 năm 2026
 
-Google Play 1.0.5 (25), với biểu tượng đã duyệt, đã phát hành cho 100% người dùng và là bản Android mới nhất. Nâng cấp bản ký, đọc bài báo thật, khởi động lại ngoại tuyến và 160 kiểm thử đều đạt. Apple 1.0.5 (26) chỉ sửa việc trở lại sau đăng nhập trên Apple và đã có trên TestFlight; Mac 1.0.4 (24) đã phát hành, iOS 1.0.2 (21) còn xét duyệt. Bán đăng ký rộng rãi vẫn tắt trong khi chờ xác minh thanh toán riêng của ứng dụng. Giữ nguyên bài báo và tài khoản.
+Apple từ chối iOS 1.0.2 (21) theo 4.3/4.2.6 và yêu cầu giải thích trước khi gửi lại. Chúng tôi đã trả lời cả chín câu hỏi, đính kèm ảnh thật của trình đọc và đang chờ Apple phản hồi. Apple 1.0.5 (26) vẫn ở TestFlight; Mac 1.0.4 (24) đã phát hành. Android 1.0.5 (25) được xác nhận công khai ngày 3 tháng 10. Cả 174 bài kiểm thử, kiểm tra bộ dựng nội dung và bản dựng sản xuất đều đạt. Chưa mở bán gói đăng ký cho mọi người; các bài báo và tài khoản hiện có được giữ nguyên.
 
-[Google 25](../docs/release-candidate-25.md) · [Apple 26](../docs/native-sign-in-recovery-20261003.md)
+[Google 25](../docs/release-candidate-25.md) · [Apple 26](../docs/app-review-20261006.json)
 
 ## Tổng quan
 

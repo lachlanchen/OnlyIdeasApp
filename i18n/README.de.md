@@ -8,11 +8,11 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
-## Aktuelle Tests und Prüfung · 3. Oktober 2026
+## Aktuelle Tests und Prüfung · 6. Oktober 2026
 
-Google Play 1.0.5 (25) mit dem freigegebenen Symbol ist zu 100 % veröffentlicht und die neueste Android-Version. Signiertes Upgrade, Lesen einer echten Publikation, Offline-Neustart und 160 Tests bestanden. Apple 1.0.5 (26) verbessert ausschließlich die Rückkehr nach der Apple-Anmeldung und ist in TestFlight; Mac 1.0.4 (24) ist öffentlich, iOS 1.0.2 (21) weiterhin in Prüfung. Allgemeine Abonnementverkäufe warten auf die eigene Zahlungsprüfung. Publikationen und Konten bleiben erhalten.
+Apple hat iOS 1.0.2 (21) nach 4.3/4.2.6 abgelehnt und vor einer erneuten Einreichung Erläuterungen angefordert. Alle neun Fragen wurden mit echten Reader-Screenshots beantwortet; Apples Antwort steht aus. Apple 1.0.5 (26) bleibt in TestFlight, Mac 1.0.4 (24) ist öffentlich. Android 1.0.5 (25) wurde am 3. Oktober als veröffentlicht bestätigt. Die aktuellen 174 Tests, Renderer-Prüfung und der Produktionsbuild bestanden. Allgemeine Abonnementkäufe bleiben deaktiviert; bestehende Artikel und Konten bleiben erhalten.
 
-[Google 25](../docs/release-candidate-25.md) · [Apple 26](../docs/native-sign-in-recovery-20261003.md)
+[Google 25](../docs/release-candidate-25.md) · [Apple 26](../docs/app-review-20261006.json)
 
 ## Überblick
 

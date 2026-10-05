@@ -8,11 +8,11 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
-## 최신 테스트 및 심사 · 2026년 10월 3일
+## 최신 테스트 및 심사 · 2026년 10월 6일
 
-승인된 아이콘을 포함한 Google Play 1.0.5 (25)가 전체 사용자에게 공개되었으며 최신 Android 빌드입니다. 서명된 앱 업그레이드, 실제 논문 읽기, 오프라인 재시작과 160개 테스트를 통과했습니다. Apple 1.0.5 (26)은 Apple 로그인 복귀만 개선하며 TestFlight에 있습니다. Mac 1.0.4 (24)는 공개되었고 iOS 1.0.2 (21)은 심사 중입니다. 일반 구독 판매는 이 앱의 결제 검증이 끝날 때까지 비활성화됩니다. 기존 논문과 계정은 유지됩니다.
+Apple은 4.3/4.2.6에 따라 iOS 1.0.2 (21)을 거절하고 재제출 전에 설명을 요청했습니다. 아홉 질문 모두에 답하고 실제 리더 화면을 첨부했으며 답변을 기다리고 있습니다. 최신 Apple 1.0.5 (26)은 TestFlight에 있고 Mac 1.0.4 (24)은 공개되었습니다. Android 1.0.5 (25)의 공개는 10월 3일 확인했습니다. 이번 174개 테스트, 렌더러 검증 및 프로덕션 빌드가 통과했습니다. 일반 구독 판매는 비활성화 상태이며 기존 논문과 계정은 유지됩니다.
 
-[Google 25](../docs/release-candidate-25.md) · [Apple 26](../docs/native-sign-in-recovery-20261003.md)
+[Google 25](../docs/release-candidate-25.md) · [Apple 26](../docs/app-review-20261006.json)
 
 ## 개요
 

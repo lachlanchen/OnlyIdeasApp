@@ -8,11 +8,11 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
-## 最新のテストと審査 · 2026年10月3日
+## 最新のテストと審査 · 2026年10月6日
 
-Google Play 1.0.5 (25) は承認済みアイコンを含み、全ユーザー向けに公開済みです。Android の最新版です。署名済みアプリの更新、実論文の閲覧、オフライン再起動、160 件のテストに合格しました。Apple 1.0.5 (26) の変更は Apple のログイン復帰のみで、TestFlight にあります。Mac 1.0.4 (24) は公開済み、iOS 1.0.2 (21) は審査中です。一般向け定期購入は本アプリの決済検証待ちです。既存の論文とアカウントは保持されます。
+Apple は iOS 1.0.2 (21) を 4.3/4.2.6 に基づき却下し、再提出前の説明を求めました。9つの質問すべてに回答し、実際のリーダー画面を添付して返信待ちです。最新 Apple 1.0.5 (26) は TestFlight、Mac 1.0.4 (24) は公開済みです。Android 1.0.5 (25) の公開は10月3日に確認しました。今回の174テスト、レンダラー検証、本番ビルドは成功しました。一般向けサブスクリプション販売は無効のままで、既存の論文とアカウントを保持しています。
 
-[Google 25](../docs/release-candidate-25.md) · [Apple 26](../docs/native-sign-in-recovery-20261003.md)
+[Google 25](../docs/release-candidate-25.md) · [Apple 26](../docs/app-review-20261006.json)
 
 ## 概要
 

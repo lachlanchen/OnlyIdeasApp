@@ -1,0 +1,90 @@
+{
+  "checkedAt": "2026-10-05T22:02:53.976Z",
+  "appId": "6816392935",
+  "bundleId": "art.onlyideas.app",
+  "rejectedVersion": "1.0.2",
+  "rejectedBuild": 21,
+  "submissionId": "896a3d14-73f2-4fee-a629-ff436c5358f3",
+  "rejectionTopics": [
+    "4.3 Spam",
+    "4.2.6 App Generation Services"
+  ],
+  "providerRequestedAction": "Answer nine product, audience, beta-testing, consolidation, code-sharing and ownership questions before resubmitting if the current product meets the requirements.",
+  "actionCompleted": "Sent all nine answers in three messages and attached two genuine historical reader screenshots. Each complete message and both attachments verified after page reload.",
+  "response": "app-review-20261006-response.md",
+  "replyParts": [
+    {
+      "part": 1,
+      "characters": 3743,
+      "verified": true
+    },
+    {
+      "part": 2,
+      "characters": 3907,
+      "verified": true
+    },
+    {
+      "part": 3,
+      "characters": 3890,
+      "verified": true
+    }
+  ],
+  "attachments": [
+    "evidence/integrated-reader-1.0.2-20/ios-original.png",
+    "evidence/watch-search-24/mac-mini-interlaced.png"
+  ],
+  "latestUploadedBuilds": {
+    "IOS": {
+      "id": "c0120b50-6c3a-475f-95ca-c54d0c16fa09",
+      "version": "1.0.5",
+      "build": "26",
+      "processingState": "VALID",
+      "expired": false,
+      "internalBuildState": "IN_BETA_TESTING"
+    },
+    "MAC_OS": {
+      "id": "54ff026f-6f93-49ca-bc39-66983f9db869",
+      "version": "1.0.5",
+      "build": "26",
+      "processingState": "VALID",
+      "expired": false,
+      "internalBuildState": "IN_BETA_TESTING"
+    }
+  },
+  "latestCandidateSource": "5647308",
+  "currentSourceChecked": "7cebcb1",
+  "checks": {
+    "tests": 174,
+    "failures": 0,
+    "renderer": "passed",
+    "typescriptAndBuild": "passed",
+    "liveReviewExample": {
+      "paper": {
+        "title": "Measuring holographic entanglement entropy on a quantum simulator",
+        "doi": "10.1038/s41534-019-0145-z",
+        "characters": 33520,
+        "assets": 3,
+        "visibility": "public"
+      },
+      "reading": {
+        "language": "zh-Hans",
+        "translated": 324,
+        "total": 324,
+        "complete": true
+      },
+      "checkedAt": "2026-10-05T21:59:37.785443+00:00"
+    },
+    "readmeTranslations": "English plus ten translations passed"
+  },
+  "resubmitted": false,
+  "state": "Clarification sent; awaiting App Review response. Rejected submission remains in place.",
+  "nativeQualification": "Build26 has signed upload and Swift behavior/compile evidence. Fresh native OAuth acceptance and an actual OnlyIdeas Apple subscription purchase remain unverified; no new payment claims or activation.",
+  "nextAction": "Read Apple response. If clarification resolves the design concern, complete native sign-in qualification, attach the latest qualified candidate and resubmit once. If specific product overlap remains, implement that substantive correction first.",
+  "scope": "No application code, server deployment, billing, account, paper data, Mac review or Google review changed. Shared Mac desktop untouched. Dedicated Linux store stack stopped; existing shared store browser preserved.",
+  "providerReadback": {
+    "checkedAt": "2026-10-05T22:04:18.098731+00:00",
+    "reviewState": "UNRESOLVED_ISSUES",
+    "version": "1.0.2",
+    "versionState": "REJECTED"
+  }
+}
