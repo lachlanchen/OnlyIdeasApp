@@ -17,7 +17,10 @@ agent composer and upload/sign-in flows stay clear. All 11 interface languages
 include the new copy, including RTL Arabic.
 
 `public/store-availability.json` records verified public platform availability.
-Mac is enabled; iOS remains in review and Google Play returned 404. After a
+All three platforms are enabled as of 6 October 2026: iOS 1.0.2 (21),
+Mac 1.0.4 (24), and the public Google Play listing. Apple iOS availability was
+verified in the US and Hong Kong; the exact Google package resolves publicly.
+See [the distribution receipt](distribution-20261006.json). After a
 platform is publicly verified, set only its boolean to true and deploy the file.
 Both the permanent section and device suggestion read it without a native build.
 A shared Apple app ID or HTTP 200 alone does not establish iOS availability when

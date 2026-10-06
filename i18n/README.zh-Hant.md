@@ -8,11 +8,11 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
-## 最新測試與審核 · 2026年10月6日
+## 正式發布與下一次更新 · 2026年10月6日
 
-Apple 依據 4.3/4.2.6 拒絕了 iOS 1.0.2 (21)，要求先說明情況再重新提交。我們已回答全部九個問題並附上真實閱讀器截圖，正等待 Apple 回覆。最新 Apple 1.0.5 (26) 仍在 TestFlight；Mac 1.0.4 (24) 已發布。Android 1.0.5 (25) 於 10月3日確認公開發布。本次 174 項測試、渲染驗證和正式構建均通過。一般使用者訂閱銷售仍未啟用，現有論文和帳戶保留。
+Apple 已批准並自動發布 iOS/Watch 1.0.2 (21)，Mac 1.0.4 (24) 也已上架。Apple 已設定的175個商店均可用，美國下載價格為0.99美元。包含已確認的流動圖示和登入復原改進的最新 iOS/Watch 與 Mac 1.0.5 (26) 已提交審核，獲批後自動發布。Google Play 已公開上架，build 25 於10月3日確認正式發布。網頁和 PWA 已啟用三個平台的商店連結。174項測試及渲染、建置檢查全部通過。一般使用者訂閱購買仍未開放。
 
-[Google 25](../docs/release-candidate-25.md) · [Apple 26](../docs/app-review-20261006.json)
+[App Store](https://apps.apple.com/app/onlyideas/id6816392935?platform=iphone) · [Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?platform=mac) · [Google Play](https://play.google.com/store/apps/details?id=art.onlyideas.app) · [2026-10-06](../docs/distribution-20261006.json) · [Apple 26](../docs/apple-review-26-20261006.json)
 
 ## 概覽
 
@@ -28,15 +28,6 @@ OnlyIdeas 是共享的論文閱讀空間。匯入 PDF 或開放取用的 PDF 連
 透過配對的 iPhone，將公開論文摘錄以原文、譯文或交錯模式傳送到手錶，並重用已下載的譯文。macOS 12 及以上版本已在四台 Mac 上通過線上與離線閱讀測試。精確 DOI/arXiv 搜尋重用既有轉錄；慢速索引有時限，下載受限時仍可開啟來源或上傳 PDF。
 
 [24](../docs/watch-search-24.md)
-
-<!-- distribution20260930 -->
-**2026-10-02 · OnlyIdeas**
-
-**Mac 1.0.4 (24) 已攜新圖示正式上架。** 已在美國和香港 App Store 確認，涵蓋175個商店，美國售價0.99美元，支援 macOS 12 及以上版本。iOS/Watch 1.0.2 (21) 仍在等待審核，現有提交維持不變。
-
-網頁版和已安裝的 PWA 提供適合目前裝置的可選商店連結，也可以繼續在這裡閱讀。只有確認正式上架後，才會啟用對應的商店按鈕。
-
-[Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?platform=mac) · [2026-10-02](../docs/distribution-20260930.md)
 
 <!-- plans21 -->
 1.0.2 (21)：個人檔案現在一律顯示「方案與用量」，登入前或暫時無法購買時也能查看。iOS、Android、Mac 和 PWA 均展示三個已確認方案及配額。付費功能仍須完成沙盒購買驗證後開放。

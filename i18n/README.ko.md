@@ -8,11 +8,11 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
-## 최신 테스트 및 심사 · 2026년 10월 6일
+## 정식 출시 및 다음 업데이트 · 2026년 10월 6일
 
-Apple은 4.3/4.2.6에 따라 iOS 1.0.2 (21)을 거절하고 재제출 전에 설명을 요청했습니다. 아홉 질문 모두에 답하고 실제 리더 화면을 첨부했으며 답변을 기다리고 있습니다. 최신 Apple 1.0.5 (26)은 TestFlight에 있고 Mac 1.0.4 (24)은 공개되었습니다. Android 1.0.5 (25)의 공개는 10월 3일 확인했습니다. 이번 174개 테스트, 렌더러 검증 및 프로덕션 빌드가 통과했습니다. 일반 구독 판매는 비활성화 상태이며 기존 논문과 계정은 유지됩니다.
+Apple이 iOS/Watch 1.0.2 (21)을 승인하여 자동 출시했으며 Mac 1.0.4 (24)도 공개되었습니다. 설정된 Apple 스토어 175곳에서 이용할 수 있고 미국 다운로드 가격은 0.99달러입니다. 승인된 유려한 아이콘과 로그인 복구 개선을 담은 최신 iOS/Watch 및 Mac 1.0.5 (26)을 심사에 제출했으며 승인 후 자동 출시됩니다. Google Play는 공개 상태이며 build 25의 정식 출시는 10월 3일 확인했습니다. 웹과 PWA에서 세 플랫폼의 스토어 링크를 활성화했습니다. 174개 테스트와 렌더러·빌드 검사가 모두 통과했습니다. 일반 사용자의 구독 구매는 아직 비활성화 상태입니다.
 
-[Google 25](../docs/release-candidate-25.md) · [Apple 26](../docs/app-review-20261006.json)
+[App Store](https://apps.apple.com/app/onlyideas/id6816392935?platform=iphone) · [Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?platform=mac) · [Google Play](https://play.google.com/store/apps/details?id=art.onlyideas.app) · [2026-10-06](../docs/distribution-20261006.json) · [Apple 26](../docs/apple-review-26-20261006.json)
 
 ## 개요
 
@@ -28,15 +28,6 @@ OnlyIdeas는 연구 논문을 함께 읽는 공간입니다. PDF나 공개 접�
 페어링된 iPhone에서 공개 논문 발췌문을 원문, 번역 또는 교차 보기로 Watch에 보냅니다. 다운로드한 번역을 재사용합니다. macOS 12 이상은 소유자의 Mac 네 대에서 온라인 및 오프라인 읽기 테스트를 통과했습니다. 정확한 DOI/arXiv 검색은 기존 변환을 재사용합니다. 느린 검색에는 제한 시간이 있으며, 다운로드가 차단되면 원문 링크나 PDF 업로드를 이용할 수 있습니다.
 
 [24](../docs/watch-search-24.md)
-
-<!-- distribution20260930 -->
-**2026-10-02 · OnlyIdeas**
-
-**새 아이콘이 포함된 Mac 1.0.4 (24)가 정식 출시되었습니다.** 미국과 홍콩 App Store에서 확인했으며, 175개 스토어에서 이용할 수 있습니다. 미국 가격은 0.99달러이고 macOS 12 이상을 지원합니다. iOS/Watch 1.0.2 (21)는 계속 심사 대기 중이며 기존 제출은 변경하지 않았습니다.
-
-웹과 설치된 PWA에서 기기에 맞는 스토어 링크를 선택할 수 있습니다. 여기에서 계속 읽을 수 있으며, 스토어 버튼은 정식 공개를 확인한 뒤 활성화됩니다.
-
-[Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?platform=mac) · [2026-10-02](../docs/distribution-20260930.md)
 
 <!-- plans21 -->
 1.0.2 (21): 프로필에 요금제 및 사용량이 항상 표시됩니다. 로그인 전이나 결제가 불가능한 경우에도 iOS, Android, Mac, PWA에서 세 요금제와 할당량을 볼 수 있습니다. 유료 기능은 샌드박스 구매 검증 후 활성화됩니다.

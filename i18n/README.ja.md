@@ -8,11 +8,11 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
-## 最新のテストと審査 · 2026年10月6日
+## 正式公開と次の更新 · 2026年10月6日
 
-Apple は iOS 1.0.2 (21) を 4.3/4.2.6 に基づき却下し、再提出前の説明を求めました。9つの質問すべてに回答し、実際のリーダー画面を添付して返信待ちです。最新 Apple 1.0.5 (26) は TestFlight、Mac 1.0.4 (24) は公開済みです。Android 1.0.5 (25) の公開は10月3日に確認しました。今回の174テスト、レンダラー検証、本番ビルドは成功しました。一般向けサブスクリプション販売は無効のままで、既存の論文とアカウントを保持しています。
+Apple が iOS/Watch 1.0.2 (21) を承認し、自動公開しました。Mac 1.0.4 (24) も公開済みです。設定済みの175の Apple ストアで利用でき、米国のダウンロード価格は0.99米ドルです。承認済みの流れるようなアイコンとログイン復帰の改善を含む最新 iOS/Watch・Mac 1.0.5 (26) を審査に提出し、承認後の自動公開に設定しました。Google Play は公開中で、build 25 の製品版公開を10月3日に確認しています。Web と PWA では3プラットフォームのストアリンクを有効にしました。174テストとレンダラー・ビルド検証は成功しました。一般向けのサブスクリプション購入はまだ無効です。
 
-[Google 25](../docs/release-candidate-25.md) · [Apple 26](../docs/app-review-20261006.json)
+[App Store](https://apps.apple.com/app/onlyideas/id6816392935?platform=iphone) · [Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?platform=mac) · [Google Play](https://play.google.com/store/apps/details?id=art.onlyideas.app) · [2026-10-06](../docs/distribution-20261006.json) · [Apple 26](../docs/apple-review-26-20261006.json)
 
 ## 概要
 
@@ -28,15 +28,6 @@ OnlyIdeas は論文を一緒に読むための共有読書室です。PDF また
 ペアリングしたiPhoneから、公開論文の抜粋を原文・翻訳・交互表示でWatchへ送信できます。ダウンロード済みの翻訳を再利用します。macOS 12以降は所有者の4台のMacでオンライン・オフラインの読書テストに合格しました。DOI/arXivの完全一致検索は既存の変換結果を再利用します。遅い検索には制限時間があり、取得できない場合は出典やPDFアップロードを利用できます。
 
 [24](../docs/watch-search-24.md)
-
-<!-- distribution20260930 -->
-**2026-10-02 · OnlyIdeas**
-
-**新しいアイコンを含むMac 1.0.4 (24) を一般公開しました。** 米国と香港のApp Storeで確認済みです。175ストアで利用でき、米国価格は0.99米ドルです。macOS 12以降に対応します。iOS/Watch 1.0.2 (21) は引き続き審査待ちで、既存の申請は変更していません。
-
-ウェブ版とインストール済みPWAでは、端末に合ったストアへのリンクを任意で利用できます。そのまま読み続けることもでき、ストアボタンは一般公開を確認してから有効になります。
-
-[Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?platform=mac) · [2026-10-02](../docs/distribution-20260930.md)
 
 <!-- plans21 -->
 1.0.2 (21)：プロフィールに「プランと利用状況」を常に表示します。ログイン前や購入できない場合も、iOS、Android、Mac、PWAで3つのプランと利用枠を確認できます。有料機能の有効化にはサンドボックス購入の検証が必要です。

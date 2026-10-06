@@ -8,11 +8,11 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
-## Kiểm thử và xét duyệt mới nhất · 6 tháng 10 năm 2026
+## Phát hành và bản cập nhật tiếp theo · 6 tháng 10 năm 2026
 
-Apple từ chối iOS 1.0.2 (21) theo 4.3/4.2.6 và yêu cầu giải thích trước khi gửi lại. Chúng tôi đã trả lời cả chín câu hỏi, đính kèm ảnh thật của trình đọc và đang chờ Apple phản hồi. Apple 1.0.5 (26) vẫn ở TestFlight; Mac 1.0.4 (24) đã phát hành. Android 1.0.5 (25) được xác nhận công khai ngày 3 tháng 10. Cả 174 bài kiểm thử, kiểm tra bộ dựng nội dung và bản dựng sản xuất đều đạt. Chưa mở bán gói đăng ký cho mọi người; các bài báo và tài khoản hiện có được giữ nguyên.
+Apple đã duyệt và tự động phát hành iOS/Watch 1.0.2 (21); Mac 1.0.4 (24) cũng đã công khai. Cả 175 cửa hàng Apple đã cấu hình đều khả dụng, với giá tải xuống tại Mỹ là 0,99 USD. Bản iOS/Watch và Mac mới nhất 1.0.5 (26), có biểu tượng đường nét mềm mại đã duyệt và cải thiện khôi phục đăng nhập, đã được gửi xét duyệt và sẽ tự động phát hành khi được duyệt. Google Play đã công khai; build 25 được xác nhận ở kênh chính thức ngày 3 tháng 10. Web và PWA đã bật liên kết cửa hàng cho cả ba nền tảng. Cả 174 bài kiểm thử cùng kiểm tra kết xuất và bản dựng đều đạt. Chưa mở mua gói đăng ký cho mọi người.
 
-[Google 25](../docs/release-candidate-25.md) · [Apple 26](../docs/app-review-20261006.json)
+[App Store](https://apps.apple.com/app/onlyideas/id6816392935?platform=iphone) · [Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?platform=mac) · [Google Play](https://play.google.com/store/apps/details?id=art.onlyideas.app) · [2026-10-06](../docs/distribution-20261006.json) · [Apple 26](../docs/apple-review-26-20261006.json)
 
 ## Tổng quan
 
@@ -28,15 +28,6 @@ Mô hình tiết kiệm có thể cấu hình sẽ tạo hướng dẫn đọc v
 Gửi trích đoạn bài báo công khai đến Watch qua iPhone đã ghép đôi, với bản gốc, bản dịch hoặc văn bản xen kẽ. Bản dịch đã tải được tái sử dụng. macOS 12 trở lên đã vượt qua kiểm tra đọc trực tuyến và ngoại tuyến trên cả bốn máy Mac của chủ sở hữu. Tìm kiếm DOI/arXiv chính xác tái sử dụng bản chuyển đổi có sẵn; chỉ mục chậm có thời hạn chờ, và khi tải bị chặn vẫn có thể mở nguồn hoặc tải PDF lên.
 
 [24](../docs/watch-search-24.md)
-
-<!-- distribution20260930 -->
-**2026-10-02 · OnlyIdeas**
-
-**Mac 1.0.4 (24) đã phát hành công khai với biểu tượng mới.** Đã xác minh trên App Store Mỹ và Hồng Kông; có tại 175 cửa hàng, giá tại Mỹ là 0,99 USD. Hỗ trợ macOS 12 trở lên. iOS/Watch 1.0.2 (21) vẫn chờ xét duyệt; hồ sơ hiện tại không thay đổi.
-
-Trang web và PWA đã cài đặt có liên kết cửa hàng tùy chọn phù hợp với thiết bị. Bạn có thể tiếp tục đọc tại đây; nút cửa hàng chỉ được bật sau khi xác minh ứng dụng đã phát hành công khai.
-
-[Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?platform=mac) · [2026-10-02](../docs/distribution-20260930.md)
 
 <!-- plans21 -->
 1.0.2 (21): Hồ sơ luôn hiển thị gói và mức sử dụng, kể cả trước khi đăng nhập hoặc khi chưa thể thanh toán. Cả ba gói cùng hạn mức xuất hiện trên iOS, Android, Mac và PWA. Tính năng trả phí vẫn cần được kiểm chứng bằng giao dịch thử nghiệm.

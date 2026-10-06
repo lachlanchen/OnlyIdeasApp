@@ -8,11 +8,11 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
-## 最新测试与审核 · 2026年10月6日
+## 正式发布与下一次更新 · 2026年10月6日
 
-Apple 依据 4.3/4.2.6 拒绝了 iOS 1.0.2 (21)，要求先说明情况再重新提交。我们已回答全部九个问题并附上真实阅读器截图，正等待 Apple 回复。最新 Apple 1.0.5 (26) 仍在 TestFlight；Mac 1.0.4 (24) 已发布。Android 1.0.5 (25) 于 10月3日确认公开发布。本次 174 项测试、渲染验证和生产构建均通过。普通用户订阅销售仍未启用，现有论文和账户保留。
+Apple 已批准并自动发布 iOS/Watch 1.0.2 (21)，Mac 1.0.4 (24) 也已上架。Apple 已配置的175个商店均可用，美国下载价格为0.99美元。包含已确认的流动图标和登录恢复改进的最新 iOS/Watch 与 Mac 1.0.5 (26) 已提交审核，获批后自动发布。Google Play 已公开上架，build 25 于10月3日确认正式发布。网页和 PWA 已启用三个平台的商店链接。174项测试及渲染、构建检查全部通过。普通用户订阅购买仍未开放。
 
-[Google 25](../docs/release-candidate-25.md) · [Apple 26](../docs/app-review-20261006.json)
+[App Store](https://apps.apple.com/app/onlyideas/id6816392935?platform=iphone) · [Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?platform=mac) · [Google Play](https://play.google.com/store/apps/details?id=art.onlyideas.app) · [2026-10-06](../docs/distribution-20261006.json) · [Apple 26](../docs/apple-review-26-20261006.json)
 
 ## 概览
 
@@ -28,15 +28,6 @@ OnlyIdeas 是共享的论文阅读空间。导入 PDF 或开放获取的 PDF 链
 通过配对的 iPhone，将公开论文摘录以原文、译文或交错模式发送到手表，并复用已下载的译文。macOS 12 及以上版本已在四台 Mac 上通过在线与离线阅读测试。精确 DOI/arXiv 搜索复用已有转录；慢速索引有时限，下载受限时仍可打开来源或上传 PDF。
 
 [24](../docs/watch-search-24.md)
-
-<!-- distribution20260930 -->
-**2026-10-02 · OnlyIdeas**
-
-**Mac 1.0.4 (24) 已携新图标正式上架。** 已在美国和香港 App Store 确认，覆盖175个商店，美国售价0.99美元，支持 macOS 12 及以上版本。iOS/Watch 1.0.2 (21) 仍在等待审核，现有提交保持不变。
-
-网页版和已安装的 PWA 提供适合当前设备的可选商店链接，也可以继续在这里阅读。只有确认正式上架后，才会启用对应的商店按钮。
-
-[Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?platform=mac) · [2026-10-02](../docs/distribution-20260930.md)
 
 <!-- plans21 -->
 1.0.2 (21)：个人资料现在始终显示“套餐与用量”，登录前或暂时无法购买时也可查看。在 iOS、Android、Mac 和 PWA 上展示三个已确认套餐及配额。付费功能仍须完成沙盒购买验证后开放。

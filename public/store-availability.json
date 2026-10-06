@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "ios": false,
-  "android": false,
+  "ios": true,
+  "android": true,
   "macos": true
 }

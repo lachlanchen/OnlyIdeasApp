@@ -8,11 +8,11 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
-## Latest testing and review · 6 October 2026
+## Public release and next update · 6 October 2026
 
-Apple rejected iOS 1.0.2 (21) under 4.3/4.2.6 and requested clarification before resubmission. We answered all nine questions with genuine reader screenshots; the response is awaiting Apple review. Latest Apple 1.0.5 (26) remains in TestFlight; Mac 1.0.4 (24) is public. Android 1.0.5 (25) was verified public on 3 October. Fresh checks passed 174 tests, renderer validation and the production build. General subscription sales remain disabled, and existing papers and accounts are preserved.
+Apple approved and automatically released iOS/Watch 1.0.2 (21); Mac 1.0.4 (24) is also public. All 175 configured Apple storefronts are available, with a US download price of $0.99. The latest iOS/Watch and Mac 1.0.5 (26), including the approved flowing icon and sign-in recovery, have been submitted for review with automatic release after approval. Google Play is public; build 25 was verified in production on 3 October. Web and PWA store links are enabled for all three platforms. All 174 tests and renderer/build checks passed. General subscription purchases remain disabled.
 
-[Google 25](docs/release-candidate-25.md) · [Apple 26](docs/app-review-20261006.json)
+[App Store](https://apps.apple.com/app/onlyideas/id6816392935?platform=iphone) · [Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?platform=mac) · [Google Play](https://play.google.com/store/apps/details?id=art.onlyideas.app) · [2026-10-06](docs/distribution-20261006.json) · [Apple 26](docs/apple-review-26-20261006.json)
 
 ## Overview
 
@@ -28,15 +28,6 @@ A configurable economical model creates reading guides and translations on reque
 Send public-paper excerpts to Watch as Original, Translation or Interlaced text using the paired iPhone. Downloaded translations are reused. macOS 12+ passed online and offline reader tests on all four owner Macs. Exact DOI/arXiv searches reuse known transcripts; slow indexes have a deadline, and denied downloads retain source/upload recovery.
 
 [24](docs/watch-search-24.md)
-
-<!-- distribution20260930 -->
-**2026-10-02 · OnlyIdeas**
-
-**Mac 1.0.4 (24) is publicly released with the new icon.** Verified on the US and Hong Kong App Store listings; available in 175 storefronts, at US$0.99 in the US. It supports macOS 12 and later. iOS/Watch 1.0.2 (21) remains waiting for review; its existing submission is unchanged.
-
-Web and installed PWA readers offer optional, device-aware store links. You can keep reading here; store buttons are enabled only after public availability is verified.
-
-[Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?platform=mac) · [2026-10-02](docs/distribution-20260930.md)
 
 <!-- plans21 -->
 1.0.2 (21): Profile now always shows Plans & usage, even before sign-in or when checkout is unavailable. View all three approved plans and quotas on iOS, Android, Mac and PWA. Paid activation still requires sandbox purchase qualification.

@@ -8,11 +8,11 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
-## Últimas pruebas y revisión · 6 de octubre de 2026
+## Publicación y próxima actualización · 6 de octubre de 2026
 
-Apple rechazó iOS 1.0.2 (21) según 4.3/4.2.6 y pidió aclaraciones antes de volver a enviarlo. Respondimos las nueve preguntas con capturas reales del lector y esperamos su respuesta. Apple 1.0.5 (26) sigue en TestFlight; Mac 1.0.4 (24) está publicado. Android 1.0.5 (25) se verificó público el 3 de octubre. Pasaron las 174 pruebas, la validación del renderizador y la compilación de producción. Las ventas generales de suscripciones siguen desactivadas; se conservan los artículos y las cuentas existentes.
+Apple aprobó y publicó automáticamente iOS/Watch 1.0.2 (21); Mac 1.0.4 (24) también está disponible. Las 175 tiendas Apple configuradas están habilitadas, con un precio de descarga de 0,99 USD en Estados Unidos. Las últimas versiones iOS/Watch y Mac 1.0.5 (26), con el icono fluido aprobado y mejoras de recuperación del inicio de sesión, se enviaron a revisión con publicación automática tras la aprobación. Google Play es público; el build 25 se verificó en producción el 3 de octubre. La web y la PWA tienen habilitados los enlaces a las tres tiendas. Pasaron las 174 pruebas y las comprobaciones del renderizador y la compilación. Las compras generales de suscripciones siguen desactivadas.
 
-[Google 25](../docs/release-candidate-25.md) · [Apple 26](../docs/app-review-20261006.json)
+[App Store](https://apps.apple.com/app/onlyideas/id6816392935?platform=iphone) · [Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?platform=mac) · [Google Play](https://play.google.com/store/apps/details?id=art.onlyideas.app) · [2026-10-06](../docs/distribution-20261006.json) · [Apple 26](../docs/apple-review-26-20261006.json)
 
 ## Descripción
 
@@ -28,15 +28,6 @@ Un modelo económico configurable crea guías de lectura y traducciones cuando s
 Envía extractos de artículos públicos al Watch como original, traducción o texto intercalado desde el iPhone enlazado. Se reutilizan las traducciones descargadas. macOS 12 o posterior superó pruebas de lectura con y sin conexión en los cuatro Mac del propietario. Las búsquedas exactas por DOI/arXiv reutilizan textos existentes; los índices lentos tienen un plazo límite y las descargas bloqueadas permiten abrir la fuente o subir un PDF.
 
 [24](../docs/watch-search-24.md)
-
-<!-- distribution20260930 -->
-**2026-10-02 · OnlyIdeas**
-
-**Mac 1.0.4 (24) ya está publicado con el nuevo icono.** Verificado en las tiendas de EE. UU. y Hong Kong; disponible en 175 tiendas, a 0,99 USD en EE. UU. Compatible con macOS 12 y posteriores. iOS/Watch 1.0.2 (21) sigue esperando revisión; su envío no ha cambiado.
-
-La web y la PWA instalada ofrecen enlaces opcionales a la tienda según el dispositivo. Puedes seguir leyendo aquí; los botones se activan solo tras verificar la disponibilidad pública.
-
-[Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?platform=mac) · [2026-10-02](../docs/distribution-20260930.md)
 
 <!-- plans21 -->
 1.0.2 (21): El perfil siempre muestra los planes y el uso, incluso sin iniciar sesión o cuando no se puede comprar. Los tres planes y sus cuotas aparecen en iOS, Android, Mac y PWA. La activación de pagos sigue pendiente de validar las compras en pruebas.

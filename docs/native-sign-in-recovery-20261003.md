@@ -46,3 +46,11 @@ upload processes are stopped. See [the artifact receipt](apple-testflight-26.jso
 The existing iOS21 production review and public Mac24 remain unchanged. Google25
 continues in review. The new Apple binary still needs a fresh native sign-in
 check and app-specific payment qualification before production promotion.
+
+## Review submission · 6 October 2026
+
+The owner requested the latest icon build after iOS21 approval. iOS/Watch and
+Mac 1.0.5 (26) are now submitted for review with automatic release after approval.
+The public iOS21 and Mac24 remain available. General purchases stay disabled;
+an actual Apple payment lifecycle is not claimed. See the dated
+[submission and qualification receipt](apple-review-26-20261006.json).

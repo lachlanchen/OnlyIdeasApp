@@ -1,0 +1,79 @@
+{
+  "checkedAt": "2026-10-06T14:52:30.659855+00:00",
+  "version": "1.0.5",
+  "build": 26,
+  "appId": "6816392935",
+  "source": "5647308",
+  "submissions": {
+    "IOS": {
+      "versionId": "a597ea1d-b451-4834-b205-92e3a44224c2",
+      "buildId": "c0120b50-6c3a-475f-95ca-c54d0c16fa09",
+      "reviewId": "39056a63-fc52-4b95-a03b-e99a78b11912",
+      "reviewState": "WAITING_FOR_REVIEW",
+      "versionState": "WAITING_FOR_REVIEW",
+      "submittedAt": "2026-10-06T14:51:15.258Z",
+      "releaseType": "AFTER_APPROVAL"
+    },
+    "MAC_OS": {
+      "versionId": "fff60735-a4ce-4a0b-aa41-a83a681c8ba2",
+      "buildId": "54ff026f-6f93-49ca-bc39-66983f9db869",
+      "reviewId": "ec2d6598-c1ed-476e-84a8-9627c3731b13",
+      "reviewState": "WAITING_FOR_REVIEW",
+      "versionState": "WAITING_FOR_REVIEW",
+      "submittedAt": "2026-10-06T14:51:35.147Z",
+      "releaseType": "AFTER_APPROVAL"
+    }
+  },
+  "automaticReleaseAfterApproval": true,
+  "icons": {
+    "approvedDesign": "Flowing cyan-blue-violet O/idea mark with gold dot on ivory.",
+    "appleProcessedIconsVisuallyVerified": true,
+    "iosSha256": "e33c81fb535815f02b9368894e229332e1729238c59e031a996f060d13c021ca",
+    "macSha256": "b193492649c3f8b08c6c2b8c64d28a8d2fe12643a79b67da5e96cbdb0afbdb78"
+  },
+  "currentPublicReleases": {
+    "ios": "1.0.2 (21)",
+    "macos": "1.0.4 (24)",
+    "google": "1.0.5 (25), last production-build verification 3 October; public listing rechecked 6 October"
+  },
+  "validation": {
+    "projectTests": 174,
+    "failures": 0,
+    "renderer": "passed",
+    "typescriptAndBuild": "passed",
+    "nativeOAuth": {
+      "verifiedAt": "2026-10-06T14:50:58.587894+00:00",
+      "passed": true,
+      "platform": "Signed iOS simulator build from build26 native source on the KVM Mac",
+      "realProductionGitHubAuthentication": true,
+      "dedicatedReviewerAccountUsed": true,
+      "emailVerificationRequested": false,
+      "lostReturnRecovery": true,
+      "keychainSessionAndNativeProfile": true,
+      "accountPersistedAfterRelaunch": true,
+      "confirmedSignOutCompleted": true,
+      "signedOutStatePersistedAfterRelaunch": true,
+      "finalSignOutXCTest": {
+        "tests": 1,
+        "failures": 0,
+        "durationSeconds": 44.095
+      },
+      "initialHarnessFindings": [
+        "Unsigned simulator app cannot access Keychain. Corrected with normal simulator signing.",
+        "Login/relaunch assertions passed, but the first sign-out assertion targeted an alert rather than a sheet.",
+        "The next sign-out harness killed the app before asynchronous sign-out completed; the final check waits for signed-out UI before relaunch."
+      ],
+      "nativeSourceSha256": {
+        "NativeStore.swift": "2116db16c3d8025132771abff3a8c1b3fb642943671b04c786e17f0266f052b3",
+        "NativeOAuthRecovery.swift": "072aa0cb62f3c69b0ceadb0b9876afb401981d5e7c0b5efdf1105ab28d8ea6b9"
+      },
+      "limits": [
+        "Not a physical-device or exact installed TestFlight binary test.",
+        "No fresh Mac GUI provider login or StoreKit purchase was performed."
+      ],
+      "applicationCodeChanged": false
+    }
+  },
+  "payments": "No new subscription products submitted or general purchase activation. Actual OnlyIdeas Apple purchase lifecycle remains unqualified.",
+  "releaseReceipt": "distribution-20261006.json"
+}
