@@ -8,6 +8,12 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
+## Rounded icon test builds · 7 October 2026
+
+Rounded icon corners are available in internal testing as 1.0.6 (27) on iOS/Watch, Mac and Android. No production review was submitted or replaced. Current reviews and public releases remain unchanged; this improvement is saved for the next review.
+
+[Test-build evidence](docs/rounded-icons-20261007.md)
+
 ## Public release and next update · 6 October 2026
 
 Apple approved and automatically released iOS/Watch 1.0.2 (21); Mac 1.0.4 (24) is also public. All 175 configured Apple storefronts are available, with a US download price of $0.99. The latest iOS/Watch and Mac 1.0.5 (26), including the approved flowing icon and sign-in recovery, have been submitted for review with automatic release after approval. Google Play is public; build 25 was verified in production on 3 October. Web and PWA store links are enabled for all three platforms. All 174 tests and renderer/build checks passed. General subscription purchases remain disabled.

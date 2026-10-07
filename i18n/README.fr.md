@@ -8,6 +8,12 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
+## Versions de test aux icônes arrondies · 7 octobre 2026
+
+Les icônes aux coins arrondis sont disponibles en test interne dans la version 1.0.6 (27) sur iOS/Watch, Mac et Android. Aucune version de production n’a été soumise ni remplacée pour examen. Les examens en cours et les versions publiques restent inchangés ; cette amélioration est conservée pour le prochain examen.
+
+[Vérification des versions de test](../docs/rounded-icons-20261007.md)
+
 ## Publication et prochaine mise à jour · 6 octobre 2026
 
 Apple a approuvé et publié automatiquement iOS/Watch 1.0.2 (21) ; Mac 1.0.4 (24) est également public. Les 175 boutiques Apple configurées sont disponibles, au prix de téléchargement de 0,99 USD aux États-Unis. Les dernières versions iOS/Watch et Mac 1.0.5 (26), avec l’icône fluide approuvée et la récupération de connexion, ont été soumises à examen avec publication automatique après approbation. Google Play est public ; le build 25 a été vérifié en production le 3 octobre. Les liens vers les trois boutiques sont activés sur le Web et la PWA. Les 174 tests et les vérifications du rendu et de compilation ont réussi. Les achats généraux d’abonnements restent désactivés.

@@ -1,0 +1,131 @@
+{
+  "verifiedAt": "2026-10-07T11:25:36.798886+00:00",
+  "version": "1.0.6",
+  "build": 27,
+  "source": "5b6b1ca86c8ad18150d16f14665330cd8a0ad386",
+  "branch": "test/rounded-icons-20261007",
+  "apple": [
+    {
+      "platform": "IOS",
+      "id": "03292f73-7605-4361-8304-8a63b8b6f129",
+      "version": "1.0.6",
+      "build": "27",
+      "processing": "VALID",
+      "internal": "IN_BETA_TESTING"
+    },
+    {
+      "platform": "MAC_OS",
+      "id": "59d87f30-f62f-484e-bd24-ba23c572d44b",
+      "version": "1.0.6",
+      "build": "27",
+      "processing": "VALID",
+      "internal": "IN_BETA_TESTING"
+    }
+  ],
+  "google": {
+    "app": "OnlyIdeas",
+    "version": "1.0.6",
+    "build": 27,
+    "track": "internal",
+    "release": 18,
+    "status": "Available to internal testers",
+    "productionChanged": false,
+    "source": "5b6b1ca86c8ad18150d16f14665330cd8a0ad386",
+    "consoleUrl": "https://play.google.com/console/u/0/developers/6157557679644496686/app/4974173414823223936/tracks/4701325459048995948?tab=releases"
+  },
+  "packages": [
+    {
+      "repo": "OnlyIdeasApp",
+      "platform": "ios",
+      "version": "1.0.6",
+      "build": "27",
+      "bundleId": "art.onlyideas.app",
+      "signatureVerified": true,
+      "sha256": "61b41cca981af8cda143e6160ee3013d6d8565cbdba82b1485001311afa42c0e",
+      "watchVersionMatched": true
+    },
+    {
+      "repo": "OnlyIdeasApp",
+      "platform": "macos",
+      "version": "1.0.6",
+      "build": "27",
+      "bundleId": "art.onlyideas.app",
+      "signatureVerified": true,
+      "sha256": "3b91accc9daa8ef94e3c64c2c0d87c72576f86e2da451b45d541f6c97bf9d66e",
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ]
+    }
+  ],
+  "android": {
+    "files": {
+      "android/app/build/outputs/bundle/release/app-release.aab": "fcbcc6d8aaccfdc20feacc991c79f404b7b213affd1493b0e1cd76d98d77c69c",
+      "android/app/build/outputs/apk/release/app-release.apk": "853e6efc5cc1997ed67a4646462ef2b84494f21ab56abd17b12129cd050f07e7"
+    },
+    "iconEntries": [
+      "base/res/mipmap-hdpi-v4/ic_launcher.png",
+      "base/res/mipmap-mdpi-v4/ic_launcher.png",
+      "base/res/mipmap-xhdpi-v4/ic_launcher.png",
+      "base/res/mipmap-xxhdpi-v4/ic_launcher.png",
+      "base/res/mipmap-xxxhdpi-v4/ic_launcher.png"
+    ]
+  },
+  "testOnly": true,
+  "productionReviewSubmitted": false,
+  "productionReviewReplaced": false,
+  "webDeployed": false,
+  "mastersPreserved": true,
+  "checks": {
+    "projectTests": 174,
+    "rendererAndBuild": true,
+    "androidLintAndSignature": true,
+    "signedAppleArchiveAndExport": true,
+    "macIntelAndAppleSilicon": true,
+    "iconSourceAndPackagedAlphaChecks": true
+  },
+  "qualificationLimits": [
+    "Icon and packaging update; no new physical-device functional or purchase test was performed.",
+    "iOS and Watch retain the existing opaque artwork and system-applied masks."
+  ],
+  "productionReadback": {
+    "at": "2026-10-07T11:25:40.201365+00:00",
+    "attachedBuildsPreserved": true,
+    "noNewProductionVersion": true,
+    "apple": [
+      {
+        "platform": "MAC_OS",
+        "version": "1.0.5",
+        "state": "WAITING_FOR_REVIEW",
+        "versionId": "fff60735-a4ce-4a0b-aa41-a83a681c8ba2",
+        "buildId": "54ff026f-6f93-49ca-bc39-66983f9db869",
+        "build": "26"
+      },
+      {
+        "platform": "IOS",
+        "version": "1.0.5",
+        "state": "WAITING_FOR_REVIEW",
+        "versionId": "a597ea1d-b451-4834-b205-92e3a44224c2",
+        "buildId": "c0120b50-6c3a-475f-95ca-c54d0c16fa09",
+        "build": "26"
+      },
+      {
+        "platform": "MAC_OS",
+        "version": "1.0.4",
+        "state": "READY_FOR_SALE",
+        "versionId": "bba07e3d-610e-4d4c-89cc-c0825326f358",
+        "buildId": "a85e103e-7a00-4734-a993-bc5eeb37eb4f",
+        "build": "24"
+      },
+      {
+        "platform": "IOS",
+        "version": "1.0.2",
+        "state": "READY_FOR_SALE",
+        "versionId": "2d1f64a6-4865-4e3c-bece-c28a74b6af9e",
+        "buildId": "7a504094-e18e-4a7e-a832-f9c3e1739f92",
+        "build": "21"
+      }
+    ],
+    "googleBuild": 25
+  }
+}

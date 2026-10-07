@@ -8,6 +8,12 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
+## Testversionen mit abgerundeten Symbolen · 7. Oktober 2026
+
+Abgerundete App-Symbole stehen mit 1.0.6 (27) für interne Tests auf iOS/Watch, Mac und Android bereit. Es wurde keine neue Produktionsprüfung eingereicht oder eine laufende Prüfung ersetzt. Laufende Prüfungen und öffentliche Versionen bleiben unverändert; diese Verbesserung wird für die nächste Prüfung vorgemerkt.
+
+[Nachweise der Testversionen](../docs/rounded-icons-20261007.md)
+
 ## Veröffentlichung und nächstes Update · 6. Oktober 2026
 
 Apple hat iOS/Watch 1.0.2 (21) genehmigt und automatisch veröffentlicht; Mac 1.0.4 (24) ist ebenfalls öffentlich. Alle 175 eingerichteten Apple-Storefronts sind verfügbar; der Download kostet in den USA 0,99 USD. Die neuesten Versionen iOS/Watch und Mac 1.0.5 (26) mit dem freigegebenen fließenden Symbol und verbesserter Anmeldewiederaufnahme wurden zur Prüfung eingereicht und werden nach Genehmigung automatisch veröffentlicht. Google Play ist öffentlich; Build 25 wurde am 3. Oktober in Produktion bestätigt. Web und PWA bieten Links zu allen drei Stores. Alle 174 Tests sowie Renderer- und Build-Prüfungen bestanden. Allgemeine Abonnementkäufe bleiben deaktiviert.

@@ -8,6 +8,12 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
+## Versiones de prueba con iconos redondeados · 7 de octubre de 2026
+
+Los iconos con esquinas redondeadas están disponibles para pruebas internas en 1.0.6 (27) para iOS/Watch, Mac y Android. No se ha enviado ni sustituido ninguna revisión de producción. Las revisiones actuales y las versiones públicas siguen sin cambios; esta mejora se reserva para la próxima revisión.
+
+[Evidencia de las versiones de prueba](../docs/rounded-icons-20261007.md)
+
 ## Publicación y próxima actualización · 6 de octubre de 2026
 
 Apple aprobó y publicó automáticamente iOS/Watch 1.0.2 (21); Mac 1.0.4 (24) también está disponible. Las 175 tiendas Apple configuradas están habilitadas, con un precio de descarga de 0,99 USD en Estados Unidos. Las últimas versiones iOS/Watch y Mac 1.0.5 (26), con el icono fluido aprobado y mejoras de recuperación del inicio de sesión, se enviaron a revisión con publicación automática tras la aprobación. Google Play es público; el build 25 se verificó en producción el 3 de octubre. La web y la PWA tienen habilitados los enlaces a las tres tiendas. Pasaron las 174 pruebas y las comprobaciones del renderizador y la compilación. Las compras generales de suscripciones siguen desactivadas.

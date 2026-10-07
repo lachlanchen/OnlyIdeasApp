@@ -8,6 +8,12 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
+## Bản thử nghiệm biểu tượng bo góc · 7 tháng 10 năm 2026
+
+Biểu tượng bo góc có trong bản thử nghiệm nội bộ 1.0.6 (27) trên iOS/Watch, Mac và Android. Không gửi mới hoặc thay thế bản xét duyệt phát hành chính thức nào. Các bản đang xét duyệt và bản công khai không thay đổi; cải tiến này được lưu cho lần xét duyệt tiếp theo.
+
+[Bằng chứng bản thử nghiệm](../docs/rounded-icons-20261007.md)
+
 ## Phát hành và bản cập nhật tiếp theo · 6 tháng 10 năm 2026
 
 Apple đã duyệt và tự động phát hành iOS/Watch 1.0.2 (21); Mac 1.0.4 (24) cũng đã công khai. Cả 175 cửa hàng Apple đã cấu hình đều khả dụng, với giá tải xuống tại Mỹ là 0,99 USD. Bản iOS/Watch và Mac mới nhất 1.0.5 (26), có biểu tượng đường nét mềm mại đã duyệt và cải thiện khôi phục đăng nhập, đã được gửi xét duyệt và sẽ tự động phát hành khi được duyệt. Google Play đã công khai; build 25 được xác nhận ở kênh chính thức ngày 3 tháng 10. Web và PWA đã bật liên kết cửa hàng cho cả ba nền tảng. Cả 174 bài kiểm thử cùng kiểm tra kết xuất và bản dựng đều đạt. Chưa mở mua gói đăng ký cho mọi người.

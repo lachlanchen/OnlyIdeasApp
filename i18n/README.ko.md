@@ -8,6 +8,12 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
+## 둥근 모서리 아이콘 테스트 빌드 · 2026년 10월 7일
+
+둥근 모서리 아이콘을 적용한 1.0.6 (27)을 iOS/Watch, Mac, Android 내부 테스트에서 사용할 수 있습니다. 정식 출시 심사를 새로 제출하거나 교체하지 않았습니다. 현재 심사와 공개 버전은 그대로 유지하며, 이 개선 사항은 다음 심사에 포함합니다.
+
+[테스트 빌드 확인 기록](../docs/rounded-icons-20261007.md)
+
 ## 정식 출시 및 다음 업데이트 · 2026년 10월 6일
 
 Apple이 iOS/Watch 1.0.2 (21)을 승인하여 자동 출시했으며 Mac 1.0.4 (24)도 공개되었습니다. 설정된 Apple 스토어 175곳에서 이용할 수 있고 미국 다운로드 가격은 0.99달러입니다. 승인된 유려한 아이콘과 로그인 복구 개선을 담은 최신 iOS/Watch 및 Mac 1.0.5 (26)을 심사에 제출했으며 승인 후 자동 출시됩니다. Google Play는 공개 상태이며 build 25의 정식 출시는 10월 3일 확인했습니다. 웹과 PWA에서 세 플랫폼의 스토어 링크를 활성화했습니다. 174개 테스트와 렌더러·빌드 검사가 모두 통과했습니다. 일반 사용자의 구독 구매는 아직 비활성화 상태입니다.

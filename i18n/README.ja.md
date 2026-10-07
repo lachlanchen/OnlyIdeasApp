@@ -8,6 +8,12 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
+## 角丸アイコンのテスト版 · 2026年10月7日
+
+角丸アイコンを含む 1.0.6 (27) を、iOS/Watch・Mac・Android の内部テストで利用できます。製品版の審査申請や差し替えは行っていません。現在の審査と公開版を維持し、この改善は次回の審査にまとめます。
+
+[テスト版の確認記録](../docs/rounded-icons-20261007.md)
+
 ## 正式公開と次の更新 · 2026年10月6日
 
 Apple が iOS/Watch 1.0.2 (21) を承認し、自動公開しました。Mac 1.0.4 (24) も公開済みです。設定済みの175の Apple ストアで利用でき、米国のダウンロード価格は0.99米ドルです。承認済みの流れるようなアイコンとログイン復帰の改善を含む最新 iOS/Watch・Mac 1.0.5 (26) を審査に提出し、承認後の自動公開に設定しました。Google Play は公開中で、build 25 の製品版公開を10月3日に確認しています。Web と PWA では3プラットフォームのストアリンクを有効にしました。174テストとレンダラー・ビルド検証は成功しました。一般向けのサブスクリプション購入はまだ無効です。

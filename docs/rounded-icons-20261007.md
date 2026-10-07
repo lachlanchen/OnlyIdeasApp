@@ -18,7 +18,15 @@ owner instruction. Accumulate this change for the next review.
 
 Source exports were inspected visually and checked for transparent corners,
 opaque centres and correct sizes. iOS icons remain opaque 1024px assets.
-Full project checks passed. Native signed-package and store-processing evidence
-will be recorded after upload; an archive or upload alone is not tester access.
+Full project checks passed (174 tests), with renderer/build and Android lint.
+All signed Apple archives, exported packages, matching Watch versions and Mac
+Intel/Apple-silicon architectures were verified. Packaged Android and Mac icons
+have transparent corners; the approved masters remain unchanged.
+
+iOS/Watch and Mac are VALID / IN_BETA_TESTING in the existing internal group.
+Android is Available to internal testers. See [the receipt](rounded-icons-20261007.json).
+No new physical-device functional or purchase test was performed for this icon
+update. The OnlyIdeas stale signing request was cleared by restarting its owned
+job after normal keychain unlock; no shared security settings were changed.
 
 The candidate is on `test/rounded-icons-20261007`; production reviews are separate.

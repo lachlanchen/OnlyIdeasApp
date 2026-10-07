@@ -8,6 +8,12 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
+## 圓角圖示測試版 · 2026年10月7日
+
+iOS/Watch、Mac 和 Android 的內部測試版 1.0.6 (27) 已包含圓角圖示適配。沒有新增或替換正式版審核。現有審核和公開版本維持不變，此項改進留待下次審核時一併提交。
+
+[測試版本驗證記錄](../docs/rounded-icons-20261007.md)
+
 ## 正式發布與下一次更新 · 2026年10月6日
 
 Apple 已批准並自動發布 iOS/Watch 1.0.2 (21)，Mac 1.0.4 (24) 也已上架。Apple 已設定的175個商店均可用，美國下載價格為0.99美元。包含已確認的流動圖示和登入復原改進的最新 iOS/Watch 與 Mac 1.0.5 (26) 已提交審核，獲批後自動發布。Google Play 已公開上架，build 25 於10月3日確認正式發布。網頁和 PWA 已啟用三個平台的商店連結。174項測試及渲染、建置檢查全部通過。一般使用者訂閱購買仍未開放。
