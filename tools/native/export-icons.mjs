@@ -57,4 +57,5 @@ await writeFile(new URL('android/app/src/main/res/drawable/onlyideas_background.
 const splashMark = await sharp(source).resize(512, 512).toBuffer()
 await save('ios/App/App/Assets.xcassets/Splash.imageset/splash-2732x2732.png', sharp({ create: { width: 2732, height: 2732, channels: 3, background: paper } }).composite([{ input: splashMark, gravity: 'center' }]))
 await import('./export-mac-icon.mjs')
+await import('./export-play-feature.mjs')
 console.log('Exported approved OnlyIdeas artwork for web, iOS, Watch, Mac, Android and Google Play.')
