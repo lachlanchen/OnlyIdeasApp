@@ -18,15 +18,19 @@ async function png(path, size) {
   if (size > metadata.width) throw new Error(`Refusing to enlarge icon for ${path}`)
   await save(path, sharp(source).resize(size, size).flatten({ background: paper }))
 }
+async function rounded(size) {
+  const mask = Buffer.from(`<svg width="${size}" height="${size}"><rect width="${size}" height="${size}" rx="${size * .225}" fill="white"/></svg>`)
+  return sharp(source).resize(size, size).ensureAlpha().composite([{ input: mask, blend: 'dest-in' }])
+}
 for (const [path, size] of [
   ['assets/brand/onlyideas-icon-1024.png', 1024],
   ['ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png', 1024],
   ['watch/OnlyIdeasWatch/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png', 1024],
   ['store/google/icon.png', 512],
-  ['public/mark-512.png', 512],
   ['public/apple-touch-icon.png', 180],
   ['android/app/src/main/res/drawable-nodpi/onlyideas_artwork.png', 512],
 ]) await png(path, size)
+await save('public/mark-512.png', await rounded(512))
 
 // Preserve existing URLs and web UI references using a self-contained SVG image.
 // External image references inside an <img>-loaded SVG are blocked by browsers.
@@ -38,12 +42,12 @@ await writeFile(new URL('assets/brand/onlyideas-icon.svg', root), svg)
 for (const [density, scale] of Object.entries({ mdpi: 1, hdpi: 1.5, xhdpi: 2, xxhdpi: 3, xxxhdpi: 4 })) {
   const dir = `android/app/src/main/res/mipmap-${density}`
   const size = 48 * scale
-  await png(`${dir}/ic_launcher.png`, size)
+  await save(`${dir}/ic_launcher.png`, await rounded(size))
   const circle = Buffer.from(`<svg width="${size}" height="${size}"><circle cx="${size / 2}" cy="${size / 2}" r="${size / 2}" fill="white"/></svg>`)
   await save(`${dir}/ic_launcher_round.png`, sharp(source).resize(size, size).ensureAlpha().composite([{ input: circle, blend: 'dest-in' }]))
   // Android masks a 108dp layer to its central viewport. The approved image has
   // its own whitespace; this inset keeps its complete mark inside the safe area.
-  const foreground = await sharp(source).resize(72 * scale, 72 * scale).toBuffer()
+  const foreground = await (await rounded(72 * scale)).png().toBuffer()
   await save(`${dir}/ic_launcher_foreground.png`, sharp({ create: { width: 108 * scale, height: 108 * scale, channels: 3, background: paper } }).composite([{ input: foreground, gravity: 'center' }]))
 }
 await writeFile(new URL('android/app/src/main/res/drawable/onlyideas_foreground.xml', root), '<bitmap xmlns:android="http://schemas.android.com/apk/res/android" android:src="@mipmap/ic_launcher_foreground" android:gravity="fill" android:filter="true"/>\n')

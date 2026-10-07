@@ -18,9 +18,9 @@ onlyideas_profile_id=$(security cms -D -i "$onlyideas_profile" | plutil -extract
 cp "$onlyideas_profile" "$HOME/Library/MobileDevice/Provisioning Profiles/$onlyideas_profile_id.mobileprovision"
 cp "$onlyideas_profile" "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles/$onlyideas_profile_id.mobileprovision"
 cd "$onlyideas_root/ios/App"
-xcodebuild -project App.xcodeproj -scheme App -configuration Release -destination generic/platform=iOS -archivePath "$onlyideas_root/release/OnlyIdeas-1.0.5-26.xcarchive" -derivedDataPath "$onlyideas_root/release/DerivedData" -jobs 1 archive SWIFT_ENABLE_EXPLICIT_MODULES=NO COMPILER_INDEX_STORE_ENABLE=NO "OTHER_CODE_SIGN_FLAGS=--keychain $onlyideas_keychain"
-onlyideas_app="$onlyideas_root/release/OnlyIdeas-1.0.5-26.xcarchive/Products/Applications/App.app"
-[[ $(plutil -extract CFBundleShortVersionString raw -o - "$onlyideas_app/Info.plist") == 1.0.5 ]]
-[[ $(plutil -extract CFBundleVersion raw -o - "$onlyideas_app/Info.plist") == 26 ]]
+xcodebuild -project App.xcodeproj -scheme App -configuration Release -destination generic/platform=iOS -archivePath "$onlyideas_root/release/OnlyIdeas-1.0.6-27.xcarchive" -derivedDataPath "$onlyideas_root/release/DerivedData" -jobs 1 archive SWIFT_ENABLE_EXPLICIT_MODULES=NO COMPILER_INDEX_STORE_ENABLE=NO "OTHER_CODE_SIGN_FLAGS=--keychain $onlyideas_keychain"
+onlyideas_app="$onlyideas_root/release/OnlyIdeas-1.0.6-27.xcarchive/Products/Applications/App.app"
+[[ $(plutil -extract CFBundleShortVersionString raw -o - "$onlyideas_app/Info.plist") == 1.0.6 ]]
+[[ $(plutil -extract CFBundleVersion raw -o - "$onlyideas_app/Info.plist") == 27 ]]
 codesign --verify --deep --strict "$onlyideas_app"
-xcodebuild -exportArchive -archivePath "$onlyideas_root/release/OnlyIdeas-1.0.5-26.xcarchive" -exportOptionsPlist ExportOptions.plist -exportPath "$onlyideas_root/release/export-1.0.5-26"
+xcodebuild -exportArchive -archivePath "$onlyideas_root/release/OnlyIdeas-1.0.6-27.xcarchive" -exportOptionsPlist ExportOptions.plist -exportPath "$onlyideas_root/release/export-1.0.6-27"

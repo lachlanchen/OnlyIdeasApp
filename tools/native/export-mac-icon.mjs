@@ -9,7 +9,12 @@ const root=fileURLToPath(new URL('ios/App/App/Assets.xcassets/MacIcon.appiconset
 const images=[];
 for(const size of [16,32,128,256,512])for(const scale of [1,2]) {
  const px=size*scale,filename=`icon_${size}@${scale}x.png`;
- await sharp(source).resize(px,px).flatten({background:'#fdfaf0'}).png().toFile(`${root}/${filename}`);
+ // Pre-macOS26 Catalyst icons keep their own alpha silhouette. Inset the tile
+ // to align with neighbouring Dock icons without changing the approved mark.
+ const inset=Math.round(px*.09),tile=px-inset*2;
+ const mask=Buffer.from(`<svg width="${tile}" height="${tile}"><rect width="${tile}" height="${tile}" rx="${tile*.225}" fill="white"/></svg>`);
+ const artwork=await sharp(source).resize(tile,tile).ensureAlpha().composite([{input:mask,blend:'dest-in'}]).png().toBuffer();
+ await sharp({create:{width:px,height:px,channels:4,background:'#00000000'}}).composite([{input:artwork,left:inset,top:inset}]).png().toFile(`${root}/${filename}`);
  images.push({idiom:'mac',size:`${size}x${size}`,scale:`${scale}x`,filename});
 }
 await writeFile(`${root}/Contents.json`,JSON.stringify({images,info:{author:'xcode',version:1}},null,2)+'\n');

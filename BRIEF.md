@@ -309,3 +309,12 @@ dismissible device-aware suggestions and permanent store links in web Settings
 (Bunko) or Profile (OnlyIdeas). Installed PWAs retain this choice. Reading stays
 available; opening a store is explicit. Enable each destination only after its
 public platform release is verified. See `docs/pwa-store-links.md`.
+
+## Rounded icon test candidate · 2026-10-07
+
+The owner requested rounded icon corners for both apps, with internal test builds
+only and no new production review. Preserve the approved artwork and archived
+masters. Legacy Mac, web and Android launcher exports receive transparent rounded
+corners; iOS/Watch and store marketing assets remain opaque for platform masking.
+Version 1.0.6 (27) is a test candidate. Accumulate this change for the
+next owner-authorized review; preserve current production releases and reviews.
