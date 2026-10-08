@@ -14,15 +14,23 @@ export function sourceKey(source) {
       const arxiv = ['arxiv.org', 'www.arxiv.org', 'export.arxiv.org'].includes(url.hostname)
         && url.pathname.match(/^\/(?:abs|pdf)\/((?:\d{4}\.\d{4,5}|[a-z.-]+\/\d{7})(?:v\d+)?)(?:\.pdf)?\/?$/i);
       if (arxiv) return `arxiv:${arxiv[1].toLowerCase()}`;
-      if (['doi.org', 'dx.doi.org'].includes(url.hostname) && /^\/10\.\d{4,9}\//.test(url.pathname)) return `doi:${url.pathname.slice(1).toLowerCase()}`;
+      if (['doi.org', 'dx.doi.org'].includes(url.hostname) && /^\/10\.\d{4,9}\//.test(url.pathname)) {
+        const arxivDOI=url.pathname.match(/^\/10\.48550\/arxiv\.(\d{4}\.\d{4,5}(?:v\d+)?)$/i);
+        return arxivDOI?`arxiv:${arxivDOI[1].toLowerCase()}`:`doi:${url.pathname.slice(1).toLowerCase()}`;
+      }
       if (['nature.com', 'www.nature.com'].includes(url.hostname) && /^\/articles\/[\w-]+(?:\.pdf)?$/.test(url.pathname)) return `nature:${url.pathname.replace(/\.pdf$/, '')}`;
     }
     return `url:${url.href}`;
   } catch { return null; }
 }
 export function importKeys(fields) {
+  const sources = fields.uploadSource ? [] : [fields.url, fields.sourcePage];
+  // An explicit preprint revision must not resolve through a publication DOI.
+  const sourceKeys=sources.map(sourceKey).filter(Boolean),versions=sourceKeys.filter(k=>/^arxiv:.*v\d+$/.test(k)),versioned=versions.length>0;
+  const doi = !fields.uploadSource && !versioned && String(fields.metadata?.doi || '').trim().toLowerCase();
   return [...new Set([
-    fields.url && sourceKey(fields.url),
+    ...(versioned?versions:sourceKeys),
+    /^10\.\d{4,9}\/\S+$/.test(doi || '') && sourceKey('https://doi.org/' + doi),
     /^[a-f0-9]{64}$/.test(fields.sourceDigest || '') && `file:${fields.sourceDigest}`,
     typeof fields.mmd === 'string' && `text:${hash(fields.mmd)}`,
   ].filter(Boolean))];
@@ -39,15 +47,25 @@ export function indexPaper(store, paper) {
   // An uploaded PDF's selected article is a claim, not a global source alias.
   const claimed=paper.provenance?.userSupplied===true;
   const keys = new Set([...importKeys({ url: claimed?null:paper.source, mmd: paper.mmd, sourceDigest: digest }), !claimed&&sourceKey(paper.provenance?.source)]);
+  if (!claimed && original && !original.uploadSource) {
+    // These locations were actually retrieved for this conversion. Bibliographic
+    // DOI claims become global aliases only after the PDF identity check agrees.
+    for (const url of [original.url, original.downloadedFrom, original.sourcePage]) if (url) keys.add(sourceKey(url));
+    if (original.paperIdentity?.state === 'matched' && original.paperIdentity.doiMatch === true) {
+      for (const key of importKeys({ metadata: original.metadata })) keys.add(key);
+    }
+  }
   store.db.prepare('DELETE FROM paper_import_keys WHERE paper=?').run(paper.id);
   for (const key of keys) if (key) store.db.prepare('INSERT OR IGNORE INTO paper_import_keys VALUES(?,?)').run(key, paper.id);
 }
 export function initImportReuse(store) {
   store.db.exec('CREATE TABLE IF NOT EXISTS paper_import_keys(key TEXT NOT NULL, paper TEXT NOT NULL, PRIMARY KEY(key,paper)); CREATE INDEX IF NOT EXISTS import_key_paper ON paper_import_keys(paper)');
-  if (store.db.prepare("SELECT 1 FROM credit_meta WHERE name='paper_import_index_v1'").get()) return;
+  if (store.db.prepare("SELECT 1 FROM credit_meta WHERE name='paper_import_index_v3'").get()) return;
   // Additive migration; canonical paper bodies and personal data are untouched.
   for (const row of store.db.prepare('SELECT body FROM papers').all()) indexPaper(store, JSON.parse(row.body));
-  store.db.prepare("INSERT INTO credit_meta VALUES('paper_import_index_v1','1')").run();
+  store.db.prepare("INSERT OR REPLACE INTO credit_meta VALUES('paper_import_index_v1','1')").run();
+  store.db.prepare("INSERT OR REPLACE INTO credit_meta VALUES('paper_import_index_v2','1')").run();
+  store.db.prepare("INSERT INTO credit_meta VALUES('paper_import_index_v3','1')").run();
 }
 export function reusablePaper(store, owner, fields, exclude) {
   const keys = importKeys(fields);

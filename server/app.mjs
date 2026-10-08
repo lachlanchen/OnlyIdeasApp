@@ -1,4 +1,5 @@
 import {paperSegments,segmentSource,readingView} from './translation-pieces.mjs';
+import {libraryPapers} from './library-search.mjs';
 import {uploadContext,activeRecovery,bindRecovery,canUploadForJob,recoveryJob} from './import-recovery.mjs';
 import {unlimitedAllowance,countsAsRequest} from './allowances.mjs';
 import {createReadingSpace,recordActivity} from './reading-space.mjs';
@@ -244,7 +245,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         res.setHeader('Set-Cookie', [cookie(cookieName, store.createSession(u), 90 * 86400), cookie(`${cookieName}-oauth`, '', 0)]);
         res.writeHead(303, { Location: '/' }); return res.end();
       }
-      if (path === '/api/papers' && method === 'GET') return response(res, { papers: store.papers(user?.id).filter(p => store.active(p.owner) && !store.blocked(user?.id, p.owner)).map(publicPaper) });
+      if (path === '/api/papers' && method === 'GET') return response(res, { papers: libraryPapers(store,user).map(publicPaper) });
       if (path === '/api/papers/markdown' && method === 'POST') {
         requireUser(); const data = await json(req); limit(`import:${user.id}`, 10);
         requireValue(uuid.test(data.requestId || ''), 'A request ID is required.');
@@ -276,7 +277,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
           sharing = req.headers['x-paper-sharing'] === 'shared' ? 'shared' : 'private';
           creditLimit = Number(req.headers['x-credit-limit']);
           metadata = { title: decodeURIComponent(req.headers['x-paper-title'] || 'My paper'), language: req.headers['x-paper-language'] || 'en' };
-        } else { const body = await json(req); metadata = body; sharing = body.sharing === 'shared' ? 'shared' : 'private'; creditLimit=body.creditLimit; link = body.url; requireValue(typeof link === 'string' && link.length <= 2000 && link.startsWith('https://'), 'Enter a direct HTTPS PDF link.'); }
+        } else { const body = await json(req); metadata = body; sharing = body.sharing === 'private' ? 'private' : 'shared'; creditLimit=body.creditLimit; link = body.url; requireValue(typeof link === 'string' && link.length <= 2000 && link.startsWith('https://'), 'Enter a direct HTTPS PDF link.'); }
         if(context){metadata=context.metadata;sharing=context.sharing||sharing;const prior=activeRecovery(store,user.id,context);if(prior)return response(res,{job:safeJob(prior)},202);}
         requireValue(typeof metadata.title === 'string' && metadata.title.trim() && metadata.title.length <= 300, 'Add a paper title.');
         requireValue(Object.hasOwn(languages, metadata.language || 'en'), 'Choose a supported language.');

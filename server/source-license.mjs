@@ -21,7 +21,8 @@ export async function verifySourceLicense(job,{download=downloadPublic}={}) {
  const metadata=job.metadata?.metadataSource||'';
  const arxiv=metadata.match(/^https:\/\/arxiv\.org\/abs\/([\w./-]+)$/);
  const indexed=/^https:\/\/openalex\.org\/W\d+$/.test(metadata);
- if(!arxiv&&!indexed)return null;
+ const crossref=job.metadata?.index==='crossref'&&sourceKey(metadata)===sourceKey('https://doi.org/'+job.metadata?.doi);
+ if(!arxiv&&!indexed&&!crossref)return null;
  const page=job.sourcePage||(arxiv?metadata:null);if(!page)return null;
- try{const html=await download(page,{maxBytes:2_000_000,timeout:12000});return sourceLicense(html.toString(),page,job.downloadedFrom||job.url)}catch{return null}
+ try{const result=await download(page,{maxBytes:2_000_000,timeout:12000,withMetadata:true});const html=Buffer.isBuffer(result)?result:result.bytes;return sourceLicense(html.toString(),Buffer.isBuffer(result)?page:result.url,job.downloadedFrom||job.url)}catch{return null}
 }

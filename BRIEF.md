@@ -318,3 +318,17 @@ masters. Legacy Mac, web and Android launcher exports receive transparent rounde
 corners; iOS/Watch and store marketing assets remain opaque for platform masking.
 Version 1.0.6 (27) is a test candidate. Accumulate this change for the
 next owner-authorized review; preserve current production releases and reviews.
+
+## Research-agent reliability · 2026-10-08
+
+The owner reported an unrelated research-agent answer and duplicate conversion
+of an already fetched paper. Interpret conversational/multilingual requests into
+scientific search concepts, exclude unrelated hits and keep a fresh topic separate
+from prior paper references. Literature overviews use attributed abstracts and
+state their limits; full-text claims require the saved transcript. Reuse verified
+DOI/source aliases and revision-keyed translations across readers before fetching
+or converting. Shared paper requests are the default; explicit private uploads,
+chats, notes and interests remain isolated. Collapse duplicate verified public
+cards without removing historical paper IDs. Mac Agent uses a compact native
+file picker. Existing interests, discovery, saved/liked collections and discussion
+remain the product foundation; no private user-profile sharing is implied.

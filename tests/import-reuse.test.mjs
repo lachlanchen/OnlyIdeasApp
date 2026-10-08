@@ -28,6 +28,7 @@ function paper(store,visibility='public') {
 test('source aliases preserve arXiv revisions and query parameters that can select other content',()=>{
   assert.equal(sourceKey(source),sourceKey('https://www.arxiv.org/abs/2205.01833v2?utm_source=reading#page=2'));
   assert.notEqual(sourceKey(source),sourceKey('https://arxiv.org/pdf/2205.01833v1'));
+  assert.equal(sourceKey(source),sourceKey('https://doi.org/10.48550/arXiv.2205.01833v2'));
   assert.notEqual(sourceKey(source),sourceKey('https://arxiv.org/pdf/2205.01833'));
   assert.notEqual(sourceKey(source),sourceKey(source+'?version=3'));
   assert.notEqual(sourceKey(source),sourceKey('https://arxiv.org.evil.test/pdf/2205.01833v2'));
@@ -80,7 +81,7 @@ test('private, blocked, suspended and withdrawn papers cannot be reused by other
     f.store.db.prepare('INSERT INTO blocks VALUES(?,?,?)').run('reader','author','Author');assert.equal(reusablePaper(f.store,'reader',{sourceDigest:hash(pdf)}),null);
     f.store.db.prepare('DELETE FROM blocks').run();f.store.db.prepare('INSERT INTO suspensions VALUES(?,?)').run('author',Date.now());assert.equal(reusablePaper(f.store,'reader',{url:source}),null);
     f.store.db.prepare('DELETE FROM suspensions').run();const before=f.store.db.prepare('SELECT body FROM papers').get().body;
-    f.store.db.prepare('DELETE FROM paper_import_keys').run();f.store.db.prepare("DELETE FROM credit_meta WHERE name='paper_import_index_v1'").run();const reopened=new Store(f.dir);
+    f.store.db.prepare('DELETE FROM paper_import_keys').run();f.store.db.prepare("DELETE FROM credit_meta WHERE name IN ('paper_import_index_v1','paper_import_index_v2','paper_import_index_v3')").run();const reopened=new Store(f.dir);
     assert.equal(reusablePaper(reopened,'reader',{sourceDigest:hash(pdf)}).id,p.id);assert.equal(reopened.db.prepare('SELECT body FROM papers').get().body,before);reopened.close();
   } finally {f.close()}
 });
@@ -131,4 +132,57 @@ test('discussion opens on the latest 200 visible comments in chronological order
     for(let i=250;i<470;i++) f.store.db.prepare('INSERT INTO comments VALUES(?,?,?,?,?)').run('c'+i,'paper','other',JSON.stringify({id:'c'+i,owner:'other',visibility:'pending',moderation:'pending',text:'Pending'}),i);
     const visible=visibleComments(f.store,'paper',{id:'reader'});assert.equal(visible.length,200);assert.equal(visible[0].id,'c50');assert.equal(visible.at(-1).id,'c249');
   } finally {f.close()}
+});
+
+test('verified DOI and retrieved-source aliases reuse one transcript and translation across different indexes',()=>{
+ const f=fixture();try{
+  const id=randomUUID(),doi='10.1234/event.2024',landing='https://publisher.test/article/'+doi;
+  f.store.saveJob({id,owner:'author',kind:'import',dedupe:id,created:Date.now(),state:'completed',url:'https://arxiv.org/pdf/2401.12345',sourcePage:'https://arxiv.org/abs/2401.12345',downloadedFrom:'https://repository.test/event.pdf',metadata:{doi},paperIdentity:{state:'matched',doiMatch:true}});
+  const p=f.store.savePaper({...makePaper({id,owner:'author',title:'Event sensor research',source:'https://arxiv.org/pdf/2401.12345',mmd:'Original research prose.'}),visibility:'public'});
+  for(const fields of [{url:'https://doi.org/'+doi},{url:landing,metadata:{doi}},{url:'https://repository.test/event.pdf'}])assert.equal(reusablePaper(f.store,'new-reader',fields).id,p.id);
+  assert.equal(reusablePaper(f.store,'new-reader',{url:'https://arxiv.org/pdf/2401.12345v2',metadata:{doi}}),null);
+  assert.equal(reusablePaper(f.store,'new-reader',{url:'https://arxiv.org/pdf/2401.12345v2',sourcePage:'https://doi.org/'+doi,metadata:{doi}}),null);
+  const j=requestArtifact(f.store,{model:{name:'first'}},{id:'reader'},p,{kind:'translation',language:'zh-Hans'});
+  const reused=reusablePaper(f.store,'new-reader',{url:landing,metadata:{doi}});
+  assert.equal(requestArtifact(f.store,{model:{name:'second'}},{id:'new-reader'},reused,{kind:'translation',language:'zh-Hans'}).id,j.id);
+  const raw=f.store.db.prepare('SELECT body FROM papers WHERE id=?').get(id).body;
+  f.store.db.prepare("DELETE FROM credit_meta WHERE name='paper_import_index_v3'").run();f.store.db.prepare('DELETE FROM paper_import_keys').run();
+  const reopened=new Store(f.dir);assert.equal(reusablePaper(reopened,'third-reader',{url:'https://doi.org/'+doi}).id,id);assert.equal(reopened.db.prepare('SELECT body FROM papers WHERE id=?').get(id).body,raw);reopened.close();
+ }finally{f.close()}
+});
+
+test('an uploaded or unverified bibliographic DOI cannot poison shared identity aliases',()=>{
+ const f=fixture();try{
+  for(const uploaded of [false,true]){
+   const id=randomUUID(),doi='10.1234/claim.'+uploaded;
+   f.store.saveJob({id,owner:'author',kind:'import',dedupe:id,created:Date.now(),state:'completed',metadata:{doi},...(uploaded?{uploadSource:'https://doi.org/'+doi,paperIdentity:{state:'matched',doiMatch:true}}:{})});
+   f.store.savePaper({...makePaper({id,owner:'author',title:'Claimed title',source:uploaded?'https://doi.org/'+doi:'https://example.org/'+id,mmd:'Different bytes '+id}),visibility:'public',doi,...(uploaded?{provenance:{userSupplied:true}}:{})});
+   assert.equal(reusablePaper(f.store,'reader',{url:'https://doi.org/'+doi}),null);
+  }
+ }finally{f.close()}
+});
+
+test('approved publication runs before a concurrent import so it reuses the finished shared transcript',async()=>{
+ const f=fixture();try{
+  const p=paper(f.store,'private'),publish={id:randomUUID(),owner:p.owner,kind:'publish',reviewed:true,dedupe:'publish-fixture',paperId:p.id,state:'queued',created:Date.now()};
+  const follower={id:randomUUID(),owner:'new-reader',kind:'import',sharing:'shared',url:source,dedupe:'waiting-import',state:'queued',created:publish.created-100};
+  f.store.saveJob(follower);f.store.saveJob(publish);
+  assert.equal(f.store.claimJob().id,publish.id);
+  f.store.savePaper({...p,visibility:'public'});f.store.saveJob({...publish,state:'completed'});
+  const next=f.store.claimJob();assert.equal(next.id,follower.id);
+  assert.deepEqual(await mathpix(next,{},f.store),{paperId:p.id,reused:true});
+ }finally{f.close()}
+});
+
+test('the reading room and search show one canonical public work without deleting private or versioned records',async()=>{
+ const {libraryPapers,libraryCards}=await import('../server/library-search.mjs');const f=fixture();try{
+  const doi='10.1234/same-work',ids=[];
+  for(const url of ['https://doi.org/'+doi,'https://arxiv.org/pdf/2401.10000','https://arxiv.org/pdf/2401.10000v2']){
+   const id=randomUUID();ids.push(id);f.store.saveJob({id,owner:'author',kind:'import',dedupe:id,created:Date.now(),state:'completed',url,metadata:{doi},paperIdentity:{state:'matched',doiMatch:true}});
+   f.store.savePaper({...makePaper({id,owner:'author',title:'The same published work',mmd:'Version '+id,source:url,doi}),visibility:'public'});
+  }
+  const privateID=randomUUID();f.store.savePaper(makePaper({id:privateID,owner:'reader',title:'Private annotations',mmd:'My personal research',doi}));
+  assert.deepEqual(new Set(libraryPapers(f.store,{id:'reader'}).map(p=>p.id)),new Set([ids[0],ids[2],privateID]));
+  assert.equal(libraryCards(f.store,null).length,2);assert.equal(f.store.paper(ids[1]).id,ids[1]);
+ }finally{f.close()}
 });

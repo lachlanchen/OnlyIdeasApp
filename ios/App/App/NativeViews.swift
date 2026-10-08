@@ -341,10 +341,20 @@ struct NativeAgent: View {
     }
     .sheet(isPresented: $requests) { NativeRequests() }
     .sheet(isPresented: $options) { NativeSharingOptions() }
+    #if targetEnvironment(macCatalyst)
+    .sheet(isPresented:$attachPicker) {
+      NativeAgentFilePicker { urls in
+        attachPicker=false
+        if !urls.isEmpty { Task { await store.attach(urls) } }
+      }
+      .frame(minWidth:520,idealWidth:680,maxWidth:760,minHeight:420,idealHeight:520,maxHeight:640)
+    }
+    #else
     .fileImporter(isPresented:$attachPicker,allowedContentTypes:[.data],allowsMultipleSelection:true) { result in
       if case .success(let urls)=result { Task { await store.attach(urls) } }
       else if case .failure(let error)=result { store.error=error.localizedDescription }
     }
+    #endif
     .sheet(isPresented:$photoPicker) { NativePhotoPicker { bytes in photoPicker=false;if let bytes { Task { await store.attachData(bytes,name:"Photo.jpg") } } } }
     .task {
       while !Task.isCancelled {
@@ -1267,6 +1277,28 @@ struct NativeArtifact: View {
     }.navigationTitle(artifact.kind == "digest" ? "Reading guide" : "Translation")
       .navigationBarTitleDisplayMode(.inline)
     }
+  }
+}
+
+struct NativeAgentFilePicker: UIViewControllerRepresentable {
+  let completion: ([URL]) -> Void
+  func makeCoordinator() -> Coordinator { Coordinator(completion) }
+  func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
+    let types=["pdf","docx","png","jpg","jpeg","webp","txt","md","mmd","csv","json","tex"]
+      .compactMap { UTType(filenameExtension:$0) }
+    let picker=UIDocumentPickerViewController(forOpeningContentTypes:types,asCopy:false)
+    picker.allowsMultipleSelection=true
+    picker.delegate=context.coordinator
+    picker.modalPresentationStyle = .formSheet
+    picker.preferredContentSize=CGSize(width:680,height:520)
+    return picker
+  }
+  func updateUIViewController(_ controller:UIDocumentPickerViewController,context:Context) {}
+  final class Coordinator:NSObject,UIDocumentPickerDelegate {
+    let completion:([URL])->Void
+    init(_ completion:@escaping ([URL])->Void){self.completion=completion}
+    func documentPicker(_ controller:UIDocumentPickerViewController,didPickDocumentsAt urls:[URL]){completion(urls)}
+    func documentPickerWasCancelled(_ controller:UIDocumentPickerViewController){completion([])}
   }
 }
 

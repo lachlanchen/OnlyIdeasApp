@@ -74,7 +74,9 @@ export class Store {
   claimJob() {
     this.db.exec('BEGIN IMMEDIATE');
     try {
-      const row=this.db.prepare("SELECT body FROM jobs WHERE (state='queued' OR (state='running' AND coalesce(json_extract(body,'$.leaseUntil'),0)<?)) AND owner NOT IN (SELECT id FROM suspensions) AND owner NOT IN (SELECT id FROM deleted_accounts) ORDER BY created LIMIT 1").get(Date.now());
+      // Finish approved publication before a later import checks the shared cache.
+      // This keeps concurrent readers from converting the same just-finished PDF.
+      const row=this.db.prepare("SELECT body FROM jobs WHERE (state='queued' OR (state='running' AND coalesce(json_extract(body,'$.leaseUntil'),0)<?)) AND owner NOT IN (SELECT id FROM suspensions) AND owner NOT IN (SELECT id FROM deleted_accounts) ORDER BY CASE WHEN json_extract(body,'$.kind')='publish' AND json_extract(body,'$.reviewed')=1 THEN 0 ELSE 1 END, created LIMIT 1").get(Date.now());
       let job=row?JSON.parse(row.body):null;
       if(job){job={...job,state:'running',lease:randomUUID(),leaseUntil:Date.now()+180_000};this.saveJob(job);}
       this.db.exec('COMMIT');return job;

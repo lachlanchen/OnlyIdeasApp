@@ -49,7 +49,7 @@ export function createChats(store, config, agentActions) {
         for(const id of ids)attachment(store,id,user.id);requireValue(body.text.trim()||ids.length,'Write a message or attach a file.');
         const text=body.text.trim()||'Help me understand these files.';
         requireValue(messages(id).length < 200, 'Start a new conversation to continue.');
-        const taskId = queue(id,user,{ kind:'chat', text, attachments:ids, language:Object.hasOwn(languages,body.language)?body.language:'en',agentActions:body.agentActions===true,sharing:body.sharing==='shared'?'shared':'private' }); add(id,'user',{text,attachmentIds:ids});
+        const taskId = queue(id,user,{ kind:'chat', text, attachments:ids, language:Object.hasOwn(languages,body.language)?body.language:'en',agentActions:body.agentActions===true,sharing:body.sharing==='private'?'private':'shared' }); add(id,'user',{text,attachmentIds:ids});
         if (chat.title === 'New conversation') db.prepare('UPDATE chats SET title=? WHERE id=?').run(text.slice(0,70),id);
         return { taskId, queued:true };
       }
@@ -59,9 +59,10 @@ export function createChats(store, config, agentActions) {
         if(card.paperId){const paper=store.paper(card.paperId);requireValue(canReusePaper(store,paper,user.id),'Paper not found.',404);const dedupe=`reuse:import:${paper.id}:${paper.revision}`;const job=store.existing(user.id,dedupe)||store.saveJob({id:randomUUID(),owner:user.id,kind:'import',dedupe,created:Date.now(),finishedAt:Date.now(),state:'completed',message:'Ready · existing paper reused',paperId:paper.id,reused:true});return {job,paperId:paper.id,reused:true};}
         const sourceURL=card.pdfUrl||card.source;requireValue(sourceURL,'Open the source or upload your copy.');
         // Existing queue enforces deduplication, account quotas and Mathpix page caps.
-        const job = enqueue(user,{ kind:'import', sharing:body.sharing === 'shared' ? 'shared' : 'private', creditLimit:body.creditLimit, url:sourceURL, sourcePage:card.source,downloadSources:card.downloadSources||[],discoveryId:card.id,metadata:{...paperMetadata(card),title:card.title,authors:card.authors,language:'en',license:'private',category:'Research'}, dedupe:`import:${hash(sourceURL)}` });
-        if (job.paperId && body.sharing === 'shared') { const p=store.paper(job.paperId); if(p)requestSharing(store,p,'shared'); }
-        add(id,'assistant',{text:job.reused ? 'This paper is already available. Open the existing paper; its text, figures and available translations are reused. Your chat and notes stay private.' : body.sharing !== 'shared' ? 'The paper is saved to your private library after conversion.' : 'The paper will be added to the shared reading room after source and community review. Your chat and notes stay private.',jobId:job.id});
+        const sharing=body.sharing==='private'?'private':'shared';
+        const job = enqueue(user,{ kind:'import', sharing, creditLimit:body.creditLimit, url:sourceURL, sourcePage:card.source,downloadSources:card.downloadSources||[],discoveryId:card.id,metadata:{...paperMetadata(card),title:card.title,authors:card.authors,language:'en',license:'private',category:'Research'}, dedupe:`import:${hash(sourceURL)}` });
+        if (job.paperId && sharing === 'shared') { const p=store.paper(job.paperId); if(p?.owner===user.id)requestSharing(store,p,'shared'); }
+        add(id,'assistant',{text:job.reused ? 'This paper is already available. Open the existing paper; its text, figures and available translations are reused. Your chat and notes stay private.' : sharing === 'private' ? 'The paper is saved to your private library after conversion.' : 'The paper will be added to the shared reading room after source and community review. Your chat and notes stay private.',jobId:job.id});
         return { job };
       }
       requireValue(false,'Method not allowed.',405);

@@ -17,6 +17,8 @@ o.PBXFileReference['504EC3041FED79650016851F'].path = 'OnlyIdeas.app';
 for (const key of ['504EC3171FED79650016851F','504EC3181FED79650016851F']) {
   const b = o.XCBuildConfiguration[key].buildSettings;
   Object.assign(b, {
+    // Build 28 is the Mac-only document-picker fix; later shared builds advance it.
+    CURRENT_PROJECT_VERSION:Math.max(Number(b.CURRENT_PROJECT_VERSION),28),
     // Shared successor includes the approved icon on every Apple platform.
     PRODUCT_NAME:'OnlyIdeas', INFOPLIST_FILE:'App/MacInfo.plist',
     SUPPORTS_MACCATALYST:'YES', DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER:'NO',
