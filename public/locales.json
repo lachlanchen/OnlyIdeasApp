@@ -750,7 +750,18 @@
     "I checked permission to redistribute the text and figures.": "I checked permission to redistribute the text and figures.",
     "I checked the transcript, equations, figures and content.": "I checked the transcript, equations, figures and content.",
     "Approved papers and figures will be published for everyone. This does not share personal notes or chats.": "Approved papers and figures will be published for everyone. This does not share personal notes or chats.",
-    "Review decisions saved. Approved papers appear after publication completes.": "Review decisions saved. Approved papers appear after publication completes."
+    "Review decisions saved. Approved papers appear after publication completes.": "Review decisions saved. Approved papers appear after publication completes.",
+    "Open this paper to complete its review.": "Open this paper to complete its review.",
+    "Review this paper again; it has changed.": "Review this paper again; it has changed.",
+    "Choose a verified license.": "Choose a verified license.",
+    "Add a valid HTTPS permission evidence URL.": "Add a valid HTTPS permission evidence URL.",
+    "Write a review note (at least 10 characters).": "Write a review note (at least 10 characters).",
+    "{ready} of {count} ready": "{ready} of {count} ready",
+    "Complete the highlighted review before approving.": "Complete the highlighted review before approving.",
+    "Ready for approval": "Ready for approval",
+    "Review next selected paper": "Review next selected paper",
+    "Review checklist": "Review checklist",
+    "Publication is already in progress. Refresh the queue.": "Publication is already in progress. Refresh the queue."
   },
   "zh-Hans": {
     "Choose a valid PDF.": "请选择有效的 PDF。",
@@ -1503,7 +1514,18 @@
     "I checked permission to redistribute the text and figures.": "我已核实文本和插图的再分发许可。",
     "I checked the transcript, equations, figures and content.": "我已检查转写、公式、插图和内容。",
     "Approved papers and figures will be published for everyone. This does not share personal notes or chats.": "通过审核的论文和插图将公开发布，不会分享个人笔记或对话。",
-    "Review decisions saved. Approved papers appear after publication completes.": "审核决定已保存。批准的论文将在发布完成后显示。"
+    "Review decisions saved. Approved papers appear after publication completes.": "审核决定已保存。批准的论文将在发布完成后显示。",
+    "Open this paper to complete its review.": "打开此论文以完成审核。",
+    "Review this paper again; it has changed.": "论文已更改，请重新审核。",
+    "Choose a verified license.": "请选择已核实的许可。",
+    "Add a valid HTTPS permission evidence URL.": "请添加有效的 HTTPS 许可证明链接。",
+    "Write a review note (at least 10 characters).": "请填写审核备注（至少 10 个字符）。",
+    "{ready} of {count} ready": "{count} 篇中有 {ready} 篇可批准",
+    "Complete the highlighted review before approving.": "批准前请完成突出显示的审核项目。",
+    "Ready for approval": "可以批准",
+    "Review next selected paper": "审核下一篇所选论文",
+    "Review checklist": "审核清单",
+    "Publication is already in progress. Refresh the queue.": "正在发布，请刷新队列。"
   },
   "zh-Hant": {
     ". Public comments are reviewed.": "公開評論會經過審核。",
@@ -2256,7 +2278,18 @@
     "I checked permission to redistribute the text and figures.": "我已核實文字和插圖的再散佈許可。",
     "I checked the transcript, equations, figures and content.": "我已檢查轉寫、公式、插圖和內容。",
     "Approved papers and figures will be published for everyone. This does not share personal notes or chats.": "通過審核的論文和插圖將公開發佈，不會分享個人筆記或對話。",
-    "Review decisions saved. Approved papers appear after publication completes.": "審核決定已儲存。批准的論文將在發佈完成後顯示。"
+    "Review decisions saved. Approved papers appear after publication completes.": "審核決定已儲存。批准的論文將在發佈完成後顯示。",
+    "Open this paper to complete its review.": "開啟此論文以完成審核。",
+    "Review this paper again; it has changed.": "論文已更改，請重新審核。",
+    "Choose a verified license.": "請選擇已核實的許可。",
+    "Add a valid HTTPS permission evidence URL.": "請新增有效的 HTTPS 許可證明連結。",
+    "Write a review note (at least 10 characters).": "請填寫審核備註（至少 10 個字元）。",
+    "{ready} of {count} ready": "{count} 篇中有 {ready} 篇可批准",
+    "Complete the highlighted review before approving.": "批准前請完成醒目顯示的審核項目。",
+    "Ready for approval": "可以批准",
+    "Review next selected paper": "審核下一篇所選論文",
+    "Review checklist": "審核清單",
+    "Publication is already in progress. Refresh the queue.": "正在發佈，請重新整理佇列。"
   },
   "ja": {
     ". Public comments are reviewed.": "公開コメントは審査されます。",
@@ -3009,7 +3042,18 @@
     "I checked permission to redistribute the text and figures.": "本文と図の再配布の許諾を確認しました。",
     "I checked the transcript, equations, figures and content.": "変換された本文、数式、図、内容を確認しました。",
     "Approved papers and figures will be published for everyone. This does not share personal notes or chats.": "承認された論文と図は全員に公開されます。個人のメモや会話は共有されません。",
-    "Review decisions saved. Approved papers appear after publication completes.": "審査結果を保存しました。承認された論文は公開処理の完了後に表示されます。"
+    "Review decisions saved. Approved papers appear after publication completes.": "審査結果を保存しました。承認された論文は公開処理の完了後に表示されます。",
+    "Open this paper to complete its review.": "この論文を開いて審査を完了してください。",
+    "Review this paper again; it has changed.": "論文が変更されました。再審査してください。",
+    "Choose a verified license.": "確認済みのライセンスを選択してください。",
+    "Add a valid HTTPS permission evidence URL.": "許諾の根拠を示す有効な HTTPS URL を追加してください。",
+    "Write a review note (at least 10 characters).": "審査メモを10文字以上で記入してください。",
+    "{ready} of {count} ready": "{count} 件中 {ready} 件が承認可能",
+    "Complete the highlighted review before approving.": "承認前に強調表示された審査項目を完了してください。",
+    "Ready for approval": "承認可能",
+    "Review next selected paper": "選択した次の論文を審査",
+    "Review checklist": "審査チェックリスト",
+    "Publication is already in progress. Refresh the queue.": "公開処理中です。一覧を更新してください。"
   },
   "ko": {
     ". Public comments are reviewed.": "공개 댓글은 검토됩니다.",
@@ -3762,7 +3806,18 @@
     "I checked permission to redistribute the text and figures.": "본문과 그림의 재배포 허가를 확인했습니다.",
     "I checked the transcript, equations, figures and content.": "변환된 본문, 수식, 그림 및 내용을 확인했습니다.",
     "Approved papers and figures will be published for everyone. This does not share personal notes or chats.": "승인된 논문과 그림은 모두에게 공개됩니다. 개인 메모나 대화는 공유되지 않습니다.",
-    "Review decisions saved. Approved papers appear after publication completes.": "검토 결정이 저장되었습니다. 승인된 논문은 게시가 완료되면 표시됩니다."
+    "Review decisions saved. Approved papers appear after publication completes.": "검토 결정이 저장되었습니다. 승인된 논문은 게시가 완료되면 표시됩니다.",
+    "Open this paper to complete its review.": "이 논문을 열어 검토를 완료하세요.",
+    "Review this paper again; it has changed.": "논문이 변경되었습니다. 다시 검토하세요.",
+    "Choose a verified license.": "확인된 라이선스를 선택하세요.",
+    "Add a valid HTTPS permission evidence URL.": "유효한 HTTPS 허가 근거 URL을 추가하세요.",
+    "Write a review note (at least 10 characters).": "검토 메모를 10자 이상 작성하세요.",
+    "{ready} of {count} ready": "{count}개 중 {ready}개 준비됨",
+    "Complete the highlighted review before approving.": "승인 전에 강조된 검토 항목을 완료하세요.",
+    "Ready for approval": "승인 준비 완료",
+    "Review next selected paper": "선택한 다음 논문 검토",
+    "Review checklist": "검토 체크리스트",
+    "Publication is already in progress. Refresh the queue.": "이미 게시 중입니다. 대기열을 새로 고치세요."
   },
   "ar": {
     ". Public comments are reviewed.": "التعليقات العامة تخضع للمراجعة.",
@@ -4515,7 +4570,18 @@
     "I checked permission to redistribute the text and figures.": "تحققت من الإذن بإعادة توزيع النص والأشكال.",
     "I checked the transcript, equations, figures and content.": "تحققت من النص المحوّل والمعادلات والأشكال والمحتوى.",
     "Approved papers and figures will be published for everyone. This does not share personal notes or chats.": "ستُنشر الأبحاث والأشكال المعتمدة للجميع. لن تُشارك الملاحظات أو المحادثات الشخصية.",
-    "Review decisions saved. Approved papers appear after publication completes.": "حُفظت القرارات. تظهر الأبحاث المعتمدة بعد اكتمال النشر."
+    "Review decisions saved. Approved papers appear after publication completes.": "حُفظت القرارات. تظهر الأبحاث المعتمدة بعد اكتمال النشر.",
+    "Open this paper to complete its review.": "افتح هذا البحث لإكمال مراجعته.",
+    "Review this paper again; it has changed.": "تغير البحث؛ راجعه مرة أخرى.",
+    "Choose a verified license.": "اختر ترخيصًا تم التحقق منه.",
+    "Add a valid HTTPS permission evidence URL.": "أضف رابط HTTPS صالحًا لدليل الإذن.",
+    "Write a review note (at least 10 characters).": "اكتب ملاحظة مراجعة من 10 أحرف على الأقل.",
+    "{ready} of {count} ready": "جاهز {ready} من {count}",
+    "Complete the highlighted review before approving.": "أكمل المراجعة المميزة قبل الموافقة.",
+    "Ready for approval": "جاهز للموافقة",
+    "Review next selected paper": "مراجعة البحث المحدد التالي",
+    "Review checklist": "قائمة تحقق المراجعة",
+    "Publication is already in progress. Refresh the queue.": "النشر جارٍ بالفعل. حدّث القائمة."
   },
   "fr": {
     ". Public comments are reviewed.": ". Les commentaires publics sont examinés.",
@@ -5268,7 +5334,18 @@
     "I checked permission to redistribute the text and figures.": "J’ai vérifié l’autorisation de redistribuer le texte et les figures.",
     "I checked the transcript, equations, figures and content.": "J’ai vérifié la transcription, les équations, les figures et le contenu.",
     "Approved papers and figures will be published for everyone. This does not share personal notes or chats.": "Les articles et figures approuvés seront publics. Les notes et conversations personnelles ne seront pas partagées.",
-    "Review decisions saved. Approved papers appear after publication completes.": "Décisions enregistrées. Les articles approuvés apparaîtront une fois la publication terminée."
+    "Review decisions saved. Approved papers appear after publication completes.": "Décisions enregistrées. Les articles approuvés apparaîtront une fois la publication terminée.",
+    "Open this paper to complete its review.": "Ouvrez cet article pour terminer sa vérification.",
+    "Review this paper again; it has changed.": "Cet article a changé ; vérifiez-le à nouveau.",
+    "Choose a verified license.": "Choisissez une licence vérifiée.",
+    "Add a valid HTTPS permission evidence URL.": "Ajoutez une URL HTTPS valide justifiant l’autorisation.",
+    "Write a review note (at least 10 characters).": "Rédigez une note de validation d’au moins 10 caractères.",
+    "{ready} of {count} ready": "{ready} sur {count} prêts",
+    "Complete the highlighted review before approving.": "Terminez la vérification mise en évidence avant d’approuver.",
+    "Ready for approval": "Prêt à approuver",
+    "Review next selected paper": "Vérifier l’article sélectionné suivant",
+    "Review checklist": "Liste de vérification",
+    "Publication is already in progress. Refresh the queue.": "La publication est déjà en cours. Actualisez la file."
   },
   "de": {
     ". Public comments are reviewed.": "Öffentliche Kommentare werden geprüft.",
@@ -6021,7 +6098,18 @@
     "I checked permission to redistribute the text and figures.": "Ich habe die Erlaubnis zur Weiterverbreitung von Text und Abbildungen geprüft.",
     "I checked the transcript, equations, figures and content.": "Ich habe Transkript, Formeln, Abbildungen und Inhalt geprüft.",
     "Approved papers and figures will be published for everyone. This does not share personal notes or chats.": "Genehmigte Artikel und Abbildungen werden für alle veröffentlicht. Persönliche Notizen und Chats werden nicht geteilt.",
-    "Review decisions saved. Approved papers appear after publication completes.": "Entscheidungen gespeichert. Genehmigte Artikel erscheinen nach Abschluss der Veröffentlichung."
+    "Review decisions saved. Approved papers appear after publication completes.": "Entscheidungen gespeichert. Genehmigte Artikel erscheinen nach Abschluss der Veröffentlichung.",
+    "Open this paper to complete its review.": "Öffnen Sie diesen Artikel, um die Prüfung abzuschließen.",
+    "Review this paper again; it has changed.": "Der Artikel hat sich geändert. Bitte erneut prüfen.",
+    "Choose a verified license.": "Wählen Sie eine geprüfte Lizenz.",
+    "Add a valid HTTPS permission evidence URL.": "Fügen Sie eine gültige HTTPS-URL als Erlaubnisnachweis hinzu.",
+    "Write a review note (at least 10 characters).": "Schreiben Sie eine Prüfnotiz mit mindestens 10 Zeichen.",
+    "{ready} of {count} ready": "{ready} von {count} bereit",
+    "Complete the highlighted review before approving.": "Schließen Sie die hervorgehobene Prüfung vor der Genehmigung ab.",
+    "Ready for approval": "Bereit zur Genehmigung",
+    "Review next selected paper": "Nächsten ausgewählten Artikel prüfen",
+    "Review checklist": "Prüfcheckliste",
+    "Publication is already in progress. Refresh the queue.": "Die Veröffentlichung läuft bereits. Aktualisieren Sie die Warteschlange."
   },
   "es": {
     ". Public comments are reviewed.": "Los comentarios públicos se revisan.",
@@ -6774,7 +6862,18 @@
     "I checked permission to redistribute the text and figures.": "He comprobado el permiso para redistribuir el texto y las figuras.",
     "I checked the transcript, equations, figures and content.": "He revisado la transcripción, las ecuaciones, las figuras y el contenido.",
     "Approved papers and figures will be published for everyone. This does not share personal notes or chats.": "Los artículos y figuras aprobados se publicarán para todos. No se compartirán notas ni conversaciones personales.",
-    "Review decisions saved. Approved papers appear after publication completes.": "Decisiones guardadas. Los artículos aprobados aparecerán al terminar la publicación."
+    "Review decisions saved. Approved papers appear after publication completes.": "Decisiones guardadas. Los artículos aprobados aparecerán al terminar la publicación.",
+    "Open this paper to complete its review.": "Abre este artículo para completar su revisión.",
+    "Review this paper again; it has changed.": "El artículo ha cambiado; revísalo de nuevo.",
+    "Choose a verified license.": "Elige una licencia verificada.",
+    "Add a valid HTTPS permission evidence URL.": "Añade una URL HTTPS válida que acredite el permiso.",
+    "Write a review note (at least 10 characters).": "Escribe una nota de revisión de al menos 10 caracteres.",
+    "{ready} of {count} ready": "{ready} de {count} listos",
+    "Complete the highlighted review before approving.": "Completa la revisión resaltada antes de aprobar.",
+    "Ready for approval": "Listo para aprobar",
+    "Review next selected paper": "Revisar el siguiente artículo seleccionado",
+    "Review checklist": "Lista de comprobación",
+    "Publication is already in progress. Refresh the queue.": "La publicación ya está en curso. Actualiza la cola."
   },
   "ru": {
     ". Public comments are reviewed.": "Публичные комментарии проходят проверку.",
@@ -7527,7 +7626,18 @@
     "I checked permission to redistribute the text and figures.": "Я проверил разрешение на распространение текста и иллюстраций.",
     "I checked the transcript, equations, figures and content.": "Я проверил распознанный текст, формулы, иллюстрации и содержание.",
     "Approved papers and figures will be published for everyone. This does not share personal notes or chats.": "Одобренные статьи и иллюстрации будут доступны всем. Личные заметки и переписка не публикуются.",
-    "Review decisions saved. Approved papers appear after publication completes.": "Решения сохранены. Одобренные статьи появятся после завершения публикации."
+    "Review decisions saved. Approved papers appear after publication completes.": "Решения сохранены. Одобренные статьи появятся после завершения публикации.",
+    "Open this paper to complete its review.": "Откройте эту статью, чтобы завершить проверку.",
+    "Review this paper again; it has changed.": "Статья изменилась. Проверьте её ещё раз.",
+    "Choose a verified license.": "Выберите проверенную лицензию.",
+    "Add a valid HTTPS permission evidence URL.": "Добавьте действительную HTTPS-ссылку на подтверждение разрешения.",
+    "Write a review note (at least 10 characters).": "Напишите заметку о проверке длиной не менее 10 символов.",
+    "{ready} of {count} ready": "Готово {ready} из {count}",
+    "Complete the highlighted review before approving.": "Завершите выделенную проверку перед одобрением.",
+    "Ready for approval": "Готово к одобрению",
+    "Review next selected paper": "Проверить следующую выбранную статью",
+    "Review checklist": "Контрольный список проверки",
+    "Publication is already in progress. Refresh the queue.": "Публикация уже выполняется. Обновите очередь."
   },
   "vi": {
     ". Public comments are reviewed.": "Bình luận công khai sẽ được kiểm duyệt.",
@@ -8280,6 +8390,17 @@
     "I checked permission to redistribute the text and figures.": "Tôi đã kiểm tra quyền phân phối lại văn bản và hình.",
     "I checked the transcript, equations, figures and content.": "Tôi đã kiểm tra bản chuyển đổi, phương trình, hình và nội dung.",
     "Approved papers and figures will be published for everyone. This does not share personal notes or chats.": "Bài báo và hình được duyệt sẽ được công khai. Ghi chú và trò chuyện cá nhân không được chia sẻ.",
-    "Review decisions saved. Approved papers appear after publication completes.": "Đã lưu quyết định. Bài báo được duyệt sẽ xuất hiện sau khi công bố hoàn tất."
+    "Review decisions saved. Approved papers appear after publication completes.": "Đã lưu quyết định. Bài báo được duyệt sẽ xuất hiện sau khi công bố hoàn tất.",
+    "Open this paper to complete its review.": "Mở bài báo này để hoàn tất kiểm tra.",
+    "Review this paper again; it has changed.": "Bài báo đã thay đổi. Vui lòng kiểm tra lại.",
+    "Choose a verified license.": "Chọn giấy phép đã xác minh.",
+    "Add a valid HTTPS permission evidence URL.": "Thêm URL HTTPS hợp lệ chứng minh quyền.",
+    "Write a review note (at least 10 characters).": "Viết ghi chú duyệt ít nhất 10 ký tự.",
+    "{ready} of {count} ready": "{ready} trong {count} đã sẵn sàng",
+    "Complete the highlighted review before approving.": "Hoàn tất phần kiểm tra được đánh dấu trước khi duyệt.",
+    "Ready for approval": "Sẵn sàng duyệt",
+    "Review next selected paper": "Kiểm tra bài báo đã chọn tiếp theo",
+    "Review checklist": "Danh sách kiểm tra",
+    "Publication is already in progress. Refresh the queue.": "Đang công bố. Vui lòng làm mới hàng đợi."
   }
 }

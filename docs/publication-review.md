@@ -53,7 +53,11 @@ this change does not require a native binary to use that page.
    CC-BY-4.0, CC-BY-SA-4.0 or documented author permission. Check whether any
    third-party figures require separate permission.
 4. Select the reviewed rows, choose **Approve selected**, and confirm. Unchecked
-   papers cannot be approved in a batch. Request changes or decline with an
+   papers cannot be approved in a batch. Selecting a paper opens its checklist.
+   **Approve selected** stays available when rows are selected: it guides you to
+   the first unfinished review, or opens confirmation when all are ready. The
+   checklist names missing fields, including the minimum 10-character note, and
+   the batch shows how many papers are ready. Request changes or decline with an
    explanation for the contributor when permission or content remains unclear.
 5. Approved jobs move to Publishing. Successful publication makes the paper public
    through the existing Git-backed publisher and once-only reward accounting.
@@ -100,3 +104,20 @@ content and cannot turn a declined request into an approval.
   queued; this deployment did not approve them or publish a test paper.
 - Public HTTPS/browser checks and owned-runtime cleanup are recorded in the private
   deployment receipt. Store reviews, billing, account providers and ingress are unchanged.
+
+### Approval-button correction · 9 October 2026
+
+The initial page silently disabled approval until every selected paper met all
+requirements. It also kept the old queue token after a fresh preview, which could
+leave an otherwise completed review blocked if another administrator had changed
+the paper. The corrected page explains missing requirements, opens the form on
+selection, synchronizes the preview's current token, and provides a next-paper or
+approval action beside completed review fields.
+
+191 tests and the renderer/build gates passed. New component regressions exercise
+incomplete-form guidance, explicit confirmation with the refreshed token, and
+unsupported license/URL validation. A visible desktop/mobile browser test selected
+two papers, verified that unfinished fields did not submit, completed both reviews,
+and sent exactly one confirmed batch to the isolated fixture server. The production
+deployment changes static web files only; API rules, data and service processes
+are unchanged.
