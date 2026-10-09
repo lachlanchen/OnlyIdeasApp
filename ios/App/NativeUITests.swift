@@ -193,20 +193,32 @@ final class NativeUITests: XCTestCase {
     let app = XCUIApplication()
     app.launchArguments = ["-onlyideas.native.language","en","-onlyideas.native.appearance","light"]
     app.launch()
+    let library = app.segmentedControls.buttons["Reading library"]
+    XCTAssertTrue(library.waitForExistence(timeout:30))
+    XCTAssertTrue(app.buttons["Filters"].waitForExistence(timeout:15))
+    XCTAssertTrue(app.buttons["Fetch & read"].firstMatch.waitForExistence(timeout:45))
+    shot("Store29-01-discovery")
+    library.tap()
     let title = "Measuring holographic entanglement entropy on a quantum simulator"
     let row = app.buttons.matching(NSPredicate(format:"label CONTAINS %@",title)).firstMatch
     XCTAssertTrue(row.waitForExistence(timeout:30))
-    shot("Final10-01-library")
+    shot("Store29-02-library")
     app.buttons["Agent"].firstMatch.tap()
     XCTAssertTrue(app.buttons["Attach files"].waitForExistence(timeout:10))
-    shot("Final10-02-agent")
+    shot("Store29-03-agent")
     app.buttons["Profile"].firstMatch.tap()
     XCTAssertTrue(app.navigationBars["Profile"].waitForExistence(timeout:10))
-    shot("Final10-03-profile")
+    shot("Store29-profile")
     app.buttons["Library"].firstMatch.tap();row.tap()
     XCTAssertTrue(app.webViews.staticTexts[title].waitForExistence(timeout:45))
-    shot("Final10-04-reader")
-    app.swipeUp();shot("Final10-05-equations")
+    XCTAssertTrue(app.webViews.buttons["Discuss paragraph"].firstMatch.waitForExistence(timeout:30))
+    shot("Store29-04-reader")
+    app.webViews.firstMatch.swipeUp();shot("Store29-05-equations")
+    app.buttons["Interlaced"].tap()
+    let translated = app.webViews.staticTexts.matching(NSPredicate(format:"label CONTAINS %@","AI translation")).firstMatch
+    XCTAssertTrue(translated.waitForExistence(timeout:30))
+    shot("Store29-06-interlaced")
+    app.terminate()
   }
 
   func testAutomaticCacheAndCompactReader() {

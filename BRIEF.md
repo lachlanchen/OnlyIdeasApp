@@ -3,6 +3,16 @@
 Requested by Lachlan on 2026-09-26. A quiet, social research library for reading
 papers, discussing passages and making ideas easier to understand across languages.
 
+## Screenshot refresh and accumulated test build · 2026-10-10
+
+The owner requested updated screenshots reflecting the current app and an
+accumulated internal test build. Prepare 1.0.7 (29) for TestFlight and Google Play
+internal testing, with real native captures of discovery, library, agent and
+illustrated multilingual reading. Stage store assets for the next review;
+preserve current production listings, releases and active Mac review. Keep
+original screenshot sets as historical evidence. Do not enable billing or alter
+personal data as part of screenshot capture.
+
 ## Quick publication approval · 2026-10-09
 
 The owner requested one-click approval of selected papers they have already

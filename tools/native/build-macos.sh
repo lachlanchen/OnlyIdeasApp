@@ -18,9 +18,9 @@ onlyideas_profile_id=$(security cms -D -i "$onlyideas_profile" | plutil -extract
 cp "$onlyideas_profile" "$HOME/Library/MobileDevice/Provisioning Profiles/$onlyideas_profile_id.provisionprofile"
 cp "$onlyideas_profile" "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles/$onlyideas_profile_id.provisionprofile"
 cd "$onlyideas_root/ios/App"
-xcodebuild -project OnlyIdeasMac.xcodeproj -scheme OnlyIdeas -configuration Release -destination "generic/platform=macOS,variant=Mac Catalyst" -archivePath "$onlyideas_root/release/OnlyIdeas-macOS-1.0.6-28.xcarchive" -derivedDataPath "$onlyideas_root/release/DerivedDataMacRelease" -jobs 1 archive ARCHS="arm64 x86_64" ONLY_ACTIVE_ARCH=NO SWIFT_ENABLE_EXPLICIT_MODULES=NO COMPILER_INDEX_STORE_ENABLE=NO "OTHER_CODE_SIGN_FLAGS=--keychain $onlyideas_keychain"
-onlyideas_app="$onlyideas_root/release/OnlyIdeas-macOS-1.0.6-28.xcarchive/Products/Applications/OnlyIdeas.app"
-[[ $(plutil -extract CFBundleShortVersionString raw -o - "$onlyideas_app/Contents/Info.plist") == 1.0.6 ]]
-[[ $(plutil -extract CFBundleVersion raw -o - "$onlyideas_app/Contents/Info.plist") == 28 ]]
+xcodebuild -project OnlyIdeasMac.xcodeproj -scheme OnlyIdeas -configuration Release -destination "generic/platform=macOS,variant=Mac Catalyst" -archivePath "$onlyideas_root/release/OnlyIdeas-macOS-1.0.7-29.xcarchive" -derivedDataPath "$onlyideas_root/release/DerivedDataMacRelease" -jobs 1 archive ARCHS="arm64 x86_64" ONLY_ACTIVE_ARCH=NO SWIFT_ENABLE_EXPLICIT_MODULES=NO COMPILER_INDEX_STORE_ENABLE=NO "OTHER_CODE_SIGN_FLAGS=--keychain $onlyideas_keychain"
+onlyideas_app="$onlyideas_root/release/OnlyIdeas-macOS-1.0.7-29.xcarchive/Products/Applications/OnlyIdeas.app"
+[[ $(plutil -extract CFBundleShortVersionString raw -o - "$onlyideas_app/Contents/Info.plist") == 1.0.7 ]]
+[[ $(plutil -extract CFBundleVersion raw -o - "$onlyideas_app/Contents/Info.plist") == 29 ]]
 codesign --verify --deep --strict "$onlyideas_app"
-xcodebuild -exportArchive -archivePath "$onlyideas_root/release/OnlyIdeas-macOS-1.0.6-28.xcarchive" -exportOptionsPlist ExportOptions-Mac.plist -exportPath "$onlyideas_root/release/macos-export-1.0.6-28"
+xcodebuild -exportArchive -archivePath "$onlyideas_root/release/OnlyIdeas-macOS-1.0.7-29.xcarchive" -exportOptionsPlist ExportOptions-Mac.plist -exportPath "$onlyideas_root/release/macos-export-1.0.7-29"
