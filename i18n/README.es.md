@@ -8,11 +8,11 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
-## Último envío · 9 de octubre de 2026
+## Publicación · 10 de octubre de 2026
 
-OnlyIdeas 1.0.6 se envió a revisión: build27 para iOS/Watch y Android, build28 para Mac. Apple: Waiting for Review; Google: Changes in review. Incluye el icono redondeado y un selector de archivos compacto en Mac28. Las correcciones del agente, la reutilización y la revisión de publicaciones ya están en el servidor. Publicación automática tras la aprobación.
+OnlyIdeas 1.0.6 (27) ya está disponible en iOS/Watch y Google Play, con un despliegue de Google al 100 %. Mac 1.0.6 (28) sigue en revisión de Apple y se publicará automáticamente tras la aprobación; la versión pública de Mac es 1.0.5 (26). Las versiones móviles incluyen el icono aprobado con esquinas redondeadas.
 
-[Envío y verificación](../docs/latest-review-20261009.md)
+[Verificación de publicación](../docs/distribution-20261010.md)
 
 ## Publicación y próxima actualización · 6 de octubre de 2026
 

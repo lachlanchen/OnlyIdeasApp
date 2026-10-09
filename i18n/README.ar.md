@@ -8,11 +8,11 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
-## آخر إرسال للمراجعة · 9 أكتوبر 2026
+## الإصدار العام · 10 أكتوبر 2026
 
-أُرسل OnlyIdeas 1.0.6 للمراجعة: build27 على iOS/Watch وAndroid، وbuild28 على Mac. حالة Apple: Waiting for Review؛ وحالة Google: Changes in review. يتضمن الأيقونة المستديرة ونافذة مرفقات أصغر على Mac28. إصلاحات المساعد وإعادة استخدام الأوراق ومراجعة النشر تعمل على الخادم. النشر تلقائي بعد الموافقة.
+أصبح OnlyIdeas 1.0.6 (27) متاحًا على iOS/Watch وGoogle Play، بنسبة طرح 100% على Google. ما زال Mac 1.0.6 (28) قيد مراجعة Apple وسيُنشر تلقائيًا بعد الموافقة؛ إصدار Mac العام الحالي هو 1.0.5 (26). تتضمن إصدارات الهاتف الأيقونة المعتمدة ذات الزوايا المستديرة.
 
-[سجل الإرسال والتحقق](../docs/latest-review-20261009.md)
+[التحقق من النشر](../docs/distribution-20261010.md)
 
 ## الإصدار العام والتحديث القادم · 6 أكتوبر 2026
 

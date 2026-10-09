@@ -8,11 +8,11 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
-## 最新の審査申請 · 2026年10月9日
+## 正式公開 · 2026年10月10日
 
-OnlyIdeas 1.0.6 を審査に提出しました。iOS/Watch・Android は build27、Mac は build28 です。Apple は審査待ち、Google は変更を審査中です。角丸アイコンに加え、Mac28 は添付ファイル選択画面を小さくしました。論文エージェント、処理済みデータの再利用、公開審査の修正はサーバーに反映済みです。承認後に自動公開します。
+OnlyIdeas 1.0.6 (27) は iOS/Watch と Google Play で公開済みです。Google の配信率は 100% です。Mac 1.0.6 (28) は Apple の審査中で、承認後に自動公開されます。Mac の公開版は 1.0.5 (26) です。モバイル版には承認済みの角丸アイコンが含まれます。
 
-[申請と検証の記録](../docs/latest-review-20261009.md)
+[公開の確認記録](../docs/distribution-20261010.md)
 
 ## 正式公開と次の更新 · 2026年10月6日
 

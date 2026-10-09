@@ -8,11 +8,11 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
-## 최신 심사 제출 · 2026년 10월 9일
+## 정식 배포 · 2026년 10월 10일
 
-OnlyIdeas 1.0.6을 심사에 제출했습니다. iOS/Watch와 Android는 build27, Mac은 build28입니다. Apple은 심사 대기, Google은 변경사항 심사 중입니다. 둥근 아이콘과 Mac28의 작은 첨부 선택 창이 포함됩니다. 논문 에이전트, 처리 결과 재사용, 게시 심사 수정은 서버에 적용되었습니다. 승인 후 자동 출시됩니다.
+OnlyIdeas 1.0.6 (27)가 iOS/Watch와 Google Play에 공개되었습니다. Google 배포율은 100%입니다. Mac 1.0.6 (28)는 Apple 심사 중이며 승인 후 자동 공개됩니다. 현재 Mac 공개 버전은 1.0.5 (26)입니다. 모바일 버전에는 승인된 둥근 모서리 아이콘이 포함됩니다.
 
-[제출 및 검증 기록](../docs/latest-review-20261009.md)
+[배포 확인 기록](../docs/distribution-20261010.md)
 
 ## 정식 출시 및 다음 업데이트 · 2026년 10월 6일
 

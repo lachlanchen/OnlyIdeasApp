@@ -1,0 +1,124 @@
+{
+  "verifiedAt": "2026-10-09T21:33:10.375933+00:00",
+  "app": "OnlyIdeas",
+  "apple": {
+    "ios": {
+      "id": "975f4ede-ab63-4cc2-a569-a9f2739431c0",
+      "platform": "IOS",
+      "version": "1.0.6",
+      "state": "READY_FOR_DISTRIBUTION",
+      "storeState": "READY_FOR_SALE",
+      "release": "AFTER_APPROVAL",
+      "buildId": "03292f73-7605-4361-8304-8a63b8b6f129",
+      "build": "27",
+      "review": {
+        "id": "5a5010ef-54e0-4cc3-b629-77c668f49bf0",
+        "platform": "IOS",
+        "submittedDate": "2026-10-09T06:37:02.662Z",
+        "state": "COMPLETE"
+      },
+      "public": {
+        "us": {
+          "version": "1.0.6",
+          "price": 0.99,
+          "currency": "USD",
+          "currentVersionReleaseDate": "2026-10-09T16:35:08Z",
+          "trackViewUrl": "https://apps.apple.com/us/app/onlyideas/id6816392935?uo=4"
+        },
+        "hk": {
+          "version": "1.0.6",
+          "price": 8.0,
+          "currency": "HKD",
+          "currentVersionReleaseDate": "2026-10-09T16:35:08Z",
+          "trackViewUrl": "https://apps.apple.com/hk/app/onlyideas/id6816392935?uo=4"
+        },
+        "iphone": {
+          "url": "https://apps.apple.com/us/app/id6816392935?platform=iphone",
+          "intent": {
+            "storefront": "us",
+            "language": "en-US",
+            "isDefaultLanguage": true,
+            "$kind": "ProductPageIntent",
+            "id": "6816392935"
+          },
+          "version": "Version 1.0.6",
+          "date": "Fri Oct 09 2026 16:35:08 GMT+0000 (Coordinated Universal Time)"
+        }
+      }
+    },
+    "macos": {
+      "submitted": {
+        "id": "5ad8493d-49ec-47fd-a777-ff7e9f0a55e3",
+        "platform": "MAC_OS",
+        "version": "1.0.6",
+        "state": "IN_REVIEW",
+        "storeState": "IN_REVIEW",
+        "release": "AFTER_APPROVAL",
+        "buildId": "76fb95d9-ec2a-408b-aa1f-e77bea5e6fca",
+        "build": "28"
+      },
+      "review": {
+        "id": "faf370c8-069e-488b-92a8-82299a43c0b3",
+        "platform": "MAC_OS",
+        "submittedDate": "2026-10-09T06:37:18.689Z",
+        "state": "IN_REVIEW"
+      },
+      "publicBuild": {
+        "id": "fff60735-a4ce-4a0b-aa41-a83a681c8ba2",
+        "platform": "MAC_OS",
+        "version": "1.0.5",
+        "state": "READY_FOR_DISTRIBUTION",
+        "storeState": "READY_FOR_SALE",
+        "release": "AFTER_APPROVAL",
+        "buildId": "54ff026f-6f93-49ca-bc39-66983f9db869",
+        "build": "26"
+      },
+      "publicPage": {
+        "url": "https://apps.apple.com/us/app/id6816392935?platform=mac",
+        "intent": {
+          "storefront": "us",
+          "language": "en-US",
+          "isDefaultLanguage": true,
+          "$kind": "ProductPageIntent",
+          "id": "6816392935",
+          "platform": "mac"
+        },
+        "version": "Version 1.0.5",
+        "date": "Wed Oct 07 2026 21:23:59 GMT+0000 (Coordinated Universal Time)"
+      }
+    },
+    "availability": {
+      "verifiedAt": "2026-10-09T21:32:36.441926+00:00",
+      "total": 175,
+      "available": 175,
+      "availableInNewTerritories": true,
+      "iosPhasedRelease": null
+    }
+  },
+  "google": {
+    "package": "art.onlyideas.app",
+    "version": "1.0.6",
+    "build": 27,
+    "status": "AVAILABLE_ON_GOOGLE_PLAY",
+    "rollout": 1,
+    "countries": 178,
+    "managedPublishing": false,
+    "unpublishedChanges": false,
+    "lastPublishedDate": "2026-10-09",
+    "publicUrl": "https://play.google.com/store/apps/details?id=art.onlyideas.app",
+    "publicHttpStatus": 200,
+    "productionEvidenceSha256": "283c492fa7a5aa3fa97495b48dcc6e9de528c27e9a63fcc77339837c77d8e866",
+    "rolloutEvidenceSha256": "9fe3f3be900cb6114d088c85c32643e3a4dcb1da589fc972b07cb39cae5cdb88"
+  },
+  "actions": {
+    "manualReleaseRequired": false,
+    "reason": "Both iOS and Google releases published automatically after approval. Mac updates remain in review with AFTER_APPROVAL.",
+    "storeMutations": false
+  },
+  "billing": "General subscription purchases remain disabled; no prices, products or entitlements changed.",
+  "checks": {
+    "distributionReceiptAssertions": true,
+    "localizedReadmeLinks": 11,
+    "noNativeCodeChanges": true
+  }
+}

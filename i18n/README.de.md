@@ -8,11 +8,11 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
-## Neueste Einreichung · 9. Oktober 2026
+## Öffentliche Veröffentlichung · 10. Oktober 2026
 
-OnlyIdeas 1.0.6 wurde zur Prüfung eingereicht: Build27 für iOS/Watch und Android, Build28 für Mac. Apple: Waiting for Review; Google: Changes in review. Enthalten sind das abgerundete Symbol und unter Mac28 die kompakte Dateiauswahl. Korrekturen am Rechercheassistenten, an der Wiederverwendung und an der Veröffentlichungsprüfung sind auf dem Server aktiv. Veröffentlichung automatisch nach Freigabe.
+OnlyIdeas 1.0.6 (27) ist auf iOS/Watch und Google Play öffentlich verfügbar. Der Google-Rollout beträgt 100 %. Mac 1.0.6 (28) wird noch von Apple geprüft und nach der Freigabe automatisch veröffentlicht; öffentlich verfügbar ist Mac 1.0.5 (26). Die mobilen Versionen enthalten das freigegebene Icon mit abgerundeten Ecken.
 
-[Einreichung und Prüfung](../docs/latest-review-20261009.md)
+[Veröffentlichungsnachweis](../docs/distribution-20261010.md)
 
 ## Veröffentlichung und nächstes Update · 6. Oktober 2026
 

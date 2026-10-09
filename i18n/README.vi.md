@@ -8,11 +8,11 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
-## Bản gửi mới nhất · 9 tháng 10 năm 2026
+## Phát hành chính thức · 10 tháng 10 năm 2026
 
-OnlyIdeas 1.0.6 đã được gửi xét duyệt: build27 cho iOS/Watch và Android, build28 cho Mac. Apple: Waiting for Review; Google: Changes in review. Có biểu tượng bo góc và cửa sổ chọn tệp gọn hơn trên Mac28. Các sửa lỗi trợ lý, tái sử dụng tài liệu và duyệt xuất bản đã được triển khai trên máy chủ. Tự động phát hành sau khi được chấp thuận.
+OnlyIdeas 1.0.6 (27) đã có trên iOS/Watch và Google Play, với tỷ lệ triển khai Google là 100%. Mac 1.0.6 (28) vẫn đang được Apple xét duyệt và sẽ tự động phát hành sau khi được duyệt; bản Mac công khai hiện là 1.0.5 (26). Các bản di động có biểu tượng bo góc đã được chấp thuận.
 
-[Gửi duyệt và kiểm chứng](../docs/latest-review-20261009.md)
+[Xác minh phát hành](../docs/distribution-20261010.md)
 
 ## Phát hành và bản cập nhật tiếp theo · 6 tháng 10 năm 2026
 

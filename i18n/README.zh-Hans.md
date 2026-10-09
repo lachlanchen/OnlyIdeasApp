@@ -8,11 +8,11 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
-## 最新审核提交 · 2026年10月9日
+## 正式发布 · 2026年10月10日
 
-OnlyIdeas 1.0.6 已提交审核：iOS/Watch 和 Android 为 build27，Mac 为 build28。Apple 显示等待审核，Google 显示更改审核中。包含确认的圆角图标，Mac28 新增紧凑的附件选择窗口。论文助手、重复处理复用和发布审核修复已在服务器上线，通过后自动发布。
+OnlyIdeas 1.0.6 (27) 已在 iOS/Watch 和 Google Play 正式发布，Google 推出比例为 100%。Mac 1.0.6 (28) 仍在 Apple 审核中，通过后自动发布；Mac 当前公开版本为 1.0.5 (26)。移动版包含已确认的圆角图标。
 
-[提交及验证记录](../docs/latest-review-20261009.md)
+[发布验证记录](../docs/distribution-20261010.md)
 
 ## 正式发布与下一次更新 · 2026年10月6日
 
