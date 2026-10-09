@@ -42,6 +42,24 @@ this change does not require a native binary to use that page.
 
 ## Review a batch
 
+### Quick approval
+
+Select the papers you have already checked, then click **Quick approve** once.
+Selection stays in the list. There is no per-paper checklist, required typed note
+or second confirmation popup. Clicking the button confirms permission and review
+of the text, equations and figures; an explicit private audit note is recorded
+automatically for each selected paper.
+
+The shortcut reuses each paper's recorded supported licence and HTTPS source or
+permission URL. If a selected paper has no supported licence, choose its verified
+permission once in the batch selector. This fills only missing/unsupported
+licences and keeps existing ones. Nothing is automatically assigned a Creative
+Commons licence or author permission. Missing evidence still opens the relevant
+paper for correction. The same 20-paper limit, administrator role, atomic batch,
+stale-content protection and durable publication process apply.
+
+### Detailed review
+
 1. Filter by status or search by title, author or DOI. Each page has up to 50
    requests; a batch contains at most 20 selected papers.
 2. Open each paper. Compare its source with the rendered transcript, equations
@@ -52,9 +70,9 @@ this change does not require a native binary to use that page.
    confirmations for **each** paper. Supported licenses remain CC0-1.0,
    CC-BY-4.0, CC-BY-SA-4.0 or documented author permission. Check whether any
    third-party figures require separate permission.
-4. Select the reviewed rows, choose **Approve selected**, and confirm. Unchecked
-   papers cannot be approved in a batch. Selecting a paper opens its checklist.
-   **Approve selected** stays available when rows are selected: it guides you to
+4. Select the reviewed rows, choose **Detailed review**, and confirm. Unchecked
+   papers cannot be approved in a batch. **Detailed review** opens a checklist.
+   It stays available when rows are selected: it guides you to
    the first unfinished review, or opens confirmation when all are ready. The
    checklist names missing fields, including the minimum 10-character note, and
    the batch shows how many papers are ready. Request changes or decline with an
@@ -121,3 +139,22 @@ two papers, verified that unfinished fields did not submit, completed both revie
 and sent exactly one confirmed batch to the isolated fixture server. The production
 deployment changes static web files only; API rules, data and service processes
 are unchanged.
+
+### One-click approval · 9 October 2026
+
+The owner requested approval of already-checked selections in one click. Added
+Quick approve, an optional batch choice for missing licences, automatic explicit
+audit confirmation and synchronous duplicate-click protection. Selection no
+longer opens or scrolls to the detailed form. All new controls are localized in
+the eleven interface languages.
+
+194 tests and renderer/TypeScript/build checks passed. Browser testing at desktop
+and 390px mobile widths submitted exactly one two-paper batch without a modal;
+the saved audit records preserved the existing CC-BY licence and applied explicit
+author permission only to the paper missing a licence. Unselected and private
+fixtures were preserved. An early post-success assertion ran before queue refresh;
+the same committed result was verified after loading, without resubmitting.
+
+Only static web files are deployed. The API, publication worker, database,
+account roles, billing and Apple/Google review submissions are unchanged. This
+update is available on the web administration page without another store build.

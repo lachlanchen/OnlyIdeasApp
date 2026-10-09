@@ -3,7 +3,7 @@ import {CheckCheck,RefreshCw,ShieldCheck,ArrowLeft} from 'lucide-react'
 import {api,post,type Paper,type Session} from './api'
 import {ReaderContent} from './ReaderContent'
 import {t} from './i18n'
-import {approvalNeeds,reviewableStates,type ReviewDraft} from './publication-approval'
+import {approvalNeeds,quickApprovalDraft,reviewLicenses,reviewableStates,type ReviewDraft} from './publication-approval'
 import './publication-review.css'
 
 export const reviewLabels:Record<string,string>={awaiting_review:'Awaiting review',changes_requested:'Changes requested',publishing:'Publishing',shared:'Shared',declined:'Not approved',publication_failed:'Publication failed',private:'Only me'}
@@ -21,11 +21,12 @@ export function PublicationReview({session,login,back}:{session:Session|null;log
   const [queue,setQueue]=useState<Queue>(),[detail,setDetail]=useState<Detail>(),[selected,setSelected]=useState<string[]>([])
   const [drafts,setDrafts]=useState<Record<string,ReviewDraft>>({}),[error,setError]=useState(''),[notice,setNotice]=useState(''),[busy,setBusy]=useState(false)
   const [action,setAction]=useState(''),[reason,setReason]=useState(''),[loading,setLoading]=useState(false)
-  const generation=useRef(0),previewRequest=useRef(0),focusOnReview=useRef(false)
+  const [missingLicense,setMissingLicense]=useState('')
+  const generation=useRef(0),previewRequest=useRef(0),focusOnReview=useRef(false),decisionPending=useRef(false)
   const allowed=!!session?.capabilities.publicationReview
-  async function refresh(){const g=++generation.current;setLoading(true);setSelected([]);setDetail(undefined);setDrafts({});previewRequest.current++
+  async function refresh(){const g=++generation.current;setLoading(true);setSelected([]);setDetail(undefined);setDrafts({});setMissingLicense('');previewRequest.current++
     try{const result=await api<Queue>(`/admin/publications?state=${state}&offset=${offset}&q=${encodeURIComponent(query)}`);if(g===generation.current){setQueue(result);setError('')}}catch(e){if(g===generation.current)setError((e as Error).message)}finally{if(g===generation.current)setLoading(false)}}
-  useEffect(()=>{if(allowed)void refresh();else{generation.current++;previewRequest.current++;setQueue(undefined);setDetail(undefined);setSelected([]);setDrafts({})}return()=>{generation.current++;previewRequest.current++}},[allowed,session?.user?.id,state,offset])
+  useEffect(()=>{if(allowed)void refresh();else{generation.current++;previewRequest.current++;setQueue(undefined);setDetail(undefined);setSelected([]);setDrafts({});setMissingLicense('')}return()=>{generation.current++;previewRequest.current++}},[allowed,session?.user?.id,state,offset])
   async function preview(entry:Entry,focus=false){const g=generation.current,n=++previewRequest.current;focusOnReview.current=focus;setError('');setDetail(undefined)
     try{const value=await api<Detail>(`/admin/publications/${entry.id}`);if(g!==generation.current||n!==previewRequest.current)return;
       const {mmd,sections,...summary}=value.paper
@@ -40,6 +41,9 @@ export function PublicationReview({session,login,back}:{session:Session|null;log
   const selectedEntries=selected.flatMap(id=>{const entry=queue?.items.find(i=>i.id===id);return entry?[entry]:[]})
   const incomplete=selectedEntries.filter(entry=>approvalNeeds(entry,drafts[entry.id]).length>0)
   const canApprove=selected.length>0&&selectedEntries.length===selected.length&&incomplete.length===0
+  const quickItems=selectedEntries.map(entry=>({id:entry.id,...quickApprovalDraft(entry,drafts[entry.id],missingLicense)}))
+  const quickNeeds=selectedEntries.map((entry,i)=>({entry,needs:approvalNeeds(entry,quickItems[i])})).filter(row=>row.needs.length)
+  const missingLicenseCount=selectedEntries.filter(entry=>!reviewLicenses.includes(quickApprovalDraft(entry,drafts[entry.id]).license)).length
   const needs=detail?approvalNeeds(detail,draft):[]
   function focusChecks(){const panel=document.getElementById('review-checks');panel?.scrollIntoView({block:'start',behavior:'smooth'});panel?.focus({preventScroll:true})}
   useEffect(()=>{if(detail&&draft&&focusOnReview.current){focusOnReview.current=false;focusChecks()}},[detail,draft])
@@ -50,14 +54,30 @@ export function PublicationReview({session,login,back}:{session:Session|null;log
     setNotice(t('Complete the highlighted review before approving.'))
     if(detail?.id===entry.id&&draft?.token===entry.token)focusChecks();else void preview(entry,true)
   }
-  function selectEntry(entry:Entry,checked:boolean){setSelected(s=>checked?[...s,entry.id]:s.filter(id=>id!==entry.id));if(checked&&detail?.id!==entry.id)void preview(entry,true)}
-  async function decide(){const g=generation.current;setBusy(true);setError('');try{await post('/admin/publications/batch',{action,reason,items:selected.map(id=>({id,token:queue?.items.find(i=>i.id===id)?.token,...(action==='approve'?drafts[id]:{})}))});if(g!==generation.current)return;setAction('');setReason('');setNotice(t('Review decisions saved. Approved papers appear after publication completes.'));await refresh()}catch(e){if(g===generation.current)setError((e as Error).message)}finally{setBusy(false)}}
+  function selectEntry(entry:Entry,checked:boolean){setSelected(s=>checked?[...s,entry.id]:s.filter(id=>id!==entry.id));setMissingLicense('');setNotice('');setError('')}
+  async function sendDecision(nextAction:string,items:object[]){if(decisionPending.current)return;decisionPending.current=true;const g=generation.current;setBusy(true);setError('');try{await post('/admin/publications/batch',{action:nextAction,reason:nextAction==='approve'?'':reason,items});if(g!==generation.current)return;setAction('');setReason('');setNotice(t('Review decisions saved. Approved papers appear after publication completes.'));await refresh()}catch(e){if(g===generation.current)setError((e as Error).message)}finally{decisionPending.current=false;setBusy(false)}}
+  function decide(){return sendDecision(action,selected.map(id=>({id,token:queue?.items.find(i=>i.id===id)?.token,...(action==='approve'?drafts[id]:{})})))}
+  function quickApprove(){
+    if(busy||loading||decisionPending.current||!selected.length)return
+    if(selectedEntries.length!==selected.length){setError(t('This paper or review changed. Refresh and review it again.'));return}
+    const missing=quickNeeds[0]
+    if(missing){
+      if(missing.needs.includes('Choose a verified license.'))document.getElementById('quick-review-license')?.focus()
+      else void preview(missing.entry,true)
+      setError(`${missing.entry.paper.title}: ${missing.needs.map(need=>t(need)).join(' ')}`)
+      return
+    }
+    void sendDecision('approve',quickItems)
+  }
   if(!allowed)return <main className="review-page"><button className="text-button" onClick={back}><ArrowLeft size={16}/>{t('Library')}</button><h1>{t('Publication review')}</h1><p>{t('Only designated OnlyIdeas administrators can review sharing requests.')}</p>{!session?.user&&<button className="primary" onClick={login}>{t('Sign in with GitHub')}</button>}</main>
   return <main className="review-page" data-testid="publication-review">
     <header className="review-heading"><div><span className="eyebrow">OnlyIdeas · {t('Administration')}</span><h1><ShieldCheck/>{t('Publication review')}</h1><p>{t('Check permission and readability, then publish once for everyone.')}</p></div><button className="secondary" disabled={loading||busy} onClick={()=>void refresh()}><RefreshCw size={16}/>{t('Refresh')}</button></header>
     <div className="review-filters"><label>{t('Status')}<select aria-label={t('Status')} value={state} onChange={e=>{setState(e.target.value);setOffset(0)}}>{['awaiting_review','changes_requested','publishing','shared','declined','publication_failed','all'].map(s=><option key={s} value={s}>{t(s==='all'?'All papers':reviewLabels[s])}{s==='all'?'':` · ${queue?.counts[s]||0}`}</option>)}</select></label><form onSubmit={e=>{e.preventDefault();if(offset)setOffset(0);else void refresh()}}><label>{t('Search library')}<input value={query} onChange={e=>setQuery(e.target.value)} placeholder={t('Title, author or DOI')}/></label><button className="secondary">{t('Search')}</button></form></div>
     {error&&<p className="review-error" role="alert">{error}</p>}{notice&&<p className="sharing-status" role="status">{notice}</p>}
-    <div className="review-batch"><strong aria-live="polite">{t('{count} selected',{count:selected.length})}{selected.length>0&&<small>{t('{ready} of {count} ready',{ready:selectedEntries.length-incomplete.length,count:selected.length})}</small>}</strong><button className="primary" data-testid="approve-selected" disabled={busy||loading||!selected.length} onClick={prepareApproval}><CheckCheck size={16}/>{t('Approve selected')}</button><button className="secondary" disabled={busy||loading||!selected.length} onClick={()=>{setReason('');setAction('changes')}}>{t('Request changes')}</button><button className="secondary" disabled={busy||loading||!selected.length} onClick={()=>{setReason('');setAction('reject')}}>{t('Decline')}</button>{state==='publication_failed'&&<button className="secondary" disabled={busy||loading||!selected.length} onClick={()=>{setReason('');setAction('retry')}}>{t('Retry publication')}</button>}</div>
+    <div className="review-batch"><strong aria-live="polite">{t('{count} selected',{count:selected.length})}{selected.length>0&&<small>{t('{ready} of {count} ready',{ready:selectedEntries.length-quickNeeds.length,count:selected.length})}</small>}</strong><button className="primary" data-testid="quick-approve" aria-describedby="quick-review-help" disabled={busy||loading||!selected.length} onClick={quickApprove}><CheckCheck size={16}/>{busy?t('Saving…'):t('Quick approve')}</button><button className="secondary" data-testid="approve-selected" disabled={busy||loading||!selected.length} onClick={prepareApproval}>{t('Detailed review')}</button><button className="secondary" disabled={busy||loading||!selected.length} onClick={()=>{setReason('');setAction('changes')}}>{t('Request changes')}</button><button className="secondary" disabled={busy||loading||!selected.length} onClick={()=>{setReason('');setAction('reject')}}>{t('Decline')}</button>{state==='publication_failed'&&<button className="secondary" disabled={busy||loading||!selected.length} onClick={()=>{setReason('');setAction('retry')}}>{t('Retry publication')}</button>}
+      <p id="quick-review-help" className="quick-review-help">{t('Click Quick approve to confirm sharing permission and that the selected papers’ text, equations and figures are ready. Your confirmation is recorded automatically; no second popup.')}</p>
+      {missingLicenseCount>0&&<label className="quick-review-license">{t('Permission for {count} papers without a supported license',{count:missingLicenseCount})}<select id="quick-review-license" data-testid="quick-review-license" value={missingLicense} disabled={busy||loading} onChange={e=>{setMissingLicense(e.target.value);setError('')}}><option value="">{t('Choose a verified license.')}</option>{reviewLicenses.map(license=><option key={license} value={license}>{license==='author-permission'?t('Author permission confirmed'):license}</option>)}</select><small>{t('Choose only permission you have verified. Recorded licenses are kept.')}</small></label>}
+    </div>
     <div className="review-workspace"><section className="review-list" aria-label={t('Review queue')}>
       {loading?<p>{t('Loading…')}</p>:!queue?.items.length?<p className="empty">{t('No papers waiting in this view.')}</p>:queue.items.map(entry=><article className={'review-row'+(detail?.id===entry.id?' current':'')} key={entry.id}>
         <input type="checkbox" aria-label={t('Select')+' '+entry.paper.title} disabled={busy||loading||!reviewableStates.includes(entry.state)||(!selected.includes(entry.id)&&selected.length>=20)} checked={selected.includes(entry.id)} onChange={e=>selectEntry(entry,e.target.checked)}/>

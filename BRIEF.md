@@ -3,6 +3,16 @@
 Requested by Lachlan on 2026-09-26. A quiet, social research library for reading
 papers, discussing passages and making ideas easier to understand across languages.
 
+## Quick publication approval · 2026-10-09
+
+The owner requested one-click approval of selected papers they have already
+checked. The administrator web page offers Quick approve alongside detailed
+review. The click explicitly confirms permission and content quality and records
+an audit note automatically. Reuse saved permission/source details; let the
+reviewer choose permission once for selected papers missing a supported licence.
+Do not infer permissions. Keep exact roles, private-upload boundaries, current
+revision tokens, atomic batches and durable publication unchanged.
+
 ## Optional shared identity direction · 2026-10-03
 
 The owner requested independent apps with optional LazyingArt login, while

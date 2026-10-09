@@ -761,7 +761,13 @@
     "Ready for approval": "Ready for approval",
     "Review next selected paper": "Review next selected paper",
     "Review checklist": "Review checklist",
-    "Publication is already in progress. Refresh the queue.": "Publication is already in progress. Refresh the queue."
+    "Publication is already in progress. Refresh the queue.": "Publication is already in progress. Refresh the queue.",
+    "Quick approve": "Quick approve",
+    "Detailed review": "Detailed review",
+    "Click Quick approve to confirm sharing permission and that the selected papers’ text, equations and figures are ready. Your confirmation is recorded automatically; no second popup.": "Click Quick approve to confirm sharing permission and that the selected papers’ text, equations and figures are ready. Your confirmation is recorded automatically; no second popup.",
+    "Permission for {count} papers without a supported license": "Permission for {count} papers without a supported license",
+    "Author permission confirmed": "Author permission confirmed",
+    "Choose only permission you have verified. Recorded licenses are kept.": "Choose only permission you have verified. Recorded licenses are kept."
   },
   "zh-Hans": {
     "Choose a valid PDF.": "请选择有效的 PDF。",
@@ -1525,7 +1531,13 @@
     "Ready for approval": "可以批准",
     "Review next selected paper": "审核下一篇所选论文",
     "Review checklist": "审核清单",
-    "Publication is already in progress. Refresh the queue.": "正在发布，请刷新队列。"
+    "Publication is already in progress. Refresh the queue.": "正在发布，请刷新队列。",
+    "Quick approve": "快速批准",
+    "Detailed review": "详细审核",
+    "Click Quick approve to confirm sharing permission and that the selected papers’ text, equations and figures are ready. Your confirmation is recorded automatically; no second popup.": "点击“快速批准”即确认所选论文已获得共享许可，正文、公式和图片均已检查。系统自动记录您的确认，不再弹窗。",
+    "Permission for {count} papers without a supported license": "为 {count} 篇缺少受支持许可的论文选择许可",
+    "Author permission confirmed": "已确认作者授权",
+    "Choose only permission you have verified. Recorded licenses are kept.": "仅选择您已核实的许可；已有许可保持不变。"
   },
   "zh-Hant": {
     ". Public comments are reviewed.": "公開評論會經過審核。",
@@ -2289,7 +2301,13 @@
     "Ready for approval": "可以批准",
     "Review next selected paper": "審核下一篇所選論文",
     "Review checklist": "審核清單",
-    "Publication is already in progress. Refresh the queue.": "正在發佈，請重新整理佇列。"
+    "Publication is already in progress. Refresh the queue.": "正在發佈，請重新整理佇列。",
+    "Quick approve": "快速批准",
+    "Detailed review": "詳細審核",
+    "Click Quick approve to confirm sharing permission and that the selected papers’ text, equations and figures are ready. Your confirmation is recorded automatically; no second popup.": "點擊「快速批准」即確認所選論文已獲得共享許可，正文、公式和圖片均已檢查。系統自動記錄您的確認，不再彈窗。",
+    "Permission for {count} papers without a supported license": "為 {count} 篇缺少支援許可的論文選擇許可",
+    "Author permission confirmed": "已確認作者授權",
+    "Choose only permission you have verified. Recorded licenses are kept.": "僅選擇您已核實的許可；已有許可保持不變。"
   },
   "ja": {
     ". Public comments are reviewed.": "公開コメントは審査されます。",
@@ -3053,7 +3071,13 @@
     "Ready for approval": "承認可能",
     "Review next selected paper": "選択した次の論文を審査",
     "Review checklist": "審査チェックリスト",
-    "Publication is already in progress. Refresh the queue.": "公開処理中です。一覧を更新してください。"
+    "Publication is already in progress. Refresh the queue.": "公開処理中です。一覧を更新してください。",
+    "Quick approve": "簡単承認",
+    "Detailed review": "詳細な審査",
+    "Click Quick approve to confirm sharing permission and that the selected papers’ text, equations and figures are ready. Your confirmation is recorded automatically; no second popup.": "「簡単承認」を押すと、選択した論文の共有許諾と本文・数式・図の確認が完了したことを表明します。確認は自動記録され、追加の確認画面は開きません。",
+    "Permission for {count} papers without a supported license": "対応するライセンスがない {count} 件の許諾",
+    "Author permission confirmed": "著者の許可を確認済み",
+    "Choose only permission you have verified. Recorded licenses are kept.": "確認済みの許諾のみ選択してください。記録済みのライセンスは維持されます。"
   },
   "ko": {
     ". Public comments are reviewed.": "공개 댓글은 검토됩니다.",
@@ -3817,7 +3841,13 @@
     "Ready for approval": "승인 준비 완료",
     "Review next selected paper": "선택한 다음 논문 검토",
     "Review checklist": "검토 체크리스트",
-    "Publication is already in progress. Refresh the queue.": "이미 게시 중입니다. 대기열을 새로 고치세요."
+    "Publication is already in progress. Refresh the queue.": "이미 게시 중입니다. 대기열을 새로 고치세요.",
+    "Quick approve": "빠른 승인",
+    "Detailed review": "상세 검토",
+    "Click Quick approve to confirm sharing permission and that the selected papers’ text, equations and figures are ready. Your confirmation is recorded automatically; no second popup.": "빠른 승인을 누르면 선택한 논문의 공유 허가와 본문, 수식, 그림을 확인했음을 표시합니다. 확인 내용은 자동 기록되며 추가 팝업은 없습니다.",
+    "Permission for {count} papers without a supported license": "지원되는 라이선스가 없는 논문 {count}개의 허가",
+    "Author permission confirmed": "저자 허가 확인 완료",
+    "Choose only permission you have verified. Recorded licenses are kept.": "확인한 허가만 선택하세요. 기존 라이선스는 유지됩니다."
   },
   "ar": {
     ". Public comments are reviewed.": "التعليقات العامة تخضع للمراجعة.",
@@ -4581,7 +4611,13 @@
     "Ready for approval": "جاهز للموافقة",
     "Review next selected paper": "مراجعة البحث المحدد التالي",
     "Review checklist": "قائمة تحقق المراجعة",
-    "Publication is already in progress. Refresh the queue.": "النشر جارٍ بالفعل. حدّث القائمة."
+    "Publication is already in progress. Refresh the queue.": "النشر جارٍ بالفعل. حدّث القائمة.",
+    "Quick approve": "موافقة سريعة",
+    "Detailed review": "مراجعة مفصلة",
+    "Click Quick approve to confirm sharing permission and that the selected papers’ text, equations and figures are ready. Your confirmation is recorded automatically; no second popup.": "بالضغط على «موافقة سريعة» تؤكد إذن المشاركة وجاهزية نصوص الأبحاث المحددة ومعادلاتها وأشكالها. يُسجل تأكيدك تلقائيًا دون نافذة إضافية.",
+    "Permission for {count} papers without a supported license": "إذن {count} أبحاث دون ترخيص مدعوم",
+    "Author permission confirmed": "تم تأكيد إذن المؤلف",
+    "Choose only permission you have verified. Recorded licenses are kept.": "اختر فقط إذنًا تحققت منه. تُحفظ التراخيص المسجلة."
   },
   "fr": {
     ". Public comments are reviewed.": ". Les commentaires publics sont examinés.",
@@ -5345,7 +5381,13 @@
     "Ready for approval": "Prêt à approuver",
     "Review next selected paper": "Vérifier l’article sélectionné suivant",
     "Review checklist": "Liste de vérification",
-    "Publication is already in progress. Refresh the queue.": "La publication est déjà en cours. Actualisez la file."
+    "Publication is already in progress. Refresh the queue.": "La publication est déjà en cours. Actualisez la file.",
+    "Quick approve": "Approbation rapide",
+    "Detailed review": "Vérification détaillée",
+    "Click Quick approve to confirm sharing permission and that the selected papers’ text, equations and figures are ready. Your confirmation is recorded automatically; no second popup.": "Cliquer sur Approbation rapide confirme l’autorisation de partage et la vérification du texte, des équations et des figures des articles sélectionnés. Votre confirmation est enregistrée automatiquement, sans autre fenêtre.",
+    "Permission for {count} papers without a supported license": "Autorisation pour {count} articles sans licence prise en charge",
+    "Author permission confirmed": "Autorisation de l’auteur confirmée",
+    "Choose only permission you have verified. Recorded licenses are kept.": "Choisissez uniquement une autorisation vérifiée. Les licences enregistrées sont conservées."
   },
   "de": {
     ". Public comments are reviewed.": "Öffentliche Kommentare werden geprüft.",
@@ -6109,7 +6151,13 @@
     "Ready for approval": "Bereit zur Genehmigung",
     "Review next selected paper": "Nächsten ausgewählten Artikel prüfen",
     "Review checklist": "Prüfcheckliste",
-    "Publication is already in progress. Refresh the queue.": "Die Veröffentlichung läuft bereits. Aktualisieren Sie die Warteschlange."
+    "Publication is already in progress. Refresh the queue.": "Die Veröffentlichung läuft bereits. Aktualisieren Sie die Warteschlange.",
+    "Quick approve": "Schnell genehmigen",
+    "Detailed review": "Ausführliche Prüfung",
+    "Click Quick approve to confirm sharing permission and that the selected papers’ text, equations and figures are ready. Your confirmation is recorded automatically; no second popup.": "Mit Schnell genehmigen bestätigen Sie die Erlaubnis zum Teilen und die Prüfung von Text, Gleichungen und Abbildungen der ausgewählten Artikel. Ihre Bestätigung wird automatisch ohne weiteres Dialogfeld gespeichert.",
+    "Permission for {count} papers without a supported license": "Erlaubnis für {count} Artikel ohne unterstützte Lizenz",
+    "Author permission confirmed": "Erlaubnis des Autors bestätigt",
+    "Choose only permission you have verified. Recorded licenses are kept.": "Wählen Sie nur eine verifizierte Erlaubnis. Erfasste Lizenzen bleiben erhalten."
   },
   "es": {
     ". Public comments are reviewed.": "Los comentarios públicos se revisan.",
@@ -6873,7 +6921,13 @@
     "Ready for approval": "Listo para aprobar",
     "Review next selected paper": "Revisar el siguiente artículo seleccionado",
     "Review checklist": "Lista de comprobación",
-    "Publication is already in progress. Refresh the queue.": "La publicación ya está en curso. Actualiza la cola."
+    "Publication is already in progress. Refresh the queue.": "La publicación ya está en curso. Actualiza la cola.",
+    "Quick approve": "Aprobación rápida",
+    "Detailed review": "Revisión detallada",
+    "Click Quick approve to confirm sharing permission and that the selected papers’ text, equations and figures are ready. Your confirmation is recorded automatically; no second popup.": "Al pulsar Aprobación rápida confirmas el permiso para compartir y que has revisado el texto, las ecuaciones y las figuras seleccionadas. La confirmación se registra automáticamente, sin otro diálogo.",
+    "Permission for {count} papers without a supported license": "Permiso para {count} artículos sin licencia compatible",
+    "Author permission confirmed": "Permiso del autor confirmado",
+    "Choose only permission you have verified. Recorded licenses are kept.": "Elige solo un permiso verificado. Se conservan las licencias registradas."
   },
   "ru": {
     ". Public comments are reviewed.": "Публичные комментарии проходят проверку.",
@@ -7637,7 +7691,13 @@
     "Ready for approval": "Готово к одобрению",
     "Review next selected paper": "Проверить следующую выбранную статью",
     "Review checklist": "Контрольный список проверки",
-    "Publication is already in progress. Refresh the queue.": "Публикация уже выполняется. Обновите очередь."
+    "Publication is already in progress. Refresh the queue.": "Публикация уже выполняется. Обновите очередь.",
+    "Quick approve": "Быстро одобрить",
+    "Detailed review": "Подробная проверка",
+    "Click Quick approve to confirm sharing permission and that the selected papers’ text, equations and figures are ready. Your confirmation is recorded automatically; no second popup.": "Нажимая «Быстро одобрить», вы подтверждаете разрешение на распространение и проверку текста, формул и рисунков выбранных статей. Подтверждение записывается автоматически, без дополнительного окна.",
+    "Permission for {count} papers without a supported license": "Разрешение для {count} статей без поддерживаемой лицензии",
+    "Author permission confirmed": "Разрешение автора подтверждено",
+    "Choose only permission you have verified. Recorded licenses are kept.": "Выбирайте только проверенное разрешение. Сохранённые лицензии не меняются."
   },
   "vi": {
     ". Public comments are reviewed.": "Bình luận công khai sẽ được kiểm duyệt.",
@@ -8401,6 +8461,12 @@
     "Ready for approval": "Sẵn sàng duyệt",
     "Review next selected paper": "Kiểm tra bài báo đã chọn tiếp theo",
     "Review checklist": "Danh sách kiểm tra",
-    "Publication is already in progress. Refresh the queue.": "Đang công bố. Vui lòng làm mới hàng đợi."
+    "Publication is already in progress. Refresh the queue.": "Đang công bố. Vui lòng làm mới hàng đợi.",
+    "Quick approve": "Duyệt nhanh",
+    "Detailed review": "Kiểm tra chi tiết",
+    "Click Quick approve to confirm sharing permission and that the selected papers’ text, equations and figures are ready. Your confirmation is recorded automatically; no second popup.": "Nhấn Duyệt nhanh để xác nhận quyền chia sẻ và rằng bạn đã kiểm tra văn bản, phương trình và hình của các bài đã chọn. Xác nhận được ghi tự động, không có hộp thoại thứ hai.",
+    "Permission for {count} papers without a supported license": "Quyền cho {count} bài chưa có giấy phép được hỗ trợ",
+    "Author permission confirmed": "Đã xác nhận quyền từ tác giả",
+    "Choose only permission you have verified. Recorded licenses are kept.": "Chỉ chọn quyền đã xác minh. Giấy phép đã ghi được giữ nguyên."
   }
 }
