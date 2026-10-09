@@ -7,7 +7,7 @@ superseding the earlier test-only instruction.
 | --- | --- | --- |
 | iOS / paired Apple Watch | 1.0.6 (27) | Waiting for Review |
 | Universal Mac | 1.0.6 (28) | Waiting for Review |
-| Google Play production | 1.0.6 (27) | Changes in review; automatic checks running |
+| Google Play production | 1.0.6 (27) | Changes in review; automatic checks passed |
 
 Apple will release automatically after approval. Google received the production
 change at 100% rollout across the existing targeted countries, with managed

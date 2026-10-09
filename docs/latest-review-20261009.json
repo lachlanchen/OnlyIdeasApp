@@ -1,5 +1,5 @@
 {
-  "verifiedAt": "2026-10-09T06:45:44.753629+00:00",
+  "verifiedAt": "2026-10-09T06:47:15.591985+00:00",
   "authorization": "Owner requested latest qualified fixes/builds submitted to Apple and Google on 9 October 2026; supersedes 7 October test-only direction.",
   "source": "e5cede252365bbbdf9976c35659025dddab7eeec",
   "nativeCandidatesReused": true,
@@ -68,12 +68,13 @@
     "version": "1.0.6",
     "build": 27,
     "reviewState": "CHANGES_IN_REVIEW",
-    "quickChecksRunning": true,
+    "quickChecksRunning": false,
     "managedPublishing": false,
     "rollout": 1,
     "availability": "All existing targeted countries",
     "submittedChange": "Production release only",
-    "verifiedAt": "2026-10-09T06:45:08.171Z"
+    "verifiedAt": "2026-10-09T06:47:02.555Z",
+    "quickChecksPassed": true
   },
   "checks": {
     "projectTests": 191,
