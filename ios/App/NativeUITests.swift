@@ -191,7 +191,8 @@ final class NativeUITests: XCTestCase {
   func testFinalStoreScreens() {
     continueAfterFailure = false
     let app = XCUIApplication()
-    app.launchArguments = ["-onlyideas.native.language","en","-onlyideas.native.appearance","light"]
+    // Existing DEBUG isolation skips stored account tokens and uses a public-only cache.
+    app.launchArguments = ["-onlyideas.native.language","en","-onlyideas.native.appearance","light","--onlyideas-mac-qa"]
     app.launch()
     let library = app.segmentedControls.buttons["Reading library"]
     XCTAssertTrue(library.waitForExistence(timeout:30))
@@ -208,6 +209,7 @@ final class NativeUITests: XCTestCase {
     shot("Store29-03-agent")
     app.buttons["Profile"].firstMatch.tap()
     XCTAssertTrue(app.navigationBars["Profile"].waitForExistence(timeout:10))
+    XCTAssertTrue(app.buttons["Sign in"].exists)
     shot("Store29-profile")
     app.buttons["Library"].firstMatch.tap();row.tap()
     XCTAssertTrue(app.webViews.staticTexts[title].waitForExistence(timeout:45))
