@@ -8,6 +8,13 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
+<!-- test29 -->
+**1.0.7 (29) · 2026-10-10**
+
+OnlyIdeas 1.0.7 (29)를 iOS/Watch 및 Mac TestFlight와 Google Play 내부 테스트에서 사용할 수 있습니다. 현재 화면을 반영한 스크린샷을 다음 스토어 업데이트용으로 준비했습니다. 공개 버전과 진행 중인 Mac 심사는 유지됩니다.
+
+[1.0.7 (29)](../docs/test-candidate-29.md) · [Screenshots](../store/screenshots/1.0.7-29/README.md)
+
 ## 정식 배포 · 2026년 10월 10일
 
 OnlyIdeas 1.0.6 (27)가 iOS/Watch와 Google Play에 공개되었습니다. Google 배포율은 100%입니다. Mac 1.0.6 (28)는 Apple 심사 중이며 승인 후 자동 공개됩니다. 현재 Mac 공개 버전은 1.0.5 (26)입니다. 모바일 버전에는 승인된 둥근 모서리 아이콘이 포함됩니다.

@@ -1,0 +1,125 @@
+{
+  "version": "1.0.7",
+  "build": 29,
+  "status": "staged for next review; not uploaded to production listings",
+  "capture": "Actual native UI and public papers; see README for device and QA scope",
+  "captureSources": {
+    "iphone": {
+      "build": 29,
+      "version": "1.0.7",
+      "source": "532f448",
+      "device": "OnlyIdeasStoreiPhone simulator on 7050",
+      "captured": "2026-10-10",
+      "verified": "XCTest passed; selected files visually inspected; no saved account token"
+    },
+    "macos": {
+      "build": 24,
+      "version": "1.0.4",
+      "source": "e08c39ef52ba1e31d6e5f25e6f574e2da8513d9b",
+      "device": "Mac mini native Catalyst app",
+      "captured": "2026-09-30",
+      "verified": "Preserved real public-paper QA; reader SwiftUI and renderer files unchanged through build29; reused screenshots are not a new Mac test"
+    },
+    "android": {
+      "build": 29,
+      "version": "1.0.7",
+      "source": "532f448",
+      "device": "OnlyIdeas_Review_API34 emulator, isolated art.onlyideas.app.screenshots data",
+      "captured": "2026-10-10",
+      "verified": "Real public library and paper; 33 cached reading pairs, 3 visible figures, no horizontal overflow; opaque alpha channel removed losslessly for 24-bit PNG"
+    }
+  },
+  "screenshots": [
+    {
+      "file": "android/01-discovery.png",
+      "width": 1080,
+      "height": 1920,
+      "sha256": "efc48bc1a1fbf97698b62e6d773a937c4d6cd7535e7d57bacb49d551b22e24c8",
+      "bytes": 180788
+    },
+    {
+      "file": "android/02-library.png",
+      "width": 1080,
+      "height": 1920,
+      "sha256": "9aacc68bfec3fe48821a67438bfa67733e9865015a7ac838907b7e459be62181",
+      "bytes": 175102
+    },
+    {
+      "file": "android/03-agent.png",
+      "width": 1080,
+      "height": 1920,
+      "sha256": "3efe9b1ff38d4ddc3076b7acb19edb1ca15e786a1af7d8e8d0db761f6a69cc46",
+      "bytes": 111781
+    },
+    {
+      "file": "android/04-reader.png",
+      "width": 1080,
+      "height": 1920,
+      "sha256": "45cfe5b751cc11ed0d1c88b1bcba30786b4d79de814e15baf915e5e9b690516b",
+      "bytes": 222616
+    },
+    {
+      "file": "android/05-equations.png",
+      "width": 1080,
+      "height": 1920,
+      "sha256": "29c613e73056940fa31feafab09aaeae58f89f52b3d4ff86653b8c8d19d838fc",
+      "bytes": 225527
+    },
+    {
+      "file": "android/06-interlaced.png",
+      "width": 1080,
+      "height": 1920,
+      "sha256": "587967522e96d69f8593ed59ffb145c76f4e9c82833a8241c3bc450351dda7fb",
+      "bytes": 249663
+    },
+    {
+      "file": "iphone/01-discovery.png",
+      "width": 1320,
+      "height": 2868,
+      "sha256": "47e4a9af635fbb0a0fa83dedd1ae730b6654510beab98ec13efa7b3b9cc198e4",
+      "bytes": 498102
+    },
+    {
+      "file": "iphone/02-library.png",
+      "width": 1320,
+      "height": 2868,
+      "sha256": "3a7cfe3cfcf758c258b87fd0172d1237e12baf9dca6a62f20afca0fdd0f1e715",
+      "bytes": 458325
+    },
+    {
+      "file": "iphone/03-agent.png",
+      "width": 1320,
+      "height": 2868,
+      "sha256": "1f6b363d81deb01c7e6c4295152914fabb1305833dbab64c3695f7274694fb74",
+      "bytes": 258570
+    },
+    {
+      "file": "iphone/04-reader.png",
+      "width": 1320,
+      "height": 2868,
+      "sha256": "a494df9769be93ab6f450f75aba9dc0a156be943448ac75f1cbb981bea7b76f3",
+      "bytes": 452079
+    },
+    {
+      "file": "macos/01-reader.png",
+      "width": 1280,
+      "height": 800,
+      "sha256": "327d8590724153f4ba73cf928d74b679fbbcadb1e28cbdcaa91ba35a0086f19c",
+      "bytes": 419081
+    },
+    {
+      "file": "macos/02-equations.png",
+      "width": 1280,
+      "height": 800,
+      "sha256": "4097bd109eb00e812baf545d1fb632317eee4d31b24a819ccbf6ac674116e73d",
+      "bytes": 618103
+    },
+    {
+      "file": "macos/03-interlaced.png",
+      "width": 1280,
+      "height": 800,
+      "sha256": "b8a857f17b12b5463448d0d1cb67629774ee734fa42930ceb3bf72bf461b188b",
+      "bytes": 405098
+    }
+  ]
+}

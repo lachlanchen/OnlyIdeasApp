@@ -8,6 +8,13 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
+<!-- test29 -->
+**1.0.7 (29) · 2026-10-10**
+
+OnlyIdeas 1.0.7 (29) ist in TestFlight für iOS/Watch und Mac sowie im internen Google-Play-Test verfügbar. Aktuelle Screenshots sind für das nächste Store-Update vorbereitet. Die öffentlichen Versionen und die laufende Mac-Prüfung bleiben erhalten.
+
+[1.0.7 (29)](../docs/test-candidate-29.md) · [Screenshots](../store/screenshots/1.0.7-29/README.md)
+
 ## Öffentliche Veröffentlichung · 10. Oktober 2026
 
 OnlyIdeas 1.0.6 (27) ist auf iOS/Watch und Google Play öffentlich verfügbar. Der Google-Rollout beträgt 100 %. Mac 1.0.6 (28) wird noch von Apple geprüft und nach der Freigabe automatisch veröffentlicht; öffentlich verfügbar ist Mac 1.0.5 (26). Die mobilen Versionen enthalten das freigegebene Icon mit abgerundeten Ecken.

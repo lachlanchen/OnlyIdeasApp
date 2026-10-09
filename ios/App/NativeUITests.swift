@@ -197,7 +197,8 @@ final class NativeUITests: XCTestCase {
     let library = app.segmentedControls.buttons["Reading library"]
     XCTAssertTrue(library.waitForExistence(timeout:30))
     XCTAssertTrue(app.buttons["Filters"].waitForExistence(timeout:15))
-    XCTAssertTrue(app.buttons["Fetch & read"].firstMatch.waitForExistence(timeout:45))
+    let discoveryAction = app.buttons.matching(NSPredicate(format:"label == %@ OR label == %@", "Open paper", "Fetch & read")).firstMatch
+    XCTAssertTrue(discoveryAction.waitForExistence(timeout:45))
     shot("Store29-01-discovery")
     library.tap()
     let title = "Measuring holographic entanglement entropy on a quantum simulator"
@@ -215,10 +216,12 @@ final class NativeUITests: XCTestCase {
     XCTAssertTrue(app.webViews.staticTexts[title].waitForExistence(timeout:45))
     XCTAssertTrue(app.webViews.buttons["Discuss paragraph"].firstMatch.waitForExistence(timeout:30))
     shot("Store29-04-reader")
-    app.webViews.firstMatch.swipeUp();shot("Store29-05-equations")
     app.buttons["Interlaced"].tap()
     let translated = app.webViews.staticTexts.matching(NSPredicate(format:"label CONTAINS %@","AI translation")).firstMatch
     XCTAssertTrue(translated.waitForExistence(timeout:30))
+    // Let the WebKit and native compositor finish the reading-mode transition.
+    // A scroll position alone is not evidence that an equation is on screen.
+    Thread.sleep(forTimeInterval:3)
     shot("Store29-06-interlaced")
     app.terminate()
   }

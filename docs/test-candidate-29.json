@@ -1,0 +1,76 @@
+{
+  "version": "1.0.7",
+  "build": 29,
+  "checkedAt": "2026-10-09T23:35:01.842731+00:00",
+  "source": "532f448",
+  "scope": "Internal testing only; screenshot assets staged, no new production review",
+  "apple": [
+    {
+      "platform": "MAC_OS",
+      "id": "1b9448f7-a932-4b97-b795-cb01396c1ccd",
+      "version": "1.0.7",
+      "build": "29",
+      "processing": "VALID",
+      "internal": "IN_BETA_TESTING"
+    },
+    {
+      "platform": "IOS",
+      "id": "82d81e13-0728-4aaa-bf31-8f0a869694a6",
+      "version": "1.0.7",
+      "build": "29",
+      "processing": "VALID",
+      "internal": "IN_BETA_TESTING"
+    }
+  ],
+  "google": {
+    "package": "art.onlyideas.app",
+    "track": "internal",
+    "release": "1.0.7 (29) - Current reader test",
+    "state": "Available to internal testers",
+    "production": "1.0.6 (27), 100% rollout; no unpublished changes"
+  },
+  "artifacts": {
+    "iosIpa": "1cd64eac4c0ef3a265fbb86c895c30597a0607a621627637ecad6ffd490f9e3b",
+    "macPkg": "6cfdfc479d8433338214e0f4656f824eed77f94f676733ee2f3ac5a4add8db0b",
+    "androidAab": "5cac91cab366c830121d65a9019076990c170a7299debe0249c50c1d86fc6cab",
+    "androidApk": "ad072aa1c75b5bdb5afe7c8630927d80b6a6a135e51c9ebead7a63356e682e9a"
+  },
+  "qualification": {
+    "tests": 194,
+    "failed": 0,
+    "rendererAndBuild": "passed",
+    "androidLint": "passed",
+    "appleSignaturesAndValidation": "passed",
+    "macArchitectures": [
+      "x86_64",
+      "arm64"
+    ],
+    "iphoneScreenshotTest": "passed",
+    "androidReader": {
+      "visibleEquations": 343,
+      "visibleFigures": 3,
+      "fits": true,
+      "pairs": 33,
+      "translated": true
+    },
+    "macScreenshots": "Reused verified build24 captures of unchanged reader; no new Mac UI run"
+  },
+  "productionApple": [
+    {
+      "platform": "MAC_OS",
+      "version": "1.0.6",
+      "state": "IN_REVIEW",
+      "releaseType": "AFTER_APPROVAL",
+      "buildId": "76fb95d9-ec2a-408b-aa1f-e77bea5e6fca",
+      "attachmentUnchanged": true
+    },
+    {
+      "platform": "IOS",
+      "version": "1.0.6",
+      "state": "READY_FOR_SALE",
+      "releaseType": "AFTER_APPROVAL",
+      "buildId": "03292f73-7605-4361-8304-8a63b8b6f129",
+      "attachmentUnchanged": true
+    }
+  ]
+}

@@ -8,6 +8,13 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
+<!-- test29 -->
+**1.0.7 (29) · 2026-10-10**
+
+OnlyIdeas 1.0.7 (29) 已提供 iOS/Watch、Mac TestFlight 和 Google Play 内部测试。已整理反映当前界面的截图，供下一次商店更新使用。正式版及正在进行的 Mac 审核保持不变。
+
+[1.0.7 (29)](../docs/test-candidate-29.md) · [Screenshots](../store/screenshots/1.0.7-29/README.md)
+
 ## 正式发布 · 2026年10月10日
 
 OnlyIdeas 1.0.6 (27) 已在 iOS/Watch 和 Google Play 正式发布，Google 推出比例为 100%。Mac 1.0.6 (28) 仍在 Apple 审核中，通过后自动发布；Mac 当前公开版本为 1.0.5 (26)。移动版包含已确认的圆角图标。

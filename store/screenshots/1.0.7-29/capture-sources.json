@@ -1,0 +1,26 @@
+{
+  "iphone": {
+    "build": 29,
+    "version": "1.0.7",
+    "source": "532f448",
+    "device": "OnlyIdeasStoreiPhone simulator on 7050",
+    "captured": "2026-10-10",
+    "verified": "XCTest passed; selected files visually inspected; no saved account token"
+  },
+  "macos": {
+    "build": 24,
+    "version": "1.0.4",
+    "source": "e08c39ef52ba1e31d6e5f25e6f574e2da8513d9b",
+    "device": "Mac mini native Catalyst app",
+    "captured": "2026-09-30",
+    "verified": "Preserved real public-paper QA; reader SwiftUI and renderer files unchanged through build29; reused screenshots are not a new Mac test"
+  },
+  "android": {
+    "build": 29,
+    "version": "1.0.7",
+    "source": "532f448",
+    "device": "OnlyIdeas_Review_API34 emulator, isolated art.onlyideas.app.screenshots data",
+    "captured": "2026-10-10",
+    "verified": "Real public library and paper; 33 cached reading pairs, 3 visible figures, no horizontal overflow; opaque alpha channel removed losslessly for 24-bit PNG"
+  }
+}
