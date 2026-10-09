@@ -1,0 +1,110 @@
+{
+  "verifiedAt": "2026-10-09T06:45:44.753629+00:00",
+  "authorization": "Owner requested latest qualified fixes/builds submitted to Apple and Google on 9 October 2026; supersedes 7 October test-only direction.",
+  "source": "e5cede252365bbbdf9976c35659025dddab7eeec",
+  "nativeCandidatesReused": true,
+  "apple": [
+    {
+      "app": "6816392935",
+      "platform": "IOS",
+      "version": "975f4ede-ab63-4cc2-a569-a9f2739431c0",
+      "build": "03292f73-7605-4361-8304-8a63b8b6f129",
+      "buildNumber": "27",
+      "marketing": "1.0.6",
+      "releaseType": "AFTER_APPROVAL",
+      "screenshots": [
+        {
+          "locale": "en-US",
+          "type": "APP_IPHONE_67",
+          "count": 5,
+          "complete": true
+        },
+        {
+          "locale": "en-US",
+          "type": "APP_WATCH_SERIES_10",
+          "count": 2,
+          "complete": true
+        },
+        {
+          "locale": "en-US",
+          "type": "APP_IPAD_PRO_3GEN_129",
+          "count": 3,
+          "complete": true
+        }
+      ],
+      "reviewerCredentialsVerified": true,
+      "reviewId": "5a5010ef-54e0-4cc3-b629-77c668f49bf0",
+      "reviewState": "WAITING_FOR_REVIEW",
+      "versionState": "WAITING_FOR_REVIEW",
+      "submittedAt": "2026-10-09T06:37:02.662Z",
+      "verifiedAt": "2026-10-09T06:40:14.234001+00:00"
+    },
+    {
+      "app": "6816392935",
+      "platform": "MAC_OS",
+      "version": "5ad8493d-49ec-47fd-a777-ff7e9f0a55e3",
+      "build": "76fb95d9-ec2a-408b-aa1f-e77bea5e6fca",
+      "buildNumber": "28",
+      "marketing": "1.0.6",
+      "releaseType": "AFTER_APPROVAL",
+      "screenshots": [
+        {
+          "locale": "en-US",
+          "type": "APP_DESKTOP",
+          "count": 6,
+          "complete": true
+        }
+      ],
+      "reviewerCredentialsVerified": true,
+      "reviewId": "faf370c8-069e-488b-92a8-82299a43c0b3",
+      "reviewState": "WAITING_FOR_REVIEW",
+      "versionState": "WAITING_FOR_REVIEW",
+      "submittedAt": "2026-10-09T06:37:18.689Z",
+      "verifiedAt": "2026-10-09T06:40:16.180866+00:00"
+    }
+  ],
+  "google": {
+    "appId": "4974173414823223936",
+    "version": "1.0.6",
+    "build": 27,
+    "reviewState": "CHANGES_IN_REVIEW",
+    "quickChecksRunning": true,
+    "managedPublishing": false,
+    "rollout": 1,
+    "availability": "All existing targeted countries",
+    "submittedChange": "Production release only",
+    "verifiedAt": "2026-10-09T06:45:08.171Z"
+  },
+  "checks": {
+    "projectTests": 191,
+    "rendererTypeScriptAndProductionBuild": true,
+    "androidArtifactsMatchPreviousInternalUpload": true,
+    "signedApplePackagesPreviouslyValidated": true,
+    "appleScreenshotsComplete": true,
+    "privateReviewerCredentialsReadback": true,
+    "nativeAuthenticationSourceMatchesOctober6Qualification": true,
+    "liveAnonymousPublicReading": {
+      "realPapers": 3,
+      "figuresAccessible": 10,
+      "transcriptCharacters": [
+        33881,
+        33520,
+        10500
+      ],
+      "newConversions": 0
+    }
+  },
+  "billing": "General subscription purchases remain disabled. No product, price, entitlement or provider activation changes.",
+  "release": "Automatic after approval; Google100 percent across existing targeted countries.",
+  "limits": [
+    "Review submission is not approval or public availability.",
+    "No new physical-device test or payment transaction in this submission.",
+    "Mac28 compact file picker compiled and signed successfully; no fresh installed-app picker interaction is claimed."
+  ],
+  "serverFixes": "Paper-agent relevance, canonical public-paper transcript/translation reuse and protected publication-review guidance are deployed; private content remains private.",
+  "publicAtPreflight": {
+    "ios": "1.0.5 (26)",
+    "macos": "1.0.5 (26)",
+    "android": "1.0.5 (25)"
+  }
+}

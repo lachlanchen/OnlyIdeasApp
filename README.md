@@ -8,11 +8,11 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
-## Rounded icon test builds · 7 October 2026
+## Latest submission · 9 October 2026
 
-Rounded icon corners are available in internal testing as 1.0.6 (27) on iOS/Watch, Mac and Android. No production review was submitted or replaced. Current reviews and public releases remain unchanged; this improvement is saved for the next review.
+OnlyIdeas 1.0.6 is submitted for review: iOS/Watch and Android build27, Mac build28. Apple shows Waiting for Review; Google shows Changes in review. The approved rounded icon is included, and Mac28 adds the compact attachment picker. Paper-agent, reuse and publication-review fixes are live on the server. Release is automatic after approval.
 
-[Test-build evidence](docs/rounded-icons-20261007.md)
+[Submission and verification](docs/latest-review-20261009.md)
 
 ## Public release and next update · 6 October 2026
 

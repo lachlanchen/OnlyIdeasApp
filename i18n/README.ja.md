@@ -8,11 +8,11 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
-## 角丸アイコンのテスト版 · 2026年10月7日
+## 最新の審査申請 · 2026年10月9日
 
-角丸アイコンを含む 1.0.6 (27) を、iOS/Watch・Mac・Android の内部テストで利用できます。製品版の審査申請や差し替えは行っていません。現在の審査と公開版を維持し、この改善は次回の審査にまとめます。
+OnlyIdeas 1.0.6 を審査に提出しました。iOS/Watch・Android は build27、Mac は build28 です。Apple は審査待ち、Google は変更を審査中です。角丸アイコンに加え、Mac28 は添付ファイル選択画面を小さくしました。論文エージェント、処理済みデータの再利用、公開審査の修正はサーバーに反映済みです。承認後に自動公開します。
 
-[テスト版の確認記録](../docs/rounded-icons-20261007.md)
+[申請と検証の記録](../docs/latest-review-20261009.md)
 
 ## 正式公開と次の更新 · 2026年10月6日
 

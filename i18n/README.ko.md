@@ -8,11 +8,11 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
-## 둥근 모서리 아이콘 테스트 빌드 · 2026년 10월 7일
+## 최신 심사 제출 · 2026년 10월 9일
 
-둥근 모서리 아이콘을 적용한 1.0.6 (27)을 iOS/Watch, Mac, Android 내부 테스트에서 사용할 수 있습니다. 정식 출시 심사를 새로 제출하거나 교체하지 않았습니다. 현재 심사와 공개 버전은 그대로 유지하며, 이 개선 사항은 다음 심사에 포함합니다.
+OnlyIdeas 1.0.6을 심사에 제출했습니다. iOS/Watch와 Android는 build27, Mac은 build28입니다. Apple은 심사 대기, Google은 변경사항 심사 중입니다. 둥근 아이콘과 Mac28의 작은 첨부 선택 창이 포함됩니다. 논문 에이전트, 처리 결과 재사용, 게시 심사 수정은 서버에 적용되었습니다. 승인 후 자동 출시됩니다.
 
-[테스트 빌드 확인 기록](../docs/rounded-icons-20261007.md)
+[제출 및 검증 기록](../docs/latest-review-20261009.md)
 
 ## 정식 출시 및 다음 업데이트 · 2026년 10월 6일
 

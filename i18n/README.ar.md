@@ -8,11 +8,11 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
-## إصدارات اختبار الأيقونات المستديرة · 7 أكتوبر 2026
+## آخر إرسال للمراجعة · 9 أكتوبر 2026
 
-تتوفر الأيقونات ذات الزوايا المستديرة للاختبار الداخلي في الإصدار 1.0.6 (27) على iOS/Watch وMac وAndroid. لم يُرسل أي إصدار لمراجعة الإنتاج ولم تُستبدل أي مراجعة. تبقى المراجعات الحالية والإصدارات العامة دون تغيير، ويُحفظ هذا التحسين للمراجعة القادمة.
+أُرسل OnlyIdeas 1.0.6 للمراجعة: build27 على iOS/Watch وAndroid، وbuild28 على Mac. حالة Apple: Waiting for Review؛ وحالة Google: Changes in review. يتضمن الأيقونة المستديرة ونافذة مرفقات أصغر على Mac28. إصلاحات المساعد وإعادة استخدام الأوراق ومراجعة النشر تعمل على الخادم. النشر تلقائي بعد الموافقة.
 
-[سجل إصدارات الاختبار](../docs/rounded-icons-20261007.md)
+[سجل الإرسال والتحقق](../docs/latest-review-20261009.md)
 
 ## الإصدار العام والتحديث القادم · 6 أكتوبر 2026
 

@@ -8,11 +8,11 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
-## Bản thử nghiệm biểu tượng bo góc · 7 tháng 10 năm 2026
+## Bản gửi mới nhất · 9 tháng 10 năm 2026
 
-Biểu tượng bo góc có trong bản thử nghiệm nội bộ 1.0.6 (27) trên iOS/Watch, Mac và Android. Không gửi mới hoặc thay thế bản xét duyệt phát hành chính thức nào. Các bản đang xét duyệt và bản công khai không thay đổi; cải tiến này được lưu cho lần xét duyệt tiếp theo.
+OnlyIdeas 1.0.6 đã được gửi xét duyệt: build27 cho iOS/Watch và Android, build28 cho Mac. Apple: Waiting for Review; Google: Changes in review. Có biểu tượng bo góc và cửa sổ chọn tệp gọn hơn trên Mac28. Các sửa lỗi trợ lý, tái sử dụng tài liệu và duyệt xuất bản đã được triển khai trên máy chủ. Tự động phát hành sau khi được chấp thuận.
 
-[Bằng chứng bản thử nghiệm](../docs/rounded-icons-20261007.md)
+[Gửi duyệt và kiểm chứng](../docs/latest-review-20261009.md)
 
 ## Phát hành và bản cập nhật tiếp theo · 6 tháng 10 năm 2026
 

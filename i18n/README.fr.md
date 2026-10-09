@@ -8,11 +8,11 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
-## Versions de test aux icônes arrondies · 7 octobre 2026
+## Dernier envoi · 9 octobre 2026
 
-Les icônes aux coins arrondis sont disponibles en test interne dans la version 1.0.6 (27) sur iOS/Watch, Mac et Android. Aucune version de production n’a été soumise ni remplacée pour examen. Les examens en cours et les versions publiques restent inchangés ; cette amélioration est conservée pour le prochain examen.
+OnlyIdeas 1.0.6 a été envoyé en examen : build27 pour iOS/Watch et Android, build28 pour Mac. Apple : Waiting for Review ; Google : Changes in review. L’icône arrondie et le sélecteur de fichiers compact de Mac28 sont inclus. Les corrections de l’agent, de la réutilisation et de la modération des publications sont actives sur le serveur. Publication automatique après validation.
 
-[Vérification des versions de test](../docs/rounded-icons-20261007.md)
+[Envoi et vérification](../docs/latest-review-20261009.md)
 
 ## Publication et prochaine mise à jour · 6 octobre 2026
 

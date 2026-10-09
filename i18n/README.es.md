@@ -8,11 +8,11 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
-## Versiones de prueba con iconos redondeados · 7 de octubre de 2026
+## Último envío · 9 de octubre de 2026
 
-Los iconos con esquinas redondeadas están disponibles para pruebas internas en 1.0.6 (27) para iOS/Watch, Mac y Android. No se ha enviado ni sustituido ninguna revisión de producción. Las revisiones actuales y las versiones públicas siguen sin cambios; esta mejora se reserva para la próxima revisión.
+OnlyIdeas 1.0.6 se envió a revisión: build27 para iOS/Watch y Android, build28 para Mac. Apple: Waiting for Review; Google: Changes in review. Incluye el icono redondeado y un selector de archivos compacto en Mac28. Las correcciones del agente, la reutilización y la revisión de publicaciones ya están en el servidor. Publicación automática tras la aprobación.
 
-[Evidencia de las versiones de prueba](../docs/rounded-icons-20261007.md)
+[Envío y verificación](../docs/latest-review-20261009.md)
 
 ## Publicación y próxima actualización · 6 de octubre de 2026
 

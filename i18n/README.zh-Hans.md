@@ -8,11 +8,11 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
-## 圆角图标测试版 · 2026年10月7日
+## 最新审核提交 · 2026年10月9日
 
-iOS/Watch、Mac 和 Android 的内部测试版 1.0.6 (27) 已包含圆角图标适配。没有新增或替换正式版审核。现有审核和公开版本保持不变，此项改进留待下次审核时一并提交。
+OnlyIdeas 1.0.6 已提交审核：iOS/Watch 和 Android 为 build27，Mac 为 build28。Apple 显示等待审核，Google 显示更改审核中。包含确认的圆角图标，Mac28 新增紧凑的附件选择窗口。论文助手、重复处理复用和发布审核修复已在服务器上线，通过后自动发布。
 
-[测试版本验证记录](../docs/rounded-icons-20261007.md)
+[提交及验证记录](../docs/latest-review-20261009.md)
 
 ## 正式发布与下一次更新 · 2026年10月6日
 

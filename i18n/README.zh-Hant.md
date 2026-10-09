@@ -8,11 +8,11 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
-## 圓角圖示測試版 · 2026年10月7日
+## 最新審核提交 · 2026年10月9日
 
-iOS/Watch、Mac 和 Android 的內部測試版 1.0.6 (27) 已包含圓角圖示適配。沒有新增或替換正式版審核。現有審核和公開版本維持不變，此項改進留待下次審核時一併提交。
+OnlyIdeas 1.0.6 已提交審核：iOS/Watch 和 Android 為 build27，Mac 為 build28。Apple 顯示等待審核，Google 顯示變更審核中。包含確認的圓角圖示，Mac28 新增精簡的附件選擇視窗。論文助手、重複處理重用和發布審核修正已在伺服器上線，通過後自動發布。
 
-[測試版本驗證記錄](../docs/rounded-icons-20261007.md)
+[提交及驗證紀錄](../docs/latest-review-20261009.md)
 
 ## 正式發布與下一次更新 · 2026年10月6日
 

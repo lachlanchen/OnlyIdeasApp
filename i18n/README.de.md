@@ -8,11 +8,11 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
-## Testversionen mit abgerundeten Symbolen · 7. Oktober 2026
+## Neueste Einreichung · 9. Oktober 2026
 
-Abgerundete App-Symbole stehen mit 1.0.6 (27) für interne Tests auf iOS/Watch, Mac und Android bereit. Es wurde keine neue Produktionsprüfung eingereicht oder eine laufende Prüfung ersetzt. Laufende Prüfungen und öffentliche Versionen bleiben unverändert; diese Verbesserung wird für die nächste Prüfung vorgemerkt.
+OnlyIdeas 1.0.6 wurde zur Prüfung eingereicht: Build27 für iOS/Watch und Android, Build28 für Mac. Apple: Waiting for Review; Google: Changes in review. Enthalten sind das abgerundete Symbol und unter Mac28 die kompakte Dateiauswahl. Korrekturen am Rechercheassistenten, an der Wiederverwendung und an der Veröffentlichungsprüfung sind auf dem Server aktiv. Veröffentlichung automatisch nach Freigabe.
 
-[Nachweise der Testversionen](../docs/rounded-icons-20261007.md)
+[Einreichung und Prüfung](../docs/latest-review-20261009.md)
 
 ## Veröffentlichung und nächstes Update · 6. Oktober 2026
 
