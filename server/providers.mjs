@@ -1,4 +1,5 @@
 import {reserveSubscriptionQuota,finishSubscriptionQuota} from './subscription-quota.mjs';
+import {publicationFingerprint} from './publication-review.mjs';
 import {transcriptTitle} from './paper-metadata.mjs';
 import {inspectPaperIdentity} from './pdf-identity.mjs';
 import {verifySourceLicense} from './source-license.mjs';
@@ -161,6 +162,7 @@ export async function publishPaper(job, config, store) {
   requireValue(job.reviewed === true, 'Public papers require community review.', 403);
   const p = store.paper(job.paperId);
   requireValue(p?.owner === job.owner, 'Only the owner can publish this paper.', 403);
+  requireValue(job.reviewFingerprint===publicationFingerprint(p),'The paper changed after review. An administrator must review it again.',409);
   const repo = config.github?.repository, token = config.github?.contentToken;
   requireValue(repo === 'lachlanchen/OnlyIdeas-papers' && (token || config.github?.checkout), 'The public library connection is not configured yet.', 503);
   if (config.github.checkout) return publishWithGit(p, config, store);

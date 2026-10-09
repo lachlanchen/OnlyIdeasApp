@@ -7,6 +7,7 @@ import { hash, sections, requireValue } from './domain.mjs';
 import { initCredits, creditTransaction } from './credits.mjs';
 import { initBilling } from './billing-ledger.mjs';
 import { initImportReuse, indexPaper } from './import-reuse.mjs';
+import { initPublicationReview } from './publication-review.mjs';
 export class Store {
   constructor(directory) {
     mkdirSync(directory, { recursive: true, mode: 0o700 });
@@ -37,6 +38,7 @@ export class Store {
     initCredits(this);
     initReadingSpace(this);
     initBilling(this);
+    initPublicationReview(this);
     creditTransaction(this, () => initImportReuse(this));
     this.db.exec('COMMIT');
     } catch(error) { try {this.db.exec('ROLLBACK')} finally {this.db.close()} throw error; }

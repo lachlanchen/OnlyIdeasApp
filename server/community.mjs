@@ -3,6 +3,8 @@ import { join } from 'node:path';
 import { hash, requireValue, mayPublish } from './domain.mjs';
 import { deleteCredits } from './credits.mjs';
 import { deleteBillingAccount } from './billing-ledger.mjs';
+import {publicationFingerprint} from './publication-review.mjs';
+import {randomUUID} from 'node:crypto';
 
 export const termsVersion = '2026-09-27';
 
@@ -22,6 +24,7 @@ export async function deleteAccount(store, user) {
       if (db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?").get(table)) db.prepare(`DELETE FROM ${table} WHERE owner=?`).run(user.id);
     }
     for (const paper of papers) {
+      db.prepare('DELETE FROM publication_reviews WHERE paper=?').run(paper.id);
       db.prepare('DELETE FROM paper_import_keys WHERE paper=?').run(paper.id);
       if(db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='translation_pieces'").get())db.prepare('DELETE FROM translation_pieces WHERE paper=?').run(paper.id);
       db.prepare('DELETE FROM artifact_requests WHERE paper=?').run(paper.id);
@@ -77,10 +80,13 @@ export function moderate(store, action, id) {
   } else if (action === 'approve-paper' || action === 'reject-paper') {
     const j = store.job(id);
     requireValue(j?.kind === 'publish' && j.state === 'awaiting_review', 'Publication is not waiting for review.');
-    if (action === 'approve-paper') { const paper=store.paper(j.paperId); requireValue(paper, 'Paper not found.'); mayPublish(paper, true); }
+    const paper=store.paper(j.paperId);requireValue(paper,'Paper not found.');
+    if (action === 'approve-paper') { mayPublish(paper, true);j.reviewFingerprint=publicationFingerprint(paper); }
     j.state = action === 'approve-paper' ? 'queued' : 'failed';
-    j.reviewed = true; j.message = action === 'approve-paper' ? 'Approved for publication' : 'Publication was declined. Contact support for details.';
-    store.saveJob(j);
+    j.reviewed = action==='approve-paper';j.reviewDecision=j.reviewed?'approve':'reject'; j.message = action === 'approve-paper' ? 'Approved for publication' : 'Publication was declined. Contact support for details.';
+    paper.sharing=j.reviewed?'publishing':'declined';store.savePaper(paper);store.saveJob(j);
+    const event={id:randomUUID(),job:j.id,paper:paper.id,reviewer:'operator-cli',created:Date.now(),action:j.reviewDecision,revision:paper.revision,fingerprint:publicationFingerprint(paper)};
+    db.prepare('INSERT INTO publication_reviews VALUES(?,?,?,?,?,?)').run(event.id,j.id,paper.id,event.reviewer,event.created,JSON.stringify(event));
   } else if (action === 'suspend') {
     db.prepare('INSERT OR IGNORE INTO suspensions VALUES(?,?)').run(id, Date.now());
     db.prepare("DELETE FROM sessions WHERE json_extract(user,'$.id')=?").run(id);

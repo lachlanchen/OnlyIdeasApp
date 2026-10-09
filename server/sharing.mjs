@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { publicationFingerprint, publicationState } from './publication-review.mjs';
 
 // Curated source metadata. Approval still requires review of the converted paper
 // and all figures; an open URL alone never establishes redistribution permission.
@@ -20,9 +21,9 @@ export function requestSharing(store, paper, sharing = 'private') {
   }
   const origin=store.job(paper.id);
   const verified=origin?.owner===paper.owner&&!origin.uploadSource&&origin.sourceLicense?.verification==='indexed-source-license'&&origin.sourceLicense.license===paper.license;
-  paper.sharing = verified?'publishing':'awaiting_review'; store.savePaper(paper);
   const dedupe = `publish:${paper.id}:${paper.revision}`;
   const existing = store.existing(paper.owner, dedupe);
+  paper.sharing=existing?publicationState(paper,existing):verified?'publishing':'awaiting_review';store.savePaper(paper);
   if (existing) return existing;
-  return store.saveJob({ id: randomUUID(), owner: paper.owner, kind: 'publish', paperId: paper.id, dedupe, created: Date.now(), state: verified?'queued':'awaiting_review', reviewed:!!verified, message: verified?'Sharing the verified open-access paper':proof ? 'Shared library · waiting for source and community review' : 'Shared library · source permission needs review before publication' });
+  return store.saveJob({ id: randomUUID(), owner: paper.owner, kind: 'publish', paperId: paper.id, dedupe, created: Date.now(), state: verified?'queued':'awaiting_review', reviewed:!!verified, ...(verified?{reviewFingerprint:publicationFingerprint(paper)}:{}), message: verified?'Sharing the verified open-access paper':'An OnlyIdeas administrator will review sharing permission and content before publication' });
 }

@@ -1,5 +1,6 @@
 import {paperSegments,segmentSource,readingView} from './translation-pieces.mjs';
 import {libraryPapers} from './library-search.mjs';
+import {createPublicationReview,isReviewer,paperReviewStatus} from './publication-review.mjs';
 import {uploadContext,activeRecovery,bindRecovery,canUploadForJob,recoveryJob} from './import-recovery.mjs';
 import {unlimitedAllowance,countsAsRequest} from './allowances.mjs';
 import {createReadingSpace,recordActivity} from './reading-space.mjs';
@@ -41,6 +42,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
   const space=createReadingSpace(store,social,discovery);
   const apple = createAppleAuth(store, config, provider);
   const billing = createBilling(store,config,billingOptions);
+  const reviews = createPublicationReview(store,config);
   const limits = new Map();
   const response = (res, data, code = 200) => { res.writeHead(code, { 'Content-Type': 'application/json; charset=utf-8' }); res.end(JSON.stringify(data)); };
   const readBody = async (req, max = 100_000) => {
@@ -126,6 +128,23 @@ export function createApp(store, config, { worker = true, provider = providerJSO
       }
       const paperFor = id => { const p = store.paper(id); requireValue(p && store.active(p.owner) && !store.blocked(user?.id, p.owner) && (p.visibility === 'public' || p.owner === user?.id), 'Paper not found.', 404); return p; };
       if (path.startsWith('/api/')) limit(user?.id || req.socket.remoteAddress, 240);
+      if (path.startsWith('/api/admin/')) {
+        reviews.authorized(user);
+        if(path==='/api/admin/publications'&&method==='GET')return response(res,reviews.list(user,Object.fromEntries(url.searchParams)));
+        if(path==='/api/admin/publications/batch'&&method==='POST') {
+          limit(`review:${user.id}`,20);
+          requireValue(config.github?.contentToken || config.github?.checkout,'The public library connection is not configured yet.',503);
+          return response(res,reviews.decide(user,await json(req)));
+        }
+        const review=path.match(/^\/api\/admin\/publications\/([\w-]+)(?:\/(figures\/[\w.-]+))?$/);
+        if(review&&['GET','HEAD'].includes(method)) {
+          if(!review[2])return response(res,reviews.detail(user,review[1]));
+          const p=reviews.asset(user,review[1],review[2]);
+          const bytes=await readFile(join(store.directory,'papers',p.id,review[2]));
+          res.writeHead(200,{'Content-Type':mime[extname(review[2])]||'application/octet-stream'});return res.end(method==='HEAD'?undefined:bytes);
+        }
+        throw new AppError('Not found.',404);
+      }
       if (['/api/saved','/api/liked'].includes(path) && method === 'GET') { requireUser();return response(res,{papers:social.saved(user,path==='/api/liked'?'liked':'saved')}); }
       if(path==='/api/preferences'){requireUser();if(method==='GET')return response(res,{preferences:space.preferences(user)});if(method==='PUT')return response(res,{preferences:space.savePreferences(user,await json(req))});}
       if(path==='/api/activity'&&method==='GET'){requireUser();return response(res,space.history(user));}
@@ -175,7 +194,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         requireValue(native, 'Open sign-in from the app.', 403);
         const b = await json(req); return response(res, redeemNative(store, b.flow, b.verifier));
       }
-      if (path === '/api/session' && method === 'GET') return response(res, { user, development: !!config.development, capabilities: { login: !!config.github?.clientId, apple: apple.enabled, pdf: !!config.mathpix?.appKey, assistant: !!config.model?.url, publishing: !!(config.github?.contentToken || config.github?.checkout) }, languages, maxPages: config.maxPages || 30 });
+      if (path === '/api/session' && method === 'GET') return response(res, { user, development: !!config.development, capabilities: { login: !!config.github?.clientId, apple: apple.enabled, pdf: !!config.mathpix?.appKey, assistant: !!config.model?.url, publishing: !!(config.github?.contentToken || config.github?.checkout), publicationReview:isReviewer(store,config,user) }, languages, maxPages: config.maxPages || 30 });
       if (path === '/api/auth/local' && method === 'POST') {
         requireValue(config.development && ['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(req.socket.remoteAddress), 'Not available.', 404);
         const local = { id: 'local-reader', name: 'Local reader', login: 'local-reader' };
@@ -245,7 +264,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         res.setHeader('Set-Cookie', [cookie(cookieName, store.createSession(u), 90 * 86400), cookie(`${cookieName}-oauth`, '', 0)]);
         res.writeHead(303, { Location: '/' }); return res.end();
       }
-      if (path === '/api/papers' && method === 'GET') return response(res, { papers: libraryPapers(store,user).map(publicPaper) });
+      if (path === '/api/papers' && method === 'GET') return response(res, { papers: libraryPapers(store,user).map(p=>({...publicPaper(p),...(p.owner===user?.id?{review:paperReviewStatus(store,p)}:{})})) });
       if (path === '/api/papers/markdown' && method === 'POST') {
         requireUser(); const data = await json(req); limit(`import:${user.id}`, 10);
         requireValue(uuid.test(data.requestId || ''), 'A request ID is required.');
@@ -308,7 +327,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
       if (matchPaper) {
         const p = paperFor(matchPaper[1]), action = matchPaper[2];
         if(action==='reading'&&method==='GET')return response(res,readingView(store,p,user,url.searchParams.get('language')||'en'));
-        if (!action && method === 'GET') return response(res, { paper: { ...p, isOwner: p.owner === user?.id, owner: undefined } });
+        if (!action && method === 'GET') return response(res, { paper: { ...p, isOwner: p.owner === user?.id, owner: undefined, ...(p.owner===user?.id?{review:paperReviewStatus(store,p)}:{}) } });
         if(action==='segments'&&method==='GET')return response(res,{segments:paperSegments(p.mmd,p.language).filter(s=>s.display.length>=30&&s.translatable).map(s=>({...s,text:s.display,sentences:s.sentences.filter(x=>x.display).map(x=>({...x,text:x.display}))}))});
         if (action === 'export' && method === 'GET') { res.writeHead(200, { 'Content-Type': 'text/markdown; charset=utf-8', 'Content-Disposition': `attachment; filename="${p.id}.mmd"` }); return res.end(p.mmd); }
         if (action === 'comments' && method === 'GET') return response(res, { comments: visibleComments(store, p.id, user) });
@@ -342,9 +361,12 @@ export function createApp(store, config, { worker = true, provider = providerJSO
           requireUser(); requireValue(p.owner === user.id, 'Only the owner can publish.', 403); const b = await json(req);
           requireValue(config.github?.contentToken || config.github?.checkout, 'The public library connection is not configured yet.', 503);
           acceptTerms(store, user, b.acceptTerms);
-          p.license = b.license; p.source = String(b.source || ''); mayPublish(p, b.attestation); store.savePaper(p);
+          const previous=store.existing(p.owner,`publish:${p.id}:${p.revision}`);
+          requireValue(p.visibility!=='public'&&!['queued','running'].includes(previous?.state),'This paper is already shared or publishing.',409);
+          p.license = b.license; p.source = String(b.source || ''); mayPublish(p, b.attestation); p.sharing='awaiting_review';store.savePaper(p);
           const job = enqueue(user, { kind: 'publish', paperId: p.id, dedupe: `publish:${p.id}:${p.revision}` });
-          if (job.state === 'queued') { job.state = 'awaiting_review'; job.message = 'Waiting for a community review before public sharing'; store.saveJob(job); }
+          job.state='awaiting_review';job.reviewed=false;delete job.reviewFingerprint;delete job.reviewDecision;
+          job.message='Waiting for an OnlyIdeas administrator to review sharing permission and content';store.saveJob(job);
           return response(res, { job }, 202);
         }
       }
@@ -389,7 +411,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
       if (path.startsWith('/api/') || path.startsWith('/content/')) throw new AppError('Not found.', 404);
       if (method === 'GET' || method === 'HEAD') {
         requireValue(config.webRoot, 'The web app has not been built yet.', 503);
-        const target = path === '/' ? '/index.html' : path;
+        const target = ['/', '/admin'].includes(path) ? '/index.html' : path;
         requireValue(/^\/[\w./-]+$/.test(target) && !target.includes('..'), 'Invalid path.');
         const filename = resolve(config.webRoot, `.${target}`);
         const bytes = await readFile(filename).catch(() => { throw new AppError('Not found.', 404); });

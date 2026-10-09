@@ -16,7 +16,7 @@ function loadRenderer() {
     document.head.append(script)
   })
 }
-export function ReaderContent({ paper, reading, mode='original', onSelection, onSection, onParagraph }: { paper: Paper; reading?:ReadingView; mode?:ReadingMode; onSelection?: (quote: string, section: string) => void; onSection?: (section: string) => void; onParagraph?:(quote:string,id:string)=>void }) {
+export function ReaderContent({ paper, reading, mode='original', assetBase, onSelection, onSection, onParagraph }: { paper: Paper; assetBase?:string; reading?:ReadingView; mode?:ReadingMode; onSelection?: (quote: string, section: string) => void; onSection?: (section: string) => void; onParagraph?:(quote:string,id:string)=>void }) {
   const ref = useRef<HTMLDivElement>(null)
   const currentMode = useRef(mode)
   currentMode.current = mode
@@ -34,19 +34,19 @@ export function ReaderContent({ paper, reading, mode='original', onSelection, on
       if(onParagraph)paragraphActions(container,t('Discuss paragraph'),onParagraph)
       if(reading)pairReading(container,reading,renderText,{source:languageNames[paper.language]||paper.language,translation:(languageNames[reading.language]||reading.language)+' · '+t('AI translation'),partial:t('Remaining passages use the original.')})
       const template = document.createElement('template');template.content.append(...Array.from(container.childNodes))
-      const saved = await downloadedPaper(paper.id, (await offlineSession())?.user?.id)
+      const saved = assetBase ? undefined : await downloadedPaper(paper.id, (await offlineSession())?.user?.id)
       for (const img of template.content.querySelectorAll('img')) {
         const path = img.getAttribute('src')?.replace(/^\.\//, '')
         if (!path || !paper.assets.some(a => a.path === path)) { img.replaceWith(document.createTextNode('[Figure unavailable in this version]')); continue }
         const cached = saved?.paper.revision === paper.revision ? saved.figures[path] : undefined
         if (native || cached) {
           try {
-            const blob = cached || await request(`/content/${paper.id}/${path}`).then(r => { if (!r.ok) throw new Error(); return r.blob() })
+            const blob = cached || await request(`${assetBase || `/content/${paper.id}`}/${path}`).then(r => { if (!r.ok) throw new Error(); return r.blob() })
             if (!active) return
             if (!blob) throw new Error('Figure unavailable')
             const url = URL.createObjectURL(blob); objectURLs.push(url); img.src = url
           } catch { img.replaceWith(document.createTextNode('[Figure unavailable. Connect and reopen this paper.]')); continue }
-        } else img.src = `/content/${paper.id}/${path}`
+        } else img.src = `${assetBase || `/content/${paper.id}`}/${path}`
         img.removeAttribute('style'); img.removeAttribute('width'); img.removeAttribute('height')
         img.loading = 'lazy'; img.decoding = 'async'
       }
@@ -77,7 +77,7 @@ export function ReaderContent({ paper, reading, mode='original', onSelection, on
       ref.current.dataset.readingMode=currentMode.current
     }).catch(() => { if (active) setError(t("The equation renderer could not load. Reload to try again; the original text is below.")) })
     return () => { active = false; objectURLs.forEach(url => URL.revokeObjectURL(url)) }
-  }, [paper,reading])
+  }, [paper,reading,assetBase])
   useEffect(()=>{if(ref.current)readingMode(ref.current,mode)},[mode])
   function select() {
     const selection = window.getSelection(), text = selection?.toString().trim() || ''
