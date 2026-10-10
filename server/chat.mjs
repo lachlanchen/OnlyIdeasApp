@@ -1,3 +1,5 @@
+import {sharingConsent} from './sharing-consent.mjs';
+import {compactChatHistory} from './chat-context.mjs';
 import {libraryCards} from './library-search.mjs';
 import {unlimitedAllowance} from './allowances.mjs';
 import { paperMetadata } from './paper-metadata.mjs';
@@ -48,7 +50,6 @@ export function createChats(store, config, agentActions) {
         const ids=body.attachments||[];requireValue(Array.isArray(ids)&&ids.length<=3&&ids.every(a=>typeof a==='string'),'Attach up to three files.');
         for(const id of ids)attachment(store,id,user.id);requireValue(body.text.trim()||ids.length,'Write a message or attach a file.');
         const text=body.text.trim()||'Help me understand these files.';
-        requireValue(messages(id).length < 200, 'Start a new conversation to continue.');
         const taskId = queue(id,user,{ kind:'chat', text, attachments:ids, language:Object.hasOwn(languages,body.language)?body.language:'en',agentActions:body.agentActions===true,sharing:body.sharing==='private'?'private':'shared' }); add(id,'user',{text,attachmentIds:ids});
         if (chat.title === 'New conversation') db.prepare('UPDATE chats SET title=? WHERE id=?').run(text.slice(0,70),id);
         return { taskId, queued:true };
@@ -60,7 +61,7 @@ export function createChats(store, config, agentActions) {
         const sourceURL=card.pdfUrl||card.source;requireValue(sourceURL,'Open the source or upload your copy.');
         // Existing queue enforces deduplication, account quotas and Mathpix page caps.
         const sharing=body.sharing==='private'?'private':'shared';
-        const job = enqueue(user,{ kind:'import', sharing, creditLimit:body.creditLimit, url:sourceURL, sourcePage:card.source,downloadSources:card.downloadSources||[],discoveryId:card.id,metadata:{...paperMetadata(card),title:card.title,authors:card.authors,language:'en',license:'private',category:'Research'}, dedupe:`import:${hash(sourceURL)}` });
+        const job = enqueue(user,{ kind:'import', sharing, sharingConsent:sharingConsent(body.sharingConsent,sharing), creditLimit:body.creditLimit, url:sourceURL, sourcePage:card.source,downloadSources:card.downloadSources||[],discoveryId:card.id,metadata:{...paperMetadata(card),title:card.title,authors:card.authors,language:'en',license:'private',category:'Research'}, dedupe:`import:${hash(sourceURL)}` });
         if (job.paperId && sharing === 'shared') { const p=store.paper(job.paperId); if(p?.owner===user.id)requestSharing(store,p,'shared'); }
         add(id,'assistant',{text:job.reused ? 'This paper is already available. Open the existing paper; its text, figures and available translations are reused. Your chat and notes stay private.' : sharing === 'private' ? 'The paper is saved to your private library after conversion.' : 'The paper will be added to the shared reading room after source and community review. Your chat and notes stay private.',jobId:job.id});
         return { job };
@@ -82,7 +83,7 @@ export function createChats(store, config, agentActions) {
         const history=messages(row.chat).slice(-16), ids=[...new Set(history.flatMap(m=>(m.attachments||[]).filter(a=>a.state==='ready').map(a=>a.id)))].slice(-6);
         let budget=60_000;
         const documents=ids.map(id=>{const a=attachment(store,id,row.owner),p=store.paper(a.paperId);if(!canReusePaper(store,p,row.owner))return null;const text=p.mmd.slice(0,Math.min(20_000,budget));budget-=text.length;return {name:a.name,text,truncated:text.length<p.mmd.length};}).filter(Boolean);
-        db.exec('COMMIT');return {task:{id:row.id,lease:body.lease,text:body.text,language:body.language,sharing:body.sharing,agentActions:body.agentActions===true,hasNewAttachments:files.length>0,documents,library:libraryCards(store,{id:row.owner}),messages:history.map(m=>({role:m.role,text:m.text,papers:m.papers,actions:m.actions}))}};
+        db.exec('COMMIT');return {task:{id:row.id,lease:body.lease,text:body.text,language:body.language,sharing:body.sharing,agentActions:body.agentActions===true,hasNewAttachments:files.length>0,documents,library:libraryCards(store,{id:row.owner}),messages:compactChatHistory(history)}};
       }
       db.exec('COMMIT');return {task:null};
       } catch(e){db.exec('ROLLBACK');throw e;}

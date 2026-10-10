@@ -42,7 +42,7 @@ struct NativeReadingApp: View {
       TabView(selection: $tab) {
         NavigationView { NativeLibrary(profile: { tab = 2 }) }.id(store.account?.id ?? "public")
           .navigationViewStyle(.stack).modifier(MacTabBarHidden()).tag(0)
-        NavigationView { NativeAgent() }.navigationViewStyle(.stack)
+        NavigationView { NativeAgent(isActive: tab == 1) }.navigationViewStyle(.stack)
           .modifier(MacTabBarHidden()).tag(1)
         NavigationView { NativeReadingSpace(initialSection:spaceSection) }.navigationViewStyle(.stack).modifier(MacTabBarHidden()).tag(3)
         NavigationView { NativeProfile() }.navigationViewStyle(.stack)
@@ -55,7 +55,7 @@ struct NativeReadingApp: View {
         .navigationViewStyle(.stack).tabItem {
           Label(T("Library"), systemImage: "books.vertical")
         }.tag(0)
-      NavigationView { NativeAgent() }.navigationViewStyle(.stack).tabItem {
+      NavigationView { NativeAgent(isActive: tab == 1) }.navigationViewStyle(.stack).tabItem {
         Label(T("Agent"), systemImage: "bubble.left.and.bubble.right")
       }.tag(1)
       NavigationView { NativeReadingSpace(initialSection:spaceSection) }.navigationViewStyle(.stack).tabItem {Label(T("Your space"),systemImage:"tray")}.badge(store.inboxUnread).tag(3)
@@ -81,11 +81,12 @@ struct NativeReadingApp: View {
     .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
       Task { await store.resumeSignIn() }
     }
+    .onChange(of:tab){_ in dismissReadingKeyboard()}
     .onChange(of:store.account?.id){id in if id==nil {ReadingReminder.cancel();store.inboxUnread=0}}
     .onReceive(Timer.publish(every:30,on:.main,in:.common).autoconnect()){_ in guard let id=store.account?.id,UIApplication.shared.applicationState == .active else{return};Task{if let r=try? await store.json("/api/inbox"),store.account?.id==id {store.inboxUnread=r["unread"]as?Int ?? 0}}}
     .onReceive(NotificationCenter.default.publisher(for:Notification.Name("OnlyIdeas.OpenSpace"))){_ in spaceSection="daily";tab=3;UserDefaults.standard.removeObject(forKey:"onlyideas.open.daily")}
     .onReceive(NotificationCenter.default.publisher(for:Notification.Name("OnlyIdeas.Ask"))){event in
-      guard let text=event.object as? String else{return};tab=1;Task{store.newConversation();await store.send(text)}
+      guard let text=event.object as? String else{return};tab=1;Task{await store.resumeConversation();await store.send(text)}
     }
     .onAppear{if UserDefaults.standard.bool(forKey:"onlyideas.open.daily"){spaceSection="daily";tab=3;UserDefaults.standard.removeObject(forKey:"onlyideas.open.daily")}}
     #if DEBUG
@@ -170,6 +171,12 @@ struct NativeLibrary: View {
           Label(T("Offline · cached papers"), systemImage: "arrow.down.circle.fill").font(.body)
             .foregroundColor(.secondary)
         }
+        HStack(spacing: 8) {
+          Image(systemName: "magnifyingglass").foregroundColor(.secondary)
+          TextField(T("Find a paper or ask to fetch it…"), text: $query)
+            .textInputAutocapitalization(.never).disableAutocorrection(true)
+          if !query.isEmpty { Button { query = "" } label: { Image(systemName: "xmark.circle.fill").foregroundColor(.secondary) }.accessibilityLabel(T("Clear")) }
+        }.padding(11).background(Color(.secondarySystemGroupedBackground)).cornerRadius(12)
         Picker(T("Library"),selection:$browseResearch){Text(T("Research for you")).tag(true);Text(T("Reading library")).tag(false)}.pickerStyle(.segmented)
         if !query.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty {
           Button {NotificationCenter.default.post(name:Notification.Name("OnlyIdeas.Ask"),object:query)} label:{Label(T("Ask the agent"),systemImage:"arrow.up.message").frame(maxWidth:.infinity,alignment:.leading)}.buttonStyle(.bordered)
@@ -211,7 +218,7 @@ struct NativeLibrary: View {
         if let id = event.object as? String, store.papers.contains(where: { $0.id == id }) { browseResearch=false;selectedPaper = id }
       }
       #endif
-      .searchable(text: $query, prompt:T("Find a paper or ask to fetch it…"))
+      .modifier(ReadingKeyboardDismiss())
       .toolbar {
         ToolbarItem(placement:.navigationBarLeading) {
           Button {options=true} label: {Text(T(store.sharedImports ? "Shared":"Only me")).font(.subheadline.weight(.semibold)).frame(minHeight:44)}.accessibilityLabel(T("Sharing & credits"))
@@ -222,7 +229,7 @@ struct NativeLibrary: View {
           }.accessibilityLabel(T("Open profile"))
         }
       }
-      .refreshable { await store.refresh() }
+      .refreshable { await store.refresh();NotificationCenter.default.post(name:Notification.Name("OnlyIdeas.RefreshLibrary"),object:nil) }
       .fileImporter(isPresented: $picker, allowedContentTypes: [.pdf]) { result in
         if case .success(let url) = result {
           Task {
@@ -259,6 +266,7 @@ struct PaperRow: View {
   }
 }
 struct NativeAgent: View {
+  var isActive = true
   @EnvironmentObject var store: ReadingStore
   @State private var draft = ""
   @State private var history = false
@@ -266,11 +274,15 @@ struct NativeAgent: View {
   @State private var attachPicker = false
   @State private var photoPicker = false
   @State private var options = false
+  @State private var inputHeight: CGFloat = 36
+  @State private var followingLatest = true
+  @State private var draggingMessages = false
   var body: some View {
     VStack(spacing: 0) {
       ScrollViewReader { proxy in
+        GeometryReader { viewport in
         ScrollView {
-          LazyVStack(alignment: .leading, spacing: 12) {
+          VStack(alignment: .leading, spacing: 12) {
             if store.messages.isEmpty { welcome }
             ForEach(store.messages) { message in
               AgentBubble(message: message, requests: $requests).contextMenu {
@@ -285,14 +297,26 @@ struct NativeAgent: View {
                 Text(T(store.agentStatus)).font(.body).foregroundColor(.secondary)
               }
             }
-            Color.clear.frame(height: 1).id("end")
+            Color.clear.frame(height: 1).id("end").background(GeometryReader { marker in
+              Color.clear.preference(key: AgentBottomPosition.self, value: marker.frame(in: .named("agent-scroll")).maxY)
+            })
           }.padding(14)
-        }.onChange(of: store.messages.count) { _ in
-          withAnimation { proxy.scrollTo("end", anchor: .bottom) }
+        }
+        .coordinateSpace(name: "agent-scroll")
+        .modifier(ReadingKeyboardDismiss())
+        .simultaneousGesture(DragGesture(minimumDistance: 12).onChanged { _ in draggingMessages = true }.onEnded { _ in draggingMessages = false })
+        .onPreferenceChange(AgentBottomPosition.self) { bottom in
+          if draggingMessages { followingLatest = bottom <= viewport.size.height + 90 }
+        }
+        .onChange(of: store.messages.last?.id) { _ in
+          guard isActive, followingLatest, !requests, !history else { return }
+          proxy.scrollTo("end", anchor: .bottom)
+        }
+        .onChange(of: store.conversationID) { _ in followingLatest = true }
         }
       }
-      composer
     }
+    .safeAreaInset(edge: .bottom, spacing: 0) { composer }
     .background(Color(.systemGroupedBackground))
     .navigationTitle(T("Agent")).navigationBarTitleDisplayMode(.inline)
     .toolbar {
@@ -356,7 +380,11 @@ struct NativeAgent: View {
     }
     #endif
     .sheet(isPresented:$photoPicker) { NativePhotoPicker { bytes in photoPicker=false;if let bytes { Task { await store.attachData(bytes,name:"Photo.jpg") } } } }
-    .task {
+    .onChange(of: requests) { if $0 { dismissReadingKeyboard() } }
+    .onChange(of: isActive) { if !$0 { dismissReadingKeyboard() } }
+    .task(id: isActive) {
+      guard isActive else { return }
+      await store.resumeConversation()
       while !Task.isCancelled {
         if let id = store.conversationID { await store.loadConversation(id) }
         try? await Task.sleep(nanoseconds: 3_000_000_000)
@@ -396,17 +424,12 @@ struct NativeAgent: View {
         Menu {
           Button(T("Choose files")) { if store.account==nil {Task {await store.signIn()}} else {attachPicker=true} }
           Button(T("Choose photo")) { if store.account==nil {Task {await store.signIn()}} else {photoPicker=true} }
-        } label:{Image(systemName:"paperclip").font(.title2).frame(width:40,height:48)}.accessibilityLabel(T("Attach files")).disabled(store.attachmentBusy||store.draftAttachments.count>=3)
-        TextEditor(text: $draft).font(.body).frame(minHeight: 54, maxHeight: 110)
-          .accessibilityLabel(T("Message the paper agent"))
-          .overlay(alignment: .topLeading) {
-            if draft.isEmpty {
-              Text(T("Ask a question or attach a file…")).font(.body).foregroundColor(
-                .secondary
-              )
-              .padding(.top, 8).padding(.leading, 4).allowsHitTesting(false)
-            }
-          }
+        } label:{Image(systemName:"paperclip").font(.title2).frame(width:40,height:40)}.accessibilityLabel(T("Attach files")).disabled(store.attachmentBusy||store.draftAttachments.count>=3)
+        ZStack(alignment: .topLeading) {
+          if draft.isEmpty { Text(T("Ask a question or attach a file…")).font(.body).lineLimit(1).foregroundColor(.secondary).padding(.top, 7).padding(.leading, 4).allowsHitTesting(false) }
+          NativeComposerInput(text: $draft, height: $inputHeight).frame(height: inputHeight)
+            .accessibilityLabel(T("Message the paper agent"))
+        }
         Button {
           let text = draft
           Task {
@@ -415,15 +438,13 @@ struct NativeAgent: View {
           }
         } label: {
           Image(systemName: "arrow.up").font(.title3.weight(.bold)).foregroundColor(.white)
-            .frame(width: 48, height: 48).background(ideaGradient).clipShape(Circle())
+            .frame(width: 40, height: 40).background(ideaGradient).clipShape(Circle())
         }.accessibilityLabel(T("Send message"))
           .disabled(
             (draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && store.draftAttachments.isEmpty) || store.busy || store.attachmentBusy
               || !store.agentStatus.isEmpty)
-      }.padding(12).background(Color(.secondarySystemGroupedBackground)).cornerRadius(22)
-      Text(T("Your chats and notes stay private.")).font(.caption)
-        .foregroundColor(.secondary)
-    }.padding(.horizontal, 12).padding(.vertical, 8)
+      }.padding(8).background(Color(.secondarySystemGroupedBackground)).cornerRadius(22)
+    }.padding(.horizontal, 12).padding(.vertical, 6).background(Color(.systemGroupedBackground))
   }
 }
 struct AgentBubble: View {
@@ -443,7 +464,7 @@ struct AgentBubble: View {
       }
       ForEach(message.papers ?? []) { paper in
         VStack(alignment: .leading, spacing: 12) {
-          Text("\(paper.year ?? "") · \(T("Open paper"))").font(.subheadline).foregroundColor(.secondary)
+          Text([paper.year, paper.journal].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · ")).font(.subheadline).foregroundColor(.secondary)
           Text(paper.title).font(.title3.weight(.semibold))
           Text(paper.authors).font(.body).foregroundColor(.secondary).lineLimit(3)
           DisclosureGroup(T("Read abstract")) { Text(paper.summary).font(.body).padding(.top, 8) }
@@ -451,7 +472,7 @@ struct AgentBubble: View {
             NavigationLink(destination:NativePaper(paper:ResearchPaper(id:id,title:paper.title))) {Label(T("Open paper"),systemImage:"book")}.buttonStyle(.borderedProminent)
           } else {
             Label(T(store.sharedImports ? "Shared after review":"Only me"),systemImage:store.sharedImports ? "globe":"lock").font(.caption).foregroundColor(.secondary)
-            Button {Task {await store.importFound(paper,shared:store.sharedImports);requests=true}} label: {Label(T("Fetch & read"),systemImage:"arrow.down.doc").font(.headline).padding(.vertical,5)}.buttonStyle(.borderedProminent)
+            Button {dismissReadingKeyboard();Task {await store.importFound(paper,shared:store.sharedImports);requests=true}} label: {Label(T("Fetch & read"),systemImage:"arrow.down.doc").font(.headline).padding(.vertical,5)}.buttonStyle(.borderedProminent)
             NativePDFRecovery(researchId:paper.id,shared:store.sharedImports){requests=true}
           }
           if let source=paper.source,let url=URL(string:source),url.scheme=="https" {Link(T("Source"),destination:url)}
@@ -681,7 +702,7 @@ struct NativeSharingOptions: View {
             Text(T("Shared reading room")).tag(true)
             Text(T("Only me")).tag(false)
           }.pickerStyle(.segmented)
-          Text(T("Shared after source and community review."))
+          Text(T("Choose a license when uploading. Confirmed sharing is immediate, with administrator review afterward."))
           Text(T("Share your own work or papers you have permission to publish.")).foregroundColor(.secondary)
         }
         NativeCreditSection()
@@ -954,6 +975,7 @@ struct NativeDocument: UIViewRepresentable {
     view.navigationDelegate = context.coordinator
     view.isOpaque = false
     view.backgroundColor = .clear
+    view.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
     view.scrollView.isDirectionalLockEnabled = true
     view.scrollView.alwaysBounceHorizontal = false
     view.scrollView.showsHorizontalScrollIndicator = false
@@ -1469,6 +1491,7 @@ struct ResearchDiscovery: View {
       if !busy&&hits.isEmpty&&notice.isEmpty {Text(T("No papers found. Try broader keywords or fewer filters.")).font(.subheadline).foregroundColor(.secondary)}
     }.task {if taxonomy.isEmpty {do{taxonomy=try store.decoded([String:[ResearchDiscipline]].self,await store.json("/api/discovery/taxonomy"))}catch{}}}
       .task(id:signature){await reset()}
+      .onReceive(NotificationCenter.default.publisher(for:Notification.Name("OnlyIdeas.RefreshLibrary"))){_ in Task{await reset()}}
       .background(NavigationLink(destination:NativePaper(paper:selected ?? ResearchPaper(id:"",title:"")),isActive:$showPaper){EmptyView()}.hidden())
   }
   var filterControls:some View {
@@ -1696,4 +1719,63 @@ struct NativePieceTranslation:View {
  }
  func refresh()async{do{let r=try await store.json("/api/papers/\(document.paper.id)/artifacts");results=try store.decoded([ReadingArtifact].self,r["artifacts"] ?? [])}catch{notice=error.localizedDescription}}
  func translate()async{guard store.account != nil else{await store.signIn();return};pending=true;defer{pending=false};do{let r=try await store.json("/api/papers/\(document.paper.id)/assist",method:"POST",body:["kind":"translation","language":language,"segmentId":segment]);let job=r["job"]as?[String:Any];notice=job?["state"]as?String=="failed" ? job?["message"]as?String ?? "" : "Translation requested. Existing work is reused.";await refresh();await store.loadJobs()}catch{notice=error.localizedDescription}}
+}
+
+private func dismissReadingKeyboard() {
+  UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+}
+private struct ReadingKeyboardDismiss: ViewModifier {
+  @ViewBuilder func body(content: Content) -> some View {
+    let dismissible = content.contentShape(Rectangle()).simultaneousGesture(
+      DragGesture(minimumDistance: 18).onChanged { value in
+        if value.translation.height > 40 && value.translation.height > abs(value.translation.width) * 1.3 {
+          dismissReadingKeyboard()
+        }
+      })
+    if #available(iOS 16.0, *) { dismissible.scrollDismissesKeyboard(.interactively) }
+    else { dismissible }
+  }
+}
+private struct AgentBottomPosition: PreferenceKey {
+  static var defaultValue: CGFloat = 0
+  static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
+}
+private struct NativeComposerInput: UIViewRepresentable {
+  @Binding var text: String
+  @Binding var height: CGFloat
+  func makeCoordinator() -> Coordinator { Coordinator(self) }
+  func makeUIView(context: Context) -> UITextView {
+    let view = UITextView()
+    view.backgroundColor = .clear
+    view.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+    view.font = .preferredFont(forTextStyle: .body)
+    view.adjustsFontForContentSizeCategory = true
+    view.textContainerInset = UIEdgeInsets(top: 7, left: 0, bottom: 7, right: 0)
+    view.textContainer.lineFragmentPadding = 4
+    view.isScrollEnabled = false
+    view.delegate = context.coordinator
+    view.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+    view.accessibilityLabel = T("Message the paper agent")
+    return view
+  }
+  func updateUIView(_ view: UITextView, context: Context) {
+    context.coordinator.parent = self
+    if view.text != text { view.text = text }
+    DispatchQueue.main.async { context.coordinator.resize(view) }
+  }
+  final class Coordinator: NSObject, UITextViewDelegate {
+    var parent: NativeComposerInput
+    init(_ parent: NativeComposerInput) { self.parent = parent }
+    func textViewDidChange(_ view: UITextView) { parent.text = view.text; resize(view) }
+    func textView(_ view: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+      (view.text as NSString).replacingCharacters(in: range, with: text).count <= 4000
+    }
+    func resize(_ view: UITextView) {
+      guard view.bounds.width > 0 else { return }
+      let natural = view.sizeThatFits(CGSize(width: view.bounds.width, height: .greatestFiniteMagnitude)).height
+      let next = min(130, max(36, natural))
+      view.isScrollEnabled = natural > 130
+      if abs(parent.height - next) > 0.5 { parent.height = next }
+    }
+  }
 }

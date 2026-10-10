@@ -54,6 +54,9 @@ public class MainActivity extends AppCompatActivity {
   private LinearLayout root, header, content, bottom, messages;
   private ScrollView chatScroll;
   private EditText composer;
+  private String agentDraft="";
+  private int agentScrollY=0;
+  private boolean followAgent=true;
   private LinearLayout attachmentTray;
   private final ArrayList<JSONObject> draftAttachments=new ArrayList<>();
   private String paragraphId="";
@@ -286,6 +289,7 @@ public class MainActivity extends AppCompatActivity {
   LinearLayout scrollContent() {
     ScrollView s = new ScrollView(this);
     s.setFillViewport(true);
+    final float[] startY={0};final boolean[] atTop={false};s.setOnTouchListener((v,e)->{if(e.getAction()==android.view.MotionEvent.ACTION_DOWN){startY[0]=e.getY();atTop[0]=s.getScrollY()==0;}else if(e.getAction()==android.view.MotionEvent.ACTION_MOVE&&e.getY()-startY[0]>dp(24)){hideKeyboard();}else if(e.getAction()==android.view.MotionEvent.ACTION_UP&&atTop[0]&&e.getY()-startY[0]>dp(110)&&page.equals("library")){refresh();}return false;});
     LinearLayout c = column();
     c.setPadding(dp(14), dp(12), dp(14), dp(20));
     s.addView(c);
@@ -361,6 +365,8 @@ public class MainActivity extends AppCompatActivity {
   }
 
   void clear(String next) {
+    if(page.equals("agent")&&composer!=null){agentDraft=composer.getText().toString();agentScrollY=chatScroll==null?0:chatScroll.getScrollY();}
+    hideKeyboard();
     if (reader != null) {
       reader.stopLoading();
       reader.removeJavascriptInterface("NativeReader");
@@ -412,8 +418,15 @@ public class MainActivity extends AppCompatActivity {
         .show();
   }
 
+  private String uploadLicense="";
   void authorizeImport(boolean shared,boolean pdf,int retryCost,Consumer<Integer> done) {
-    if(shared){done.accept(0);return;}
+    uploadLicense="";
+    if(shared){int epoch=authEpoch;String[] licenses={"CC-BY-4.0","CC-BY-SA-4.0","CC0-1.0","author-permission"};
+      LinearLayout box=column();box.setPadding(dp(20),dp(8),dp(20),dp(8));caption(box,t("Confirm sharing permission for the text and all figures. Uploads are shared immediately and reviewed afterward."));
+      Spinner picker=new Spinner(this);picker.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,licenses));box.addView(picker);
+      CheckBox consent=new CheckBox(this);consent.setText(t("I confirm permission to share the text and all figures under this license."));box.addView(consent);
+      AlertDialog dialog=new AlertDialog.Builder(this).setTitle(t("Share this material?")).setView(box).setPositiveButton(t("Confirm & share"),(d,w)->{if(epoch==authEpoch){uploadLicense=licenses[picker.getSelectedItemPosition()];done.accept(0);}}).setNeutralButton(t("Request review first"),(d,w)->{if(epoch==authEpoch)done.accept(0);}).setNegativeButton(t("Cancel"),null).create();
+      dialog.setOnShowListener(d->{dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);consent.setOnCheckedChangeListener((v,checked)->dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(checked));});dialog.show();return;}
     final int epoch=authEpoch;
     job(()->api.json("/api/credits","GET",null),credits->{
       if(!credits.optBoolean("enabled")){done.accept(0);return;}
@@ -437,7 +450,7 @@ public class MainActivity extends AppCompatActivity {
       RadioGroup choices=new RadioGroup(this);final int sharedID=View.generateViewId(),privateID=View.generateViewId();
       for(int i=0;i<2;i++){RadioButton choice=new RadioButton(this);choice.setId(i==0?sharedID:privateID);choice.setText(t(i==0?"Shared reading room":"Only me"));choice.setTextColor(ink);choice.setTextSize(17);choices.addView(choice);}
       choices.check(shareUpload?sharedID:privateID);options.addView(choices);
-      caption(options,t("Shared after source and community review."));gap(options,12);
+      caption(options,t("Choose a license when uploading. Confirmed sharing is immediate, with administrator review afterward."));gap(options,12);
       caption(options,t("Share your own work or papers you have permission to publish."));gap(options,12);
       TextView rules=text("",15,false);options.addView(rules);
       caption(options,t("Your chats and notes stay private."));gap(options,12);
@@ -543,7 +556,7 @@ public class MainActivity extends AppCompatActivity {
     search.setPadding(dp(12), dp(8), dp(12), dp(8));
     search.setBackground(rounded(surface, 14));
     searchBox.addView(search, new LinearLayout.LayoutParams(0, dp(44), 1));
-    Button ask=button("↑",true,()->{String text=search.getText().toString().trim();if(text.isEmpty())return;if(account==null){signIn();return;}chatId="";chatMessages=new JSONArray();showAgent();send(text);});ask.setContentDescription(t("Ask the agent"));searchBox.addView(ask,new LinearLayout.LayoutParams(dp(48),dp(44)));
+    Button ask=button("↑",true,()->{String text=search.getText().toString().trim();if(text.isEmpty())return;if(account==null){signIn();return;}showAgent();send(text);});ask.setContentDescription(t("Ask the agent"));searchBox.addView(ask,new LinearLayout.LayoutParams(dp(48),dp(44)));
     c.addView(searchBox);
     gap(c, 12);
     c.addView(button(t(browseResearch?"Reading library":"Research for you"),false,()->{browseResearch=!browseResearch;showLibrary();}));
@@ -837,7 +850,7 @@ public class MainActivity extends AppCompatActivity {
             t("New chat"),
             false,
             () -> {
-              chatId = "";
+              chatId = "";rememberChat();agentDraft="";if(composer!=null)composer.setText("");agentScrollY=0;
               chatMessages = new JSONArray();
               agentStatus = "";
               showAgent();
@@ -847,6 +860,8 @@ public class MainActivity extends AppCompatActivity {
     content.addView(actions);
     chatScroll = new ScrollView(this);
     chatScroll.setFillViewport(true);
+    dismissKeyboardOnDrag(chatScroll);
+    chatScroll.setOnScrollChangeListener((View v,int x,int y,int oldX,int oldY)->{if(messages!=null)followAgent=messages.getHeight()-chatScroll.getHeight()-y<dp(100);});
     messages = column();
     messages.setPadding(dp(14), dp(12), dp(14), dp(14));
     chatScroll.addView(messages);
@@ -858,10 +873,10 @@ public class MainActivity extends AppCompatActivity {
     attachmentTray=column();attachmentTray.setPadding(dp(14),0,dp(14),0);content.addView(attachmentTray);renderDraftAttachments();
     LinearLayout compose = row();
     compose.setGravity(Gravity.BOTTOM);
-    compose.setPadding(dp(12), dp(10), dp(12), dp(10));
+    compose.setPadding(dp(6), dp(4), dp(6), dp(4));
     compose.setBackground(rounded(surface, 14));
     LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(-1, -2);
-    cp.setMargins(dp(16), dp(4), dp(16), dp(14));
+    cp.setMargins(dp(12), dp(4), dp(12), dp(6));
     content.addView(compose, cp);
     Button attach=button("+",false,()->{
       if(account==null){signIn();return;}if(draftAttachments.size()>=3){toast(t("Attach up to three files."));return;}
@@ -873,7 +888,9 @@ public class MainActivity extends AppCompatActivity {
     composer.setHintTextColor(muted);
     composer.setHint(t("Ask or paste a paper link…"));
     composer.setContentDescription(t("Message the paper agent"));
-    composer.setMinLines(2);
+    composer.setMinLines(1);
+    composer.setText(agentDraft);
+    composer.setPadding(dp(6),dp(8),dp(6),dp(8));
     composer.setMaxLines(5);
     composer.setInputType(
         InputType.TYPE_CLASS_TEXT
@@ -884,10 +901,12 @@ public class MainActivity extends AppCompatActivity {
     sendButton = button("↑", true, () -> send(composer.getText().toString()));
     sendButton.setTextSize(26);
     sendButton.setContentDescription(t("Send message"));
-    compose.addView(sendButton, new LinearLayout.LayoutParams(dp(52), dp(52)));
-    TextView privacy=text(t("Your chats and notes stay private."),12,false);privacy.setGravity(Gravity.CENTER);privacy.setTextColor(muted);content.addView(privacy);
+    compose.addView(sendButton, new LinearLayout.LayoutParams(dp(44), dp(44)));
+
     renderMessages();
+    chatScroll.post(()->chatScroll.scrollTo(0,agentScrollY));
     if (!chatId.isEmpty()) loadChat(false);
+    else resumeChat();
   }
 
   void renderDraftAttachments() {
@@ -935,7 +954,7 @@ public class MainActivity extends AppCompatActivity {
           if (p == null) continue;
           gap(bubble, 18);
           LinearLayout card = card();
-          caption(card, p.optString("year") + " · " + t("Open paper"));
+          caption(card, p.optString("year") + (p.optString("journal").isEmpty()?"":" · "+p.optString("journal")));
           gap(card, 6);
           title(card, p.optString("title"), 20);
           gap(card, 6);
@@ -956,8 +975,8 @@ public class MainActivity extends AppCompatActivity {
           else {
           caption(card,t(shareUpload ? "Shared after review":"Only me"));
           card.addView(button(t("Fetch & read"),true,()->{
-            final String conversation=chatId;final boolean shared=shareUpload;
-            authorizeImport(shared,true,0,limit->job(()->api.json("/api/chats/"+conversation+"/import","POST",object("paperId",p.optString("id")).put("sharing",shared?"shared":"private").put("creditLimit",limit)),r->{toast(t("Paper queued for conversion."));loadChat(true);loadJobs(true);}));
+            hideKeyboard();final String conversation=chatId;final boolean shared=shareUpload;
+            authorizeImport(shared,true,0,limit->job(()->api.json("/api/chats/"+conversation+"/import","POST",object("paperId",p.optString("id")).put("sharing",shared?"shared":"private").put("creditLimit",limit).put("sharingConsent",uploadLicense.isEmpty()?JSONObject.NULL:object("license",uploadLicense).put("attestation",true))),r->{toast(t("Paper queued for conversion."));loadChat(false);loadJobs(true);}));
           }));
           card.addView(button(t("Upload my PDF"),false,()->recoverPDF(p.optString("id"),"",shareUpload)));
           }
@@ -993,21 +1012,25 @@ public class MainActivity extends AppCompatActivity {
     if ((text.trim().isEmpty() && draftAttachments.isEmpty()) || busy || !agentStatus.isEmpty()) return;
     busy = true;
     sendButton.setEnabled(false);
-    String old = chatId;
+    String old = chatId;final String session=api.token(),savedChat=getPreferences(MODE_PRIVATE).getString(chatPreference(),"");
     job(
         () -> {
           String id = old;
+          if(id.isEmpty()&&!savedChat.equals("new")){
+            JSONArray recent=api.jsonBound("/api/chats","GET",null,session).optJSONArray("chats");
+            if(recent!=null&&recent.length()>0){id=recent.optJSONObject(0).optString("id");for(int i=0;i<recent.length();i++)if(recent.optJSONObject(i).optString("id").equals(savedChat))id=savedChat;}
+          }
           if (id.isEmpty())
             id =
-                api.json("/api/chats", "POST", new JSONObject())
+                api.jsonBound("/api/chats", "POST", new JSONObject(),session)
                     .getJSONObject("chat")
                     .getString("id");
-          api.json("/api/chats/" + id + "/messages", "POST", new JSONObject().put("text",text).put("attachments",new JSONArray(draftAttachments.stream().map(f->f.optString("id")).collect(java.util.stream.Collectors.toList()))).put("language",language()).put("agentActions",true).put("sharing",shareUpload?"shared":"private"));
+          api.jsonBound("/api/chats/" + id + "/messages", "POST", new JSONObject().put("text",text).put("attachments",new JSONArray(draftAttachments.stream().map(f->f.optString("id")).collect(java.util.stream.Collectors.toList()))).put("language",language()).put("agentActions",true).put("sharing",shareUpload?"shared":"private"),session);
           return id;
         },
         id -> {
           busy = false;
-          chatId = id;
+          chatId = id;rememberChat();followAgent=true;agentDraft="";
           composer.setText("");draftAttachments.clear();renderDraftAttachments();
           agentStatus = "Waiting for the paper agent";
           loadChat(true);
@@ -1042,9 +1065,9 @@ public class MainActivity extends AppCompatActivity {
                   boolean changed = !encoded.equals(lastMessages);
                   if (changed) {
                     lastMessages = encoded;
+                    boolean follow=scroll||followAgent;int y=chatScroll.getScrollY();
                     renderMessages();
-                    if (scroll || changed)
-                      chatScroll.post(() -> chatScroll.fullScroll(View.FOCUS_DOWN));
+                    chatScroll.post(()->{if(follow)chatScroll.scrollTo(0,messages.getHeight());else chatScroll.scrollTo(0,y);});
                   } else {
                     progress.setText(t(agentStatus));
                     progress.setVisibility(agentStatus.isEmpty() ? View.GONE : View.VISIBLE);
@@ -1061,6 +1084,12 @@ public class MainActivity extends AppCompatActivity {
           }
         });
   }
+
+  void hideKeyboard(){View focus=getCurrentFocus();if(focus!=null){((android.view.inputmethod.InputMethodManager)getSystemService(INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(focus.getWindowToken(),0);focus.clearFocus();}}
+  void dismissKeyboardOnDrag(View view){final float[] origin={0,0};view.setOnTouchListener((v,e)->{if(e.getAction()==android.view.MotionEvent.ACTION_DOWN){origin[0]=e.getX();origin[1]=e.getY();}else if(e.getAction()==android.view.MotionEvent.ACTION_MOVE&&e.getY()-origin[1]>dp(22)&&Math.abs(e.getX()-origin[0])<e.getY()-origin[1])hideKeyboard();return false;});}
+  String chatPreference(){return "last-chat:"+(account==null?"guest":account.optString("id"));}
+  void rememberChat(){if(account!=null)getPreferences(MODE_PRIVATE).edit().putString(chatPreference(),chatId.isEmpty()?"new":chatId).apply();}
+  void resumeChat(){if(account==null||!chatId.isEmpty())return;String saved=getPreferences(MODE_PRIVATE).getString(chatPreference(),"");if(saved.equals("new"))return;int epoch=authEpoch;job(()->api.json("/api/chats","GET",null),r->{if(epoch!=authEpoch||!chatId.isEmpty()||!page.equals("agent"))return;JSONArray rows=r.optJSONArray("chats");if(rows==null||rows.length()==0)return;String found=rows.optJSONObject(0).optString("id");for(int i=0;i<rows.length();i++)if(rows.optJSONObject(i).optString("id").equals(saved))found=saved;chatId=found;rememberChat();loadChat(true);},false);}
 
   void showHistory() {
     if (account == null) {
@@ -1083,7 +1112,7 @@ public class MainActivity extends AppCompatActivity {
               .setItems(
                   titles,
                   (d, n) -> {
-                    chatId = chats.optJSONObject(n).optString("id");
+                    chatId = chats.optJSONObject(n).optString("id");rememberChat();agentScrollY=0;followAgent=true;
                     lastMessages = "";
                     chatMessages = new JSONArray();
                     agentStatus = "";
@@ -1681,6 +1710,7 @@ public class MainActivity extends AppCompatActivity {
         () -> api.json("/api/papers/" + id + "/comments", "GET", null),
         r -> {
           ScrollView scroll = new ScrollView(this);
+    dismissKeyboardOnDrag(scroll);
           LinearLayout c = column();
           c.setFocusableInTouchMode(true);
           c.setPadding(dp(22), dp(16), dp(22), dp(20));
@@ -1825,6 +1855,7 @@ public class MainActivity extends AppCompatActivity {
         () -> api.json("/api/papers/" + id + "/notes", "GET", null),
         r -> {
           ScrollView scroll = new ScrollView(this);
+    dismissKeyboardOnDrag(scroll);
           LinearLayout c = column();
           c.setPadding(dp(22), dp(18), dp(22), dp(22));
           scroll.addView(c);
@@ -2090,6 +2121,7 @@ public class MainActivity extends AppCompatActivity {
             }
           }
           Map<String, String> headers = new HashMap<>();
+          if(shared&&!uploadLicense.isEmpty()){headers.put("X-Paper-License",uploadLicense);headers.put("X-Paper-Rights","confirmed");}
           headers.put("X-Paper-Sharing",shared?"shared":"private");headers.put("X-Credit-Limit",String.valueOf(creditLimit));
           if(request==43){headers.put("X-File-Name",java.net.URLEncoder.encode(title,"UTF-8").replace("+","%20"));return api.bytes("/api/attachments","POST",out.toByteArray(),"application/octet-stream",headers);}
           if(request==44){if(!recovery.isEmpty())headers.put("X-Recovery-Job-Id",recovery);else headers.put("X-Research-Id",research);}

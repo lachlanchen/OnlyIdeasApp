@@ -1,3 +1,4 @@
+import {extractWebArticle} from './web-article.mjs';
 import {downloadPublic} from './network.mjs';
 import {AppError} from './domain.mjs';
 const safe=v=>{try{const u=new URL(v);return u.protocol==='https:'&&!u.username&&!u.password&&(!u.port||u.port==='443')?u.href:''}catch{return ''}};
@@ -12,7 +13,7 @@ export function citationPDFs(html,base) {
 const transient=e=>[408,429,500,502,503,504].includes(e.upstreamStatus)||['ETIMEDOUT','ECONNRESET','EAI_AGAIN','ECONNREFUSED','ERR_STREAM_PREMATURE_CLOSE'].includes(e.code)||/took too long|socket hang up|aborted/i.test(e.message);
 // Bounded retries apply only to temporary failures, never repeated 401/403s.
 // Every redirect and alternate location still passes pinned public-DNS checks.
-export async function downloadPaperPDF(job,{download=downloadPublic,pause=ms=>new Promise(r=>setTimeout(r,ms)),now=Date.now}={}) {
+export async function downloadPaperPDF(job,{download=downloadPublic,pause=ms=>new Promise(r=>setTimeout(r,ms)),now=Date.now,allowHTML=false}={}) {
  const deadline=now()+90_000,attempted=new Set(),pages=new Set();let last,blocked=false,transfers=0;
  async function get(url,maxBytes,timeout){
   for(let n=0;n<2;n++){
@@ -24,14 +25,18 @@ export async function downloadPaperPDF(job,{download=downloadPublic,pause=ms=>ne
  async function attempt(url){url=safe(url);if(!url||attempted.has(url)||attempted.size>=8||now()>=deadline)return;attempted.add(url);try{
   const result=await get(url,20_000_000,25000);
   if(result.bytes.subarray(0,5).toString()==='%PDF-')return result;
+  if(allowHTML){const article=extractWebArticle(result.bytes.toString(),result.url,job.metadata);if(article)return {...result,article,format:'html'}}
   if(result.bytes.length<2_000_000)for(const pdf of citationPDFs(result.bytes.toString(),result.url)){const found=await attempt(pdf);if(found)return found}
   last=new AppError('The source supplied a web page instead of a PDF.');
  }catch(e){last=e;blocked ||= e.upstreamStatus===403||e.upstreamStatus===401||/HTTP (401|403)/.test(e.message)}}
  async function landing(url){url=safe(url);if(!url||attempted.has(url)||pages.has(url)||pages.size>=3||now()>=deadline)return;pages.add(url);try{
   const result=await get(url,2_000_000,12000);
   if(result.bytes.subarray(0,5).toString()==='%PDF-')return result;
+  if(allowHTML){const article=extractWebArticle(result.bytes.toString(),result.url,job.metadata);if(article)return {...result,article,format:'html'}}
   for(const pdf of citationPDFs(result.bytes.toString(),result.url)){const found=await attempt(pdf);if(found)return found}
  }catch(e){last=e;blocked ||= e.upstreamStatus===403||e.upstreamStatus===401||/HTTP (401|403)/.test(e.message)}}
+ const arxiv=allowHTML&&String(job.url||'').match(/^https:\/\/arxiv\.org\/pdf\/([\d.v]+)(?:\.pdf)?$/);
+ if(arxiv){const found=await landing('https://arxiv.org/html/'+arxiv[1]);if(found)return found}
  for(const url of [...new Set([job.url,...(job.downloadSources||[])])].slice(0,4)){const result=await attempt(url);if(result)return result}
  // Refresh the exact index ID/DOI; never choose a different paper by title.
  const work=/^https:\/\/openalex\.org\/W\d+$/.test(job.metadata?.metadataSource||'')?job.metadata.metadataSource:null;

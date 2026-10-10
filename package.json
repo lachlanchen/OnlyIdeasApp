@@ -32,6 +32,7 @@
     "fflate": "0.8.3",
     "google-auth-library": "11.1.0",
     "ipaddr.js": "2.5.0",
+    "jsdom": "27.0.0",
     "lucide-react": "1.41.0",
     "mathpix-markdown-it": "3.0.1",
     "react": "19.2.0",
@@ -45,7 +46,6 @@
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react": "5.1.1",
     "esbuild": "0.28.2",
-    "jsdom": "27.0.0",
     "path-browserify": "1.0.1",
     "typescript": "5.9.3",
     "vite": "7.3.6"

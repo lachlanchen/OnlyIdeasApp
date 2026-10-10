@@ -17,7 +17,7 @@ export function publicationFingerprint(p) {
   return hash(JSON.stringify(content));
 }
 export function publicationState(p, job) {
-  if (p.visibility === 'public') return 'shared';
+  if (p.visibility === 'public' && !(p.provenance?.verification==='uploader-confirmed' && job?.state!=='completed')) return 'shared';
   if (!job) return p.sharing === 'awaiting_review' ? 'awaiting_review' : 'private';
   if (['queued','running'].includes(job.state)) return 'publishing';
   if (job.state === 'failed') return job.reviewDecision === 'reject' ? 'declined' : 'publication_failed';
@@ -84,7 +84,7 @@ export function createPublicationReview(store, config) {
         const results=[];
         for(const selection of body.items) {
           const {paper:p,job:j}=record(selection.id);
-          requireValue(p.visibility!=='public','This paper is already shared. Refresh the queue.',409);
+          requireValue(p.visibility!=='public'||p.provenance?.verification==='uploader-confirmed','This paper is already shared. Refresh the queue.',409);
           requireValue(selection.token===reviewToken(p,j),'This paper or review changed. Refresh and review it again.',409);
           requireValue(j.dedupe===`publish:${p.id}:${p.revision}`,'The paper revision changed. Request a fresh review.',409);
           const action=body.action;
@@ -108,7 +108,7 @@ export function createPublicationReview(store, config) {
           j.reviewEvent=event.id;j.reviewDecision=action;
           j.state=['approve','retry'].includes(action)?'queued':action==='reject'?'failed':'awaiting_review';
           j.message=['approve','retry'].includes(action)?'Approved · publishing to the shared library':reason;
-          if(['changes','reject'].includes(action)){j.reviewed=false;delete j.reviewFingerprint;}
+          if(['changes','reject'].includes(action)){j.reviewed=false;delete j.reviewFingerprint;p.visibility='private';}
           delete j.lease;delete j.leaseUntil;
           p.sharing=publicationState(p,j);store.savePaper(p);store.saveJob(j);
           results.push(item(p,j));

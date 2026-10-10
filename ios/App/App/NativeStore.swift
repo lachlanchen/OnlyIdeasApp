@@ -62,7 +62,8 @@ struct Conversation: Codable, Identifiable {
   var id: String
   var title: String
 }
-struct FoundPaper: Codable, Identifiable {
+struct FoundPaper: Codable, Identifiable, Equatable {
+  var journal: String?
   var paperId:String?
   var source:String?
   var pdfUrl:String?
@@ -72,13 +73,13 @@ struct FoundPaper: Codable, Identifiable {
   var summary: String
   var year: String?
 }
-struct AgentAttachment: Codable, Identifiable {
+struct AgentAttachment: Codable, Identifiable, Equatable {
   var id:String
   var name:String
   var state:String
   var paperId:String?
 }
-struct AgentMessage: Codable, Identifiable {
+struct AgentMessage: Codable, Identifiable, Equatable {
   var id: String
   var role: String
   var text: String
@@ -87,7 +88,7 @@ struct AgentMessage: Codable, Identifiable {
   var jobId: String?
   var actions:[AgentAction]?
 }
-struct AgentAction:Codable,Identifiable {var id:String;var kind:String;var state:String;var message:String;var title:String?;var jobId:String?;var paperId:String?;var artifactId:String?;var canUpload:Bool?;var sharing:String?}
+struct AgentAction:Codable,Identifiable,Equatable {var id:String;var kind:String;var state:String;var message:String;var title:String?;var jobId:String?;var paperId:String?;var artifactId:String?;var canUpload:Bool?;var sharing:String?}
 struct AlignedReading: Codable {
   struct Block: Codable {var id:String;var start:Int;var end:Int;var targetStart:Int;var targetEnd:Int;var available:Int;var needed:Int;var content:Bool}
   var paperId:String;var revision:String;var language:String;var sourceLanguage:String
@@ -145,7 +146,9 @@ final class ReadingStore: NSObject, ObservableObject,
   @Published var conversations: [Conversation] = []
   @Published var messages: [AgentMessage] = []
   @Published var jobs: [ReadingJob] = []
-  @Published var conversationID: String?
+  @Published var conversationID: String? {
+    didSet { if let id = account?.id { UserDefaults.standard.set(conversationID ?? "new", forKey: "onlyideas.last-chat." + id) } }
+  }
   @Published var agentStatus = ""
   @Published var inboxUnread = 0
   @Published var error: String?
@@ -199,6 +202,8 @@ final class ReadingStore: NSObject, ObservableObject,
     #endif
     return "https://agent.onlyideas.art"
   }
+  private var responseCache:[String:(tag:String,bytes:Data)]=[:]
+  private var responseCacheIdentity:String?
   private lazy var network: URLSession = {
     #if DEBUG && targetEnvironment(macCatalyst)
     if let port = Int(ProcessInfo.processInfo.environment["ONLYIDEAS_QA_PROXY_PORT"] ?? ""), (1024...65535).contains(port) {
@@ -336,11 +341,22 @@ final class ReadingStore: NSObject, ObservableObject,
     }
     if let data = data { request.httpBody = data }
     for (k, v) in headers { request.setValue(v, forHTTPHeaderField: k) }
+    let requestIdentity=token
+    if responseCacheIdentity != requestIdentity {responseCache.removeAll();responseCacheIdentity=requestIdentity}
+    let cached=method=="GET" ? responseCache[path]:nil
+    if let cached {request.setValue(cached.tag,forHTTPHeaderField:"If-None-Match")}
+    request.cachePolicy = .reloadIgnoringLocalCacheData
     let (bytes, response) = try await network.data(for: request)
+    guard token==requestIdentity else {throw failure("Account changed. Please try again.")}
+    if let http=response as? HTTPURLResponse,http.statusCode==304,let cached {return cached.bytes}
     guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
       let value = (try? JSONSerialization.jsonObject(with: bytes)) as? [String: Any]
       throw NSError(domain: "OnlyIdeasHTTP", code: (response as? HTTPURLResponse)?.statusCode ?? 0,
         userInfo: [NSLocalizedDescriptionKey: value?["error"] as? String ?? "Connection interrupted. Please try again.","response":value ?? [:]])
+    }
+    if method=="GET",let tag=(response as? HTTPURLResponse)?.value(forHTTPHeaderField:"ETag"),bytes.count<2_000_000 {
+      if responseCache.values.reduce(0,{$0+$1.bytes.count})+bytes.count>8_000_000 {responseCache.removeAll()}
+      responseCache[path]=(tag,bytes)
     }
     return bytes
   }
@@ -701,7 +717,7 @@ final class ReadingStore: NSObject, ObservableObject,
       let title =
         url.deletingPathExtension().lastPathComponent.addingPercentEncoding(
           withAllowedCharacters: .urlQueryAllowed) ?? "Paper"
-      var contextHeaders:[String:String]=[:]
+      var contextHeaders:[String:String]=sharingHeaders(shared)
       if let id=researchId {contextHeaders["X-Research-Id"]=id}
       if let id=recoveryJobId {contextHeaders["X-Recovery-Job-Id"]=id}
       let importHeaders = [
@@ -749,7 +765,7 @@ final class ReadingStore: NSObject, ObservableObject,
       let shared=sharedImports
       guard let limit=try await authorizeImport(shared:shared,pdf:name.lowercased().hasSuffix(".pdf")) else {return}
       let encoded=name.addingPercentEncoding(withAllowedCharacters:.alphanumerics) ?? "file"
-      let data=try await request("/api/attachments",method:"POST",data:bytes,headers:["Content-Type":"application/octet-stream","X-File-Name":encoded,"X-Paper-Sharing":shared ? "shared":"private","X-Credit-Limit":String(limit)])
+      let data=try await request("/api/attachments",method:"POST",data:bytes,headers:["Content-Type":"application/octet-stream","X-File-Name":encoded,"X-Paper-Sharing":shared ? "shared":"private","X-Credit-Limit":String(limit)].merging(sharingHeaders(shared)){_,new in new})
       guard identity==token else { return }
       let response=try JSONSerialization.jsonObject(with:data) as? [String:Any] ?? [:]
       let item=try decoded(AgentAttachment.self,response["attachment"] ?? [:])
@@ -771,16 +787,30 @@ final class ReadingStore: NSObject, ObservableObject,
   }
   func loadConversations() async {
     guard account != nil else { return }
+    let identity = token
     do {
       let r = try await json("/api/chats")
+      guard identity == token else { return }
       conversations = try decoded([Conversation].self, r["chats"] ?? [])
     } catch { self.error = error.localizedDescription }
   }
+  func resumeConversation() async {
+    guard let owner = account?.id, conversationID == nil else { return }
+    let preferred = UserDefaults.standard.string(forKey: "onlyideas.last-chat." + owner)
+    if preferred == "new" { return }
+    if conversations.isEmpty { await loadConversations() }
+    guard account?.id == owner, conversationID == nil else { return }
+    if let chat = conversations.first(where: { $0.id == preferred }) ?? conversations.first {
+      await selectConversation(chat)
+    }
+  }
   func loadConversation(_ id: String) async {
+    let identity = token
     do {
       let r = try await json("/api/chats/\(id)")
-      guard conversationID == id else { return }
-      messages = try decoded([AgentMessage].self, r["messages"] ?? [])
+      guard conversationID == id, identity == token else { return }
+      let received = try decoded([AgentMessage].self, r["messages"] ?? [])
+      if messages != received { messages = received }
       let pending = (r["pending"] as? [[String: Any]])?.first
       let online = (r["agent"] as? [String: Any])?["online"] as? Bool ?? false
       agentStatus =
@@ -789,7 +819,7 @@ final class ReadingStore: NSObject, ObservableObject,
         : online
           ? pending?["status"] as? String ?? "Working…"
           : "Your request is saved. Waiting for the paper agent…"
-    } catch { agentStatus = "Connection interrupted. Your conversation is saved." }
+    } catch { if conversationID == id, identity == token { agentStatus = "Connection interrupted. Your conversation is saved." } }
   }
   func newConversation() {
     draftAttachments = []
@@ -809,14 +839,19 @@ final class ReadingStore: NSObject, ObservableObject,
     guard !busy, !attachmentBusy, agentStatus.isEmpty, (!text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || !draftAttachments.isEmpty)
     else { return }
     busy = true
+    let identity = token
     defer { busy = false }
     do {
+      await resumeConversation()
+      guard identity == token else { return }
       if conversationID == nil {
         let r = try await json("/api/chats", method: "POST", body: [:])
+        guard identity == token else { return }
         conversationID = (r["chat"] as? [String: Any])?["id"] as? String
       }
       guard let id = conversationID else { throw failure(T("Could not start the conversation.")) }
       _ = try await json("/api/chats/\(id)/messages", method: "POST", body: ["text": text, "attachments":draftAttachments.map(\.id), "language":UILanguage.current,"agentActions":true,"sharing":sharedImports ? "shared":"private"])
+      guard identity == token, conversationID == id else { return }
       draftAttachments = []
       await loadConversation(id)
       await loadConversations()
@@ -833,7 +868,7 @@ final class ReadingStore: NSObject, ObservableObject,
     guard let id = conversationID else { return }
     do {
       guard let limit=try await authorizeImport(shared:shared,pdf:true) else {return}
-      _ = try await json("/api/chats/\(id)/import", method: "POST", body: ["paperId": paper.id, "sharing": shared ? "shared" : "private","creditLimit":limit])
+      _ = try await json("/api/chats/\(id)/import", method: "POST", body: ["paperId": paper.id, "sharing": shared ? "shared" : "private","creditLimit":limit,"sharingConsent":uploadLicense.map{["license":$0,"attestation":true] as [String:Any]} ?? [:]])
       await loadConversation(id)
       await loadJobs()
     } catch { self.error = error.localizedDescription }
@@ -847,8 +882,26 @@ final class ReadingStore: NSObject, ObservableObject,
   func resolveCreditPrompt(_ allowed:Bool) {
     let pending=creditDecision;creditDecision=nil;creditPrompt=nil;pending?.resume(returning:allowed)
   }
+  func sharingHeaders(_ shared:Bool)->[String:String] {guard shared,let license=uploadLicense else{return [:]};return ["X-Paper-License":license,"X-Paper-Rights":"confirmed"]}
+  var uploadLicense:String?
+  func confirmSharing() async -> Bool {
+    uploadLicense=nil
+    let identity=token
+    return await withCheckedContinuation { continuation in
+      guard var host=UIApplication.shared.connectedScenes.compactMap({$0 as? UIWindowScene}).flatMap(\.windows).first(where:{$0.isKeyWindow})?.rootViewController else {continuation.resume(returning:false);return}
+      while let top=host.presentedViewController {host=top}
+      let alert=UIAlertController(title:T("Share this material?"),message:T("Confirm sharing permission for the text and all figures. Uploads are shared immediately and reviewed afterward."),preferredStyle:.alert)
+      for license in ["CC-BY-4.0","CC-BY-SA-4.0","CC0-1.0","author-permission"] {
+        alert.addAction(UIAlertAction(title:license=="author-permission" ? T("I have author permission") : T("Confirm & share")+" · "+license,style:.default){_ in self.uploadLicense=identity==self.token ? license:nil;continuation.resume(returning:identity==self.token)})
+      }
+      alert.addAction(UIAlertAction(title:T("Request review first"),style:.default){_ in continuation.resume(returning:identity==self.token)})
+      alert.addAction(UIAlertAction(title:T("Cancel"),style:.cancel){_ in continuation.resume(returning:false)})
+      host.present(alert,animated:true)
+    }
+  }
   func authorizeImport(shared:Bool,pdf:Bool,amount:Int?=nil) async throws -> Int? {
-    if shared {return 0}
+    if shared {return await confirmSharing() ? 0:nil}
+    uploadLicense=nil
     guard creditDecision==nil else {return nil}
     let identity=token
     let value=try JSONDecoder().decode(ReadingCredits.self,from:await request("/api/credits"))

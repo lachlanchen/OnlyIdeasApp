@@ -352,3 +352,12 @@ chats, notes and interests remain isolated. Collapse duplicate verified public
 cards without removing historical paper IDs. Mac Agent uses a compact native
 file picker. Existing interests, discovery, saved/liked collections and discussion
 remain the product foundation; no private user-profile sharing is implied.
+
+## Owner amendment · 11 October 2026 · smoother reading and sharing
+
+- New Shared uploads ask for a redistribution license and an explicit confirmation covering text and all figures. Confirmed material becomes readable in the community immediately after preparation, then enters administrator review. Users may request review first if unsure. Existing private uploads remain private. Administrators can withdraw a contribution; GitHub archival publication and contribution rewards still require approval.
+- Preserve the active conversation across library requests and app visits. Send bounded recent context to the agent, preserving exact paper references; retain conversation history in the account.
+- Keep the composer compact until it needs more lines. Dismiss the keyboard on downward dragging, and preserve scroll position across request sheets, polling and tabs. Show journal names on agent paper cards.
+- Revalidate cached paper text, translations and figures against current access and content. Pull-to-refresh refreshes library and research results. Existing local/offline limits and account isolation remain in force.
+- Import accessible full-text HTML as well as PDF. Preserve equations, tables, captions and locally cached figures, and reject abstract-only/error pages. HTML preparation does not use Mathpix or transcription-page quota. Source access controls and identity checks remain in force.
+- Deliver this batch to internal testing; no new production review is authorized by this amendment.

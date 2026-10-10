@@ -1,3 +1,5 @@
+import {conditionalJSON,conditionalResponse} from './conditional-response.mjs';
+import {sharingConsent,headerConsent} from './sharing-consent.mjs';
 import {paperSegments,segmentSource,readingView} from './translation-pieces.mjs';
 import {libraryPapers} from './library-search.mjs';
 import {createPublicationReview,isReviewer,paperReviewStatus} from './publication-review.mjs';
@@ -101,7 +103,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
         res.setHeader('Vary', 'Origin');
         res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, POST, PUT, DELETE, OPTIONS');
-        res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type, X-OnlyIdeas-Client, X-Request-Id, X-Paper-Title, X-Paper-Language, X-Paper-Sharing, X-File-Name, X-Credit-Limit, X-Research-Id, X-Recovery-Job-Id, X-Paper-Match-Confirm');
+        res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type, X-OnlyIdeas-Client, X-Request-Id, X-Paper-Title, X-Paper-Language, X-Paper-Sharing, X-Paper-License, X-Paper-Rights, If-None-Match, X-File-Name, X-Credit-Limit, X-Research-Id, X-Recovery-Job-Id, X-Paper-Match-Confirm');
       }
       if (method === 'OPTIONS') { requireValue(nativeOrigin, 'Origin not allowed.', 403); res.writeHead(204); return res.end(); }
       const native = nativeOrigin && req.headers['x-onlyideas-client'] === 'native';
@@ -117,7 +119,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         requireUser();limit(`attachment:${user.id}`,10);
         const name=decodeURIComponent(req.headers['x-file-name']||'file');
         const bytes=await readBody(req,20_000_000);
-        return response(res,{attachment:await uploadAttachment(store,config,user,bytes,name,enqueue,{sharing:req.headers['x-paper-sharing']==='shared'?'shared':'private',creditLimit:Number(req.headers['x-credit-limit']),inspectPDF})},202);
+        return response(res,{attachment:await uploadAttachment(store,config,user,bytes,name,enqueue,{sharingConsent:headerConsent(req.headers,req.headers['x-paper-sharing']),sharing:req.headers['x-paper-sharing']==='shared'?'shared':'private',creditLimit:Number(req.headers['x-credit-limit']),inspectPDF})},202);
       }
       const attached=path.match(/^\/api\/attachments\/([a-f0-9-]{36})$/);
       if(attached&&method==='GET'){requireUser();return response(res,{attachment:attachment(store,attached[1],user.id)});}
@@ -164,7 +166,6 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         if(card.paperId)return response(res,{paperId:card.paperId,reused:true});
         const recovering=recoveryJob(store,user.id,'r:'+card.id);if(recovering&&recovering.state!=='failed')return response(res,{job:safeJob(recovering)},202);
         const sourceURL=card.pdfUrl||card.source;requireValue(sourceURL,'Open the source page or upload your copy.');
-        requireValue(config.mathpix?.appKey,'PDF conversion is not connected yet.',503);
         const sharing=body.sharing==='private'?'private':'shared';
         const job=enqueue(user,{kind:'import',sharing,creditLimit:body.creditLimit,url:sourceURL,sourcePage:card.source,downloadSources:card.downloadSources||[],discoveryId:card.id,dedupe:`import:${hash(sourceURL)}`,metadata:{...paperMetadata(card),title:card.title,authors:card.authors,language:'en',category:card.discipline||'Research',license:'private'}});
         if(job.state==='failed')return response(res,{error:job.message,job:safeJob(job),source:card.source,code:job.errorCode||'import_failed'},409);
@@ -264,7 +265,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         res.setHeader('Set-Cookie', [cookie(cookieName, store.createSession(u), 90 * 86400), cookie(`${cookieName}-oauth`, '', 0)]);
         res.writeHead(303, { Location: '/' }); return res.end();
       }
-      if (path === '/api/papers' && method === 'GET') return response(res, { papers: libraryPapers(store,user).map(p=>({...publicPaper(p),...(p.owner===user?.id?{review:paperReviewStatus(store,p)}:{})})) });
+      if (path === '/api/papers' && method === 'GET') return conditionalJSON(req,res, { papers: libraryPapers(store,user).map(p=>({...publicPaper(p),...(p.owner===user?.id?{review:paperReviewStatus(store,p)}:{})})) });
       if (path === '/api/papers/markdown' && method === 'POST') {
         requireUser(); const data = await json(req); limit(`import:${user.id}`, 10);
         requireValue(uuid.test(data.requestId || ''), 'A request ID is required.');
@@ -277,7 +278,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         creditTransaction(store, () => {
           const receipt={id:p.id,owner:user.id,kind:'markdown',sharing:data.sharing};
           reserveImport(store,config,receipt,data.creditLimit);
-          store.savePaper(p); requestSharing(store,p,data.sharing);
+          store.savePaper(p); requestSharing(store,p,data.sharing,sharingConsent(data.sharingConsent,data.sharing));
           finishImportCredits(store,receipt,true);
         });
         return response(res, { paper: p }, 201);
@@ -290,13 +291,14 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         const isPDF = req.headers['content-type'] === 'application/pdf';
         const context=uploadContext(store,discovery,user,req.headers);
         requireValue(!context||isPDF,'Choose a PDF for this paper.');
-        let metadata, link = null, bytes, sharing = 'private', creditLimit, pages;
+        let metadata, link = null, bytes, sharing = 'private', creditLimit, pages, consent;
         if (isPDF) {
           bytes = await readBody(req, 20_000_000); requireValue(bytes.subarray(0, 5).toString() === '%PDF-', 'Choose a valid PDF.');
           sharing = req.headers['x-paper-sharing'] === 'shared' ? 'shared' : 'private';
           creditLimit = Number(req.headers['x-credit-limit']);
+          consent=headerConsent(req.headers,sharing);
           metadata = { title: decodeURIComponent(req.headers['x-paper-title'] || 'My paper'), language: req.headers['x-paper-language'] || 'en' };
-        } else { const body = await json(req); metadata = body; sharing = body.sharing === 'private' ? 'private' : 'shared'; creditLimit=body.creditLimit; link = body.url; requireValue(typeof link === 'string' && link.length <= 2000 && link.startsWith('https://'), 'Enter a direct HTTPS PDF link.'); }
+        } else { const body = await json(req); metadata = body; sharing = body.sharing === 'private' ? 'private' : 'shared'; creditLimit=body.creditLimit; consent=sharingConsent(body.sharingConsent,sharing); link = body.url; requireValue(typeof link === 'string' && link.length <= 2000 && link.startsWith('https://'), 'Enter an HTTPS paper or full-text article link.'); }
         if(context){metadata=context.metadata;sharing=context.sharing||sharing;const prior=activeRecovery(store,user.id,context);if(prior)return response(res,{job:safeJob(prior)},202);}
         requireValue(typeof metadata.title === 'string' && metadata.title.trim() && metadata.title.length <= 300, 'Add a paper title.');
         requireValue(Object.hasOwn(languages, metadata.language || 'en'), 'Choose a supported language.');
@@ -311,10 +313,10 @@ export function createApp(store, config, { worker = true, provider = providerJSO
             if(uncertain&&confirmed)identity={...identity,state:'user_confirmed'};
           }
           const cached = reusablePaper(store,user.id,{url:link,sourceDigest:bytes?hash(bytes):undefined});
-          if (!cached) requireValue(config.mathpix?.appKey, 'PDF conversion is not connected yet. Import Markdown in the meantime.', 503);
+          if (!cached && bytes) requireValue(config.mathpix?.appKey, 'PDF conversion is not connected yet. Import Markdown in the meantime.', 503);
           if (!cached && bytes && config.credits?.enabled === true && sharing !== 'shared') pages = await inspectPDF(join(store.directory,'jobs',requestId,'source.pdf'),config.maxPages || 30);
           job = creditTransaction(store,()=>{const prior=activeRecovery(store,user.id,context);if(prior)return prior;
-          const queued = enqueue(user, { id: requestId, dedupe, kind: 'import', sharing, url: link, creditLimit, pages, sourceDigest:bytes?hash(bytes):undefined, uploadSource:context?.source,paperIdentity:identity, metadata: { ...paperMetadata(metadata), title: metadata.title, authors: String(metadata.authors || ''), language: metadata.language || 'en', license: 'private', category: String(metadata.category || 'Research') } });
+          const queued = enqueue(user, { id: requestId, dedupe, kind: 'import', sharing, sharingConsent:consent, url: link, creditLimit, pages, sourceDigest:bytes?hash(bytes):undefined, uploadSource:context?.source,paperIdentity:identity, metadata: { ...paperMetadata(metadata), title: metadata.title, authors: String(metadata.authors || ''), language: metadata.language || 'en', license: 'private', category: String(metadata.category || 'Research') } });
           bindRecovery(store,user.id,context,queued);return queued;});
         }
         catch (error) { if (bytes) await rm(join(store.directory, 'jobs', requestId), { recursive: true, force: true }); throw error; }
@@ -326,8 +328,8 @@ export function createApp(store, config, { worker = true, provider = providerJSO
       const matchPaper = path.match(/^\/api\/papers\/([\w-]+)(?:\/(comments|notes|assist|publish|artifacts|export|segments|reading))?$/);
       if (matchPaper) {
         const p = paperFor(matchPaper[1]), action = matchPaper[2];
-        if(action==='reading'&&method==='GET')return response(res,readingView(store,p,user,url.searchParams.get('language')||'en'));
-        if (!action && method === 'GET') return response(res, { paper: { ...p, isOwner: p.owner === user?.id, owner: undefined, ...(p.owner===user?.id?{review:paperReviewStatus(store,p)}:{}) } });
+        if(action==='reading'&&method==='GET')return conditionalJSON(req,res,readingView(store,p,user,url.searchParams.get('language')||'en'));
+        if (!action && method === 'GET') return conditionalJSON(req,res, { paper: { ...p, isOwner: p.owner === user?.id, owner: undefined, ...(p.owner===user?.id?{review:paperReviewStatus(store,p)}:{}) } });
         if(action==='segments'&&method==='GET')return response(res,{segments:paperSegments(p.mmd,p.language).filter(s=>s.display.length>=30&&s.translatable).map(s=>({...s,text:s.display,sentences:s.sentences.filter(x=>x.display).map(x=>({...x,text:x.display}))}))});
         if (action === 'export' && method === 'GET') { res.writeHead(200, { 'Content-Type': 'text/markdown; charset=utf-8', 'Content-Disposition': `attachment; filename="${p.id}.mmd"` }); return res.end(p.mmd); }
         if (action === 'comments' && method === 'GET') return response(res, { comments: visibleComments(store, p.id, user) });
@@ -363,10 +365,10 @@ export function createApp(store, config, { worker = true, provider = providerJSO
           acceptTerms(store, user, b.acceptTerms);
           const previous=store.existing(p.owner,`publish:${p.id}:${p.revision}`);
           requireValue(p.visibility!=='public'&&!['queued','running'].includes(previous?.state),'This paper is already shared or publishing.',409);
-          p.license = b.license; p.source = String(b.source || ''); mayPublish(p, b.attestation); p.sharing='awaiting_review';store.savePaper(p);
+          p.license = b.license; p.source = String(b.source || ''); const consent=sharingConsent({license:b.license,attestation:b.attestation},'shared'); requireValue(consent,'Confirm sharing permission.');p.provenance={...p.provenance,verification:'uploader-confirmed',attestation:true,confirmedAt:consent.confirmedAt};mayPublish(p,b.attestation);p.visibility='public';p.sharing='awaiting_review';store.savePaper(p);
           const job = enqueue(user, { kind: 'publish', paperId: p.id, dedupe: `publish:${p.id}:${p.revision}` });
           job.state='awaiting_review';job.reviewed=false;delete job.reviewFingerprint;delete job.reviewDecision;
-          job.message='Waiting for an OnlyIdeas administrator to review sharing permission and content';store.saveJob(job);
+          job.message='Shared · administrator review pending';store.saveJob(job);
           return response(res, { job }, 202);
         }
       }
@@ -406,7 +408,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
       const asset = path.match(/^\/content\/([\w-]+)\/(figures\/[\w.-]+)$/);
       if (asset && ['GET', 'HEAD'].includes(method)) {
         const p = paperFor(asset[1]); requireValue(p.assets.some(a => a.path === asset[2]), 'Figure not found.', 404);
-        const bytes = await readFile(join(store.directory, 'papers', p.id, asset[2])); res.writeHead(200, { 'Content-Type': mime[extname(asset[2])] || 'application/octet-stream' }); return res.end(method === 'HEAD' ? undefined : bytes);
+        const bytes = await readFile(join(store.directory, 'papers', p.id, asset[2])); return conditionalResponse(req,res,bytes,mime[extname(asset[2])]||'application/octet-stream');
       }
       if (path.startsWith('/api/') || path.startsWith('/content/')) throw new AppError('Not found.', 404);
       if (method === 'GET' || method === 'HEAD') {

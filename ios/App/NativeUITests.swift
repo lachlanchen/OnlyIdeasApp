@@ -1,6 +1,32 @@
 import XCTest
 
 final class NativeUITests: XCTestCase {
+  func testCompactAgentKeyboardAndTabs() {
+    continueAfterFailure=false
+    let app=XCUIApplication()
+    app.launchArguments=["-onlyideas.native.language","en","-onlyideas.native.appearance","light","--onlyideas-mac-qa"]
+    app.launch()
+    let agent=app.tabBars.buttons["Agent"]
+    XCTAssertTrue(agent.waitForExistence(timeout:30));agent.tap()
+    let editor=app.textViews["Message the paper agent"]
+    XCTAssertTrue(editor.waitForExistence(timeout:10));XCTAssertLessThan(editor.frame.height,64)
+    shot("Test30-agent-compact")
+    editor.tap();editor.typeText("Find optical imaging papers.\nCompare the methods.\nExplain the figures.")
+    XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout:5));XCTAssertGreaterThan(editor.frame.height,40)
+    guard let scroll=app.scrollViews.allElementsBoundByIndex.filter({$0.frame.height>120}).max(by:{$0.frame.height<$1.frame.height}) else {XCTFail("Missing message scroller");return}
+    let start=scroll.coordinate(withNormalizedOffset:CGVector(dx:0.8,dy:0.18))
+    let finish=scroll.coordinate(withNormalizedOffset:CGVector(dx:0.8,dy:0.85))
+    start.press(forDuration:0.1,thenDragTo:finish)
+    let folded=XCTNSPredicateExpectation(predicate:NSPredicate(format:"exists == false"),object:app.keyboards.firstMatch)
+    XCTAssertEqual(XCTWaiter.wait(for:[folded],timeout:8),.completed)
+    shot("Test30-agent-keyboard-dismissed")
+    app.tabBars.buttons["Library"].tap()
+    XCTAssertTrue(app.segmentedControls.buttons["Reading library"].waitForExistence(timeout:10))
+    XCTAssertFalse(app.keyboards.firstMatch.exists)
+    shot("Test30-library-return")
+    agent.tap();XCTAssertTrue((editor.value as? String ?? "").contains("optical imaging"))
+    app.terminate()
+  }
   func testPlansVisibleWithoutPurchaseActivation() {
     continueAfterFailure=false
     let app=XCUIApplication()

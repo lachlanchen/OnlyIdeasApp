@@ -1,3 +1,4 @@
+import {convertWebArticle} from './web-article.mjs';
 import {reserveSubscriptionQuota,finishSubscriptionQuota} from './subscription-quota.mjs';
 import {publicationFingerprint} from './publication-review.mjs';
 import {transcriptTitle} from './paper-metadata.mjs';
@@ -35,22 +36,33 @@ export async function mathpix(job, config, store) {
   if(completed?.owner===job.owner) { requestSharing(store,completed,job.sharing); return {paperId:completed.id}; }
   const cached = reusablePaper(store,job.owner,job,job.id);
   if (cached) { await rm(join(store.directory,'jobs',job.id,'source.pdf'),{force:true}); return {paperId:cached.id,reused:true}; }
-  requireValue(config.mathpix?.appId && config.mathpix?.appKey, 'PDF conversion is not connected yet. You can import Markdown now.', 503);
   const directory = join(store.directory, 'jobs', job.id);
   await mkdir(directory, { recursive: true, mode: 0o700 });
   const pdfFile = join(directory, 'source.pdf');
-  const headers = { app_id: config.mathpix.appId, app_key: config.mathpix.appKey };
+  const headers = { app_id: config.mathpix?.appId, app_key: config.mathpix?.appKey };
   if (!job.pdfId) {
     // An interrupted/ambiguous POST must be reconciled manually, never billed twice.
     requireValue(!job.submittedAt, 'The conversion was submitted, but its receipt is uncertain. Contact support before retrying.', 409);
     if (job.url) {
-      job.message='Finding an accessible PDF…';store.saveJob(job);
-      const {bytes,url:downloadedFrom} = await downloadPaperPDF(job);job.downloadedFrom=downloadedFrom;
+      job.message='Finding accessible full text…';store.saveJob(job);
+      const found = await downloadPaperPDF(job,{allowHTML:true});const {bytes,url:downloadedFrom}=found;job.downloadedFrom=downloadedFrom;
+      if(found.format==='html') {
+        job.message='Preparing article text, equations and figures';store.saveJob(job);
+        const {mmd,assets}=await convertWebArticle(found.article,{pandoc:config.pandoc||'pandoc'});
+        store.requireActive(job.owner);
+        for(const a of assets){await mkdir(join(store.directory,'papers',job.id,'figures'),{recursive:true,mode:0o700});await writeFile(join(store.directory,'papers',job.id,a.path),a.data,{mode:0o600});}
+        job.pages=0;job.sourceDigest=hash(bytes);job.retrieval='full-text-html';store.saveJob(job);
+        const paper=makePaper({...job.metadata,id:job.id,title:found.article.title||job.metadata.title,owner:job.owner,source:downloadedFrom,mmd,assets:assets.map(({path,bytes})=>({path,bytes}))});
+        paper.provenance={source:downloadedFrom,retrieval:'full-text-html',changes:'Full-text HTML converted to reflowable Markdown; figures, tables and equations retained.'};
+        if(found.article.license){paper.license=found.article.license;paper.provenance.licenseUrl=found.article.licenseUrl;}
+        store.savePaper(paper);requestSharing(store,paper,job.sharing);return {paperId:paper.id};
+      }
       requireValue(bytes.subarray(0, 5).toString() === '%PDF-', 'This URL did not return a PDF. Try the direct PDF link or upload.');
       await writeFile(pdfFile, bytes, { mode: 0o600 });
       job.sourceDigest = hash(bytes); store.saveJob(job);
       store.db.prepare('UPDATE credit_candidates SET digest=? WHERE paper=? AND owner=?').run(hash(bytes),job.id,job.owner);
     }
+    requireValue(config.mathpix?.appId && config.mathpix?.appKey,'PDF conversion is not connected yet. Try a full-text article link.',503);
     job.sourceDigest ||= hash(await readFile(pdfFile));
     if(job.sharing==='shared'&&!job.sourceLicenseChecked){job.sourceLicense=await verifySourceLicense(job);job.sourceLicenseChecked=true;}
     store.saveJob(job);

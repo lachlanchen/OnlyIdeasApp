@@ -11,7 +11,7 @@ export function reviewedSource(url) {
   // Exact canonical URLs only: no user-supplied license or redirect is trusted.
   return reviewedSources.find(s => s.urls.includes(url));
 }
-export function requestSharing(store, paper, sharing = 'private') {
+export function requestSharing(store, paper, sharing = 'private', consent = null) {
   if (!paper || sharing !== 'shared' || paper.visibility === 'public') return null;
   store.requireActive(paper.owner);
   const proof = paper.provenance?.userSupplied ? null : reviewedSource(paper.source);
@@ -20,10 +20,16 @@ export function requestSharing(store, paper, sharing = 'private') {
     paper.provenance = { source: proof.source, licenseUrl: proof.licenseUrl, checked: '2026-09-27', changes: 'PDF converted to reflowable Mathpix Markdown; figures retained. Check equations against the source.' };
   }
   const origin=store.job(paper.id);
+  consent ||= origin?.sharingConsent;
+  if(consent?.attestation===true && ['CC0-1.0','CC-BY-4.0','CC-BY-SA-4.0','author-permission'].includes(consent.license)) {
+    paper.license=consent.license;
+    paper.provenance={...paper.provenance,verification:'uploader-confirmed',attestation:true,confirmedAt:consent.confirmedAt,changes:'Prepared for reflowable reading; uploader confirmed permission for the text and figures. Community review pending.'};
+    paper.visibility='public';
+  }
   const verified=origin?.owner===paper.owner&&!origin.uploadSource&&origin.sourceLicense?.verification==='indexed-source-license'&&origin.sourceLicense.license===paper.license;
   const dedupe = `publish:${paper.id}:${paper.revision}`;
   const existing = store.existing(paper.owner, dedupe);
   paper.sharing=existing?publicationState(paper,existing):verified?'publishing':'awaiting_review';store.savePaper(paper);
   if (existing) return existing;
-  return store.saveJob({ id: randomUUID(), owner: paper.owner, kind: 'publish', paperId: paper.id, dedupe, created: Date.now(), state: verified?'queued':'awaiting_review', reviewed:!!verified, ...(verified?{reviewFingerprint:publicationFingerprint(paper)}:{}), message: verified?'Sharing the verified open-access paper':'An OnlyIdeas administrator will review sharing permission and content before publication' });
+  return store.saveJob({ id: randomUUID(), owner: paper.owner, kind: 'publish', paperId: paper.id, dedupe, created: Date.now(), state: verified?'queued':'awaiting_review', reviewed:!!verified, ...(verified?{reviewFingerprint:publicationFingerprint(paper)}:{}), message: verified?'Sharing the verified open-access paper':paper.visibility==='public'?'Shared · administrator review pending':'Choose a license and confirm sharing permission, or wait for administrator review' });
 }

@@ -37,7 +37,7 @@ export function attachment(store,id,owner) {
   if (job?.paperId && !canReusePaper(store,store.paper(job.paperId),owner)) return {...data,state:'failed',message:'Attachment unavailable'};
   return {...data,state:job?.state==='completed'?'ready':job?.state||'failed',message:job?.message||'Attachment unavailable',paperId:job?.paperId};
 }
-export async function uploadAttachment(store,config,user,bytes,name,enqueue,{sharing='private',creditLimit,inspectPDF}={}) {
+export async function uploadAttachment(store,config,user,bytes,name,enqueue,{sharing='private',sharingConsent,creditLimit,inspectPDF}={}) {
   const {ext,mime}=inspectAttachment(bytes,name),digest=hash(bytes),old=store.db.prepare('SELECT id FROM attachments WHERE owner=? AND digest=?').get(user.id,digest);
   if(old)return attachment(store,old.id,user.id);
   const cached = reusablePaper(store,user.id,{sourceDigest:digest});
@@ -50,7 +50,7 @@ export async function uploadAttachment(store,config,user,bytes,name,enqueue,{sha
     store.requireActive(user.id);store.db.exec('BEGIN IMMEDIATE');transaction=true;
     const previous=store.db.prepare('SELECT id FROM attachments WHERE owner=? AND digest=?').get(user.id,digest);
     if(previous){store.db.exec('COMMIT');committed=true;await rm(directory,{recursive:true,force:true});return attachment(store,previous.id,user.id);}
-    const job=enqueue(user,{id,kind:'attachment',dedupe:'attachment:'+digest,ext,mime,sharing,creditLimit,pages,sourceDigest:digest,metadata:{title:name.replace(/\.[^.]+$/,''),language:'en',license:'private',category:'Uploads'}});
+    const job=enqueue(user,{id,kind:'attachment',dedupe:'attachment:'+digest,ext,mime,sharing,sharingConsent,creditLimit,pages,sourceDigest:digest,metadata:{title:name.replace(/\.[^.]+$/,''),language:'en',license:'private',category:'Uploads'}});
     const data={id,name,mime,bytes:bytes.length,jobId:job.id};
     store.db.prepare('INSERT INTO attachments VALUES(?,?,?,?)').run(id,user.id,digest,JSON.stringify(data));store.db.exec('COMMIT');committed=true;
     if(job.reused || job.id!==id) await rm(directory,{recursive:true,force:true});

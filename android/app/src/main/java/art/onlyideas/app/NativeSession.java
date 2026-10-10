@@ -25,6 +25,11 @@ final class NativeSession {
   }
   static final String ORIGIN = "https://agent.onlyideas.art";
   private final SharedPreferences prefs;
+  private record Cached(String tag,byte[] bytes){}
+  private final java.util.LinkedHashMap<String,Cached> cache=new java.util.LinkedHashMap<>();
+  private String cacheIdentity;
+  private synchronized Cached cached(String path,String identity){if(!java.util.Objects.equals(identity,cacheIdentity)){cache.clear();cacheIdentity=identity;}return cache.get(path);}
+  private synchronized void remember(String path,String identity,String tag,byte[] bytes){if(!java.util.Objects.equals(identity,token())||tag==null||bytes.length>2_000_000)return;if(!java.util.Objects.equals(identity,cacheIdentity)){cache.clear();cacheIdentity=identity;}long total=bytes.length;for(Cached c:cache.values())total+=c.bytes.length;if(total>8_000_000||cache.size()>40)cache.clear();cache.put(path,new Cached(tag,bytes));}
 
   NativeSession(Context context) {
     prefs = context.getSharedPreferences("WSSecureStorageSharedPreferences", Context.MODE_PRIVATE);
@@ -108,9 +113,13 @@ final class NativeSession {
             StandardCharsets.UTF_8));
   }
 
+  JSONObject jsonBound(String path,String method,JSONObject body,String expectedToken) throws Exception {
+    return new JSONObject(new String(bytesBound(path,method,body==null?null:body.toString().getBytes(StandardCharsets.UTF_8),"application/json",null,expectedToken,true),StandardCharsets.UTF_8));
+  }
   byte[] bytes(
       String path, String method, byte[] body, String type, java.util.Map<String, String> headers)
-      throws Exception {
+      throws Exception {return bytesBound(path,method,body,type,headers,null,false);}
+  private byte[] bytesBound(String path,String method,byte[] body,String type,java.util.Map<String,String> headers,String expectedToken,boolean bound) throws Exception {
     HttpURLConnection c = (HttpURLConnection) new URL(ORIGIN + path).openConnection();
     c.setConnectTimeout(20000);
     c.setReadTimeout(65000);
@@ -119,6 +128,9 @@ final class NativeSession {
     c.setRequestProperty("Origin", "https://localhost");
     c.setRequestProperty("X-OnlyIdeas-Client", "native");
     String token = token();
+    if(bound&&!java.util.Objects.equals(token,expectedToken)){c.disconnect();throw new Exception("Account changed. Please try again.");}
+    Cached saved=method.equals("GET")?cached(path,token):null;
+    if(saved!=null)c.setRequestProperty("If-None-Match",saved.tag());
     if (token != null) c.setRequestProperty("Authorization", "Bearer " + token);
     if (headers != null) headers.forEach(c::setRequestProperty);
     try {
@@ -131,6 +143,8 @@ final class NativeSession {
         }
       }
       int code = c.getResponseCode();
+      if(!java.util.Objects.equals(token,token()))throw new Exception("Account changed. Please try again.");
+      if(code==304&&saved!=null)return saved.bytes();
       try (var input = code >= 200 && code < 300 ? c.getInputStream() : c.getErrorStream();
           var output = new ByteArrayOutputStream()) {
         if (input == null) throw new Exception("Connection interrupted. Please try again.");
@@ -151,6 +165,7 @@ final class NativeSession {
           }
           HttpError error=new HttpError(code,message);try{error.details=new JSONObject(new String(data,StandardCharsets.UTF_8));}catch(Exception ignored){}throw error;
         }
+        if(method.equals("GET"))remember(path,token,c.getHeaderField("ETag"),data);
         return data;
       }
     } finally {

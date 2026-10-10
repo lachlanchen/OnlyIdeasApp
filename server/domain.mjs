@@ -25,7 +25,7 @@ export function makePaper({ id, title, mmd, owner, source = '', authors = '', li
 export function mayPublish(paper, attestation) {
   requireValue(attestation === true, 'Confirm that you have the right to publish this paper and its figures.');
   requireValue(['CC0-1.0', 'CC-BY-4.0', 'CC-BY-SA-4.0', 'author-permission'].includes(paper.license), 'Add a redistribution license or author permission before publishing.');
-  requireValue(paper.source.startsWith('https://') || paper.license === 'author-permission', 'A public source URL is required.');
+  requireValue(paper.source.startsWith('https://') || paper.license === 'author-permission' || ['uploader-confirmed','operator-reviewed-permission'].includes(paper.provenance?.verification)&&paper.provenance?.attestation===true, 'A public source URL is required.');
 }
 export const publicPaper = p => {
   const { mmd, sections, owner, ...summary } = p;

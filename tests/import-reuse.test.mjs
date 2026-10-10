@@ -66,7 +66,7 @@ test('readers, uploaded files and agent imports reuse one public paper and its f
     assert.equal(f.store.db.prepare("SELECT count(*) n FROM jobs WHERE state='queued'").get().n,0);
     assert.equal(f.store.db.prepare('SELECT count(*) n FROM credit_holds').get().n,0);
     assert.equal(f.store.db.prepare('SELECT body FROM papers WHERE id=?').get(p.id).body,before);
-    assert.equal((await call('/api/import',{method:'POST',headers:{'X-Request-Id':randomUUID()},body:{url:'https://arxiv.org/pdf/2205.01833v1',title:'Different revision'}})).status,503);
+    assert.equal((await call('/api/import',{method:'POST',headers:{'X-Request-Id':randomUUID()},body:{url:'https://arxiv.org/pdf/2205.01833v1',title:'Different revision'}})).status,202);
     p.visibility='private';f.store.savePaper(p);
     assert.equal((await call('/api/attachments/'+attached.data.attachment.id)).data.attachment.state,'failed');
     assert.equal((await call('/api/papers/'+p.id)).status,404);

@@ -767,7 +767,17 @@
     "Click Quick approve to confirm sharing permission and that the selected papers’ text, equations and figures are ready. Your confirmation is recorded automatically; no second popup.": "Click Quick approve to confirm sharing permission and that the selected papers’ text, equations and figures are ready. Your confirmation is recorded automatically; no second popup.",
     "Permission for {count} papers without a supported license": "Permission for {count} papers without a supported license",
     "Author permission confirmed": "Author permission confirmed",
-    "Choose only permission you have verified. Recorded licenses are kept.": "Choose only permission you have verified. Recorded licenses are kept."
+    "Choose only permission you have verified. Recorded licenses are kept.": "Choose only permission you have verified. Recorded licenses are kept.",
+    "Share this material?": "Share this material?",
+    "Sharing license": "Sharing license",
+    "Confirm sharing permission for the text and all figures. Uploads are shared immediately and reviewed afterward.": "Confirm sharing permission for the text and all figures. Uploads are shared immediately and reviewed afterward.",
+    "I have author permission": "I have author permission",
+    "I confirm permission to share the text and all figures under this license.": "I confirm permission to share the text and all figures under this license.",
+    "Confirm & share": "Confirm & share",
+    "Request review first": "Request review first",
+    "Paper or full-text article URL": "Paper or full-text article URL",
+    "Use an accessible full-text article or PDF. Text, equations, tables and figures are prepared for reading.": "Use an accessible full-text article or PDF. Text, equations, tables and figures are prepared for reading.",
+    "Choose a license when uploading. Confirmed sharing is immediate, with administrator review afterward.": "Choose a license when uploading. Confirmed sharing is immediate, with administrator review afterward."
   },
   "zh-Hans": {
     "Choose a valid PDF.": "请选择有效的 PDF。",
@@ -1537,7 +1547,17 @@
     "Click Quick approve to confirm sharing permission and that the selected papers’ text, equations and figures are ready. Your confirmation is recorded automatically; no second popup.": "点击“快速批准”即确认所选论文已获得共享许可，正文、公式和图片均已检查。系统自动记录您的确认，不再弹窗。",
     "Permission for {count} papers without a supported license": "为 {count} 篇缺少受支持许可的论文选择许可",
     "Author permission confirmed": "已确认作者授权",
-    "Choose only permission you have verified. Recorded licenses are kept.": "仅选择您已核实的许可；已有许可保持不变。"
+    "Choose only permission you have verified. Recorded licenses are kept.": "仅选择您已核实的许可；已有许可保持不变。",
+    "Share this material?": "分享这份材料？",
+    "Sharing license": "分享许可",
+    "Confirm sharing permission for the text and all figures. Uploads are shared immediately and reviewed afterward.": "请确认您有权分享正文和全部图片。上传后立即共享，管理员随后审核。",
+    "I have author permission": "我已获得作者许可",
+    "I confirm permission to share the text and all figures under this license.": "我确认有权按此许可分享正文和全部图片。",
+    "Confirm & share": "确认并分享",
+    "Request review first": "先申请审核",
+    "Paper or full-text article URL": "论文或全文网页链接",
+    "Use an accessible full-text article or PDF. Text, equations, tables and figures are prepared for reading.": "使用可访问的全文网页或 PDF，正文、公式、表格和图片会整理为适合阅读的内容。",
+    "Choose a license when uploading. Confirmed sharing is immediate, with administrator review afterward.": "上传时选择许可。确认后立即共享，管理员随后审核。"
   },
   "zh-Hant": {
     ". Public comments are reviewed.": "公開評論會經過審核。",
@@ -2307,7 +2327,17 @@
     "Click Quick approve to confirm sharing permission and that the selected papers’ text, equations and figures are ready. Your confirmation is recorded automatically; no second popup.": "點擊「快速批准」即確認所選論文已獲得共享許可，正文、公式和圖片均已檢查。系統自動記錄您的確認，不再彈窗。",
     "Permission for {count} papers without a supported license": "為 {count} 篇缺少支援許可的論文選擇許可",
     "Author permission confirmed": "已確認作者授權",
-    "Choose only permission you have verified. Recorded licenses are kept.": "僅選擇您已核實的許可；已有許可保持不變。"
+    "Choose only permission you have verified. Recorded licenses are kept.": "僅選擇您已核實的許可；已有許可保持不變。",
+    "Share this material?": "分享這份材料？",
+    "Sharing license": "分享授權",
+    "Confirm sharing permission for the text and all figures. Uploads are shared immediately and reviewed afterward.": "請確認您有權分享正文和全部圖片。上傳後立即共享，管理員隨後審核。",
+    "I have author permission": "我已獲得作者授權",
+    "I confirm permission to share the text and all figures under this license.": "我確認有權依此授權分享正文和全部圖片。",
+    "Confirm & share": "確認並分享",
+    "Request review first": "先申請審核",
+    "Paper or full-text article URL": "論文或全文網頁連結",
+    "Use an accessible full-text article or PDF. Text, equations, tables and figures are prepared for reading.": "使用可存取的全文網頁或 PDF，正文、公式、表格和圖片會整理為適合閱讀的內容。",
+    "Choose a license when uploading. Confirmed sharing is immediate, with administrator review afterward.": "上傳時選擇授權。確認後立即共享，管理員隨後審核。"
   },
   "ja": {
     ". Public comments are reviewed.": "公開コメントは審査されます。",
@@ -3077,7 +3107,17 @@
     "Click Quick approve to confirm sharing permission and that the selected papers’ text, equations and figures are ready. Your confirmation is recorded automatically; no second popup.": "「簡単承認」を押すと、選択した論文の共有許諾と本文・数式・図の確認が完了したことを表明します。確認は自動記録され、追加の確認画面は開きません。",
     "Permission for {count} papers without a supported license": "対応するライセンスがない {count} 件の許諾",
     "Author permission confirmed": "著者の許可を確認済み",
-    "Choose only permission you have verified. Recorded licenses are kept.": "確認済みの許諾のみ選択してください。記録済みのライセンスは維持されます。"
+    "Choose only permission you have verified. Recorded licenses are kept.": "確認済みの許諾のみ選択してください。記録済みのライセンスは維持されます。",
+    "Share this material?": "この資料を共有しますか？",
+    "Sharing license": "共有ライセンス",
+    "Confirm sharing permission for the text and all figures. Uploads are shared immediately and reviewed afterward.": "本文とすべての図を共有する権利を確認してください。アップロード後すぐに公開され、管理者が後で確認します。",
+    "I have author permission": "著者の許可を得ています",
+    "I confirm permission to share the text and all figures under this license.": "このライセンスで本文とすべての図を共有する権利を確認しました。",
+    "Confirm & share": "確認して共有",
+    "Request review first": "先に審査を依頼",
+    "Paper or full-text article URL": "論文または全文記事のURL",
+    "Use an accessible full-text article or PDF. Text, equations, tables and figures are prepared for reading.": "閲覧可能な全文記事またはPDFを使用します。本文、数式、表、図を読みやすく整えます。",
+    "Choose a license when uploading. Confirmed sharing is immediate, with administrator review afterward.": "アップロード時にライセンスを選択します。確認後すぐに共有され、管理者が後で審査します。"
   },
   "ko": {
     ". Public comments are reviewed.": "공개 댓글은 검토됩니다.",
@@ -3847,7 +3887,17 @@
     "Click Quick approve to confirm sharing permission and that the selected papers’ text, equations and figures are ready. Your confirmation is recorded automatically; no second popup.": "빠른 승인을 누르면 선택한 논문의 공유 허가와 본문, 수식, 그림을 확인했음을 표시합니다. 확인 내용은 자동 기록되며 추가 팝업은 없습니다.",
     "Permission for {count} papers without a supported license": "지원되는 라이선스가 없는 논문 {count}개의 허가",
     "Author permission confirmed": "저자 허가 확인 완료",
-    "Choose only permission you have verified. Recorded licenses are kept.": "확인한 허가만 선택하세요. 기존 라이선스는 유지됩니다."
+    "Choose only permission you have verified. Recorded licenses are kept.": "확인한 허가만 선택하세요. 기존 라이선스는 유지됩니다.",
+    "Share this material?": "이 자료를 공유할까요?",
+    "Sharing license": "공유 라이선스",
+    "Confirm sharing permission for the text and all figures. Uploads are shared immediately and reviewed afterward.": "본문과 모든 그림의 공유 권한을 확인하세요. 업로드 후 바로 공유되며 관리자가 나중에 검토합니다.",
+    "I have author permission": "저자의 허가를 받았습니다",
+    "I confirm permission to share the text and all figures under this license.": "이 라이선스로 본문과 모든 그림을 공유할 권한이 있음을 확인합니다.",
+    "Confirm & share": "확인 후 공유",
+    "Request review first": "먼저 검토 요청",
+    "Paper or full-text article URL": "논문 또는 전문 페이지 URL",
+    "Use an accessible full-text article or PDF. Text, equations, tables and figures are prepared for reading.": "접근 가능한 전문 페이지나 PDF를 사용하세요. 본문, 수식, 표, 그림을 읽기 좋게 정리합니다.",
+    "Choose a license when uploading. Confirmed sharing is immediate, with administrator review afterward.": "업로드할 때 라이선스를 선택하세요. 확인 후 즉시 공유되고 관리자가 나중에 검토합니다."
   },
   "ar": {
     ". Public comments are reviewed.": "التعليقات العامة تخضع للمراجعة.",
@@ -4617,7 +4667,17 @@
     "Click Quick approve to confirm sharing permission and that the selected papers’ text, equations and figures are ready. Your confirmation is recorded automatically; no second popup.": "بالضغط على «موافقة سريعة» تؤكد إذن المشاركة وجاهزية نصوص الأبحاث المحددة ومعادلاتها وأشكالها. يُسجل تأكيدك تلقائيًا دون نافذة إضافية.",
     "Permission for {count} papers without a supported license": "إذن {count} أبحاث دون ترخيص مدعوم",
     "Author permission confirmed": "تم تأكيد إذن المؤلف",
-    "Choose only permission you have verified. Recorded licenses are kept.": "اختر فقط إذنًا تحققت منه. تُحفظ التراخيص المسجلة."
+    "Choose only permission you have verified. Recorded licenses are kept.": "اختر فقط إذنًا تحققت منه. تُحفظ التراخيص المسجلة.",
+    "Share this material?": "هل تريد مشاركة هذه المادة؟",
+    "Sharing license": "ترخيص المشاركة",
+    "Confirm sharing permission for the text and all figures. Uploads are shared immediately and reviewed afterward.": "أكد حق مشاركة النص وجميع الأشكال. تُشارك الملفات فور رفعها ويراجعها المسؤولون لاحقًا.",
+    "I have author permission": "لدي إذن المؤلف",
+    "I confirm permission to share the text and all figures under this license.": "أؤكد أن لدي حق مشاركة النص وجميع الأشكال بموجب هذا الترخيص.",
+    "Confirm & share": "تأكيد ومشاركة",
+    "Request review first": "طلب المراجعة أولًا",
+    "Paper or full-text article URL": "رابط البحث أو النص الكامل",
+    "Use an accessible full-text article or PDF. Text, equations, tables and figures are prepared for reading.": "استخدم نصًا كاملًا متاحًا أو ملف PDF. يُنسق النص والمعادلات والجداول والأشكال للقراءة.",
+    "Choose a license when uploading. Confirmed sharing is immediate, with administrator review afterward.": "اختر ترخيصًا عند الرفع. تتم المشاركة فور التأكيد ثم يراجعها المسؤولون."
   },
   "fr": {
     ". Public comments are reviewed.": ". Les commentaires publics sont examinés.",
@@ -5387,7 +5447,17 @@
     "Click Quick approve to confirm sharing permission and that the selected papers’ text, equations and figures are ready. Your confirmation is recorded automatically; no second popup.": "Cliquer sur Approbation rapide confirme l’autorisation de partage et la vérification du texte, des équations et des figures des articles sélectionnés. Votre confirmation est enregistrée automatiquement, sans autre fenêtre.",
     "Permission for {count} papers without a supported license": "Autorisation pour {count} articles sans licence prise en charge",
     "Author permission confirmed": "Autorisation de l’auteur confirmée",
-    "Choose only permission you have verified. Recorded licenses are kept.": "Choisissez uniquement une autorisation vérifiée. Les licences enregistrées sont conservées."
+    "Choose only permission you have verified. Recorded licenses are kept.": "Choisissez uniquement une autorisation vérifiée. Les licences enregistrées sont conservées.",
+    "Share this material?": "Partager ce document ?",
+    "Sharing license": "Licence de partage",
+    "Confirm sharing permission for the text and all figures. Uploads are shared immediately and reviewed afterward.": "Confirmez les droits de partage du texte et de toutes les figures. Le document est partagé immédiatement puis examiné.",
+    "I have author permission": "J’ai l’autorisation de l’auteur",
+    "I confirm permission to share the text and all figures under this license.": "Je confirme avoir le droit de partager le texte et toutes les figures sous cette licence.",
+    "Confirm & share": "Confirmer et partager",
+    "Request review first": "Demander un examen préalable",
+    "Paper or full-text article URL": "URL de l’article ou du texte intégral",
+    "Use an accessible full-text article or PDF. Text, equations, tables and figures are prepared for reading.": "Utilisez un article intégral accessible ou un PDF. Texte, équations, tableaux et figures sont adaptés à la lecture.",
+    "Choose a license when uploading. Confirmed sharing is immediate, with administrator review afterward.": "Choisissez une licence à l’importation. Le partage est immédiat après confirmation, puis vérifié par un administrateur."
   },
   "de": {
     ". Public comments are reviewed.": "Öffentliche Kommentare werden geprüft.",
@@ -6157,7 +6227,17 @@
     "Click Quick approve to confirm sharing permission and that the selected papers’ text, equations and figures are ready. Your confirmation is recorded automatically; no second popup.": "Mit Schnell genehmigen bestätigen Sie die Erlaubnis zum Teilen und die Prüfung von Text, Gleichungen und Abbildungen der ausgewählten Artikel. Ihre Bestätigung wird automatisch ohne weiteres Dialogfeld gespeichert.",
     "Permission for {count} papers without a supported license": "Erlaubnis für {count} Artikel ohne unterstützte Lizenz",
     "Author permission confirmed": "Erlaubnis des Autors bestätigt",
-    "Choose only permission you have verified. Recorded licenses are kept.": "Wählen Sie nur eine verifizierte Erlaubnis. Erfasste Lizenzen bleiben erhalten."
+    "Choose only permission you have verified. Recorded licenses are kept.": "Wählen Sie nur eine verifizierte Erlaubnis. Erfasste Lizenzen bleiben erhalten.",
+    "Share this material?": "Dieses Material teilen?",
+    "Sharing license": "Lizenz zum Teilen",
+    "Confirm sharing permission for the text and all figures. Uploads are shared immediately and reviewed afterward.": "Bestätigen Sie die Rechte für Text und alle Abbildungen. Uploads werden sofort geteilt und danach geprüft.",
+    "I have author permission": "Ich habe die Erlaubnis des Autors",
+    "I confirm permission to share the text and all figures under this license.": "Ich bestätige die Berechtigung, Text und alle Abbildungen unter dieser Lizenz zu teilen.",
+    "Confirm & share": "Bestätigen und teilen",
+    "Request review first": "Zuerst Prüfung anfordern",
+    "Paper or full-text article URL": "URL des Artikels oder Volltexts",
+    "Use an accessible full-text article or PDF. Text, equations, tables and figures are prepared for reading.": "Nutzen Sie einen zugänglichen Volltext oder ein PDF. Text, Formeln, Tabellen und Abbildungen werden zum Lesen aufbereitet.",
+    "Choose a license when uploading. Confirmed sharing is immediate, with administrator review afterward.": "Wählen Sie beim Hochladen eine Lizenz. Nach Bestätigung wird sofort geteilt und später geprüft."
   },
   "es": {
     ". Public comments are reviewed.": "Los comentarios públicos se revisan.",
@@ -6927,7 +7007,17 @@
     "Click Quick approve to confirm sharing permission and that the selected papers’ text, equations and figures are ready. Your confirmation is recorded automatically; no second popup.": "Al pulsar Aprobación rápida confirmas el permiso para compartir y que has revisado el texto, las ecuaciones y las figuras seleccionadas. La confirmación se registra automáticamente, sin otro diálogo.",
     "Permission for {count} papers without a supported license": "Permiso para {count} artículos sin licencia compatible",
     "Author permission confirmed": "Permiso del autor confirmado",
-    "Choose only permission you have verified. Recorded licenses are kept.": "Elige solo un permiso verificado. Se conservan las licencias registradas."
+    "Choose only permission you have verified. Recorded licenses are kept.": "Elige solo un permiso verificado. Se conservan las licencias registradas.",
+    "Share this material?": "¿Compartir este material?",
+    "Sharing license": "Licencia para compartir",
+    "Confirm sharing permission for the text and all figures. Uploads are shared immediately and reviewed afterward.": "Confirma los derechos para compartir el texto y todas las figuras. Se compartirá de inmediato y se revisará después.",
+    "I have author permission": "Tengo permiso del autor",
+    "I confirm permission to share the text and all figures under this license.": "Confirmo que puedo compartir el texto y todas las figuras con esta licencia.",
+    "Confirm & share": "Confirmar y compartir",
+    "Request review first": "Solicitar revisión primero",
+    "Paper or full-text article URL": "URL del artículo o texto completo",
+    "Use an accessible full-text article or PDF. Text, equations, tables and figures are prepared for reading.": "Usa un artículo completo accesible o un PDF. Se adaptarán el texto, las ecuaciones, las tablas y las figuras para su lectura.",
+    "Choose a license when uploading. Confirmed sharing is immediate, with administrator review afterward.": "Elige una licencia al subir. Se compartirá tras confirmar y un administrador lo revisará después."
   },
   "ru": {
     ". Public comments are reviewed.": "Публичные комментарии проходят проверку.",
@@ -7697,7 +7787,17 @@
     "Click Quick approve to confirm sharing permission and that the selected papers’ text, equations and figures are ready. Your confirmation is recorded automatically; no second popup.": "Нажимая «Быстро одобрить», вы подтверждаете разрешение на распространение и проверку текста, формул и рисунков выбранных статей. Подтверждение записывается автоматически, без дополнительного окна.",
     "Permission for {count} papers without a supported license": "Разрешение для {count} статей без поддерживаемой лицензии",
     "Author permission confirmed": "Разрешение автора подтверждено",
-    "Choose only permission you have verified. Recorded licenses are kept.": "Выбирайте только проверенное разрешение. Сохранённые лицензии не меняются."
+    "Choose only permission you have verified. Recorded licenses are kept.": "Выбирайте только проверенное разрешение. Сохранённые лицензии не меняются.",
+    "Share this material?": "Поделиться материалом?",
+    "Sharing license": "Лицензия на публикацию",
+    "Confirm sharing permission for the text and all figures. Uploads are shared immediately and reviewed afterward.": "Подтвердите право делиться текстом и всеми иллюстрациями. Материал станет доступен сразу и будет проверен позднее.",
+    "I have author permission": "У меня есть разрешение автора",
+    "I confirm permission to share the text and all figures under this license.": "Подтверждаю право делиться текстом и всеми иллюстрациями по этой лицензии.",
+    "Confirm & share": "Подтвердить и поделиться",
+    "Request review first": "Сначала запросить проверку",
+    "Paper or full-text article URL": "Ссылка на статью или полный текст",
+    "Use an accessible full-text article or PDF. Text, equations, tables and figures are prepared for reading.": "Используйте доступный полный текст или PDF. Текст, формулы, таблицы и рисунки будут подготовлены для чтения.",
+    "Choose a license when uploading. Confirmed sharing is immediate, with administrator review afterward.": "Выберите лицензию при загрузке. После подтверждения материал публикуется сразу и проверяется позже."
   },
   "vi": {
     ". Public comments are reviewed.": "Bình luận công khai sẽ được kiểm duyệt.",
@@ -8467,6 +8567,16 @@
     "Click Quick approve to confirm sharing permission and that the selected papers’ text, equations and figures are ready. Your confirmation is recorded automatically; no second popup.": "Nhấn Duyệt nhanh để xác nhận quyền chia sẻ và rằng bạn đã kiểm tra văn bản, phương trình và hình của các bài đã chọn. Xác nhận được ghi tự động, không có hộp thoại thứ hai.",
     "Permission for {count} papers without a supported license": "Quyền cho {count} bài chưa có giấy phép được hỗ trợ",
     "Author permission confirmed": "Đã xác nhận quyền từ tác giả",
-    "Choose only permission you have verified. Recorded licenses are kept.": "Chỉ chọn quyền đã xác minh. Giấy phép đã ghi được giữ nguyên."
+    "Choose only permission you have verified. Recorded licenses are kept.": "Chỉ chọn quyền đã xác minh. Giấy phép đã ghi được giữ nguyên.",
+    "Share this material?": "Chia sẻ tài liệu này?",
+    "Sharing license": "Giấy phép chia sẻ",
+    "Confirm sharing permission for the text and all figures. Uploads are shared immediately and reviewed afterward.": "Xác nhận quyền chia sẻ văn bản và tất cả hình ảnh. Tài liệu được chia sẻ ngay và quản trị viên xét duyệt sau.",
+    "I have author permission": "Tôi có sự cho phép của tác giả",
+    "I confirm permission to share the text and all figures under this license.": "Tôi xác nhận quyền chia sẻ văn bản và tất cả hình ảnh theo giấy phép này.",
+    "Confirm & share": "Xác nhận và chia sẻ",
+    "Request review first": "Yêu cầu xét duyệt trước",
+    "Paper or full-text article URL": "URL bài báo hoặc toàn văn",
+    "Use an accessible full-text article or PDF. Text, equations, tables and figures are prepared for reading.": "Dùng bài toàn văn có thể truy cập hoặc PDF. Văn bản, công thức, bảng và hình ảnh sẽ được trình bày để đọc.",
+    "Choose a license when uploading. Confirmed sharing is immediate, with administrator review afterward.": "Chọn giấy phép khi tải lên. Chia sẻ ngay sau khi xác nhận và quản trị viên xét duyệt sau."
   }
 }
