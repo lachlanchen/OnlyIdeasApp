@@ -1,0 +1,75 @@
+{
+  "date": "2026-10-11",
+  "app": "OnlyIdeas",
+  "version": "1.0.7",
+  "scope": "Internal test update; no new production review",
+  "tests": {
+    "server": {
+      "passed": 199,
+      "failed": 0
+    },
+    "renderer": true,
+    "typescript": true,
+    "webBuild": true,
+    "androidLint": true,
+    "iosNativeInteraction": {
+      "passed": 1,
+      "failed": 0,
+      "scenarios": [
+        "compact editor",
+        "multiline expansion",
+        "downward keyboard dismissal",
+        "library return",
+        "draft retention"
+      ]
+    },
+    "realWebArticleReader": {
+      "viewport": 390,
+      "documentWidth": 375,
+      "math": 10,
+      "tables": 2,
+      "layoutSyntaxVisible": false,
+      "loadedFigures": 10,
+      "figures": 10
+    }
+  },
+  "android": {
+    "build": 30,
+    "internal": "completed",
+    "production": 27,
+    "aabSHA256": "af47d1a758f0a313c35712f91c8a85621e71682409222c8e274f94ff3962cc9f",
+    "apkSHA256": "2492dca3e37d3cc24c9dbdb631bb75ae1269f2dc0a200787ad7c04ffcdac9f91"
+  },
+  "server": {
+    "webArticleModuleSHA256": "82531a68631375f84be7f332462f9f651503b0f31a31fa917b878edba3d330a2",
+    "dataPreserved": true,
+    "ingressUnchanged": true,
+    "realArticle": "https://arxiv.org/html/2509.14649v1",
+    "mathpixCalls": 0,
+    "qaPaperPublished": false,
+    "characters": 47185,
+    "verifiedDeployedFiles": 43
+  },
+  "apple": {
+    "build": 31,
+    "delivery": "iOS/Watch and Mac available in TestFlight",
+    "iosIPA_SHA256": "a2d048e5e2a7a3f0e1a04e4852ec1f1c80a298b57e91289cc275c9ee5264c5cc",
+    "macPKG_SHA256": "73d44cc16cf693bbf98aafb9b27cfa3edc60f35fc4cd8b20f9973ea784596600",
+    "macArchitectures": [
+      "x86_64",
+      "arm64"
+    ],
+    "sourceVerifiedAgainstCommit": true,
+    "ios": {
+      "buildId": "c6c4c0cd-7425-4696-9e79-1ea628fc19e7",
+      "processing": "VALID",
+      "internal": "IN_BETA_TESTING"
+    },
+    "mac": {
+      "buildId": "061a6fe9-7650-41c9-bc55-4c958a87da99",
+      "processing": "VALID",
+      "internal": "IN_BETA_TESTING"
+    }
+  },
+  "sourceCommit": "7848dabe3e4235e71550102988fea3c82f314bff"
+}

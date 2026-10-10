@@ -1,0 +1,37 @@
+{
+  "stageOnly": true,
+  "productionListingsChanged": false,
+  "android": {
+    "version": "1.0.7",
+    "build": 30,
+    "package": "art.onlyideas.app.screenshots",
+    "source": "Same native source as release; isolated capture package, guest session",
+    "files": [
+      {
+        "path": "android/03-agent.png",
+        "sha256": "efa826e6b53bc21c102bfd1ecbd1ebfa009a90bed2af5b13d4373fdc7ccf3f6f"
+      }
+    ]
+  },
+  "note": "Android agent image staged for next review; Apple images retained as interaction evidence. No store screenshot listing changes.",
+  "apple": {
+    "version": "1.0.7",
+    "build": 31,
+    "source": "Native XCTest iPhone simulator, anonymous session; three captures from passed interaction test",
+    "files": [
+      {
+        "path": "iphone-qa/03-agent.png",
+        "sha256": "7522bfebdf8f00c5895a4d81aa90e23e95456272c17d5d5181488bca6db514d6"
+      },
+      {
+        "path": "iphone-qa/02-library-return.png",
+        "sha256": "d368ce53a85ee57a21a5c82c91f85742f1104c9dcaeed17bcca7a382d53a79f8"
+      },
+      {
+        "path": "iphone-qa/04-keyboard-dismissed.png",
+        "sha256": "10ea431c4c29023f42f5f3eb645650b14b8a8ed3628509d6b4c27431b292ed8e"
+      }
+    ],
+    "qualification": "QA evidence. Simulator tab-bar compositing is incomplete in captures; retain previous store set until a clean marketing capture."
+  }
+}
