@@ -1,5 +1,17 @@
 # OnlyIdeas · product contract
 
+## Browser-assisted paper retrieval · 2026-10-11
+
+The owner requested stronger open-access retrieval with a real browser in Docker
+and Codex assistance. Reuse accessible transcripts and translations first, then
+try bounded HTTPS/index/repository paths. A separate outbound retrieval worker
+uses fresh, sandboxed Chromium and a quota-gated bibliographic Codex fallback.
+Verify the requested paper before conversion; preserve equations and figures.
+Do not send private chats, uploads, account tokens or browser profiles to this
+worker. Its browser has no direct network or host access; public HTTPS egress is
+DNS-pinned. Respect access challenges/restricted content and retain PDF upload
+recovery. No new app binary or store change is required for this server update.
+
 ## Remembered import choices · 2026-10-11
 
 Source links and job retries never open the sharing-license prompt. Retries keep

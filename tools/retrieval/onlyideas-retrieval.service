@@ -1,0 +1,22 @@
+[Unit]
+Description=OnlyIdeas public paper browser retrieval worker
+After=network-online.target docker.service
+
+[Service]
+Type=simple
+WorkingDirectory=%h/.local/share/onlyideas-agent/current
+ExecStart=/usr/bin/flock -n %h/.local/share/onlyideas-retrieval/worker.lock %h/.nvm/versions/node/v22.21.0/bin/node --max-old-space-size=384 worker/retrieval-worker.mjs
+Environment=ONLYIDEAS_RETRIEVAL_CONFIG=%h/.config/onlyideas/retrieval-worker.json
+Environment=PATH=%h/.nvm/versions/node/v22.21.0/bin:/usr/local/bin:/usr/bin:/bin
+Restart=on-failure
+RestartSec=10
+TimeoutStopSec=170
+KillMode=control-group
+NoNewPrivileges=true
+PrivateTmp=true
+UMask=0077
+MemoryMax=2G
+TasksMax=128
+
+[Install]
+WantedBy=default.target

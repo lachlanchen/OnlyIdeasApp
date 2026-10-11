@@ -1,3 +1,4 @@
+import {createBrowserRetrieval} from './browser-retrieval.mjs';
 import {convertWebArticle} from './web-article.mjs';
 import {reserveSubscriptionQuota,finishSubscriptionQuota} from './subscription-quota.mjs';
 import {publicationFingerprint} from './publication-review.mjs';
@@ -45,7 +46,7 @@ export async function mathpix(job, config, store) {
     requireValue(!job.submittedAt, 'The conversion was submitted, but its receipt is uncertain. Contact support before retrying.', 409);
     if (job.url) {
       job.message='Finding accessible full text…';store.saveJob(job);
-      const found = await downloadPaperPDF(job,{allowHTML:true});const {bytes,url:downloadedFrom}=found;job.downloadedFrom=downloadedFrom;
+      const found = await downloadPaperPDF(job,{allowHTML:true,browserFallback:()=>createBrowserRetrieval(store,config).retrieve(job)});const {bytes,url:downloadedFrom}=found;job.downloadedFrom=downloadedFrom;if(found.browserAssisted)job.browserAssisted=true;
       if(found.format==='html') {
         job.message='Preparing article text, equations and figures';store.saveJob(job);
         const {mmd,assets}=await convertWebArticle(found.article,{pandoc:config.pandoc||'pandoc'});
@@ -69,7 +70,7 @@ export async function mathpix(job, config, store) {
     const sameFile = reusablePaper(store,job.owner,{sourceDigest:job.sourceDigest},job.id);
     if (sameFile) { await rm(pdfFile,{force:true}); return {paperId:sameFile.id,reused:true}; }
     job.pages = await inspectPDF(pdfFile, config.maxPages || 30);
-    if(job.url&&job.metadata?.doi&&!job.paperIdentity){job.paperIdentity=await inspectPaperIdentity(pdfFile,job.metadata);requireValue(job.paperIdentity.state!=='mismatch','The downloaded PDF does not match this paper’s title. Open the source or upload the correct PDF.',409);store.saveJob(job);}
+    if(job.url&&(job.metadata?.doi||job.browserAssisted)&&!job.paperIdentity){job.paperIdentity=await inspectPaperIdentity(pdfFile,job.metadata);requireValue(job.paperIdentity.state!=='mismatch'&&(!job.browserAssisted||job.paperIdentity.state==='matched'),'The downloaded PDF does not match this paper’s title. Open the source or upload the correct PDF.',409);store.saveJob(job);}
     const allowance=conversionAllowance(store,config,job);
     requireValue(allowance.unlimited || job.pages<=allowance.remaining, 'Today’s shared conversion allowance is full. Try tomorrow.', 429);
     const form = new FormData();

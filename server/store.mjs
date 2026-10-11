@@ -1,3 +1,4 @@
+import {initBrowserRetrieval} from './browser-retrieval.mjs';
 import {initReadingSpace,recordActivity} from './reading-space.mjs';
 import { DatabaseSync } from 'node:sqlite';
 import { mkdirSync } from 'node:fs';
@@ -35,6 +36,7 @@ export class Store {
       CREATE TABLE IF NOT EXISTS terms(owner TEXT PRIMARY KEY, version TEXT NOT NULL);
       CREATE INDEX IF NOT EXISTS paper_visibility ON papers(visibility,owner);
       CREATE INDEX IF NOT EXISTS job_state ON jobs(state);`);
+    initBrowserRetrieval(this);
     initCredits(this);
     initReadingSpace(this);
     initBilling(this);

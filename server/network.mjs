@@ -24,7 +24,7 @@ export async function downloadPublic(input, { maxBytes = 20_000_000, redirects =
         if (!redirects || !res.headers.location) return reject(new AppError('Too many redirects from this source.'));
         downloadPublic(new URL(res.headers.location, url).href, { maxBytes, redirects: redirects - 1, resolver, timeout, withMetadata, signal, deadline }).then(resolve, reject); return;
       }
-      if (res.statusCode !== 200) { res.resume(); const error=new AppError(`The source returned HTTP ${res.statusCode}. Try uploading your copy.`);error.upstreamStatus=res.statusCode;error.retryAfterMs=Math.min(1200,Math.max(0,Number(res.headers['retry-after']||0)*1000));reject(error); return; }
+      if (![200,203].includes(res.statusCode)) { res.resume(); const error=new AppError(`The source returned HTTP ${res.statusCode}. Try uploading your copy.`);error.upstreamStatus=res.statusCode;error.retryAfterMs=Math.min(1200,Math.max(0,Number(res.headers['retry-after']||0)*1000));reject(error); return; }
       const chunks = []; let size = 0;
       if (Number(res.headers['content-length']) > maxBytes) { req.destroy(new AppError('Download exceeds the size limit.')); return; }
       res.on('data', chunk => { size += chunk.length; if (size > maxBytes) req.destroy(new AppError('Download exceeds the size limit.')); else chunks.push(chunk); });

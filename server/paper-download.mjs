@@ -1,3 +1,4 @@
+import {repositoryCandidates} from './retrieval-sources.mjs';
 import {extractWebArticle} from './web-article.mjs';
 import {downloadPublic} from './network.mjs';
 import {AppError} from './domain.mjs';
@@ -13,7 +14,7 @@ export function citationPDFs(html,base) {
 const transient=e=>[408,429,500,502,503,504].includes(e.upstreamStatus)||['ETIMEDOUT','ECONNRESET','EAI_AGAIN','ECONNREFUSED','ERR_STREAM_PREMATURE_CLOSE'].includes(e.code)||/took too long|socket hang up|aborted/i.test(e.message);
 // Bounded retries apply only to temporary failures, never repeated 401/403s.
 // Every redirect and alternate location still passes pinned public-DNS checks.
-export async function downloadPaperPDF(job,{download=downloadPublic,pause=ms=>new Promise(r=>setTimeout(r,ms)),now=Date.now,allowHTML=false}={}) {
+export async function downloadPaperPDF(job,{download=downloadPublic,pause=ms=>new Promise(r=>setTimeout(r,ms)),now=Date.now,allowHTML=false,browserFallback}={}) {
  const deadline=now()+90_000,attempted=new Set(),pages=new Set();let last,blocked=false,transfers=0;
  async function get(url,maxBytes,timeout){
   for(let n=0;n<2;n++){
@@ -35,9 +36,15 @@ export async function downloadPaperPDF(job,{download=downloadPublic,pause=ms=>ne
   if(allowHTML){const article=extractWebArticle(result.bytes.toString(),result.url,job.metadata);if(article)return {...result,article,format:'html'}}
   for(const pdf of citationPDFs(result.bytes.toString(),result.url)){const found=await attempt(pdf);if(found)return found}
  }catch(e){last=e;blocked ||= e.upstreamStatus===403||e.upstreamStatus===401||/HTTP (401|403)/.test(e.message)}}
+ const pmc=allowHTML&&String(job.url||job.sourcePage||'').match(/^https:\/\/(?:www\.)?(?:pmc\.)?ncbi\.nlm\.nih\.gov\/(?:pmc\/)?articles\/(?:PMC)?(\d+)/i);
+ if(pmc){const found=await landing('https://pmc.ncbi.nlm.nih.gov/articles/PMC'+pmc[1]+'/');if(found)return found}
  const arxiv=allowHTML&&String(job.url||'').match(/^https:\/\/arxiv\.org\/pdf\/([\d.v]+)(?:\.pdf)?$/);
  if(arxiv){const found=await landing('https://arxiv.org/html/'+arxiv[1]);if(found)return found}
  for(const url of [...new Set([job.url,...(job.downloadSources||[])])].slice(0,4)){const result=await attempt(url);if(result)return result}
+ if(/^10\.(?:5281\/zenodo|36227\/techrxiv)\./i.test(job.metadata?.doi||'')){
+  const candidates=await repositoryCandidates({metadata:job.metadata,urls:[]},{download:async url=>(await get(url,2_000_000,10000)).bytes});
+  for(const url of candidates){const found=await attempt(url);if(found)return found;}
+ }
  // Refresh the exact index ID/DOI; never choose a different paper by title.
  const work=/^https:\/\/openalex\.org\/W\d+$/.test(job.metadata?.metadataSource||'')?job.metadata.metadataSource:null;
  const doi=/^10\.\d{4,9}\/\S+$/i.test(job.metadata?.doi||'')?job.metadata.doi:null;
@@ -51,6 +58,7 @@ export async function downloadPaperPDF(job,{download=downloadPublic,pause=ms=>ne
   }
  }catch(e){last=e}}
  const result=await landing(job.sourcePage);if(result)return result;
+ if(browserFallback){const recovered=await browserFallback();if(recovered)return recovered;}
  const error=new AppError(blocked?'This repository blocks automatic PDF downloads (403). Open the source page and upload the PDF, or try another open-access copy. No conversion was charged.':(last?.message?.includes('instead of a PDF')?'The source supplied a web page instead of a PDF. ':'')+'The PDF could not be downloaded. Try again, open the source, or upload your PDF. No conversion was charged.',422);
  error.code=blocked?'source_access_denied':'source_pdf_unavailable';throw error;
 }

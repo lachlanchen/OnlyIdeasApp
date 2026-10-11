@@ -1,0 +1,16 @@
+{
+  "origin": "https://agent.onlyideas.art",
+  "token": "SET_A_SEPARATE_RANDOM_RETRIEVAL_TOKEN",
+  "stateDir": "/home/lachlan/.local/share/onlyideas-retrieval",
+  "seccomp": "/home/lachlan/.local/share/onlyideas-agent/current/worker/browser/seccomp.json",
+  "image": "PIN_THE_QUALIFIED_DOCKER_IMAGE_SHA256",
+  "codex": {
+    "enabled": false,
+    "executable": "/absolute/path/to/codex",
+    "home": "/absolute/path/to/operator-approved-codex-home",
+    "stateDir": "/absolute/path/to/shared-research-ledger",
+    "quotaCommand": ["/absolute/path/to/python3", "/absolute/path/to/codex_session.py", "quota"],
+    "maxDaily": 12,
+    "timeoutMs": 210000
+  }
+}

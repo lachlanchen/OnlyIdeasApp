@@ -1,3 +1,4 @@
+import {createBrowserRetrieval} from './browser-retrieval.mjs';
 import {conditionalJSON,conditionalResponse} from './conditional-response.mjs';
 import {sharingConsent,headerConsent} from './sharing-consent.mjs';
 import {paperSegments,segmentSource,readingView} from './translation-pieces.mjs';
@@ -76,6 +77,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
   });
   const agentActions=createAgentActions(store,config,{enqueue,social});
   const chats=createChats(store,config,agentActions);
+  const retrieval=createBrowserRetrieval(store,config);
   const agentTimer=worker?setInterval(()=>agentActions.tick(),1500):null;agentTimer?.unref();
   const server = createServer(async (req, res) => {
     res.setHeader('X-Content-Type-Options', 'nosniff'); res.setHeader('Referrer-Policy', 'no-referrer');
@@ -84,6 +86,18 @@ export function createApp(store, config, { worker = true, provider = providerJSO
     try {
       const url = new URL(req.url, origin), path = url.pathname, method = req.method;
       requireValue(!/%2f|%5c|%00|(?:^|\/)\.\.(?:\/|$)/i.test(req.url.split('?')[0]), 'Invalid path.');
+      if(path.startsWith('/api/worker/retrieval/')) {
+        requireValue(retrieval.authorized(req),'Retrieval worker authorization required.',401);
+        requireValue(method==='POST','Method not allowed.',405);
+        if(path==='/api/worker/retrieval/claim')return response(res,retrieval.claim());
+        if(path==='/api/worker/retrieval/heartbeat')return response(res,retrieval.heartbeat(await json(req)));
+        if(path==='/api/worker/retrieval/failed')return response(res,retrieval.finish({...await json(req),error:true}));
+        if(path==='/api/worker/retrieval/result') {
+          const meta=JSON.parse(Buffer.from(String(req.headers['x-retrieval-result']||''),'base64url').toString());
+          return response(res,retrieval.finish(meta,await readBody(req,20_000_000)));
+        }
+        throw new AppError('Not found.',404);
+      }
       if (path.startsWith('/api/worker/')) {
         requireValue(chats.authorized(req), 'Worker authorization required.', 401);
         requireValue(method === 'POST', 'Method not allowed.', 405);

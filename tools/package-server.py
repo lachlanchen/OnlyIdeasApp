@@ -3,7 +3,7 @@
 import argparse,hashlib,json,pathlib,shutil,subprocess,tarfile,tempfile
 parser=argparse.ArgumentParser();parser.add_argument('output',type=pathlib.Path);args=parser.parse_args()
 root=pathlib.Path(__file__).resolve().parents[1]
-modules=['fflate','ipaddr.js','sharp','@apple/app-store-server-library','google-auth-library']
+modules=['jsdom','fflate','ipaddr.js','sharp','@apple/app-store-server-library','google-auth-library']
 assert (root/'dist/index.html').exists(), 'Run npm run build first.'
 args.output.parent.mkdir(parents=True,exist_ok=True)
 with tempfile.TemporaryDirectory(prefix='onlyideas-release-') as temp:
