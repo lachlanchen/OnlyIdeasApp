@@ -57,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
   private String agentDraft="";
   private int agentScrollY=0;
   private boolean followAgent=true;
+  private Button jumpLatest;
   private LinearLayout attachmentTray;
   private final ArrayList<JSONObject> draftAttachments=new ArrayList<>();
   private String paragraphId="";
@@ -418,15 +419,34 @@ public class MainActivity extends AppCompatActivity {
         .show();
   }
 
-  private String uploadLicense="";
-  void authorizeImport(boolean shared,boolean pdf,int retryCost,Consumer<Integer> done) {
-    uploadLicense="";
-    if(shared){int epoch=authEpoch;String[] licenses={"CC-BY-4.0","CC-BY-SA-4.0","CC0-1.0","author-permission"};
-      LinearLayout box=column();box.setPadding(dp(20),dp(8),dp(20),dp(8));caption(box,t("Confirm sharing permission for the text and all figures. Uploads are shared immediately and reviewed afterward."));
-      Spinner picker=new Spinner(this);picker.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,licenses));box.addView(picker);
-      CheckBox consent=new CheckBox(this);consent.setText(t("I confirm permission to share the text and all figures under this license."));box.addView(consent);
-      AlertDialog dialog=new AlertDialog.Builder(this).setTitle(t("Share this material?")).setView(box).setPositiveButton(t("Confirm & share"),(d,w)->{if(epoch==authEpoch){uploadLicense=licenses[picker.getSelectedItemPosition()];done.accept(0);}}).setNeutralButton(t("Request review first"),(d,w)->{if(epoch==authEpoch)done.accept(0);}).setNegativeButton(t("Cancel"),null).create();
-      dialog.setOnShowListener(d->{dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);consent.setOnCheckedChangeListener((v,checked)->dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(checked));});dialog.show();return;}
+  static class ImportPermission {
+    final boolean shared;final int creditLimit;final String license;
+    ImportPermission(boolean shared,int cost,String license){this.shared=shared;this.creditLimit=cost;this.license=license;}
+  }
+  String sharingChoicesKey(){return "sharing-choices:"+(account==null?"visitor":account.optString("id"));}
+  JSONObject sharingChoices(){try{return new JSONObject(getPreferences(MODE_PRIVATE).getString(sharingChoicesKey(),"{}"));}catch(Exception ignored){return new JSONObject();}}
+  String sharingKey(byte[] bytes){try{byte[] hash=MessageDigest.getInstance("SHA-256").digest(bytes);StringBuilder key=new StringBuilder();for(byte b:hash)key.append(String.format(Locale.ROOT,"%02x",b));return key.toString();}catch(Exception e){throw new IllegalStateException(e);}}
+  void authorizeImport(boolean shared,boolean pdf,String key,Consumer<ImportPermission> done) {
+    final int epoch=authEpoch;final String preferencesKey=sharingChoicesKey();
+    Consumer<String> finish=choice->{
+      if(epoch!=authEpoch)return;
+      if(!key.isEmpty()){JSONObject values=sharingChoices();if(values.length()>=128)values.remove(values.keys().next());try{values.put(key,choice);}catch(Exception ignored){}getPreferences(MODE_PRIVATE).edit().putString(preferencesKey,values.toString()).apply();}
+      if(choice.equals("private"))authorizeCredits(pdf,0,cost->done.accept(new ImportPermission(false,cost,"")));
+      else done.accept(new ImportPermission(true,0,choice.equals("review")?"":choice));
+    };
+    if(!shared){finish.accept("private");return;}
+    String saved=sharingChoices().optString(key);
+    if(Arrays.asList("private","review","CC-BY-4.0","CC-BY-SA-4.0","CC0-1.0","author-permission").contains(saved)){finish.accept(saved);return;}
+    String[] licenses={"CC-BY-4.0","CC-BY-SA-4.0","CC0-1.0","author-permission"};
+    LinearLayout box=column();box.setPadding(dp(20),dp(8),dp(20),dp(8));caption(box,t("Confirm sharing permission for the text and all figures. Uploads are shared immediately and reviewed afterward."));caption(box,t("Cancel keeps this material private. Your choice is remembered for this material."));
+    Spinner picker=new Spinner(this);picker.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,licenses));box.addView(picker);
+    CheckBox consent=new CheckBox(this);consent.setText(t("I confirm permission to share the text and all figures under this license."));box.addView(consent);
+    AlertDialog dialog=new AlertDialog.Builder(this).setTitle(t("Share this material?")).setView(box).setPositiveButton(t("Confirm & share"),(d,w)->finish.accept(licenses[picker.getSelectedItemPosition()])).setNeutralButton(t("Request review first"),(d,w)->finish.accept("review")).setNegativeButton(t("Cancel"),(d,w)->finish.accept("private")).create();
+    dialog.setOnCancelListener(d->finish.accept("private"));
+    dialog.setOnShowListener(d->{dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);consent.setOnCheckedChangeListener((v,checked)->dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(checked));});dialog.show();
+  }
+  void authorizeRetry(int cost,Consumer<Integer> done){if(cost>0)authorizeCredits(false,cost,done);else done.accept(0);}
+  void authorizeCredits(boolean pdf,int retryCost,Consumer<Integer> done) {
     final int epoch=authEpoch;
     job(()->api.json("/api/credits","GET",null),credits->{
       if(!credits.optBoolean("enabled")){done.accept(0);return;}
@@ -452,6 +472,7 @@ public class MainActivity extends AppCompatActivity {
       choices.check(shareUpload?sharedID:privateID);options.addView(choices);
       caption(options,t("Choose a license when uploading. Confirmed sharing is immediate, with administrator review afterward."));gap(options,12);
       caption(options,t("Share your own work or papers you have permission to publish."));gap(options,12);
+      options.addView(button(t("Reset saved sharing choices"),false,()->{getPreferences(MODE_PRIVATE).edit().remove(sharingChoicesKey()).apply();toast(t("Sharing choices reset. Choose again on your next import. Existing papers are unchanged."));}));
       TextView rules=text("",15,false);options.addView(rules);
       caption(options,t("Your chats and notes stay private."));gap(options,12);
       caption(options,t("PDF and image recognition uses Mathpix. Word and text files are converted on the server."));
@@ -861,11 +882,14 @@ public class MainActivity extends AppCompatActivity {
     chatScroll = new ScrollView(this);
     chatScroll.setFillViewport(true);
     dismissKeyboardOnDrag(chatScroll);
-    chatScroll.setOnScrollChangeListener((View v,int x,int y,int oldX,int oldY)->{if(messages!=null)followAgent=messages.getHeight()-chatScroll.getHeight()-y<dp(100);});
+    chatScroll.setOnScrollChangeListener((View v,int x,int y,int oldX,int oldY)->{if(messages!=null){followAgent=messages.getHeight()-chatScroll.getHeight()-y<dp(100);if(jumpLatest!=null)jumpLatest.setVisibility(followAgent?View.GONE:View.VISIBLE);}});
     messages = column();
     messages.setPadding(dp(14), dp(12), dp(14), dp(14));
     chatScroll.addView(messages);
-    content.addView(chatScroll, new LinearLayout.LayoutParams(-1, 0, 1));
+    FrameLayout chatFrame=new FrameLayout(this);chatFrame.addView(chatScroll,new FrameLayout.LayoutParams(-1,-1));
+    jumpLatest=button("↓",true,()->{hideKeyboard();followAgent=true;chatScroll.post(()->chatScroll.smoothScrollTo(0,messages.getHeight()));jumpLatest.setVisibility(View.GONE);});jumpLatest.setContentDescription(t("Go to latest message"));jumpLatest.setVisibility(View.GONE);
+    FrameLayout.LayoutParams jumpPosition=new FrameLayout.LayoutParams(dp(48),dp(48),Gravity.BOTTOM|Gravity.END);jumpPosition.setMargins(dp(12),dp(12),dp(12),dp(12));chatFrame.addView(jumpLatest,jumpPosition);
+    content.addView(chatFrame, new LinearLayout.LayoutParams(-1, 0, 1));
     progress = text(agentStatus, 16, false);
     progress.setTextColor(green);
     progress.setPadding(dp(22), dp(8), dp(22), dp(8));
@@ -976,7 +1000,7 @@ public class MainActivity extends AppCompatActivity {
           caption(card,t(shareUpload ? "Shared after review":"Only me"));
           card.addView(button(t("Fetch & read"),true,()->{
             hideKeyboard();final String conversation=chatId;final boolean shared=shareUpload;
-            authorizeImport(shared,true,0,limit->job(()->api.json("/api/chats/"+conversation+"/import","POST",object("paperId",p.optString("id")).put("sharing",shared?"shared":"private").put("creditLimit",limit).put("sharingConsent",uploadLicense.isEmpty()?JSONObject.NULL:object("license",uploadLicense).put("attestation",true))),r->{toast(t("Paper queued for conversion."));loadChat(false);loadJobs(true);}));
+            authorizeImport(shared,true,sharingKey(("research:"+p.optString("id")).getBytes(StandardCharsets.UTF_8)),permission->job(()->api.json("/api/chats/"+conversation+"/import","POST",object("paperId",p.optString("id")).put("sharing",permission.shared?"shared":"private").put("creditLimit",permission.creditLimit).put("sharingConsent",permission.license.isEmpty()?JSONObject.NULL:object("license",permission.license).put("attestation",true))),r->{toast(t("Paper queued for conversion."));loadChat(false);loadJobs(true);}));
           }));
           card.addView(button(t("Upload my PDF"),false,()->recoverPDF(p.optString("id"),"",shareUpload)));
           }
@@ -2061,7 +2085,7 @@ public class MainActivity extends AppCompatActivity {
                           .setNegativeButton(t("Close"), null)
                           .setPositiveButton(
                               t("Try again"),
-                              (x, y) -> authorizeImport(j.optInt("creditCost")==0,false,j.optInt("creditCost"),limit ->
+                              (x, y) -> authorizeRetry(j.optInt("creditCost"),limit ->
                                   job(
                                       () ->
                                           api.json(
@@ -2090,13 +2114,12 @@ public class MainActivity extends AppCompatActivity {
     String name="";
     try(var cursor=getContentResolver().query(uri,null,null,null,null)){if(cursor!=null&&cursor.moveToFirst()){int col=cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME);if(col>=0)name=cursor.getString(col);}}catch(Exception ignored){}
     final boolean shared=request==44?recoveryShared:shareUpload;
-    authorizeImport(shared,request!=43||name.toLowerCase(Locale.ROOT).endsWith(".pdf")||"application/pdf".equals(getContentResolver().getType(uri)),0,limit->uploadPicked(uri,request,shared,limit));
+    final boolean pdf=request!=43||name.toLowerCase(Locale.ROOT).endsWith(".pdf")||"application/pdf".equals(getContentResolver().getType(uri));
+    job(()->{try(InputStream input=getContentResolver().openInputStream(uri)){if(input==null)throw new Exception("Could not read this PDF.");ByteArrayOutputStream bytes=new ByteArrayOutputStream();byte[] buffer=new byte[8192];int n;while((n=input.read(buffer))!=-1){if(bytes.size()+n>20_000_000)throw new Exception("Choose a file smaller than 20 MB.");bytes.write(buffer,0,n);}return sharingKey(bytes.toByteArray());}},key->authorizeImport(shared,pdf,key,permission->uploadPicked(uri,request,permission,"")));
   }
 
-  void uploadPicked(Uri uri,int request,boolean shared,int creditLimit) {
-    uploadPicked(uri,request,shared,creditLimit,"");
-  }
-  void uploadPicked(Uri uri,int request,boolean shared,int creditLimit,String confirmation) {
+  void uploadPicked(Uri uri,int request,ImportPermission permission,String confirmation) {
+    final boolean shared=permission.shared;final int creditLimit=permission.creditLimit;final String uploadLicense=permission.license;
     if(account==null||(request==44&&!account.optString("id").equals(uploadOwner))){alert(t("Sign in to continue."));return;}
     busy = true;
     final String research=uploadResearch,recovery=uploadRecovery;
@@ -2135,7 +2158,7 @@ public class MainActivity extends AppCompatActivity {
         },
         r -> {
           busy = false;
-          try{JSONObject check=new JSONObject(new String(r,StandardCharsets.UTF_8));if(check.optString("code").equals("pdf_match_uncertain")){new AlertDialog.Builder(this).setTitle(t("Check paper match")).setMessage(t(check.optString("error"))+"\n\n"+check.optString("expectedTitle")).setPositiveButton(t("This PDF matches"),(d,w)->uploadPicked(uri,request,shared,creditLimit,check.optString("confirmation"))).setNegativeButton(t("Cancel"),null).show();return;}}catch(Exception ignored){}
+          try{JSONObject check=new JSONObject(new String(r,StandardCharsets.UTF_8));if(check.optString("code").equals("pdf_match_uncertain")){new AlertDialog.Builder(this).setTitle(t("Check paper match")).setMessage(t(check.optString("error"))+"\n\n"+check.optString("expectedTitle")).setPositiveButton(t("This PDF matches"),(d,w)->uploadPicked(uri,request,permission,check.optString("confirmation"))).setNegativeButton(t("Cancel"),null).show();return;}}catch(Exception ignored){}
           if(request==43){try{JSONObject file=new JSONObject(new String(r,StandardCharsets.UTF_8)).getJSONObject("attachment");if(draftAttachments.stream().noneMatch(a->a.optString("id").equals(file.optString("id"))))draftAttachments.add(file);renderDraftAttachments();toast(t("Attachment added."));}catch(Exception e){alert(e.getMessage());}return;}
           toast(t("PDF queued for conversion."));
           loadJobs(true);

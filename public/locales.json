@@ -1557,7 +1557,11 @@
     "Request review first": "先申请审核",
     "Paper or full-text article URL": "论文或全文网页链接",
     "Use an accessible full-text article or PDF. Text, equations, tables and figures are prepared for reading.": "使用可访问的全文网页或 PDF，正文、公式、表格和图片会整理为适合阅读的内容。",
-    "Choose a license when uploading. Confirmed sharing is immediate, with administrator review afterward.": "上传时选择许可。确认后立即共享，管理员随后审核。"
+    "Choose a license when uploading. Confirmed sharing is immediate, with administrator review afterward.": "上传时选择许可。确认后立即共享，管理员随后审核。",
+    "Go to latest message": "跳到最新消息",
+    "Cancel keeps this material private. Your choice is remembered for this material.": "取消将保留为私密。此材料的选择会被记住。",
+    "Reset saved sharing choices": "重设已保存的分享选择",
+    "Sharing choices reset. Choose again on your next import. Existing papers are unchanged.": "分享选择已重设。下次导入时可重新选择，已有论文不受影响。"
   },
   "zh-Hant": {
     ". Public comments are reviewed.": "公開評論會經過審核。",
@@ -2337,7 +2341,11 @@
     "Request review first": "先申請審核",
     "Paper or full-text article URL": "論文或全文網頁連結",
     "Use an accessible full-text article or PDF. Text, equations, tables and figures are prepared for reading.": "使用可存取的全文網頁或 PDF，正文、公式、表格和圖片會整理為適合閱讀的內容。",
-    "Choose a license when uploading. Confirmed sharing is immediate, with administrator review afterward.": "上傳時選擇授權。確認後立即共享，管理員隨後審核。"
+    "Choose a license when uploading. Confirmed sharing is immediate, with administrator review afterward.": "上傳時選擇授權。確認後立即共享，管理員隨後審核。",
+    "Go to latest message": "跳至最新訊息",
+    "Cancel keeps this material private. Your choice is remembered for this material.": "取消將保留為私人。此材料的選擇會被記住。",
+    "Reset saved sharing choices": "重設已儲存的分享選擇",
+    "Sharing choices reset. Choose again on your next import. Existing papers are unchanged.": "分享選擇已重設。下次匯入時可重新選擇，已有論文不受影響。"
   },
   "ja": {
     ". Public comments are reviewed.": "公開コメントは審査されます。",
@@ -3117,7 +3125,11 @@
     "Request review first": "先に審査を依頼",
     "Paper or full-text article URL": "論文または全文記事のURL",
     "Use an accessible full-text article or PDF. Text, equations, tables and figures are prepared for reading.": "閲覧可能な全文記事またはPDFを使用します。本文、数式、表、図を読みやすく整えます。",
-    "Choose a license when uploading. Confirmed sharing is immediate, with administrator review afterward.": "アップロード時にライセンスを選択します。確認後すぐに共有され、管理者が後で審査します。"
+    "Choose a license when uploading. Confirmed sharing is immediate, with administrator review afterward.": "アップロード時にライセンスを選択します。確認後すぐに共有され、管理者が後で審査します。",
+    "Go to latest message": "最新のメッセージへ",
+    "Cancel keeps this material private. Your choice is remembered for this material.": "キャンセルすると非公開になります。この資料の選択は保存されます。",
+    "Reset saved sharing choices": "保存した共有設定をリセット",
+    "Sharing choices reset. Choose again on your next import. Existing papers are unchanged.": "共有設定をリセットしました。次の取り込み時に選び直せます。既存の論文は変更されません。"
   },
   "ko": {
     ". Public comments are reviewed.": "공개 댓글은 검토됩니다.",
@@ -3897,7 +3909,11 @@
     "Request review first": "먼저 검토 요청",
     "Paper or full-text article URL": "논문 또는 전문 페이지 URL",
     "Use an accessible full-text article or PDF. Text, equations, tables and figures are prepared for reading.": "접근 가능한 전문 페이지나 PDF를 사용하세요. 본문, 수식, 표, 그림을 읽기 좋게 정리합니다.",
-    "Choose a license when uploading. Confirmed sharing is immediate, with administrator review afterward.": "업로드할 때 라이선스를 선택하세요. 확인 후 즉시 공유되고 관리자가 나중에 검토합니다."
+    "Choose a license when uploading. Confirmed sharing is immediate, with administrator review afterward.": "업로드할 때 라이선스를 선택하세요. 확인 후 즉시 공유되고 관리자가 나중에 검토합니다.",
+    "Go to latest message": "최신 메시지로 이동",
+    "Cancel keeps this material private. Your choice is remembered for this material.": "취소하면 비공개로 유지됩니다. 이 자료의 선택은 저장됩니다.",
+    "Reset saved sharing choices": "저장된 공유 선택 초기화",
+    "Sharing choices reset. Choose again on your next import. Existing papers are unchanged.": "공유 선택이 초기화되었습니다. 다음 가져오기에서 다시 선택하세요. 기존 논문은 변경되지 않습니다."
   },
   "ar": {
     ". Public comments are reviewed.": "التعليقات العامة تخضع للمراجعة.",
@@ -4677,7 +4693,11 @@
     "Request review first": "طلب المراجعة أولًا",
     "Paper or full-text article URL": "رابط البحث أو النص الكامل",
     "Use an accessible full-text article or PDF. Text, equations, tables and figures are prepared for reading.": "استخدم نصًا كاملًا متاحًا أو ملف PDF. يُنسق النص والمعادلات والجداول والأشكال للقراءة.",
-    "Choose a license when uploading. Confirmed sharing is immediate, with administrator review afterward.": "اختر ترخيصًا عند الرفع. تتم المشاركة فور التأكيد ثم يراجعها المسؤولون."
+    "Choose a license when uploading. Confirmed sharing is immediate, with administrator review afterward.": "اختر ترخيصًا عند الرفع. تتم المشاركة فور التأكيد ثم يراجعها المسؤولون.",
+    "Go to latest message": "الانتقال إلى أحدث رسالة",
+    "Cancel keeps this material private. Your choice is remembered for this material.": "الإلغاء يبقي هذه المادة خاصة. سيتم حفظ اختيارك لهذه المادة.",
+    "Reset saved sharing choices": "إعادة ضبط خيارات المشاركة المحفوظة",
+    "Sharing choices reset. Choose again on your next import. Existing papers are unchanged.": "تمت إعادة ضبط خيارات المشاركة. اختر مجددًا عند الاستيراد التالي. لن تتغير الأوراق الحالية."
   },
   "fr": {
     ". Public comments are reviewed.": ". Les commentaires publics sont examinés.",
@@ -5457,7 +5477,11 @@
     "Request review first": "Demander un examen préalable",
     "Paper or full-text article URL": "URL de l’article ou du texte intégral",
     "Use an accessible full-text article or PDF. Text, equations, tables and figures are prepared for reading.": "Utilisez un article intégral accessible ou un PDF. Texte, équations, tableaux et figures sont adaptés à la lecture.",
-    "Choose a license when uploading. Confirmed sharing is immediate, with administrator review afterward.": "Choisissez une licence à l’importation. Le partage est immédiat après confirmation, puis vérifié par un administrateur."
+    "Choose a license when uploading. Confirmed sharing is immediate, with administrator review afterward.": "Choisissez une licence à l’importation. Le partage est immédiat après confirmation, puis vérifié par un administrateur.",
+    "Go to latest message": "Aller au dernier message",
+    "Cancel keeps this material private. Your choice is remembered for this material.": "Annuler garde ce document privé. Votre choix sera mémorisé pour ce document.",
+    "Reset saved sharing choices": "Réinitialiser les choix de partage",
+    "Sharing choices reset. Choose again on your next import. Existing papers are unchanged.": "Choix réinitialisés. Choisissez à nouveau au prochain import. Les articles existants restent inchangés."
   },
   "de": {
     ". Public comments are reviewed.": "Öffentliche Kommentare werden geprüft.",
@@ -6237,7 +6261,11 @@
     "Request review first": "Zuerst Prüfung anfordern",
     "Paper or full-text article URL": "URL des Artikels oder Volltexts",
     "Use an accessible full-text article or PDF. Text, equations, tables and figures are prepared for reading.": "Nutzen Sie einen zugänglichen Volltext oder ein PDF. Text, Formeln, Tabellen und Abbildungen werden zum Lesen aufbereitet.",
-    "Choose a license when uploading. Confirmed sharing is immediate, with administrator review afterward.": "Wählen Sie beim Hochladen eine Lizenz. Nach Bestätigung wird sofort geteilt und später geprüft."
+    "Choose a license when uploading. Confirmed sharing is immediate, with administrator review afterward.": "Wählen Sie beim Hochladen eine Lizenz. Nach Bestätigung wird sofort geteilt und später geprüft.",
+    "Go to latest message": "Zur neuesten Nachricht",
+    "Cancel keeps this material private. Your choice is remembered for this material.": "Abbrechen hält dieses Material privat. Deine Auswahl wird für dieses Material gespeichert.",
+    "Reset saved sharing choices": "Gespeicherte Freigaben zurücksetzen",
+    "Sharing choices reset. Choose again on your next import. Existing papers are unchanged.": "Freigabeauswahl zurückgesetzt. Beim nächsten Import erneut wählen. Bestehende Artikel bleiben unverändert."
   },
   "es": {
     ". Public comments are reviewed.": "Los comentarios públicos se revisan.",
@@ -7017,7 +7045,11 @@
     "Request review first": "Solicitar revisión primero",
     "Paper or full-text article URL": "URL del artículo o texto completo",
     "Use an accessible full-text article or PDF. Text, equations, tables and figures are prepared for reading.": "Usa un artículo completo accesible o un PDF. Se adaptarán el texto, las ecuaciones, las tablas y las figuras para su lectura.",
-    "Choose a license when uploading. Confirmed sharing is immediate, with administrator review afterward.": "Elige una licencia al subir. Se compartirá tras confirmar y un administrador lo revisará después."
+    "Choose a license when uploading. Confirmed sharing is immediate, with administrator review afterward.": "Elige una licencia al subir. Se compartirá tras confirmar y un administrador lo revisará después.",
+    "Go to latest message": "Ir al último mensaje",
+    "Cancel keeps this material private. Your choice is remembered for this material.": "Cancelar mantiene este material privado. Se recordará tu elección para este material.",
+    "Reset saved sharing choices": "Restablecer opciones de compartir",
+    "Sharing choices reset. Choose again on your next import. Existing papers are unchanged.": "Opciones restablecidas. Elige de nuevo al importar. Los artículos existentes no cambian."
   },
   "ru": {
     ". Public comments are reviewed.": "Публичные комментарии проходят проверку.",
@@ -7797,7 +7829,11 @@
     "Request review first": "Сначала запросить проверку",
     "Paper or full-text article URL": "Ссылка на статью или полный текст",
     "Use an accessible full-text article or PDF. Text, equations, tables and figures are prepared for reading.": "Используйте доступный полный текст или PDF. Текст, формулы, таблицы и рисунки будут подготовлены для чтения.",
-    "Choose a license when uploading. Confirmed sharing is immediate, with administrator review afterward.": "Выберите лицензию при загрузке. После подтверждения материал публикуется сразу и проверяется позже."
+    "Choose a license when uploading. Confirmed sharing is immediate, with administrator review afterward.": "Выберите лицензию при загрузке. После подтверждения материал публикуется сразу и проверяется позже.",
+    "Go to latest message": "К последнему сообщению",
+    "Cancel keeps this material private. Your choice is remembered for this material.": "Отмена оставляет материал личным. Выбор для этого материала будет сохранён.",
+    "Reset saved sharing choices": "Сбросить настройки публикации",
+    "Sharing choices reset. Choose again on your next import. Existing papers are unchanged.": "Настройки сброшены. Выберите заново при следующем импорте. Существующие статьи не изменятся."
   },
   "vi": {
     ". Public comments are reviewed.": "Bình luận công khai sẽ được kiểm duyệt.",
@@ -8577,6 +8613,10 @@
     "Request review first": "Yêu cầu xét duyệt trước",
     "Paper or full-text article URL": "URL bài báo hoặc toàn văn",
     "Use an accessible full-text article or PDF. Text, equations, tables and figures are prepared for reading.": "Dùng bài toàn văn có thể truy cập hoặc PDF. Văn bản, công thức, bảng và hình ảnh sẽ được trình bày để đọc.",
-    "Choose a license when uploading. Confirmed sharing is immediate, with administrator review afterward.": "Chọn giấy phép khi tải lên. Chia sẻ ngay sau khi xác nhận và quản trị viên xét duyệt sau."
+    "Choose a license when uploading. Confirmed sharing is immediate, with administrator review afterward.": "Chọn giấy phép khi tải lên. Chia sẻ ngay sau khi xác nhận và quản trị viên xét duyệt sau.",
+    "Go to latest message": "Đến tin nhắn mới nhất",
+    "Cancel keeps this material private. Your choice is remembered for this material.": "Hủy sẽ giữ tài liệu này riêng tư. Lựa chọn cho tài liệu này sẽ được ghi nhớ.",
+    "Reset saved sharing choices": "Đặt lại lựa chọn chia sẻ đã lưu",
+    "Sharing choices reset. Choose again on your next import. Existing papers are unchanged.": "Đã đặt lại lựa chọn chia sẻ. Chọn lại khi nhập lần tới. Các bài hiện có không thay đổi."
   }
 }

@@ -276,6 +276,7 @@ struct NativeAgent: View {
   @State private var options = false
   @State private var inputHeight: CGFloat = 36
   @State private var followingLatest = true
+  @State private var awayFromLatest = false
   @State private var draggingMessages = false
   var body: some View {
     VStack(spacing: 0) {
@@ -306,7 +307,15 @@ struct NativeAgent: View {
         .modifier(ReadingKeyboardDismiss())
         .simultaneousGesture(DragGesture(minimumDistance: 12).onChanged { _ in draggingMessages = true }.onEnded { _ in draggingMessages = false })
         .onPreferenceChange(AgentBottomPosition.self) { bottom in
-          if draggingMessages { followingLatest = bottom <= viewport.size.height + 90 }
+          awayFromLatest = bottom > viewport.size.height + 90
+          if draggingMessages { followingLatest = !awayFromLatest }
+        }
+        .overlay(alignment: .bottomTrailing) {
+          if awayFromLatest {
+            Button {followingLatest=true;dismissReadingKeyboard();withAnimation {proxy.scrollTo("end",anchor:.bottom)}} label: {
+              Image(systemName:"arrow.down").font(.headline).frame(width:44,height:44).background(.regularMaterial,in:Circle()).overlay(Circle().stroke(Color.secondary.opacity(0.25)))
+            }.accessibilityLabel(T("Go to latest message")).padding(12)
+          }
         }
         .onChange(of: store.messages.last?.id) { _ in
           guard isActive, followingLatest, !requests, !history else { return }
@@ -692,6 +701,7 @@ struct NativeCreditSection: View {
   }
 }
 struct NativeSharingOptions: View {
+  @State private var reset = false
   @EnvironmentObject var store:ReadingStore
   @Environment(\.dismiss) var dismiss
   var body: some View {
@@ -704,6 +714,8 @@ struct NativeSharingOptions: View {
           }.pickerStyle(.segmented)
           Text(T("Choose a license when uploading. Confirmed sharing is immediate, with administrator review afterward."))
           Text(T("Share your own work or papers you have permission to publish.")).foregroundColor(.secondary)
+          Button(T("Reset saved sharing choices")) {store.resetSharingChoices();reset=true}
+          if reset {Text(T("Sharing choices reset. Choose again on your next import. Existing papers are unchanged.")).font(.footnote)}
         }
         NativeCreditSection()
         Section(T("Files & privacy")) {
@@ -742,7 +754,7 @@ struct NativeRequests: View {
                 Task {
                   do {
                     let cost=job.creditCost ?? 0
-                    guard let limit=try await store.authorizeImport(shared:cost==0,pdf:false,amount:cost) else {return}
+                    guard let limit=try await store.authorizeRetry(cost:cost) else {return}
                     _ = try await store.json("/api/jobs/\(job.id)/retry", method: "POST", body: ["creditLimit":limit])
                     await store.loadJobs()
                   } catch { store.error = error.localizedDescription }

@@ -1,5 +1,16 @@
 # OnlyIdeas · product contract
 
+## Remembered import choices · 2026-10-11
+
+Source links and job retries never open the sharing-license prompt. Retries keep
+server-stored permissions and only reconfirm a private credit cost if required.
+Canceling a new sharing choice continues privately, subject to the normal credit
+confirmation. Remember the choice per account and exact file/content or research
+item; do not apply one paper's attestation to unrelated material. Sharing options
+can reset these choices for future imports without republishing existing papers.
+Agent chat has a jump-to-latest control on web, iOS/Mac and Android.
+
+
 Requested by Lachlan on 2026-09-26. A quiet, social research library for reading
 papers, discussing passages and making ideas easier to understand across languages.
 

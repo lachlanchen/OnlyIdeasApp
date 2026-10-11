@@ -709,20 +709,20 @@ final class ReadingStore: NSObject, ObservableObject,
     let access = url.startAccessingSecurityScopedResource()
     defer { if access { url.stopAccessingSecurityScopedResource() } }
     do {
-      guard let limit = try await authorizeImport(shared:shared,pdf:true) else { return }
-      let length = try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0
+            let length = try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0
       guard length <= 20_000_000 else { throw failure(T("Choose a PDF smaller than 20 MB.")) }
       let bytes = try Data(contentsOf: url)
       guard bytes.count <= 20_000_000 else { throw failure(T("Choose a PDF smaller than 20 MB.")) }
       let title =
         url.deletingPathExtension().lastPathComponent.addingPercentEncoding(
           withAllowedCharacters: .urlQueryAllowed) ?? "Paper"
-      var contextHeaders:[String:String]=sharingHeaders(shared)
+      guard let permission = try await authorizeImport(shared:shared,pdf:true,key:sharingKey(bytes)) else { return }
+      var contextHeaders:[String:String]=permission.headers
       if let id=researchId {contextHeaders["X-Research-Id"]=id}
       if let id=recoveryJobId {contextHeaders["X-Recovery-Job-Id"]=id}
       let importHeaders = [
           "Content-Type": "application/pdf", "X-Request-Id": UUID().uuidString.lowercased(),
-          "X-Paper-Title": title, "X-Paper-Language": "en", "X-Paper-Sharing": shared ? "shared" : "private", "X-Credit-Limit":String(limit),
+          "X-Paper-Title": title, "X-Paper-Language": "en", "X-Paper-Sharing": permission.shared ? "shared" : "private", "X-Credit-Limit":String(permission.creditLimit),
         ].merging(contextHeaders){_,new in new}
       do {_ = try await request(
         "/api/import", method: "POST", data: bytes,
@@ -763,9 +763,9 @@ final class ReadingStore: NSObject, ObservableObject,
     defer { attachmentBusy=false }
     do {
       let shared=sharedImports
-      guard let limit=try await authorizeImport(shared:shared,pdf:name.lowercased().hasSuffix(".pdf")) else {return}
+      guard let permission=try await authorizeImport(shared:shared,pdf:name.lowercased().hasSuffix(".pdf"),key:sharingKey(bytes)) else {return}
       let encoded=name.addingPercentEncoding(withAllowedCharacters:.alphanumerics) ?? "file"
-      let data=try await request("/api/attachments",method:"POST",data:bytes,headers:["Content-Type":"application/octet-stream","X-File-Name":encoded,"X-Paper-Sharing":shared ? "shared":"private","X-Credit-Limit":String(limit)].merging(sharingHeaders(shared)){_,new in new})
+      let data=try await request("/api/attachments",method:"POST",data:bytes,headers:["Content-Type":"application/octet-stream","X-File-Name":encoded,"X-Paper-Sharing":permission.shared ? "shared":"private","X-Credit-Limit":String(permission.creditLimit)].merging(permission.headers){_,new in new})
       guard identity==token else { return }
       let response=try JSONSerialization.jsonObject(with:data) as? [String:Any] ?? [:]
       let item=try decoded(AgentAttachment.self,response["attachment"] ?? [:])
@@ -867,8 +867,8 @@ final class ReadingStore: NSObject, ObservableObject,
   func importFound(_ paper: FoundPaper, shared: Bool = true) async {
     guard let id = conversationID else { return }
     do {
-      guard let limit=try await authorizeImport(shared:shared,pdf:true) else {return}
-      _ = try await json("/api/chats/\(id)/import", method: "POST", body: ["paperId": paper.id, "sharing": shared ? "shared" : "private","creditLimit":limit,"sharingConsent":uploadLicense.map{["license":$0,"attestation":true] as [String:Any]} ?? [:]])
+      guard let permission=try await authorizeImport(shared:shared,pdf:true,key:sharingKey(Data(("research:"+paper.id).utf8))) else {return}
+      _ = try await json("/api/chats/\(id)/import", method: "POST", body: ["paperId": paper.id, "sharing": permission.shared ? "shared" : "private","creditLimit":permission.creditLimit,"sharingConsent":permission.license.map{["license":$0,"attestation":true] as [String:Any]} ?? [:]])
       await loadConversation(id)
       await loadJobs()
     } catch { self.error = error.localizedDescription }
@@ -882,26 +882,45 @@ final class ReadingStore: NSObject, ObservableObject,
   func resolveCreditPrompt(_ allowed:Bool) {
     let pending=creditDecision;creditDecision=nil;creditPrompt=nil;pending?.resume(returning:allowed)
   }
-  func sharingHeaders(_ shared:Bool)->[String:String] {guard shared,let license=uploadLicense else{return [:]};return ["X-Paper-License":license,"X-Paper-Rights":"confirmed"]}
-  var uploadLicense:String?
-  func confirmSharing() async -> Bool {
-    uploadLicense=nil
+  struct ImportPermission {
+    var shared:Bool
+    var creditLimit:Int
+    var license:String?
+    var headers:[String:String] {guard shared,let license else{return [:]};return ["X-Paper-License":license,"X-Paper-Rights":"confirmed"]}
+  }
+  func sharingKey(_ data:Data)->String {Data(SHA256.hash(data:data)).map{String(format:"%02x",$0)}.joined()}
+  private var sharingChoicesKey:String {"onlyideas.sharing-choices."+scope}
+  func resetSharingChoices() {UserDefaults.standard.removeObject(forKey:sharingChoicesKey)}
+  func confirmSharing(key:String) async -> String? {
+    let choicesKey=sharingChoicesKey
+    if let saved=UserDefaults.standard.dictionary(forKey:choicesKey)?[key] as? String,["private","review","CC-BY-4.0","CC-BY-SA-4.0","CC0-1.0","author-permission"].contains(saved) {return saved}
     let identity=token
     return await withCheckedContinuation { continuation in
-      guard var host=UIApplication.shared.connectedScenes.compactMap({$0 as? UIWindowScene}).flatMap(\.windows).first(where:{$0.isKeyWindow})?.rootViewController else {continuation.resume(returning:false);return}
+      guard var host=UIApplication.shared.connectedScenes.compactMap({$0 as? UIWindowScene}).flatMap(\.windows).first(where:{$0.isKeyWindow})?.rootViewController else {continuation.resume(returning:nil);return}
       while let top=host.presentedViewController {host=top}
-      let alert=UIAlertController(title:T("Share this material?"),message:T("Confirm sharing permission for the text and all figures. Uploads are shared immediately and reviewed afterward."),preferredStyle:.alert)
-      for license in ["CC-BY-4.0","CC-BY-SA-4.0","CC0-1.0","author-permission"] {
-        alert.addAction(UIAlertAction(title:license=="author-permission" ? T("I have author permission") : T("Confirm & share")+" · "+license,style:.default){_ in self.uploadLicense=identity==self.token ? license:nil;continuation.resume(returning:identity==self.token)})
+      let finish:(String)->Void={choice in
+        guard identity==self.token else {continuation.resume(returning:nil);return}
+        if !key.isEmpty {var values=UserDefaults.standard.dictionary(forKey:choicesKey) ?? [:];if values.count>=128,let first=values.keys.sorted().first {values.removeValue(forKey:first)};values[key]=choice;UserDefaults.standard.set(values,forKey:choicesKey)}
+        continuation.resume(returning:choice)
       }
-      alert.addAction(UIAlertAction(title:T("Request review first"),style:.default){_ in continuation.resume(returning:identity==self.token)})
-      alert.addAction(UIAlertAction(title:T("Cancel"),style:.cancel){_ in continuation.resume(returning:false)})
+      let alert=UIAlertController(title:T("Share this material?"),message:T("Confirm sharing permission for the text and all figures. Uploads are shared immediately and reviewed afterward.")+" "+T("Cancel keeps this material private. Your choice is remembered for this material."),preferredStyle:.alert)
+      for license in ["CC-BY-4.0","CC-BY-SA-4.0","CC0-1.0","author-permission"] {
+        alert.addAction(UIAlertAction(title:license=="author-permission" ? T("I have author permission") : T("Confirm & share")+" · "+license,style:.default){_ in finish(license)})
+      }
+      alert.addAction(UIAlertAction(title:T("Request review first"),style:.default){_ in finish("review")})
+      alert.addAction(UIAlertAction(title:T("Cancel"),style:.cancel){_ in finish("private")})
       host.present(alert,animated:true)
     }
   }
-  func authorizeImport(shared:Bool,pdf:Bool,amount:Int?=nil) async throws -> Int? {
-    if shared {return await confirmSharing() ? 0:nil}
-    uploadLicense=nil
+  func authorizeImport(shared:Bool,pdf:Bool,key:String) async throws -> ImportPermission? {
+    let identity=token
+    guard let choice=shared ? await confirmSharing(key:key):"private",identity==token else {return nil}
+    if choice != "private" {return ImportPermission(shared:true,creditLimit:0,license:choice=="review" ? nil:choice)}
+    guard let cost=try await authorizeCredits(pdf:pdf),identity==token else {return nil}
+    return ImportPermission(shared:false,creditLimit:cost,license:nil)
+  }
+  func authorizeRetry(cost:Int) async throws -> Int? {cost>0 ? try await authorizeCredits(pdf:false,amount:cost):0}
+  func authorizeCredits(pdf:Bool,amount:Int?=nil) async throws -> Int? {
     guard creditDecision==nil else {return nil}
     let identity=token
     let value=try JSONDecoder().decode(ReadingCredits.self,from:await request("/api/credits"))

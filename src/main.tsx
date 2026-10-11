@@ -1,4 +1,4 @@
-import {consentHeaders,uploadConsent} from './sharing-consent'
+import {consentHeaders,materialKey} from './sharing-consent'
 import {PublicationReview,SharingStatus,reviewLabels} from './PublicationReview'
 import {StoreLinks} from './StoreLinks'
 import {PieceTranslation} from './PieceTranslation'
@@ -6,7 +6,7 @@ import {UploadPaper} from './UploadPaper'
 import {ReadingSpace} from './ReadingSpace'
 import {Discovery,fuzzyMatch,metadata,type ResearchHit} from './Discovery'
 import {PaperActions} from './PaperActions'
-import {CreditsPanel,SharingOptions,authorizeImport} from './Credits'
+import {CreditsPanel,SharingOptions,authorizeImport,authorizeRetry} from './Credits'
 import {Subscriptions} from './Subscriptions'
 import React, { useEffect, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
@@ -154,7 +154,7 @@ function App() {
     {message && <div className="toast" role="status">{message}<button aria-label={t("Dismiss")} onClick={() => setMessage('')}><X size={16}/></button></div>}
     {login && <Modal title={t("A place for your ideas")} close={() => { setLogin(false); setAuthBusy(false); void cancelSignIn() }}><p>{t("Sign in to keep your papers, save notes, and join the conversation.")}</p><div className="login-mark"><img src="/mark.svg" alt=""/></div>{session?.capabilities.login ? <button className="primary block" disabled={authBusy} onClick={async () => { setAuthBusy(true); try { await signIn() } catch (e) { setAuthBusy(false); notify((e as Error).message) } }}>{authBusy ? <Loader2 className="spin" size={18}/> : <Github size={18}/>} {authBusy ? t("Waiting for sign-in…") : t("Continue with GitHub")}</button> : <p className="notice">{t("GitHub sign-in is being connected. Public papers are ready to read.")}</p>}{session?.development && <button className="secondary block" onClick={async () => { try { await post('/auth/local', {}); await refresh(); setLogin(false) } catch (e) { notify((e as Error).message) } }}>{t("Continue in local preview")}</button>}<p className="fine">{t("Your session stays signed in across visits. You can sign out at any time. Choose Shared or Only me before importing. Your notes and chats stay private.")}</p></Modal>}
     {add && session && <ImportModal session={session!} close={() => setAdd(false)} done={async p => { await refresh(); setAdd(false); if (p) await open(p); else setJobPanel(true) }} notify={notify}/>}
-    {jobPanel && <Modal title={t("Your requests")} close={() => setJobPanel(false)}><p className="muted">{t("You can leave and come back. Requests are saved to your account.")}</p>{jobs.map(j => <div className="job-row" key={j.id}><div>{j.state === 'completed' ? <Check size={18}/> : j.state === 'failed' ? <X size={18}/> : <Loader2 className="spin" size={18}/>}</div><div><strong>{['import','attachment'].includes(j.kind) ? t("Readable paper") : j.kind === 'digest' ? t("Reading guide") : j.kind === 'publish' ? t("Public library") : t("Translation")}</strong>{j.title&&<h3>{j.title}</h3>}<p>{j.message}</p>{j.canUpload&&<UploadPaper jobId={j.id} shared={j.sharing==='shared'} needLogin={()=>false} notify={notify} done={()=>void refresh()}/>} {j.state==='failed'&&j.source?.startsWith('https://')&&<a href={j.source} target="_blank" rel="noreferrer">{t('Open source')}</a>}{j.state === 'failed' && <button className="text-button" onClick={async () => { try { const creditLimit=j.creditCost?await authorizeImport(false,0,0,j.creditCost):0;if(creditLimit===null)return;await post(`/jobs/${j.id}/retry`, {creditLimit}); notify(t("Request queued to resume.")) } catch (e) { notify((e as Error).message) } }}>{t("Try again")}</button>}{j.paperId && j.state === 'completed' && <button className="text-button" onClick={() => { setJobPanel(false); void open({ id: j.paperId } as Paper) }}>{t("Open paper")}<ArrowRight size={14}/></button>}</div></div>)}</Modal>}
+    {jobPanel && <Modal title={t("Your requests")} close={() => setJobPanel(false)}><p className="muted">{t("You can leave and come back. Requests are saved to your account.")}</p>{jobs.map(j => <div className="job-row" key={j.id}><div>{j.state === 'completed' ? <Check size={18}/> : j.state === 'failed' ? <X size={18}/> : <Loader2 className="spin" size={18}/>}</div><div><strong>{['import','attachment'].includes(j.kind) ? t("Readable paper") : j.kind === 'digest' ? t("Reading guide") : j.kind === 'publish' ? t("Public library") : t("Translation")}</strong>{j.title&&<h3>{j.title}</h3>}<p>{j.message}</p>{j.canUpload&&<UploadPaper jobId={j.id} shared={j.sharing==='shared'} needLogin={()=>false} notify={notify} done={()=>void refresh()}/>} {j.state==='failed'&&j.source?.startsWith('https://')&&<a href={j.source} target="_blank" rel="noreferrer">{t('Open source')}</a>}{j.state === 'failed' && <button className="text-button" onClick={async () => { try { const creditLimit=await authorizeRetry(j.creditCost||0);if(creditLimit===null)return;await post(`/jobs/${j.id}/retry`, {creditLimit}); notify(t("Request queued to resume.")) } catch (e) { notify((e as Error).message) } }}>{t("Try again")}</button>}{j.paperId && j.state === 'completed' && <button className="text-button" onClick={() => { setJobPanel(false); void open({ id: j.paperId } as Paper) }}>{t("Open paper")}<ArrowRight size={14}/></button>}</div></div>)}</Modal>}
   </>
 }
 
@@ -170,10 +170,10 @@ function ImportModal({ session, close, done, notify }: { session: Session; close
   async function submit(e: React.FormEvent) {
     e.preventDefault(); setBusy(true)
     try {
-      const creditLimit=await authorizeImport(sharing==='shared',kind==='markdown'?0:1,kind==='markdown'?1:0);if(creditLimit===null)return
-      if (kind === 'markdown') { const result = await post<{ paper: Paper }>('/papers/markdown', { title, language: lang, mmd: text, sharing, sharingConsent:uploadConsent(), creditLimit, requestId: request.current }); await done(result.paper) }
-      else if (kind === 'pdf' && file) { await api('/import', { method: 'POST', headers: { 'Content-Type': 'application/pdf', 'X-Request-Id': request.current, 'X-Paper-Title': encodeURIComponent(title), 'X-Paper-Language': lang, 'X-Paper-Sharing': sharing, ...consentHeaders(),'X-Credit-Limit':String(creditLimit) }, body: file }); await done() }
-      else if (kind === 'url') { await api('/import', { method: 'POST', headers: { 'X-Request-Id': request.current }, body: JSON.stringify({ title, url, language: lang, sharing, sharingConsent:uploadConsent(), creditLimit }) }); await done() }
+      const permission=await authorizeImport(sharing==='shared',kind==='markdown'?0:1,kind==='markdown'?1:0,await materialKey(kind==='pdf'&&file?file:kind==='url'?url.trim():text));if(!permission)return
+      if (kind === 'markdown') { const result = await post<{ paper: Paper }>('/papers/markdown', { title, language: lang, mmd: text, ...permission, requestId: request.current }); await done(result.paper) }
+      else if (kind === 'pdf' && file) { await api('/import', { method: 'POST', headers: { 'Content-Type': 'application/pdf', 'X-Request-Id': request.current, 'X-Paper-Title': encodeURIComponent(title), 'X-Paper-Language': lang, 'X-Paper-Sharing': permission.sharing, ...consentHeaders(permission),'X-Credit-Limit':String(permission.creditLimit) }, body: file }); await done() }
+      else if (kind === 'url') { await api('/import', { method: 'POST', headers: { 'X-Request-Id': request.current }, body: JSON.stringify({ title, url, language: lang, ...permission }) }); await done() }
       else throw new Error('Choose a PDF first.')
     } catch (e) { notify((e as Error).message) } finally { setBusy(false) }
   }
