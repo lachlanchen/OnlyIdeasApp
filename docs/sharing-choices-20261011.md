@@ -26,3 +26,22 @@ qualification boundaries remain; a new native gesture run is not implied here.
 
 Only internal test distribution is authorized for this update. No new production
 review, pricing, login, database migration or bulk publication is included.
+
+## Delivery verified
+
+Build32 is VALID and IN_BETA_TESTING on iOS/Watch and macOS. The Mac binary
+contains both arm64 and x86_64. Google Play internal build32 is completed and
+shows Available to internal testers; production build27 is unchanged. Apple
+signed archives exported and uploaded successfully. Native source hashes match
+the committed files. No new native interaction run is claimed for this small
+follow-up; build31's keyboard/tab test remains its own evidence.
+
+The web update is live at https://agent.onlyideas.art. Public HTTPS readback
+matched the candidate index and JavaScript exactly, with health200. Only web
+assets changed; server source, configuration and shared ingress remained intact.
+The deployment preserved a consistent database backup and rollback release.
+A first local health probe used the wrong port and automatically rolled back;
+the corrected probe used the established18628 listener and passed before the
+public HTTPS check. No account, paper or subscription migration occurred.
+
+Curated delivery details: `store/review/sharing-choices-20261011.json`.

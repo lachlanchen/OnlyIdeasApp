@@ -1,0 +1,73 @@
+{
+  "date": "2026-10-11",
+  "app": "OnlyIdeas",
+  "version": "1.0.7",
+  "build": 32,
+  "sourceCommit": "eaae7e8fedf8745618cb810573f46eaa9d6bbfe7",
+  "scope": "Internal test update; no production review",
+  "tests": {
+    "passed": 201,
+    "failed": 0,
+    "renderer": true,
+    "typescript": true,
+    "webBuild": true,
+    "androidReleaseLint": true,
+    "pwaJumpButton": true,
+    "pwaViewportWidths": [
+      390,
+      1200
+    ],
+    "newNativeInteractionRun": false
+  },
+  "apple": [
+    {
+      "platform": "MAC_OS",
+      "id": "d80ce794-b455-4c14-b381-44c6e119478e",
+      "version": "1.0.7",
+      "build": "32",
+      "processing": "VALID",
+      "internal": "IN_BETA_TESTING"
+    },
+    {
+      "platform": "IOS",
+      "id": "40748959-fecc-43e7-aad7-b04493b9774f",
+      "version": "1.0.7",
+      "build": "32",
+      "processing": "VALID",
+      "internal": "IN_BETA_TESTING"
+    }
+  ],
+  "artifacts": {
+    "iosIPA_SHA256": "218291cb00341d918ffc5e71107b9f52ebf76370815777fbd0c036b8854f3d3b",
+    "macPKG_SHA256": "0c153229290a8bfd9938e33bd556f0671ff604170778a638566a4666f1759113",
+    "androidAAB_SHA256": "e5102830077f35aebc59441b6e5994494609793b8f41dbf445ddfaf7c25468fe",
+    "macArchitectures": [
+      "x86_64",
+      "arm64"
+    ],
+    "nativeSourceHashesMatch": true
+  },
+  "android": {
+    "internal": "completed",
+    "internalBuild": 32,
+    "productionBuild": 27,
+    "uiAvailableToTesters": true
+  },
+  "web": {
+    "health": 200,
+    "indexMatches": true,
+    "script": "/assets/index-cLVEvhg-.js",
+    "sha256": "0e210638e8c3a34edf212c174e3627c7ee437b5542cfb6cf8a1135f5873c1fa2"
+  },
+  "deployment": {
+    "release": "/opt/onlyideas/releases/web32-3e9567849213bde0",
+    "previous": "/opt/onlyideas/releases/reading30-html-82531a68631375f8",
+    "commit": "eaae7e8fedf8745618cb810573f46eaa9d6bbfe7",
+    "files": 29,
+    "health": 200,
+    "serverUnchanged": true,
+    "ingressUnchanged": true,
+    "configUnchanged": true,
+    "databaseBackup": true
+  }
+}
