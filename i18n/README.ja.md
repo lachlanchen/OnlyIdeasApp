@@ -8,18 +8,11 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
-<!-- test29 -->
-**1.0.7 (29) · 2026-10-10**
+## 正式公開 · 2026-10-14
 
-OnlyIdeas 1.0.7 (29) を iOS/Watch・Mac の TestFlight と Google Play の内部テストで配信中です。現在の画面を反映したスクリーンショットを次回のストア更新用に準備しました。公開版と進行中の Mac 審査は維持しています。
+iOS/Watch 1.0.7 (32) は公開済みです。 Google Play 1.0.7 (32) は公開済みです。 Mac 1.0.7 (32) は審査中で、承認後に自動公開されます。現在の Mac 公開版は 1.0.6 (28) です。
 
-[1.0.7 (29)](../docs/test-candidate-29.md) · [Screenshots](../store/screenshots/1.0.7-29/README.md)
-
-## 正式公開 · 2026年10月10日
-
-OnlyIdeas 1.0.6 (27) は iOS/Watch と Google Play で公開済みです。Google の配信率は 100% です。Mac 1.0.6 (28) は Apple の審査中で、承認後に自動公開されます。Mac の公開版は 1.0.5 (26) です。モバイル版には承認済みの角丸アイコンが含まれます。
-
-[公開の確認記録](../docs/distribution-20261010.md)
+[公開の確認記録](../docs/distribution-20261014.md)
 
 ## 正式公開と次の更新 · 2026年10月6日
 

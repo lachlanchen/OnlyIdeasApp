@@ -1,0 +1,158 @@
+{
+  "verifiedAt": "2026-10-13T22:12:22.873757+00:00",
+  "app": "OnlyIdeas",
+  "apple": {
+    "ios": {
+      "id": "15a3c5a1-4864-4fd7-b75f-40d2c3793bf4",
+      "platform": "IOS",
+      "versionString": "1.0.7",
+      "appVersionState": "READY_FOR_DISTRIBUTION",
+      "releaseType": "AFTER_APPROVAL",
+      "build": {
+        "id": "40748959-fecc-43e7-aad7-b04493b9774f",
+        "number": "32"
+      },
+      "review": {
+        "id": "5331fe89-2509-4024-9173-e14d7b5c43b0",
+        "platform": "IOS",
+        "submittedDate": "2026-10-13T06:33:27.511Z",
+        "state": "COMPLETE"
+      },
+      "public": {
+        "us": {
+          "version": "1.0.7",
+          "price": 0.99,
+          "currency": "USD",
+          "currentVersionReleaseDate": "2026-10-13T16:47:45Z",
+          "trackViewUrl": "https://apps.apple.com/us/app/onlyideas/id6816392935?uo=4"
+        },
+        "hk": {
+          "version": "1.0.7",
+          "price": 8.0,
+          "currency": "HKD",
+          "currentVersionReleaseDate": "2026-10-13T16:47:45Z",
+          "trackViewUrl": "https://apps.apple.com/hk/app/onlyideas/id6816392935?uo=4"
+        },
+        "iphone": {
+          "url": "https://apps.apple.com/us/app/id6816392935?platform=iphone",
+          "intent": {
+            "storefront": "us",
+            "language": "en-US",
+            "isDefaultLanguage": true,
+            "$kind": "ProductPageIntent",
+            "id": "6816392935"
+          },
+          "version": "Version 1.0.7",
+          "date": "Tue Oct 13 2026 16:47:45 GMT+0000 (Coordinated Universal Time)"
+        }
+      }
+    },
+    "macos": {
+      "submitted": {
+        "id": "7acb6fb1-c66b-47e7-8add-dcd42180bf29",
+        "platform": "MAC_OS",
+        "versionString": "1.0.7",
+        "appVersionState": "IN_REVIEW",
+        "releaseType": "AFTER_APPROVAL",
+        "build": {
+          "id": "d80ce794-b455-4c14-b381-44c6e119478e",
+          "number": "32"
+        }
+      },
+      "review": {
+        "id": "a46c8238-5c9f-43d2-8a75-a827ad6ac850",
+        "platform": "MAC_OS",
+        "submittedDate": "2026-10-13T06:33:44.651Z",
+        "state": "IN_REVIEW"
+      },
+      "publicBuild": {
+        "id": "5ad8493d-49ec-47fd-a777-ff7e9f0a55e3",
+        "platform": "MAC_OS",
+        "versionString": "1.0.6",
+        "appVersionState": "READY_FOR_DISTRIBUTION",
+        "releaseType": "AFTER_APPROVAL",
+        "build": {
+          "id": "76fb95d9-ec2a-408b-aa1f-e77bea5e6fca",
+          "number": "28"
+        }
+      },
+      "publicPage": {
+        "url": "https://apps.apple.com/us/app/id6816392935?platform=mac",
+        "intent": {
+          "storefront": "us",
+          "language": "en-US",
+          "isDefaultLanguage": true,
+          "$kind": "ProductPageIntent",
+          "id": "6816392935",
+          "platform": "mac"
+        },
+        "version": "Version 1.0.6",
+        "date": "Sat Oct 10 2026 16:50:17 GMT+0000 (Coordinated Universal Time)"
+      }
+    },
+    "availability": {
+      "verifiedAt": "2026-10-13T22:09:48.317581+00:00",
+      "total": 175,
+      "available": 175,
+      "availableInNewTerritories": true,
+      "iosPhasedRelease": null
+    },
+    "publicScreenshotCounts": {
+      "iphone": {
+        "product_media_phone_": {
+          "items": 3
+        },
+        "product_media_pad_": {
+          "items": 3
+        },
+        "product_media_mac_": {
+          "items": 6
+        },
+        "product_media_watch_": {
+          "items": 2
+        }
+      },
+      "mac": {
+        "product_media_mac_": {
+          "items": 6
+        },
+        "product_media_pad_": {
+          "items": 3
+        },
+        "product_media_phone_": {
+          "items": 3
+        },
+        "product_media_watch_": {
+          "items": 2
+        }
+      }
+    }
+  },
+  "google": {
+    "package": "art.onlyideas.app",
+    "publicVersion": "1.0.7",
+    "publicBuild": 32,
+    "status": "AVAILABLE_ON_GOOGLE_PLAY",
+    "countries": 178,
+    "managedPublishing": false,
+    "unsentChanges": false,
+    "pendingReview": false,
+    "latestSubmittedVersion": "1.0.7",
+    "latestSubmittedBuild": 32,
+    "productionEvidenceSha256": "64a9a3c828ec1c7450f20b3fe6f2f69ead47ecc2b4b7d5535d223c490af4ea82",
+    "public": {
+      "titlePresent": true,
+      "currentReleaseNotes": true,
+      "currentDescription": true,
+      "httpStatus": 200,
+      "url": "https://play.google.com/store/apps/details?id=art.onlyideas.app"
+    }
+  },
+  "actions": {
+    "manualReleaseRequired": false,
+    "reason": "Approved builds had automatically published. Both latest Mac builds and Bunko Android23 remain in review.",
+    "storeMutations": false
+  },
+  "billingChanged": false,
+  "newNativeBuild": false
+}

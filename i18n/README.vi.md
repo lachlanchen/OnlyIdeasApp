@@ -8,18 +8,11 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
-<!-- test29 -->
-**1.0.7 (29) · 2026-10-10**
+## Phát hành chính thức · 2026-10-14
 
-OnlyIdeas 1.0.7 (29) đã có trên TestFlight cho iOS/Watch và Mac, cùng kênh thử nghiệm nội bộ Google Play. Ảnh chụp giao diện hiện tại đã được chuẩn bị cho lần cập nhật cửa hàng tiếp theo. Các bản công khai và quy trình xét duyệt Mac đang diễn ra được giữ nguyên.
+iOS/Watch 1.0.7 (32) đã được phát hành. Google Play 1.0.7 (32) đã được phát hành. Mac 1.0.7 (32) vẫn đang được xét duyệt và sẽ tự động phát hành sau khi được chấp thuận; bản Mac công khai hiện là 1.0.6 (28).
 
-[1.0.7 (29)](../docs/test-candidate-29.md) · [Screenshots](../store/screenshots/1.0.7-29/README.md)
-
-## Phát hành chính thức · 10 tháng 10 năm 2026
-
-OnlyIdeas 1.0.6 (27) đã có trên iOS/Watch và Google Play, với tỷ lệ triển khai Google là 100%. Mac 1.0.6 (28) vẫn đang được Apple xét duyệt và sẽ tự động phát hành sau khi được duyệt; bản Mac công khai hiện là 1.0.5 (26). Các bản di động có biểu tượng bo góc đã được chấp thuận.
-
-[Xác minh phát hành](../docs/distribution-20261010.md)
+[Xác minh phát hành](../docs/distribution-20261014.md)
 
 ## Phát hành và bản cập nhật tiếp theo · 6 tháng 10 năm 2026
 

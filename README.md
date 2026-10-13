@@ -8,11 +8,11 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
-## Latest review submission · 13 October 2026
+## Public distribution · 2026-10-14
 
-OnlyIdeas **1.0.7 (32)** is waiting for Apple review on iOS/Watch and macOS, and is in Google Play production review. Both Apple builds are available in TestFlight; Android32 is available internally. This update includes the compact agent composer, jump-to-latest, remembered sharing choices and reusable public reading outputs. Store screenshots were refreshed. Approved public versions remain available during review.
+iOS/Watch 1.0.7 (32) is public. Google Play 1.0.7 (32) is public. Mac 1.0.7 (32) remains in review and will release automatically after approval; the public Mac version is 1.0.6 (28).
 
-[Submission and validation](docs/latest-review-20261013.md) · [Exact build receipt](docs/latest-review-20261013.json)
+[Release verification](docs/distribution-20261014.md)
 
 ## Public distribution · 10 October 2026
 

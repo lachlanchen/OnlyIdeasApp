@@ -8,18 +8,11 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
-<!-- test29 -->
-**1.0.7 (29) · 2026-10-10**
+## الإصدار العام · 2026-10-14
 
-يتوفر OnlyIdeas 1.0.7 (29) عبر TestFlight على iOS وWatch وMac، وعبر الاختبار الداخلي في Google Play. جُهّزت لقطات الشاشة الحالية لتحديث المتجر القادم، مع الحفاظ على الإصدارات المنشورة ومراجعة Mac الجارية.
+أصبح iOS/Watch 1.0.7 (32) متاحًا. أصبح Google Play 1.0.7 (32) متاحًا. ما زال Mac 1.0.7 (32) قيد المراجعة وسيُنشر تلقائيًا بعد الموافقة؛ إصدار Mac العام الحالي هو 1.0.6 (28).
 
-[1.0.7 (29)](../docs/test-candidate-29.md) · [Screenshots](../store/screenshots/1.0.7-29/README.md)
-
-## الإصدار العام · 10 أكتوبر 2026
-
-أصبح OnlyIdeas 1.0.6 (27) متاحًا على iOS/Watch وGoogle Play، بنسبة طرح 100% على Google. ما زال Mac 1.0.6 (28) قيد مراجعة Apple وسيُنشر تلقائيًا بعد الموافقة؛ إصدار Mac العام الحالي هو 1.0.5 (26). تتضمن إصدارات الهاتف الأيقونة المعتمدة ذات الزوايا المستديرة.
-
-[التحقق من النشر](../docs/distribution-20261010.md)
+[التحقق من النشر](../docs/distribution-20261014.md)
 
 ## الإصدار العام والتحديث القادم · 6 أكتوبر 2026
 
