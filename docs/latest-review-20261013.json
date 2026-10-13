@@ -1,0 +1,122 @@
+{
+  "date": "2026-10-13",
+  "app": "OnlyIdeas",
+  "version": "1.0.7",
+  "build": 32,
+  "nativeSource": "eaae7e8fedf8745618cb810573f46eaa9d6bbfe7",
+  "checkedSource": "4b0b110",
+  "nativeChangesSince32": false,
+  "tests": {
+    "passed": 215,
+    "publicPapersRead": 9,
+    "figuresAndChineseReading": true,
+    "newNativeGestureOrProviderLogin": false
+  },
+  "artifacts": {
+    "iosIPA_SHA256": "218291cb00341d918ffc5e71107b9f52ebf76370815777fbd0c036b8854f3d3b",
+    "macPKG_SHA256": "0c153229290a8bfd9938e33bd556f0671ff604170778a638566a4666f1759113",
+    "androidAAB_SHA256": "e5102830077f35aebc59441b6e5994494609793b8f41dbf445ddfaf7c25468fe",
+    "macArchitectures": [
+      "x86_64",
+      "arm64"
+    ],
+    "nativeSourceHashesMatch": true
+  },
+  "apple": {
+    "onlyideas-IOS": {
+      "app": "6816392935",
+      "platform": "IOS",
+      "version": "15a3c5a1-4864-4fd7-b75f-40d2c3793bf4",
+      "base": "975f4ede-ab63-4cc2-a569-a9f2739431c0",
+      "build": "40748959-fecc-43e7-aad7-b04493b9774f",
+      "buildNumber": "32",
+      "marketing": "1.0.7",
+      "releaseType": "AFTER_APPROVAL",
+      "screenshots": [
+        {
+          "locale": "en-US",
+          "type": "APP_WATCH_SERIES_10",
+          "count": 2,
+          "files": [
+            "library.png",
+            "reader.png"
+          ],
+          "complete": true
+        },
+        {
+          "locale": "en-US",
+          "type": "APP_IPAD_PRO_3GEN_129",
+          "count": 3,
+          "files": [
+            "Final10-01-library.png",
+            "Final10-02-agent.png",
+            "Final10-03-profile.png"
+          ],
+          "complete": true
+        },
+        {
+          "locale": "en-US",
+          "type": "APP_IPHONE_67",
+          "count": 3,
+          "files": [
+            "current-iphone-01-discovery.png",
+            "current-iphone-02-library.png",
+            "current-iphone-04-reader.png"
+          ],
+          "complete": true
+        }
+      ],
+      "reviewerCredentialsVerified": true,
+      "reviewId": "5331fe89-2509-4024-9173-e14d7b5c43b0",
+      "reviewState": "WAITING_FOR_REVIEW",
+      "versionState": "WAITING_FOR_REVIEW",
+      "submittedAt": "2026-10-13T06:33:27.511Z",
+      "verifiedAt": "2026-10-13T06:33:30.505486+00:00"
+    },
+    "onlyideas-MAC_OS": {
+      "app": "6816392935",
+      "platform": "MAC_OS",
+      "version": "7acb6fb1-c66b-47e7-8add-dcd42180bf29",
+      "base": "5ad8493d-49ec-47fd-a777-ff7e9f0a55e3",
+      "build": "d80ce794-b455-4c14-b381-44c6e119478e",
+      "buildNumber": "32",
+      "marketing": "1.0.7",
+      "releaseType": "AFTER_APPROVAL",
+      "screenshots": [
+        {
+          "locale": "en-US",
+          "type": "APP_DESKTOP",
+          "count": 3,
+          "files": [
+            "current-macos-01-reader.png",
+            "current-macos-02-equations.png",
+            "current-macos-03-interlaced.png"
+          ],
+          "complete": true
+        }
+      ],
+      "reviewerCredentialsVerified": true,
+      "reviewId": "a46c8238-5c9f-43d2-8a75-a827ad6ac850",
+      "reviewState": "WAITING_FOR_REVIEW",
+      "versionState": "WAITING_FOR_REVIEW",
+      "submittedAt": "2026-10-13T06:33:44.651Z",
+      "verifiedAt": "2026-10-13T06:33:47.454091+00:00"
+    }
+  },
+  "google": {
+    "version": "1.0.7 (32)",
+    "state": "Changes in review",
+    "quickChecks": false,
+    "unsent": false,
+    "automaticPublishing": true,
+    "rollout": "100%",
+    "url": "https://play.google.com/console/u/0/developers/6157557679644496686/app/4974173414823223936/publishing"
+  },
+  "screenshots": {
+    "ios": "Current native discovery/library/reader from qualified build29; changed Agent capture excluded",
+    "macOS": "Three qualified native reader/equation/interlaced images; reader depiction unchanged",
+    "android": "Six native images; compact Agent from build30, other reader/discovery images from build29"
+  },
+  "billingChanged": false,
+  "webDeployedThisTask": false
+}
