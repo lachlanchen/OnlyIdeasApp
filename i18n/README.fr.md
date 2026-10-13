@@ -10,7 +10,7 @@
 
 ## Publication · 2026-10-14
 
-iOS/Watch 1.0.7 (32) est disponible. Google Play 1.0.7 (32) est disponible. Mac 1.0.7 (32) reste en cours d’examen et sera publié automatiquement après approbation ; la version Mac publique est 1.0.6 (28).
+iOS/Watch 1.0.7 (32) est disponible. Google Play 1.0.7 (32) est disponible. Mac 1.0.7 (32) est désormais disponible également.
 
 [Vérification de publication](../docs/distribution-20261014.md)
 

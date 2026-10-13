@@ -4,7 +4,7 @@
 | --- | --- | --- |
 | iOS / paired Watch | **1.0.7 (32)** | Released automatically after approval |
 | Google Play | **1.0.7 (32)** | Latest update released automatically; 100% rollout was submitted |
-| macOS | **1.0.6 (28)** | 1.0.7 (32) IN_REVIEW; automatic release after approval |
+| macOS | **1.0.7 (32)** | Released automatically; verified 14 October 06:21 HKT |
 
 Verified at `2026-10-13T22:12:22.873757+00:00`. No approved release was waiting for a manual publish action.
 The exact Apple build and completed iOS review match the US/Hong Kong public
@@ -16,9 +16,9 @@ Google production and Publishing overview were checked in the signed-in Console.
 OnlyIdeas targets 178 countries/regions with managed publishing off and no
 unsent changes. Public Play pages return HTTP200. OnlyIdeas current release notes and sharing description are visible publicly.
 
-The separate public Mac page matches the older approved Mac release. The current
-Mac review remains active. Apple public phone/tablet/Watch screenshot counts were
-checked separately from the still-pending Mac update; see the exact receipt.
+A later check at 14 October 06:21 HKT confirmed Mac1.0.7(32) is also public.
+Its review is COMPLETE, the version is downloadable, and the public Mac page
+shows the three current screenshots. See [the Mac release receipt](mac-distribution-20261014.md).
 
 [Exact provider state and identifiers](distribution-20261014.json) ·
 [Submitted builds and test boundaries](latest-review-20261013.md)

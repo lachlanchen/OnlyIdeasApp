@@ -1,0 +1,60 @@
+{
+  "checkedAt": "2026-10-13T22:21:05.758749+00:00",
+  "version": {
+    "id": "7acb6fb1-c66b-47e7-8add-dcd42180bf29",
+    "platform": "MAC_OS",
+    "versionString": "1.0.7",
+    "appStoreState": "READY_FOR_SALE",
+    "appVersionState": "READY_FOR_DISTRIBUTION",
+    "copyright": "2026 LazyingArt LLC",
+    "reviewType": "APP_STORE",
+    "releaseType": "AFTER_APPROVAL",
+    "earliestReleaseDate": null,
+    "usesIdfa": null,
+    "downloadable": true,
+    "createdDate": "2026-10-12T23:22:54-07:00"
+  },
+  "build": {
+    "id": "d80ce794-b455-4c14-b381-44c6e119478e",
+    "number": "32",
+    "processing": "VALID"
+  },
+  "review": {
+    "id": "a46c8238-5c9f-43d2-8a75-a827ad6ac850",
+    "platform": "MAC_OS",
+    "submittedDate": "2026-10-13T06:33:44.651Z",
+    "state": "COMPLETE"
+  },
+  "app": "OnlyIdeas",
+  "public": {
+    "checkedAt": "2026-10-13T22:21:05.656527+00:00",
+    "url": "https://apps.apple.com/us/app/id6816392935?platform=mac",
+    "intent": {
+      "storefront": "us",
+      "language": "en-US",
+      "isDefaultLanguage": true,
+      "$kind": "ProductPageIntent",
+      "id": "6816392935",
+      "platform": "mac"
+    },
+    "version": "Version 1.0.7",
+    "date": "Tue Oct 13 2026 22:15:46 GMT+0000 (Coordinated Universal Time)",
+    "screenshotCount": 3
+  },
+  "screenshots": [
+    {
+      "locale": "en-US",
+      "type": "APP_DESKTOP",
+      "count": 3,
+      "files": [
+        "current-macos-01-reader.png",
+        "current-macos-02-equations.png",
+        "current-macos-03-interlaced.png"
+      ],
+      "complete": true
+    }
+  ],
+  "manualReleaseRequired": false,
+  "storeMutations": false,
+  "binaryReused": true
+}

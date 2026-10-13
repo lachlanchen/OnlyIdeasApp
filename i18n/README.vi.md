@@ -10,7 +10,7 @@
 
 ## Phát hành chính thức · 2026-10-14
 
-iOS/Watch 1.0.7 (32) đã được phát hành. Google Play 1.0.7 (32) đã được phát hành. Mac 1.0.7 (32) vẫn đang được xét duyệt và sẽ tự động phát hành sau khi được chấp thuận; bản Mac công khai hiện là 1.0.6 (28).
+iOS/Watch 1.0.7 (32) đã được phát hành. Google Play 1.0.7 (32) đã được phát hành. Mac 1.0.7 (32) cũng đã được phát hành.
 
 [Xác minh phát hành](../docs/distribution-20261014.md)
 

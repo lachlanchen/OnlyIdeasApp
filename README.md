@@ -10,7 +10,7 @@
 
 ## Public distribution · 2026-10-14
 
-iOS/Watch 1.0.7 (32) is public. Google Play 1.0.7 (32) is public. Mac 1.0.7 (32) remains in review and will release automatically after approval; the public Mac version is 1.0.6 (28).
+iOS/Watch 1.0.7 (32) is public. Google Play 1.0.7 (32) is public. Mac 1.0.7 (32) is now public too.
 
 [Release verification](docs/distribution-20261014.md)
 
