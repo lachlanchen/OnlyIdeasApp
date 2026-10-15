@@ -1,5 +1,16 @@
 # OnlyIdeas · product contract
 
+## Exact paper requests · 2026-10-15
+
+Publisher punctuation must not make a literal title dependent on a successful
+language-model plan. Preserve explicit titles/DOIs, strip ordinary download-request
+wrappers, reuse saved papers and verified public source metadata, and ask for a
+selection when only ambiguous title matches exist. Keep unrelated earlier cards
+out of fresh-title requests. Distinguish an index outage from no matching paper.
+Public source-cache reuse does not bypass PDF identity, private-data boundaries,
+conversion quotas or publication consent. Deliver this worker repair to existing
+apps without rebuilding unchanged native clients or changing their store reviews.
+
 ## Chat usability and LAC app-credit display · 2026-10-15
 
 Preserve the direct LLM/app research pipeline first, with Codex and independent

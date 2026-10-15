@@ -20,9 +20,34 @@ export function surveyRequest(text) {
  return /\b(?:papers|studies|works|literature|research opportunities)\b|相关.{0,8}(?:论文|工作)|相關.{0,8}(?:論文|工作)|哪些工作|研究进展|研究進展/i.test(text)
   && /\b(?:summari[sz]e|summary|compare|review|opportunities)\b|总结|總結|综述|綜述|比较|比較|机会|機會/i.test(text);
 }
+export function hasNonLatinLetters(text) {
+ // Publisher typography (hyphens, quotes, spaces and scientific symbols) is
+ // not a foreign-language request. Check letters, not arbitrary Unicode bytes.
+ return (String(text).match(/\p{L}/gu)||[]).some(letter=>!/\p{Script=Latin}/u.test(letter));
+}
+export function literalResearchQuery(text) {
+ const normalized=String(text).normalize('NFKC').replace(/\p{Pd}/gu,'-').replace(/[“”]/g,'"').trim();
+ const quoted=normalized.match(/"([^"\n]{8,300})"/u)?.[1];
+ const request='(?:(?:can|could|would|will) you\\s+)?(?:please\\s+)?(?:help me\\s+)?(?:find|search for|download|fetch|open|read|locate|convert)\\s+';
+ const prefix=new RegExp('^'+request+'(?:(?:the|this|a)\\s+)?(?:(?:paper|article)\\s+(?:(?:titled|called)\\s+)?)?','i');
+ const suffix=new RegExp('(?:\\s*[,;:]\\s*|\\s+)'+request+'(?:(?:the|this|that)\\s+)?(?:paper|article|it)(?:\\s+for me)?[.!?]*$','i');
+ const candidate=(quoted||normalized.replace(prefix,'').replace(suffix,'')).replace(/^[\s"']+|[\s"'.!?]+$/g,'');
+ const wrapped=candidate!==normalized;
+ const terms=researchTerms(candidate);
+ if(terms.length<4||candidate.length>300||hasNonLatinLetters(candidate)||(!quoted&&/\b(?:why|how|compare|explain|recommend|opportunities)\b/i.test(candidate)))return '';
+ // A stripped explicit request or a short standalone title is safe to look up
+ // literally. Long unstructured dictation still needs interpretation.
+ if(!quoted&&!wrapped&&normalized.split(/\s+/).length>12)return '';
+ return terms.join(' ');
+}
+export function literalTitleScore(paper,query) {
+ // A related title with many extra words is not the same work merely because
+ // it contains every requested word. Compare coverage in both directions.
+ return Math.min(researchScore(paper,query),researchScore({title:query},paper.title));
+}
 export function needsQueryPlanning(text) {
  // Search indexes expect concepts, not dictation filler or untranslated questions.
- return /[^\u0000-\u024f]/u.test(text) || text.split(/\s+/).length > 12 || /\b(?:explain|why|how|compare|opportunities)\b/i.test(text);
+ return hasNonLatinLetters(text) || text.split(/\s+/).length > 12 || /\b(?:explain|why|how|compare|opportunities)\b/i.test(text);
 }
 export function normalizePlan(value) {
  if(!value||!['search','reply','explain','act'].includes(value.action))return null;
@@ -41,8 +66,10 @@ export function targetCard(task,cards=observedCards(task)){
  const doi=doiIn(text);
  const exact=cards.find(p=>doi&&doiIn(p.doi||p.source)===doi||[p.id,p.paperId,p.source,p.pdfUrl].filter(Boolean).some(v=>text.includes(v)));if(exact)return exact;
  if(doi||/https:\/\/|\b\d{4}\.\d{4,5}\b/.test(text))return null;
- const ranked=cards.map(p=>({p,score:researchScore(p,text)})).sort((a,b)=>b.score-a.score);
- if(ranked[0]?.score>=3.5&&(!ranked[1]||ranked[0].score-ranked[1].score>=.5))return ranked[0].p;
+ const title=literalResearchQuery(text),exactTitle=title?cards.filter(p=>researchTerms(p.title).join(' ')===title):[];
+ if(exactTitle.length===1)return exactTitle[0];
+ const ranked=cards.map(p=>({p,score:title?literalTitleScore(p,title):researchScore(p,text)})).sort((a,b)=>b.score-a.score);
+ if(ranked[0]?.score>=(title?6:3.5)&&(!ranked[1]||ranked[0].score-ranked[1].score>=(title?1:.5)))return ranked[0].p;
  const followupWords=new Set('explain summarize summarise summary digest translate translation save bookmark favorite like first second third fourth paragraph sentence into english chinese japanese korean french spanish german arabic russian vietnamese traditional simplified how why what does work works mean means is are was were do did its their these those current above'.split(' '));
  const topic=researchTerms(text).filter(w=>!followupWords.has(w)&&!/^\d+$/.test(w));
  if(topic.length>=2||/[这這]个.+(?:论文|論文|研究)/.test(text))return null;
