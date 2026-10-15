@@ -403,3 +403,20 @@ keep notes, chats, files not selected for publication and moderation refusals
 private. Existing import choices stay remembered per material and source/retry
 links do not reopen permission dialogs. Prepare the accumulated 1.0.8 (33) internal
 test candidate, preserving production reviews and billing.
+
+## Research backend preference amendment · 2026-10-15
+
+The owner prefers keeping Codex now and qualifying AgInTi for broader fallback
+use with its existing development session. After reusable library/index searches,
+try the existing quota-gated Codex public research helper first, then the already
+qualified AgInTi/DeepSeek metadata helper for failure or no results. This supersedes
+the helper order above. Direct DeepSeek chat/planning and durable conversion and
+translation remain in place. Do not describe bibliographic search qualification
+as evidence that AgInTi can execute every app task. Coordinate broader capability
+gaps separately; preserve private account/files and app-owned action permissions.
+
+The owner's follow-up explicitly prioritizes the previously working direct-LLM
+path. Preserve direct model interpretation and the app's library/index/download
+pipeline as the normal route; neither Codex nor AgInTi replaces it. Research
+helpers run only when that route needs additional public sources or the user
+explicitly requests agent-assisted research.
