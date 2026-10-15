@@ -11,7 +11,11 @@ final class NativeUITests: XCTestCase {
     guard let token=try? String(contentsOf:path,encoding:.utf8) else {XCTFail("Missing synthetic QA token");return}
     app.launchEnvironment["ONLYIDEAS_QA_TOKEN"]=token.trimmingCharacters(in:.whitespacesAndNewlines)
     app.launch()
-    XCTAssertTrue(app.tabBars.buttons["Agent"].waitForExistence(timeout:30));app.tabBars.buttons["Agent"].tap()
+    XCTAssertTrue(app.tabBars.buttons["Profile"].waitForExistence(timeout:30));app.tabBars.buttons["Profile"].tap()
+    let balance=app.staticTexts["lac-balance"]
+    XCTAssertTrue(balance.waitForExistence(timeout:15));XCTAssertEqual(balance.label,"45")
+    shot("Test34-phone-lac-balance")
+    app.tabBars.buttons["Agent"].tap()
     app.buttons["Conversation history"].tap()
     let chat=app.buttons["Chat layout verification"];XCTAssertTrue(chat.waitForExistence(timeout:15));chat.tap()
     let user=app.images["chat-avatar-qa-user"],assistant=app.images["chat-avatar-qa-assistant"]
@@ -30,11 +34,13 @@ final class NativeUITests: XCTestCase {
     XCTAssertTrue(app.descendants(matching:.any)["chat-text-qa-assistant"].exists)
     shot("Test34-phone-chat-light")
     app.buttons["chat-copy-qa-assistant"].tap()
-    XCTAssertEqual(UIPasteboard.general.string,response)
-    app.tabBars.buttons["Profile"].tap()
-    let balance=app.staticTexts["lac-balance"]
-    XCTAssertTrue(balance.waitForExistence(timeout:15));XCTAssertEqual(balance.label,"45")
-    shot("Test34-phone-lac-balance")
+    // Paste inside the same app; reading from the runner triggers an unrelated
+    // cross-app clipboard permission sheet and can block the test process.
+    let composer=app.textViews["Message the paper agent"]
+    composer.tap();composer.press(forDuration:1.2)
+    let paste=app.menuItems["Paste"]
+    XCTAssertTrue(paste.waitForExistence(timeout:5));paste.tap()
+    XCTAssertEqual(composer.value as? String,response)
     app.terminate()
   }
   func testOwnerPublicationAndCompactAttachment() {
