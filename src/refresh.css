@@ -80,3 +80,10 @@ html,body,#root{max-width:100%;overflow-x:hidden;overscroll-behavior-x:none}
 .chat-composer button{width:40px;min-width:40px;min-height:40px;height:40px;padding:8px;flex-shrink:0}
 .attachment-tray:empty{display:none}.agent-welcome{margin:4vh auto 20px}
 @media(max-width:640px){.agent-conversation{padding:0 10px 8px}.chat-message>p{font-size:17px}.agent-paper{padding:16px}}
+
+/* Keep the native file input out of the composer, including global form rules. */
+.chat-composer input[hidden] { display:none !important; }
+.chat-composer > button { flex:0 0 44px; width:44px; min-width:44px; max-width:44px; height:44px; min-height:44px; }
+.chat-composer textarea { flex:1 1 0; width:0; min-width:0; resize:none; }
+
+@media(max-width:640px){.toast{left:14px;right:14px;width:auto;transform:none;max-width:none;box-sizing:border-box}}

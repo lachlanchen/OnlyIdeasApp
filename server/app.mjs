@@ -1,3 +1,4 @@
+import {confirmPublication} from './confirm-publication.mjs';
 import {createBrowserRetrieval} from './browser-retrieval.mjs';
 import {conditionalJSON,conditionalResponse} from './conditional-response.mjs';
 import {sharingConsent,headerConsent} from './sharing-consent.mjs';
@@ -376,14 +377,8 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         if (action === 'publish' && method === 'POST') {
           requireUser(); requireValue(p.owner === user.id, 'Only the owner can publish.', 403); const b = await json(req);
           requireValue(config.github?.contentToken || config.github?.checkout, 'The public library connection is not configured yet.', 503);
-          acceptTerms(store, user, b.acceptTerms);
-          const previous=store.existing(p.owner,`publish:${p.id}:${p.revision}`);
-          requireValue(p.visibility!=='public'&&!['queued','running'].includes(previous?.state),'This paper is already shared or publishing.',409);
-          p.license = b.license; p.source = String(b.source || ''); const consent=sharingConsent({license:b.license,attestation:b.attestation},'shared'); requireValue(consent,'Confirm sharing permission.');p.provenance={...p.provenance,verification:'uploader-confirmed',attestation:true,confirmedAt:consent.confirmedAt};mayPublish(p,b.attestation);p.visibility='public';p.sharing='awaiting_review';store.savePaper(p);
-          const job = enqueue(user, { kind: 'publish', paperId: p.id, dedupe: `publish:${p.id}:${p.revision}` });
-          job.state='awaiting_review';job.reviewed=false;delete job.reviewFingerprint;delete job.reviewDecision;
-          job.message='Shared · administrator review pending';store.saveJob(job);
-          return response(res, { job }, 202);
+          const result=confirmPublication(store,user,p.id,b,acceptTerms);
+          return response(res, {job:result.job,alreadyPublic:result.alreadyPublic===true}, result.alreadyPublic?200:202);
         }
       }
       const comment = path.match(/^\/api\/comments\/([a-f0-9-]{36})(?:\/(report|block))?$/);

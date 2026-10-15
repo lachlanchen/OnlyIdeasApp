@@ -9,7 +9,7 @@ import {matchLibrary,researchTerms,matchesFilters} from '../server/library-searc
 import {rankResearch,researchScore,doiIn} from '../server/research-ranking.mjs';
 import {observedCards,readingIntent,targetCard,actionPlans,needsQueryPlanning,surveyRequest,normalizePlan} from './planning.mjs';
 import {sourceKey} from '../server/import-reuse.mjs';
-import {codexResearch} from './codex-research.mjs';
+import {researchPapers,researchEnabled} from './research-backends.mjs';
 
 export { parseArxiv, parseOpenAlex } from '../server/research-indexes.mjs';
 import { searchIndexes, queryArxiv, searchOptions } from '../server/research-indexes.mjs';
@@ -40,7 +40,7 @@ export async function respond(task, config, update, deps = {}) {
   async function readyCard(card,needsTranscript=intent.some(k=>['import','digest','translation'].includes(k))){
     if(card.paperId||!needsTranscript)return card;
     const failed=(task.messages||[]).some(m=>m.actions?.some(a=>a.state==='failed'&&a.source===card.source));
-    if(config.codex?.enabled&&(!card.pdfUrl||failed)){await update('Checking additional research sources');try{const found=await (deps.codex||codexResearch)(card.doi||card.title,config);const match=found.find(p=>card.doi&&p.doi?.toLowerCase()===card.doi.toLowerCase()||researchScore(p,card.title)>=6);if(match?.pdfUrl)return {...card,...match};}catch{}}
+    if(researchEnabled(config)&&(!card.pdfUrl||failed)){await update('Checking additional research sources');try{const found=await researchPapers(card.doi||card.title,config,deps);const match=found.find(p=>card.doi&&p.doi?.toLowerCase()===card.doi.toLowerCase()||researchScore(p,card.title)>=6);if(match?.pdfUrl)return {...card,...match};}catch{}}
     return card;
   }
   const useAttachments=task.documents?.length&&(task.hasNewAttachments!==false||/\b(?:attached|files?|documents?|these notes)\b|附件|文件/i.test(task.text));
@@ -84,7 +84,9 @@ export async function respond(task, config, update, deps = {}) {
   // A concrete title with an explicit action is a search request even when a
   // small planning model returns a generic reply or invents an old target.
   if(intent.length&&!target&&requestTerms.length>=2&&plan.action!=='search')plan={action:'search',query:plan.query||(semantic?'':literal)};
-  if(semantic&&(!planned||plan.action==='search'&&!plan.query))return {text:'I could not interpret this research request reliably just now. Please retry, or enter a short paper title or DOI. No paper was downloaded or converted.',papers:[]};
+  const literalTitle=intent.includes('import')&&!survey&&requestTerms.length>=6&&!/[^\u0000-\u024f]|\b(?:why|how|compare|explain)\b/i.test(task.text);
+  if(semantic&&!planned&&literalTitle)plan={action:'search',query:literal};
+  if(semantic&&!literalTitle&&(!planned||plan.action==='search'&&!plan.query))return {text:'I could not interpret this research request reliably just now. Please retry, or enter a short paper title or DOI. No paper was downloaded or converted.',papers:[]};
   if(plan.action==='act'&&task.agentActions){
     const actions=(plan.actions||[]).slice(0,3),selected=actions.map(a=>cards.find(p=>[p.id,p.paperId,p.source].filter(Boolean).includes(a.target)));
     if(intent.length&&actions.length&&actions.every(a=>intent.includes(a.kind))&&selected.every(p=>p&&target&&p===target)){
@@ -113,7 +115,7 @@ export async function respond(task, config, update, deps = {}) {
   catch {unavailable=true;}
   // Keep a literal approximate title usable even if the planner changes its words.
   if(!semantic&&original&&original!==query&&(!online.length||researchScore(rankResearch(online,original)[0],original)<3.5))try{online=[...await search(original,{source:plan.source,from:plan.from,to:plan.to,journal:plan.journal}),...online];}catch{unavailable=true;}
-  if(config.codex?.enabled&&(!online.length&&!local.length||/\bcodex\b/i.test(task.text))){await update('Checking additional research sources');try{online=[...await (deps.codex||codexResearch)(original||query,config),...online];}catch{/* Preserve catalog results and upload recovery if fallback is unavailable. */}}
+  if(researchEnabled(config)&&(!local.length&&!online.some(p=>score(p)>=3.5)||/\b(?:codex|aginti)\b/i.test(task.text))){await update('Checking additional research sources');try{online=[...await researchPapers(original||query,config,deps),...online];}catch{/* Preserve catalog results and upload recovery if fallback is unavailable. */}}
   const seen=new Set();const papers=[...local,...online].filter(p=>score(p)>=3.5&&(!semantic||researchScore(p,query)>=3)).sort((a,b)=>score(b)-score(a)).filter(p=>{const id=p.paperId||p.doi||p.source||p.id;if(seen.has(id))return false;seen.add(id);return true}).slice(0,8);
   if(survey&&papers.length&&config.model?.url){
     await update('Comparing the relevant research');

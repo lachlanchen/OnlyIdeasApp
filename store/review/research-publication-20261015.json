@@ -1,0 +1,148 @@
+{
+  "date": "2026-10-15",
+  "app": "OnlyIdeas",
+  "version": "1.0.8",
+  "build": 33,
+  "scope": "Internal testing; API/PWA/workers deployed; current formal reviews and billing unchanged",
+  "tests": {
+    "suite": {
+      "passed": 221,
+      "failed": 0
+    },
+    "typescript": true,
+    "renderer": true,
+    "webBuild": true,
+    "browserPublicationAndComposer": {
+      "publicAfterConfirmation": true,
+      "anonymousRead": 200,
+      "results": [
+        {
+          "width": 390,
+          "attachmentWidth": 44,
+          "inputWidth": 256
+        },
+        {
+          "width": 1024,
+          "attachmentWidth": 44,
+          "inputWidth": 598
+        }
+      ]
+    },
+    "nativeIPhone": {
+      "passed": 1,
+      "failed": 0,
+      "fixture": "local synthetic account and original test paper",
+      "scenarios": [
+        "44-point attachment",
+        "flexible composer",
+        "reader Make public",
+        "explicit consent",
+        "publish action",
+        "refreshed review status"
+      ]
+    },
+    "android": {
+      "lint": true,
+      "releaseInstalled": true,
+      "composerVisuallyReviewed": true
+    },
+    "mac": {
+      "universalArchive": true,
+      "reader": {
+        "figures": 7,
+        "equations": 3,
+        "paragraphs": 130,
+        "fits": true
+      },
+      "interactivePublication": "pending; peer system sheet preserved",
+      "extendedHarness": "stopped at missing cached Chinese translation in new fixture; not a full pass"
+    }
+  },
+  "research": {
+    "liveBackend": "AgInTi/DeepSeek",
+    "seconds": 36.291,
+    "codexInvoked": false,
+    "doi": "10.1002/advs.77832",
+    "directPDFStatus": 403,
+    "browserFallback": "verified full-text PMC HTML",
+    "conversion": {
+      "title": "Polarization Holographic 4D Phenotyping Reveals Nanoplastic Induced Dysfunction in Zooplankton",
+      "mmdCharacters": 106941,
+      "figures": 7,
+      "identity": {
+        "state": "matched",
+        "method": "title",
+        "title": "# Polarization Holographic 4D Phenotyping Reveals Nanoplastic Induced Dysfunction in Zooplankton",
+        "authorMatch": false,
+        "doiMatch": false
+      },
+      "mathpixUsed": false
+    },
+    "productionPaperChanged": false
+  },
+  "apple": [
+    {
+      "platform": "MAC_OS",
+      "id": "8ab9c538-2266-460e-9774-0e2835429616",
+      "version": "1.0.8",
+      "build": "33",
+      "processing": "VALID",
+      "internal": "IN_BETA_TESTING"
+    },
+    {
+      "platform": "IOS",
+      "id": "f932886b-a307-4237-afe6-1ff69016f7c4",
+      "version": "1.0.8",
+      "build": "33",
+      "processing": "VALID",
+      "internal": "IN_BETA_TESTING"
+    }
+  ],
+  "android": {
+    "internal": "Available to internal testers",
+    "versionCode": 33,
+    "apkSHA256": "8788afc8f348c68d77d3ab40abc4aafdf998240d614943c244648a9eb211df11",
+    "aabSHA256": "11c93a00584a7f3195124716c48ad846f3c7e982de299506195d5dbb95d63abe"
+  },
+  "binaries": {
+    "iosIPA": "a40b7932ddba18c380a36da93acd09b3c1461515a1be8249c80b756ed8724e70",
+    "macPackage": "88308b9d98ca3bd1e13cb75735cbe868be97cfc5c5a6f129671b5af404f283f5"
+  },
+  "deployed": {
+    "cloudRelease": "robust33-6a5fa0f710d1edd4",
+    "cloudPatchSHA256": "6a5fa0f710d1edd4cf77e7baf43ebba2d0dc972f25797fc974ef4cfef9d179c2",
+    "workerRelease": "robust33-b6031972b39ee350",
+    "workerPatchSHA256": "b6031972b39ee3505cf25d8ab149f4cb71d65cf8b06a16f5630f2c94859619fb",
+    "databaseTablesUnchanged": [
+      "papers",
+      "artifacts",
+      "translation_pieces",
+      "chats",
+      "chat_messages",
+      "notes",
+      "comments",
+      "sessions",
+      "jobs"
+    ],
+    "ingressUnchanged": true,
+    "serverConfigUnchanged": true,
+    "webAssets": [
+      {
+        "file": "dist/index.html",
+        "status": 200,
+        "sha256": "346d95fca6ede434faf1145bea0f037bcb46b2204565f356db47f8d523bcf73c"
+      },
+      {
+        "file": "dist/assets/index-BOn9Om6y.css",
+        "status": 200,
+        "sha256": "11bb22035da25c1a9aaa2f57433e18287deba84d4a9ae6c0e509b29d4671848b"
+      },
+      {
+        "file": "dist/assets/index-D37vOnoe.js",
+        "status": 200,
+        "sha256": "317e85c342f6157c8ab4e3721a4a4366a682513118d27bdde4d3cd1673882dd2"
+      }
+    ]
+  },
+  "screenshots": "store/screenshots/1.0.8-33/manifest.json; local drafts only"
+}

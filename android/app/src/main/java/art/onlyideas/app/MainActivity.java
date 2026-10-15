@@ -1527,6 +1527,9 @@ public class MainActivity extends AppCompatActivity {
     header.addView(more, new LinearLayout.LayoutParams(dp(48), dp(48)));
     if (derived) { TextView notice = text(t("AI generated result. Reopen the paper from Library for the original."), 14, false); notice.setPadding(dp(14), dp(6), dp(14), dp(6)); notice.setBackgroundColor(soft); content.addView(notice); }
     if(!derived){readerLanguages=column();content.addView(readerLanguages);updateReaderLanguages();}else readerLanguages=null;
+    if(!derived && document.optJSONObject("paper").optBoolean("isOwner") && document.optJSONObject("paper").optString("visibility").equals("private")) {
+      Button publish=button(t("Make public"),false,this::publishPaper);LinearLayout row=row();row.setPadding(dp(14),0,dp(14),dp(4));row.addView(publish);content.addView(row);
+    }
     reader = new WebView(this);
     reader.setBackgroundColor(surface);
     reader.setHorizontalScrollBarEnabled(false);
@@ -1648,6 +1651,19 @@ public class MainActivity extends AppCompatActivity {
     return TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_SP, fontSize(), getResources().getDisplayMetrics())
         / getResources().getDisplayMetrics().density;
+  }
+
+  void publishPaper() {
+    final JSONObject paper=document.optJSONObject("paper");if(paper==null||!paper.optBoolean("isOwner")||!paper.optString("visibility").equals("private"))return;
+    final int epoch=authEpoch;LinearLayout form=column();form.setPadding(dp(20),dp(8),dp(20),dp(8));
+    caption(form,t("Your paper becomes public after you confirm permission. Administrators review it afterward. Your chats and notes stay private."));
+    final String[] values={"author-permission","CC-BY-4.0","CC-BY-SA-4.0","CC0-1.0"};
+    Spinner license=new Spinner(this);license.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,new String[]{t("I have author permission"),values[1],values[2],values[3]}));form.addView(license);
+    EditText source=new EditText(this);source.setSingleLine(true);source.setHint(t("Source or permission URL"));source.setInputType(InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_VARIATION_URI);source.setText(paper.optString("source"));form.addView(source);
+    CheckBox agree=new CheckBox(this);agree.setText(t("I confirm permission to share the text and all figures under this license."));form.addView(agree);
+    caption(form,t("By making this paper public, you accept the Community Terms."));form.addView(button(t("Community Terms"),false,()->startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse("https://lachlan.lazying.art/OnlyIdeasApp/terms.html")))));
+    AlertDialog dialog=new AlertDialog.Builder(this).setTitle(t("Make public")).setView(form).setNegativeButton(t("Cancel"),null).setPositiveButton(t("Make public"),null).create();
+    dialog.setOnShowListener(v->{Button submit=dialog.getButton(AlertDialog.BUTTON_POSITIVE);submit.setEnabled(false);agree.setOnCheckedChangeListener((b,on)->submit.setEnabled(on));submit.setOnClickListener(v2->{if(epoch!=authEpoch)return;submit.setEnabled(false);job(()->{try{return api.json("/api/papers/"+paper.optString("id")+"/publish","POST",object("license",values[license.getSelectedItemPosition()]).put("source",source.getText().toString()).put("revision",paper.optString("revision")).put("attestation",true).put("acceptTerms",true));}finally{handler.post(()->{if(epoch==authEpoch&&dialog.isShowing())submit.setEnabled(agree.isChecked());});}},r->{if(epoch!=authEpoch)return;dialog.dismiss();toast(t("Your paper is public. Administrator review is pending."));openPaper(paper);});});});dialog.show();
   }
 
   void readerMenu() {

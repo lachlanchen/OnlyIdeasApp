@@ -14,7 +14,7 @@ type Detail=Entry&{history:Decision[]}
 export function SharingStatus({paper}:{paper:Paper}) {
   const state=paper.review?.state||paper.sharing||'private'
   if(paper.visibility==='public'||state==='private')return null
-  return <aside className="sharing-status" role="status"><ShieldCheck size={18}/><div><strong>{t(reviewLabels[state]||'Awaiting review')}</strong><p>{paper.review?.message||t('OnlyIdeas administrators check sharing permission, text and figures. Approved papers become available to everyone.')}</p></div></aside>
+  return <aside className="sharing-status" role="status"><ShieldCheck size={18}/><div><strong>{t(reviewLabels[state]||'Awaiting review')}</strong><p>{paper.review?.message||t(paper.isOwner&&state==='awaiting_review'?'Your paper becomes public after you confirm permission. Administrators review it afterward. Your chats and notes stay private.':'OnlyIdeas administrators check sharing permission, text and figures. Approved papers become available to everyone.')}</p></div></aside>
 }
 export function PublicationReview({session,login,back}:{session:Session|null;login:()=>void;back:()=>void}) {
   const [state,setState]=useState('awaiting_review'),[query,setQuery]=useState(''),[offset,setOffset]=useState(0)

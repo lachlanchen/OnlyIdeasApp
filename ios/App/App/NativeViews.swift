@@ -251,7 +251,7 @@ struct PaperRow: View {
     VStack(alignment: .leading, spacing: 7) {
       HStack {
         Text(paper.language?.uppercased() ?? "PAPER").font(.caption.weight(.bold))
-        Text(T(paper.sharing == "awaiting_review" ? "Shared — pending review" : paper.visibility == "private" ? "Private" : "Reading room")).font(.caption)
+        Text(T(paper.visibility == "private" ? "Private" : paper.sharing == "awaiting_review" ? "Shared — pending review" : "Reading room")).font(.caption)
         Spacer()
         if downloaded { Image(systemName: "pin.fill").font(.caption) }
         Image(systemName: "chevron.right").font(.caption)
@@ -433,10 +433,10 @@ struct NativeAgent: View {
         Menu {
           Button(T("Choose files")) { if store.account==nil {Task {await store.signIn()}} else {attachPicker=true} }
           Button(T("Choose photo")) { if store.account==nil {Task {await store.signIn()}} else {photoPicker=true} }
-        } label:{Image(systemName:"paperclip").font(.title2).frame(width:40,height:40)}.accessibilityLabel(T("Attach files")).disabled(store.attachmentBusy||store.draftAttachments.count>=3)
+        } label:{Image(systemName:"paperclip").font(.title2).frame(width:40,height:40)}.fixedSize().frame(width:44,height:44).accessibilityLabel(T("Attach files")).disabled(store.attachmentBusy||store.draftAttachments.count>=3)
         ZStack(alignment: .topLeading) {
           if draft.isEmpty { Text(T("Ask a question or attach a file…")).font(.body).lineLimit(1).foregroundColor(.secondary).padding(.top, 7).padding(.leading, 4).allowsHitTesting(false) }
-          NativeComposerInput(text: $draft, height: $inputHeight).frame(height: inputHeight)
+          NativeComposerInput(text: $draft, height: $inputHeight).frame(maxWidth:.infinity).frame(height: inputHeight)
             .accessibilityLabel(T("Message the paper agent"))
         }
         Button {
@@ -773,6 +773,49 @@ struct NativeRequests: View {
     }
   }
 }
+struct NativePublication: View {
+  @EnvironmentObject var store: ReadingStore
+  @Environment(\.dismiss) var dismiss
+  var paper: ResearchPaper
+  var completed: () -> Void
+  @State private var license="author-permission"
+  @State private var source=""
+  @State private var agreed=false
+  @State private var busy=false
+  @State private var notice=""
+  var body: some View {
+    NavigationView {
+      Form {
+        Section {Text(paper.title).font(.headline);Text(T("Your paper becomes public after you confirm permission. Administrators review it afterward. Your chats and notes stay private."))}
+        Section {
+          Picker(T("Permission"),selection:$license) {
+            Text(T("I have author permission")).tag("author-permission")
+            ForEach(["CC-BY-4.0","CC-BY-SA-4.0","CC0-1.0"],id:\.self){Text($0).tag($0)}
+          }
+          TextField(T("Source or permission URL"),text:$source).textInputAutocapitalization(.never).autocorrectionDisabled().keyboardType(.URL)
+          Toggle(T("I confirm permission to share the text and all figures under this license."),isOn:$agreed)
+          Link(T("Community Terms"),destination:URL(string:"https://lachlan.lazying.art/OnlyIdeasApp/terms.html")!)
+          Text(T("By making this paper public, you accept the Community Terms.")).font(.caption).foregroundStyle(.secondary)
+        }
+        Section {
+          if !notice.isEmpty {Text(notice).foregroundStyle(.red)}
+          Button {Task{await publish()}} label:{if busy {ProgressView()}else{Label(T("Make public"),systemImage:"globe")}}.disabled(!agreed||busy)
+        }
+      }.navigationTitle(T("Make public")).toolbar{ToolbarItem(placement:.cancellationAction){Button(T("Cancel")){dismiss()}.disabled(busy)}}
+    }.navigationViewStyle(.stack).task{source=paper.source ?? "";if let value=paper.license,["author-permission","CC-BY-4.0","CC-BY-SA-4.0","CC0-1.0"].contains(value){license=value}}
+  }
+  func publish() async {
+    guard let identity=store.account?.id else{return}
+    busy=true;defer{busy=false}
+    do {
+      _=try await store.json("/api/papers/\(paper.id)/publish",method:"POST",body:["license":license,"source":source,"revision":paper.revision ?? "","attestation":true,"acceptTerms":true])
+      guard store.account?.id==identity else{return}
+      completed();dismiss()
+      NotificationCenter.default.post(name:Notification.Name("OnlyIdeas.RefreshLibrary"),object:nil)
+    }catch{notice=error.localizedDescription}
+  }
+}
+
 struct NativePaper: View {
   @EnvironmentObject var store: ReadingStore
   @Environment(\.colorScheme) var scheme
@@ -793,6 +836,7 @@ struct NativePaper: View {
   @State private var sharing = false
   @State private var readingTools = false
   @State private var languages = false
+  @State private var publication = false
   @State private var watchNotice: String?
   @State private var watchEditions: [String:String] = [:]
   @State private var watchLanguage = ""
@@ -814,6 +858,9 @@ struct NativePaper: View {
           if readingMode != "original" {HStack {Text(T("AI translation")+" · "+(reading.map{"\($0.translated)/\($0.total)"} ?? T("Connect to fetch available languages.")));Spacer();if translationPending {ProgressView()}}.font(.caption).foregroundStyle(.secondary)}
           if !readingNotice.isEmpty {Text(T(readingNotice)).font(.caption).foregroundStyle(.secondary)}
         }.padding(.horizontal,14).padding(.vertical,6)
+        if document.paper.isOwner == true && document.paper.visibility == "private" {
+          HStack {Text(T("Private")).font(.caption).foregroundStyle(.secondary);Spacer();Button(T("Make public")){publication=true}.buttonStyle(.bordered)}.padding(.horizontal,14).padding(.bottom,4)
+        }
         NativeDocument(
           document: document, size: store.readingSize * readingScale, dark: scheme == .dark,
           quote: $quote, reading:reading,mode:readingMode,onParagraph:{q,id in quote=q;paragraph=id;discussion=true},onSelection:{_ in paragraph=""}, onWatchEditions:{editions,language in watchEditions=editions;watchLanguage=language})
@@ -883,6 +930,9 @@ struct NativePaper: View {
         if store.cachedPaper(paper.id) == nil { document = nil; store.error = error.localizedDescription }
       }
       await refreshReading()
+    }
+    .sheet(isPresented:$publication) {
+      if let p=document?.paper {NativePublication(paper:p) {Task{do{document=try await store.loadPaper(p,refresh:true)}catch{store.error=error.localizedDescription}}}}
     }
     .onChange(of:readingMode) {_ in quote=""}
     .onChange(of:readLanguage) {_ in quote=""}
@@ -1324,7 +1374,7 @@ struct NativeAgentFilePicker: UIViewControllerRepresentable {
     picker.allowsMultipleSelection=true
     picker.delegate=context.coordinator
     picker.modalPresentationStyle = .formSheet
-    picker.preferredContentSize=CGSize(width:680,height:520)
+    picker.preferredContentSize=CGSize(width:560,height:440)
     return picker
   }
   func updateUIViewController(_ controller:UIDocumentPickerViewController,context:Context) {}

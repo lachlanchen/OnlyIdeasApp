@@ -777,7 +777,11 @@
     "Request review first": "Request review first",
     "Paper or full-text article URL": "Paper or full-text article URL",
     "Use an accessible full-text article or PDF. Text, equations, tables and figures are prepared for reading.": "Use an accessible full-text article or PDF. Text, equations, tables and figures are prepared for reading.",
-    "Choose a license when uploading. Confirmed sharing is immediate, with administrator review afterward.": "Choose a license when uploading. Confirmed sharing is immediate, with administrator review afterward."
+    "Choose a license when uploading. Confirmed sharing is immediate, with administrator review afterward.": "Choose a license when uploading. Confirmed sharing is immediate, with administrator review afterward.",
+    "Make public": "Make public",
+    "Your paper becomes public after you confirm permission. Administrators review it afterward. Your chats and notes stay private.": "Your paper becomes public after you confirm permission. Administrators review it afterward. Your chats and notes stay private.",
+    "Your paper is public. Administrator review is pending.": "Your paper is public. Administrator review is pending.",
+    "By making this paper public, you accept the Community Terms.": "By making this paper public, you accept the Community Terms."
   },
   "zh-Hans": {
     "Choose a valid PDF.": "请选择有效的 PDF。",
@@ -1561,7 +1565,11 @@
     "Go to latest message": "跳到最新消息",
     "Cancel keeps this material private. Your choice is remembered for this material.": "取消将保留为私密。此材料的选择会被记住。",
     "Reset saved sharing choices": "重设已保存的分享选择",
-    "Sharing choices reset. Choose again on your next import. Existing papers are unchanged.": "分享选择已重设。下次导入时可重新选择，已有论文不受影响。"
+    "Sharing choices reset. Choose again on your next import. Existing papers are unchanged.": "分享选择已重设。下次导入时可重新选择，已有论文不受影响。",
+    "Make public": "公开论文",
+    "Your paper becomes public after you confirm permission. Administrators review it afterward. Your chats and notes stay private.": "确认分享权限后，论文将立即公开，管理员会在之后审核。聊天和笔记仍保持私密。",
+    "Your paper is public. Administrator review is pending.": "论文已公开，等待管理员后续审核。",
+    "By making this paper public, you accept the Community Terms.": "公开论文即表示你同意社区条款。"
   },
   "zh-Hant": {
     ". Public comments are reviewed.": "公開評論會經過審核。",
@@ -2345,7 +2353,11 @@
     "Go to latest message": "跳至最新訊息",
     "Cancel keeps this material private. Your choice is remembered for this material.": "取消將保留為私人。此材料的選擇會被記住。",
     "Reset saved sharing choices": "重設已儲存的分享選擇",
-    "Sharing choices reset. Choose again on your next import. Existing papers are unchanged.": "分享選擇已重設。下次匯入時可重新選擇，已有論文不受影響。"
+    "Sharing choices reset. Choose again on your next import. Existing papers are unchanged.": "分享選擇已重設。下次匯入時可重新選擇，已有論文不受影響。",
+    "Make public": "公開論文",
+    "Your paper becomes public after you confirm permission. Administrators review it afterward. Your chats and notes stay private.": "確認分享權限後，論文將立即公開，管理員會在之後審核。聊天和筆記仍保持私密。",
+    "Your paper is public. Administrator review is pending.": "論文已公開，等待管理員後續審核。",
+    "By making this paper public, you accept the Community Terms.": "公開論文即表示你同意社群條款。"
   },
   "ja": {
     ". Public comments are reviewed.": "公開コメントは審査されます。",
@@ -3129,7 +3141,11 @@
     "Go to latest message": "最新のメッセージへ",
     "Cancel keeps this material private. Your choice is remembered for this material.": "キャンセルすると非公開になります。この資料の選択は保存されます。",
     "Reset saved sharing choices": "保存した共有設定をリセット",
-    "Sharing choices reset. Choose again on your next import. Existing papers are unchanged.": "共有設定をリセットしました。次の取り込み時に選び直せます。既存の論文は変更されません。"
+    "Sharing choices reset. Choose again on your next import. Existing papers are unchanged.": "共有設定をリセットしました。次の取り込み時に選び直せます。既存の論文は変更されません。",
+    "Make public": "論文を公開",
+    "Your paper becomes public after you confirm permission. Administrators review it afterward. Your chats and notes stay private.": "共有権限を確認すると論文が公開され、管理者が後から審査します。チャットとメモは非公開のままです。",
+    "Your paper is public. Administrator review is pending.": "論文を公開しました。管理者の審査待ちです。",
+    "By making this paper public, you accept the Community Terms.": "論文を公開すると、コミュニティ規約に同意したことになります。"
   },
   "ko": {
     ". Public comments are reviewed.": "공개 댓글은 검토됩니다.",
@@ -3913,7 +3929,11 @@
     "Go to latest message": "최신 메시지로 이동",
     "Cancel keeps this material private. Your choice is remembered for this material.": "취소하면 비공개로 유지됩니다. 이 자료의 선택은 저장됩니다.",
     "Reset saved sharing choices": "저장된 공유 선택 초기화",
-    "Sharing choices reset. Choose again on your next import. Existing papers are unchanged.": "공유 선택이 초기화되었습니다. 다음 가져오기에서 다시 선택하세요. 기존 논문은 변경되지 않습니다."
+    "Sharing choices reset. Choose again on your next import. Existing papers are unchanged.": "공유 선택이 초기화되었습니다. 다음 가져오기에서 다시 선택하세요. 기존 논문은 변경되지 않습니다.",
+    "Make public": "논문 공개",
+    "Your paper becomes public after you confirm permission. Administrators review it afterward. Your chats and notes stay private.": "공유 권한을 확인하면 논문이 공개되고 관리자가 나중에 검토합니다. 채팅과 메모는 비공개로 유지됩니다.",
+    "Your paper is public. Administrator review is pending.": "논문이 공개되었습니다. 관리자 검토를 기다리고 있습니다.",
+    "By making this paper public, you accept the Community Terms.": "논문을 공개하면 커뮤니티 약관에 동의하게 됩니다."
   },
   "ar": {
     ". Public comments are reviewed.": "التعليقات العامة تخضع للمراجعة.",
@@ -4697,7 +4717,11 @@
     "Go to latest message": "الانتقال إلى أحدث رسالة",
     "Cancel keeps this material private. Your choice is remembered for this material.": "الإلغاء يبقي هذه المادة خاصة. سيتم حفظ اختيارك لهذه المادة.",
     "Reset saved sharing choices": "إعادة ضبط خيارات المشاركة المحفوظة",
-    "Sharing choices reset. Choose again on your next import. Existing papers are unchanged.": "تمت إعادة ضبط خيارات المشاركة. اختر مجددًا عند الاستيراد التالي. لن تتغير الأوراق الحالية."
+    "Sharing choices reset. Choose again on your next import. Existing papers are unchanged.": "تمت إعادة ضبط خيارات المشاركة. اختر مجددًا عند الاستيراد التالي. لن تتغير الأوراق الحالية.",
+    "Make public": "نشر الورقة للعامة",
+    "Your paper becomes public after you confirm permission. Administrators review it afterward. Your chats and notes stay private.": "تصبح الورقة متاحة للعامة بعد تأكيد إذن المشاركة. يراجعها المشرفون لاحقًا. تظل محادثاتك وملاحظاتك خاصة.",
+    "Your paper is public. Administrator review is pending.": "أصبحت الورقة عامة، وهي بانتظار مراجعة المشرفين.",
+    "By making this paper public, you accept the Community Terms.": "بنشر هذه الورقة للعامة، فإنك توافق على شروط المجتمع."
   },
   "fr": {
     ". Public comments are reviewed.": ". Les commentaires publics sont examinés.",
@@ -5481,7 +5505,11 @@
     "Go to latest message": "Aller au dernier message",
     "Cancel keeps this material private. Your choice is remembered for this material.": "Annuler garde ce document privé. Votre choix sera mémorisé pour ce document.",
     "Reset saved sharing choices": "Réinitialiser les choix de partage",
-    "Sharing choices reset. Choose again on your next import. Existing papers are unchanged.": "Choix réinitialisés. Choisissez à nouveau au prochain import. Les articles existants restent inchangés."
+    "Sharing choices reset. Choose again on your next import. Existing papers are unchanged.": "Choix réinitialisés. Choisissez à nouveau au prochain import. Les articles existants restent inchangés.",
+    "Make public": "Rendre public",
+    "Your paper becomes public after you confirm permission. Administrators review it afterward. Your chats and notes stay private.": "Votre article devient public après confirmation des droits. Les administrateurs le vérifieront ensuite. Vos discussions et notes restent privées.",
+    "Your paper is public. Administrator review is pending.": "Votre article est public. La vérification est en attente.",
+    "By making this paper public, you accept the Community Terms.": "En rendant cet article public, vous acceptez les conditions de la communauté."
   },
   "de": {
     ". Public comments are reviewed.": "Öffentliche Kommentare werden geprüft.",
@@ -6265,7 +6293,11 @@
     "Go to latest message": "Zur neuesten Nachricht",
     "Cancel keeps this material private. Your choice is remembered for this material.": "Abbrechen hält dieses Material privat. Deine Auswahl wird für dieses Material gespeichert.",
     "Reset saved sharing choices": "Gespeicherte Freigaben zurücksetzen",
-    "Sharing choices reset. Choose again on your next import. Existing papers are unchanged.": "Freigabeauswahl zurückgesetzt. Beim nächsten Import erneut wählen. Bestehende Artikel bleiben unverändert."
+    "Sharing choices reset. Choose again on your next import. Existing papers are unchanged.": "Freigabeauswahl zurückgesetzt. Beim nächsten Import erneut wählen. Bestehende Artikel bleiben unverändert.",
+    "Make public": "Veröffentlichen",
+    "Your paper becomes public after you confirm permission. Administrators review it afterward. Your chats and notes stay private.": "Nach Bestätigung der Freigaberechte wird der Artikel öffentlich. Administratoren prüfen ihn anschließend. Chats und Notizen bleiben privat.",
+    "Your paper is public. Administrator review is pending.": "Der Artikel ist öffentlich. Die Prüfung steht noch aus.",
+    "By making this paper public, you accept the Community Terms.": "Mit der Veröffentlichung akzeptierst du die Community-Bedingungen."
   },
   "es": {
     ". Public comments are reviewed.": "Los comentarios públicos se revisan.",
@@ -7049,7 +7081,11 @@
     "Go to latest message": "Ir al último mensaje",
     "Cancel keeps this material private. Your choice is remembered for this material.": "Cancelar mantiene este material privado. Se recordará tu elección para este material.",
     "Reset saved sharing choices": "Restablecer opciones de compartir",
-    "Sharing choices reset. Choose again on your next import. Existing papers are unchanged.": "Opciones restablecidas. Elige de nuevo al importar. Los artículos existentes no cambian."
+    "Sharing choices reset. Choose again on your next import. Existing papers are unchanged.": "Opciones restablecidas. Elige de nuevo al importar. Los artículos existentes no cambian.",
+    "Make public": "Hacer público",
+    "Your paper becomes public after you confirm permission. Administrators review it afterward. Your chats and notes stay private.": "El artículo será público cuando confirmes el permiso. Los administradores lo revisarán después. Tus chats y notas seguirán siendo privados.",
+    "Your paper is public. Administrator review is pending.": "El artículo ya es público. La revisión está pendiente.",
+    "By making this paper public, you accept the Community Terms.": "Al hacer público este artículo, aceptas las Normas de la comunidad."
   },
   "ru": {
     ". Public comments are reviewed.": "Публичные комментарии проходят проверку.",
@@ -7833,7 +7869,11 @@
     "Go to latest message": "К последнему сообщению",
     "Cancel keeps this material private. Your choice is remembered for this material.": "Отмена оставляет материал личным. Выбор для этого материала будет сохранён.",
     "Reset saved sharing choices": "Сбросить настройки публикации",
-    "Sharing choices reset. Choose again on your next import. Existing papers are unchanged.": "Настройки сброшены. Выберите заново при следующем импорте. Существующие статьи не изменятся."
+    "Sharing choices reset. Choose again on your next import. Existing papers are unchanged.": "Настройки сброшены. Выберите заново при следующем импорте. Существующие статьи не изменятся.",
+    "Make public": "Опубликовать",
+    "Your paper becomes public after you confirm permission. Administrators review it afterward. Your chats and notes stay private.": "Статья станет общедоступной после подтверждения права на публикацию. Администраторы проверят её позже. Чаты и заметки останутся личными.",
+    "Your paper is public. Administrator review is pending.": "Статья опубликована и ожидает проверки администратора.",
+    "By making this paper public, you accept the Community Terms.": "Публикуя статью, вы принимаете правила сообщества."
   },
   "vi": {
     ". Public comments are reviewed.": "Bình luận công khai sẽ được kiểm duyệt.",
@@ -8617,6 +8657,10 @@
     "Go to latest message": "Đến tin nhắn mới nhất",
     "Cancel keeps this material private. Your choice is remembered for this material.": "Hủy sẽ giữ tài liệu này riêng tư. Lựa chọn cho tài liệu này sẽ được ghi nhớ.",
     "Reset saved sharing choices": "Đặt lại lựa chọn chia sẻ đã lưu",
-    "Sharing choices reset. Choose again on your next import. Existing papers are unchanged.": "Đã đặt lại lựa chọn chia sẻ. Chọn lại khi nhập lần tới. Các bài hiện có không thay đổi."
+    "Sharing choices reset. Choose again on your next import. Existing papers are unchanged.": "Đã đặt lại lựa chọn chia sẻ. Chọn lại khi nhập lần tới. Các bài hiện có không thay đổi.",
+    "Make public": "Công khai bài báo",
+    "Your paper becomes public after you confirm permission. Administrators review it afterward. Your chats and notes stay private.": "Bài báo sẽ được công khai sau khi bạn xác nhận quyền chia sẻ. Quản trị viên sẽ kiểm duyệt sau. Trò chuyện và ghi chú vẫn riêng tư.",
+    "Your paper is public. Administrator review is pending.": "Bài báo đã công khai và đang chờ quản trị viên kiểm duyệt.",
+    "By making this paper public, you accept the Community Terms.": "Khi công khai bài báo này, bạn đồng ý với Điều khoản cộng đồng."
   }
 }

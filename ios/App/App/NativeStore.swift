@@ -20,6 +20,8 @@ struct ResearchPaper: Codable, Identifiable {
   var provenance:PaperProvenance?
   var license:String?
   var sharing:String?
+  var isOwner: Bool?
+  var source: String?
   var visibility: String?
   var mmd: String?
   var revision: String?

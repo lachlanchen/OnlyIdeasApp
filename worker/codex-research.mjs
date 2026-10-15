@@ -1,3 +1,4 @@
+import {verifyResearchCandidates} from './research-candidates.mjs';
 import {fileURLToPath} from 'node:url';
 import {spawn,execFile} from 'node:child_process';
 import {promisify} from 'node:util';
@@ -37,17 +38,7 @@ async function researchUnlocked(query,config){
    child.on('error',error=>{clearTimeout(timer);clearTimeout(force);evidence.end();errors.end();reject(error)});child.on('close',code=>{clearTimeout(timer);clearTimeout(force);evidence.end();errors.end();code===0&&!stopped?resolve():reject(Error(stopped?'Research fallback timed out.':'Research fallback could not finish (exit '+code+').'))});child.stdin.end(prompt);
   });
   const data=JSON.parse(await readFile(output,'utf8')),papers=[];
-  for(const p of (data.papers||[]).slice(0,4)){
-   const doi=doiIn(p.doi);if(!doi)continue;
-   try{let verified;
-    try{verified=(await queryCrossref(searchOptions({q:doi}))).papers.find(p=>p.doi.toLowerCase()===doi.toLowerCase());}catch{}
-    if(!verified){try{const data=JSON.parse((await downloadPublic('https://api.datacite.org/dois/'+encodeURIComponent(doi),{maxBytes:2_000_000,timeout:12000})).toString()).data?.attributes;
-      if(String(data?.doi).toLowerCase()===doi.toLowerCase()&&data.titles?.[0]?.title)verified={id:hash('https://doi.org/'+doi).slice(0,24),doi,title:data.titles[0].title,source:'https://doi.org/'+doi,sourcePage:publicURL(data.url),index:'datacite'};
-    }catch{}}
-    if(!verified)continue;
-    const pdf=publicURL(p.pdfUrl);papers.push({...verified,...(pdf?{pdfUrl:pdf,downloadSources:[pdf],pdfNeedsVerification:true}:{}),discoveredBy:'codex-web'});
-   }catch{/* An unverified model citation never becomes a paper card. */}
-  }
+  papers.push(...await verifyResearchCandidates(data,'codex-web'));
   await writeFile(cache,JSON.stringify({day,papers}),{mode:0o600});for(const paper of papers)await writeFile(join(c.stateDir,'search-'+hash(paper.doi)+'.json'),JSON.stringify({day,papers:[paper]}),{mode:0o600});return papers;
  }finally{await rm(dir,{recursive:true,force:true});}
 }

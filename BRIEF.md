@@ -384,3 +384,22 @@ remain the product foundation; no private user-profile sharing is implied.
 - Revalidate cached paper text, translations and figures against current access and content. Pull-to-refresh refreshes library and research results. Existing local/offline limits and account isolation remain in force.
 - Import accessible full-text HTML as well as PDF. Preserve equations, tables, captions and locally cached figures, and reject abstract-only/error pages. HTML preparation does not use Mathpix or transcription-page quota. Source access controls and identity checks remain in force.
 - Deliver this batch to internal testing; no new production review is authorized by this amendment.
+
+## Reliable research and owner publication · 2026-10-15
+
+The owner requested an independent AgInTi backend when Codex is unavailable,
+a compact attachment control, and a clear way to make an existing private paper
+public on Mac and mobile. Reuse saved transcripts/translations first. A bounded
+AgInTi/DeepSeek public-metadata search precedes the existing quota-gated Codex
+fallback; it has no shell, file, wrapper, MCP or account access. Conversion and
+translation remain in the durable existing pipeline. Specific long paper titles
+remain searchable if interpretation temporarily fails.
+
+Provide **Make public** separately from **Share** (sending a link). The paper owner
+chooses permission, confirms rights to its text and figures and accepts the
+Community Terms. The paper becomes readable immediately and receives administrator
+review afterward. Save visibility/permission/review atomically and idempotently;
+keep notes, chats, files not selected for publication and moderation refusals
+private. Existing import choices stay remembered per material and source/retry
+links do not reopen permission dialogs. Prepare the accumulated 1.0.8 (33) internal
+test candidate, preserving production reviews and billing.

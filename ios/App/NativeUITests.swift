@@ -1,6 +1,37 @@
 import XCTest
 
 final class NativeUITests: XCTestCase {
+  func testOwnerPublicationAndCompactAttachment() {
+    continueAfterFailure=false
+    let app=XCUIApplication()
+    app.launchArguments=["-onlyideas.native.language","en","-onlyideas.native.appearance","light","--onlyideas-space-qa","--onlyideas-mac-qa"]
+    app.launchEnvironment["ONLYIDEAS_QA_ORIGIN"]="http://127.0.0.1:18649"
+    let path=URL(fileURLWithPath:NSHomeDirectory()).appendingPathComponent("Documents/onlyideas-qa33-token")
+    guard let token=try? String(contentsOf:path,encoding:.utf8) else {XCTFail("Missing synthetic QA token");return}
+    app.launchEnvironment["ONLYIDEAS_QA_TOKEN"]=token.trimmingCharacters(in:.whitespacesAndNewlines)
+    app.launch()
+    XCTAssertTrue(app.tabBars.buttons["Agent"].waitForExistence(timeout:30));app.tabBars.buttons["Agent"].tap()
+    let attach=app.buttons["Attach files"].firstMatch
+    XCTAssertTrue(attach.waitForExistence(timeout:10));XCTAssertLessThanOrEqual(attach.frame.width,48)
+    let editor=app.textViews["Message the paper agent"]
+    XCTAssertTrue(editor.exists);XCTAssertGreaterThan(editor.frame.width,attach.frame.width*3)
+    shot("Test33-agent-compact")
+    app.tabBars.buttons["Library"].tap();app.segmentedControls.buttons["Reading library"].tap()
+    let paper=app.buttons.matching(NSPredicate(format:"label CONTAINS %@","Original native sharing check")).firstMatch
+    XCTAssertTrue(paper.waitForExistence(timeout:20));paper.tap()
+    let publish=app.buttons["Make public"].firstMatch
+    XCTAssertTrue(publish.waitForExistence(timeout:30));shot("Test33-private-paper");publish.tap()
+    let agree=app.switches["I confirm permission to share the text and all figures under this license."].firstMatch
+    XCTAssertTrue(agree.waitForExistence(timeout:10));agree.switches.firstMatch.tap();XCTAssertEqual(agree.value as? String,"1");shot("Test33-publication-confirm")
+    let confirm=app.buttons.matching(identifier:"Make public").allElementsBoundByIndex.last!
+    XCTAssertTrue(confirm.isEnabled);confirm.tap()
+    let closed=XCTNSPredicateExpectation(predicate:NSPredicate(format:"exists == false"),object:app.buttons["Cancel"])
+    XCTAssertEqual(XCTWaiter.wait(for:[closed],timeout:20),.completed)
+    XCTAssertFalse(app.buttons["Make public"].exists)
+    app.navigationBars.buttons["OnlyIdeas"].tap()
+    XCTAssertTrue(app.staticTexts["Shared — pending review"].waitForExistence(timeout:20));shot("Test33-publication-complete")
+    app.terminate()
+  }
   func testCompactAgentKeyboardAndTabs() {
     continueAfterFailure=false
     let app=XCUIApplication()

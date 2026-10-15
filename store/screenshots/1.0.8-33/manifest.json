@@ -1,0 +1,38 @@
+[
+  {
+    "file": "android-agent.png",
+    "pixels": [
+      1080,
+      1920
+    ],
+    "sha256": "589caa723fe7712d592cf5fe9a5819ff18ed35102e6352335580f28f23346501",
+    "state": "captured and reviewed locally; not uploaded"
+  },
+  {
+    "file": "iphone-agent.png",
+    "pixels": [
+      1320,
+      2868
+    ],
+    "sha256": "8f92a35e1604e86a1e850c1959d7a3bbc8b80bdaf88b8d665bc4c6816d8f5310",
+    "state": "captured and reviewed locally; not uploaded"
+  },
+  {
+    "file": "web-agent-desktop.png",
+    "pixels": [
+      1024,
+      844
+    ],
+    "sha256": "0d3bd15129335b88c1d140036df4eb2ba14db111e879f1ce58b144aa755a4b6a",
+    "state": "captured and reviewed locally; not uploaded"
+  },
+  {
+    "file": "web-agent-phone.png",
+    "pixels": [
+      390,
+      844
+    ],
+    "sha256": "5cb73aa896b2044d070d4c981088bb3b9e531ed74c58c7f923c3fdf0cea25d63",
+    "state": "captured and reviewed locally; not uploaded"
+  }
+]

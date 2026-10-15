@@ -5,7 +5,7 @@ import {mkdtemp,rm,readFile,mkdir,stat,writeFile} from 'node:fs/promises';
 import {join,resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {randomUUID} from 'node:crypto';
-import {codexResearch} from './codex-research.mjs';
+import {researchPapers,researchEnabled} from './research-backends.mjs';
 import {extractWebArticle} from '../server/web-article.mjs';
 import {checkPaperIdentity} from '../server/pdf-identity.mjs';
 import {retrievalURL} from '../server/browser-retrieval.mjs';
@@ -39,18 +39,18 @@ export async function dockerRetrieve(task,config){
   return output;
  }finally{await exec('docker',['rm','-f',name,proxy],{timeout:20_000}).catch(()=>{});await rm(dir,{recursive:true,force:true});}
 }
-export async function retrieveWithBrowser(task,config,{browser=dockerRetrieve,research=codexResearch,candidates=repositoryCandidates}={}){
+export async function retrieveWithBrowser(task,config,{browser=dockerRetrieve,research=researchPapers,candidates=repositoryCandidates}={}){
  const deadline=Math.min(task.deadline||Infinity,Date.now()+380_000),reports=[];
  const extra=await candidates(task);
  const urls=[...new Set([...extra,...task.urls])];
  async function attempt(list,stage){if(!list.length||deadline-Date.now()<5000)return null;const output=await browser({...task,urls:list,timeoutMs:Math.min(90_000,deadline-Date.now()-2000)},config);reports.push({stage,findings:output.findings,browserVersion:output.browserVersion});return acceptedBrowserResult(output,task.metadata);}
  let result=await attempt(urls,'browser');
- if(!result&&config.codex?.enabled&&task.metadata.doi&&deadline-Date.now()>45_000){
-  try{const found=await research(task.metadata.doi,{...config,codex:{...config.codex,timeoutMs:Math.min(config.codex.timeoutMs||210_000,deadline-Date.now()-35_000)}});
+ if(!result&&researchEnabled(config)&&task.metadata.doi&&deadline-Date.now()>45_000){
+  try{const found=await research(task.metadata.doi,{...config,researchDeadline:deadline-35_000});
    const exact=found.filter(p=>{const requested=task.metadata.doi.toLowerCase(),actual=String(p.doi||'').toLowerCase();return actual===requested||(/^10\.36227\/techrxiv\.\d+$/.test(requested)&&actual.startsWith(requested+'.v')&&/^\d+$/.test(actual.slice(requested.length+2))&&checkPaperIdentity(p.title+'\n'+String(p.summary||''),task.metadata).state==='matched');});
    const alternate=[...new Set(exact.flatMap(p=>[p.pdfUrl,...(p.downloadSources||[]),p.sourcePage,p.source]).map(retrievalURL).filter(Boolean))].filter(u=>!urls.includes(u));
-   result=await attempt(alternate,'codex-browser');reports.push({stage:'codex',verifiedCandidates:alternate.length});
-  }catch(e){reports.push({stage:'codex',available:false});}
+   result=await attempt(alternate,'research-browser');reports.push({stage:'research',verifiedCandidates:alternate.length});
+  }catch(e){reports.push({stage:'research',available:false});}
  }
  return {result,reports};
 }
