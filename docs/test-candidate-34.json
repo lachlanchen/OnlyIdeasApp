@@ -1,0 +1,52 @@
+{
+  "version": "1.0.8",
+  "build": 34,
+  "checkedAt": "2026-10-15T10:33:58.690444+00:00",
+  "source": "7a26b9dc3e281d640eb2ed913068aec636dc0779",
+  "nativeTestSource": "520a240",
+  "scope": "Internal testing only; current screenshot drafts staged, no new production review",
+  "apple": [
+    {
+      "platform": "IOS",
+      "id": "4005e205-56d5-4c34-a4fd-c467bbf9e2e4",
+      "version": "1.0.8",
+      "build": "34",
+      "processing": "VALID",
+      "internal": "IN_BETA_TESTING"
+    },
+    {
+      "platform": "MAC_OS",
+      "id": "e974a08d-c4cf-42df-ac5d-176636efad3a",
+      "version": "1.0.8",
+      "build": "34",
+      "processing": "VALID",
+      "internal": "IN_BETA_TESTING"
+    }
+  ],
+  "google": {
+    "package": "art.onlyideas.app",
+    "track": "internal",
+    "release": "1.0.8 (34) - Clear chat and LAC balance",
+    "state": "Available to internal testers",
+    "verifiedAt": "2026-10-15T10:19:00Z"
+  },
+  "artifacts": {
+    "iosIpa": "c424996f608a5c93574c751a80be5a1b145e72673293bf3633c54d91dd98c0c9",
+    "macPkg": "9f98e74703e3fee6cd2517010730c8b19c947fa269bec81cebb3c63b736894be",
+    "androidApk": "0df98ecc58fbbde96d3d01b55547acab82d86a206cddd06b20e35601b0125168",
+    "androidAab": "c8abe63149a3c9aadc8375bd7d3816873ff7df0f0cd2bf76ccf2d5aae7bca79b"
+  },
+  "qualification": {
+    "tests": 227,
+    "failed": 0,
+    "rendererTypescriptAndWebBuild": "passed",
+    "webChat": "320/390/1280px light/dark, bounds and exact Copy passed",
+    "macNative": "5 checks passed including actual native selection/copy and cold fixture balance",
+    "iphoneNative": "Cold Profile balance, chat layout and Copy/paste equality passed on iOS26.3 simulator",
+    "androidNative": "Isolated API34 emulator instrumentation passed; signed release upgrade and launch passed",
+    "physicalDevices": "No new physical-device test in this round",
+    "appleSourceManifestFiles": 41
+  },
+  "screenshots": "store/screenshots/1.0.8-34/manifest.json",
+  "sharedFunPoints": "Coordinated proposal only; no live shared balance or reward awards"
+}

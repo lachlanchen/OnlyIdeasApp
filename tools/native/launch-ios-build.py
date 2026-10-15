@@ -16,6 +16,11 @@ job = root/'release/archive-agent.plist'
 log = root/'release/archive.log'
 if log.exists(): log.replace(root/'release/archive.previous.log')
 env = {'HOME':str(pathlib.Path.home()),'PATH':'/usr/bin:/bin:/usr/sbin:/sbin'}
+developer = os.environ.get('ONLYIDEAS_DEVELOPER_DIR')
+if developer:
+    if not (pathlib.Path(developer)/'usr/bin/xcodebuild').is_file():
+        raise SystemExit('The requested OnlyIdeas Xcode toolchain is unavailable.')
+    env['DEVELOPER_DIR'] = developer
 config = pathlib.Path.home()/'.config/onlyideas/apple/signing.json'
 if config.exists():
     if config.stat().st_mode & 0o077:

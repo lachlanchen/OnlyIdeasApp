@@ -1,0 +1,58 @@
+{
+  "version": "1.0.8",
+  "build": 34,
+  "sourceCommit": "7a26b9d",
+  "testCommit": "520a240",
+  "status": "reviewed local draft; not uploaded to production listings",
+  "content": "Synthetic local reading account and conversation; no private account content",
+  "screenshots": [
+    {
+      "file": "iphone-chat.png",
+      "width": 1320,
+      "height": 2868,
+      "sha256": "4366c522516404ec4209160efc28c88364db8d171ddbf39f47f74894cb73ff3b",
+      "source": "native UI",
+      "reviewed": true
+    },
+    {
+      "file": "iphone-lac-profile.png",
+      "width": 1320,
+      "height": 2868,
+      "sha256": "05fc49592e15c330b6dcac49cf921753f7adad290ee4cd5d11dcabed8d0a593a",
+      "source": "native UI",
+      "reviewed": true
+    },
+    {
+      "file": "android-chat.png",
+      "width": 1080,
+      "height": 1920,
+      "sha256": "c9c078017f1d41a516003e02937c7bf846dc84f1c41c9d0df16bf160a0ed11e3",
+      "source": "native UI",
+      "reviewed": true
+    },
+    {
+      "file": "web-chat-desktop.png",
+      "width": 1280,
+      "height": 900,
+      "sha256": "1a96149cdffe762c18c2fe8bb2a9b3745df48af264f81c06d06835517336040c",
+      "source": "web UI",
+      "reviewed": true
+    },
+    {
+      "file": "web-chat-phone-dark.png",
+      "width": 390,
+      "height": 900,
+      "sha256": "80134775482cd75b9d33a5510e20b6f184040ed08bd0b75502b6d2be81e64f0c",
+      "source": "web UI",
+      "reviewed": true
+    },
+    {
+      "file": "web-lac-profile.png",
+      "width": 1280,
+      "height": 900,
+      "sha256": "aaf7349108ea330c69794141d1c864a86b65ca3b1aa0c793bdbfbdec5a3380e1",
+      "source": "web UI",
+      "reviewed": true
+    }
+  ]
+}

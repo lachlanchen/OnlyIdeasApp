@@ -44,6 +44,15 @@ idempotent intake/reversal and deletion rules. A client timer alone does not pro
 reading. Reward amounts remain unset; this candidate awards no new reading points.
 Exact app linking and the distinct Coin contract must be qualified before launch.
 
+EchoMind/LinkPrivate subsequently adopted Coin's exact proposed wire in
+`ec0e7ef729f2b8e185804e64264476accbf82516`: `app-lac-fun-points-v1`,
+resource `lazyingart-fun-points-api`, header `X-Lac-Points-Token`, and separate
+`/api/points/v1/intents`, `/reversals` and `/balance` operations. The incompatible
+earlier SDK draft names are superseded. Receipt validation, issuer delegation,
+closed retry/error rules and finite reward policies still need implementation
+and qualification by their owners. This is a consolidated proposal, not a live
+API or permission to send rewards. Internal build34 is independent of that work.
+
 ## Store-policy design check
 
 Checked15 October2026. Google allows earned/awarded points without Play Billing,
