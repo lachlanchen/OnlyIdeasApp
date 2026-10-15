@@ -483,16 +483,32 @@ public class MainActivity extends AppCompatActivity {
   }
   void renderCredits(LinearLayout container,JSONObject credits) {
     container.removeAllViews();
-    LinearLayout card=card();title(card,t("Reading credits"),22);gap(card,12);
-    title(card,String.valueOf(credits.optInt("balance")),36);caption(card,t("Available credits"));
+    LinearLayout card=card();title(card,t("LAC · LazyingArt Coins"),22);gap(card,12);
+    title(card,String.valueOf(credits.optInt("balance")),36);caption(card,t("OnlyIdeas balance"));
+    caption(card,t("Non-transferable app credits. No cash value."));
     if(credits.optInt("held")>0)caption(card,t("Reserved for imports")+": "+credits.optInt("held"));
-    gap(card,12);caption(card,creditRules(credits));
+    gap(card,12);caption(card,credits.optBoolean("enabled")?creditRules(credits):t("Earning and spending are not enabled for this account. Your balance is preserved."));
     card.addView(button(t("Credit history"),false,()->{
       JSONArray entries=credits.optJSONArray("history");ArrayList<String> lines=new ArrayList<>();
       Map<String,String> labels=Map.of("welcome","Welcome credits","private_import","Private import","unused_reservation","Unused reservation","failed_import","Import refund","public_reward","Public contribution","subscription","Monthly plan credits","purchase_refund","Purchase refund");
       if(entries!=null)for(int i=0;i<entries.length();i++){JSONObject e=entries.optJSONObject(i);if(e!=null)lines.add(t(labels.getOrDefault(e.optString("kind"),e.optString("kind")))+" · "+(e.optInt("delta")>0?"+":"")+e.optInt("delta")+"\n"+java.text.DateFormat.getDateInstance().format(new Date(e.optLong("created"))));}
       new AlertDialog.Builder(this).setTitle(t("Credit history")).setItems(lines.toArray(new String[0]),null).setPositiveButton(t("Done"),null).show();
     }));container.addView(card);gap(container,16);
+  }
+
+  void loadCreditSection(LinearLayout container) {
+    container.removeAllViews();
+    LinearLayout card=card();title(card,t("LAC · LazyingArt Coins"),22);
+    TextView status=text(t("Loading balance…"),16,false);card.addView(status);container.addView(card);
+    int identity=authEpoch;
+    io.execute(()->{
+      try{
+        JSONObject credits=api.json("/api/credits","GET",null);
+        handler.post(()->{if(!isFinishing()&&identity==authEpoch&&page.equals("profile")&&creditContainer==container)renderCredits(container,credits);});
+      }catch(Exception e){
+        handler.post(()->{if(!isFinishing()&&identity==authEpoch&&page.equals("profile")&&creditContainer==container){status.setText(t("Could not refresh your balance."));card.addView(button(t("Retry"),false,()->loadCreditSection(container)));}});
+      }
+    });
   }
 
   void toast(String message) {
@@ -761,7 +777,7 @@ public class MainActivity extends AppCompatActivity {
       c.addView(button(t("Saved, liked & activity"),false,this::showSpace));
       c.addView(button(t("Interests & notifications"),false,this::showReadingPreferences));
       LinearLayout wallet=column();creditContainer=wallet;c.addView(wallet);
-      job(()->api.json("/api/credits","GET",null),r->{if(page.equals("profile")&&r.optBoolean("enabled"))renderCredits(wallet,r);});
+      loadCreditSection(wallet);
     }
     LinearLayout reading = card();
     title(reading, t("Reading preferences"), 22);
@@ -963,9 +979,18 @@ public class MainActivity extends AppCompatActivity {
       if (m == null) continue;
       LinearLayout bubble = column();
       boolean user = m.optString("role").equals("user");
-      bubble.setPadding(user ? dp(18) : 0, dp(12), user ? dp(18) : 0, dp(16));
-      if (user) bubble.setBackground(rounded(soft, 20));
-      caption(bubble, user ? t("You") : "OnlyIdeas");
+      bubble.setPadding(dp(14), dp(12), dp(14), dp(14));
+      bubble.setBackground(rounded(user ? soft : surface, 18));
+      LinearLayout author = row();author.setGravity(Gravity.CENTER_VERTICAL);
+      TextView authorName=text(user ? t("You") : "OnlyIdeas",14,true);authorName.setTextColor(muted);
+      author.addView(authorName,new LinearLayout.LayoutParams(0,-2,1));
+      Button copy=button(t("Copy"),false,()->{
+        ((android.content.ClipboardManager)getSystemService(CLIPBOARD_SERVICE)).setPrimaryClip(
+          android.content.ClipData.newPlainText("OnlyIdeas",user ? m.optString("text") : t(m.optString("text"))));
+        toast(t("Copied"));
+      });copy.setTextSize(13);copy.setMinWidth(0);copy.setMinimumWidth(0);copy.setPadding(dp(6),0,dp(6),0);
+      copy.setContentDescription(t("Copy message"));author.addView(copy,new LinearLayout.LayoutParams(-2,dp(36)));
+      bubble.addView(author);
       gap(bubble, 8);
       TextView body = text(user ? m.optString("text") : t(m.optString("text")), 17, false);
       body.setTextIsSelectable(true);
@@ -1020,7 +1045,28 @@ public class MainActivity extends AppCompatActivity {
         if(action.optBoolean("canUpload"))result.addView(button(t("Upload my PDF"),false,()->recoverPDF("",action.optString("jobId"),action.optString("sharing").equals("shared"))));
         if(!action.optString("jobId").isEmpty())result.addView(button(t("Your requests"),false,()->loadJobs(true)));bubble.addView(result);
       }
-      messages.addView(bubble);
+      LinearLayout conversationRow = row();
+      conversationRow.setGravity((user ? Gravity.END : Gravity.START) | Gravity.TOP);
+      View avatar;
+      if(user){
+        String name=initial();String glyph=name.substring(0,name.offsetByCodePoints(0,1));
+        TextView person = text(glyph,17,true);person.setGravity(Gravity.CENTER);
+        person.setIncludeFontPadding(false);person.setPadding(0,0,0,0);person.setSingleLine(true);
+        person.setTextColor(green);person.setBackground(rounded(soft,17));avatar=person;
+      }else{
+        android.widget.ImageView brand=new android.widget.ImageView(this);
+        brand.setImageResource(R.mipmap.ic_launcher_round);
+        brand.setScaleType(android.widget.ImageView.ScaleType.FIT_CENTER);avatar=brand;
+      }
+      avatar.setContentDescription(user ? t("You") : "OnlyIdeas");
+      LinearLayout.LayoutParams avatarSize = new LinearLayout.LayoutParams(dp(34),dp(34));
+      if(user)avatarSize.setMarginStart(dp(8));else avatarSize.setMarginEnd(dp(8));
+      int viewport = messages.getWidth()>0 ? messages.getWidth() : getResources().getDisplayMetrics().widthPixels;
+      int bubbleWidth = Math.min(dp(user ? 560 : 720),Math.max(dp(140),viewport-dp(90)));
+      if(!user)conversationRow.addView(avatar,avatarSize);
+      conversationRow.addView(bubble,new LinearLayout.LayoutParams(bubbleWidth,-2));
+      if(user)conversationRow.addView(avatar,avatarSize);
+      messages.addView(conversationRow,new LinearLayout.LayoutParams(-1,-2));
       gap(messages, 14);
     }
     progress.setText(t(agentStatus));

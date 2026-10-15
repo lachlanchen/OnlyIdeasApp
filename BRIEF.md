@@ -1,5 +1,27 @@
 # OnlyIdeas · product contract
 
+## Chat usability and LAC app-credit display · 2026-10-15
+
+Preserve the direct LLM/app research pipeline first, with Codex and independent
+AgInTi recovery. Add clear left/right messages, user and approved OnlyIdeas icon
+avatars, native selectable text and explicit Copy on Mac/iOS/Android/web.
+Refresh relevant screenshots and accumulate the change in internal build34.
+
+Restore the account's saved credit balance in Profile: a durable visible section
+must show loading/retry and history rather than disappear before its first load.
+Use “LAC · LazyingArt Coins” for these non-transferable, no-cash-value app credits,
+with “OnlyIdeas balance” scope. Preserve balances, ledger lineage, purchased
+allowances, pilot configuration and import cost rules. Do not mint or convert
+credits during the presentation repair.
+
+The owner also requests possible shared fun-point accumulation through EchoMind,
+Bunko reading and other apps. Coordinate a separate nonmonetary ledger and explicit
+shared-account linking with the central identity/Coin owners. Their existing
+18-decimal cryptocurrency earnings asset must not be relabeled as these points.
+Shared fun points, app-local purchased usage credits and subscriptions remain
+separate. Shared accumulation is not live until exact app identity, point policies,
+receipt validation, caps, retries/reversals and store disclosures are qualified.
+
 ## Browser-assisted paper retrieval · 2026-10-11
 
 The owner requested stronger open-access retrieval with a real browser in Docker

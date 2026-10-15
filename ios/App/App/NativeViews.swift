@@ -286,11 +286,7 @@ struct NativeAgent: View {
           VStack(alignment: .leading, spacing: 12) {
             if store.messages.isEmpty { welcome }
             ForEach(store.messages) { message in
-              AgentBubble(message: message, requests: $requests).contextMenu {
-                if message.role == "assistant" {
-                  Button(T("Report AI response")) { store.reportContext = "Agent message \(message.id) in conversation \(store.conversationID ?? "")"; store.showReport = true }
-                }
-              }
+              AgentBubble(message: message, requests: $requests, availableWidth: min(900, max(0, viewport.size.width - 28)))
             }
             if !store.agentStatus.isEmpty {
               HStack(alignment: .top) {
@@ -301,7 +297,7 @@ struct NativeAgent: View {
             Color.clear.frame(height: 1).id("end").background(GeometryReader { marker in
               Color.clear.preference(key: AgentBottomPosition.self, value: marker.frame(in: .named("agent-scroll")).maxY)
             })
-          }.padding(14)
+          }.frame(maxWidth: 900).padding(14).frame(maxWidth: .infinity)
         }
         .coordinateSpace(name: "agent-scroll")
         .modifier(ReadingKeyboardDismiss())
@@ -453,19 +449,65 @@ struct NativeAgent: View {
             (draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && store.draftAttachments.isEmpty) || store.busy || store.attachmentBusy
               || !store.agentStatus.isEmpty)
       }.padding(8).background(Color(.secondarySystemGroupedBackground)).cornerRadius(22)
-    }.padding(.horizontal, 12).padding(.vertical, 6).background(Color(.systemGroupedBackground))
+    }.frame(maxWidth: 900).padding(.horizontal, 12).padding(.vertical, 6)
+      .frame(maxWidth: .infinity).background(Color(.systemGroupedBackground))
   }
 }
 struct AgentBubble: View {
   @EnvironmentObject var store: ReadingStore
   let message: AgentMessage
   @Binding var requests: Bool
+  var availableWidth: CGFloat = 900
+  @State private var copied = false
+  private var isUser: Bool { message.role == "user" }
+  private var displayedText: String { isUser ? message.text : T(message.text) }
   var body: some View {
+    HStack(alignment: .top, spacing: 8) {
+      if isUser { Spacer(minLength: 20) } else { avatar }
+      content
+        .padding(14)
+        .frame(maxWidth: min(isUser ? 560 : 720, max(120, availableWidth - 62)), alignment: .leading)
+        .background(isUser ? accent.opacity(0.10) : Color(.secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(accent.opacity(isUser ? 0.12 : 0.06)))
+        .accessibilityElement(children: .contain)
+      if isUser { avatar } else { Spacer(minLength: 20) }
+    }.frame(maxWidth: .infinity, alignment: isUser ? .trailing : .leading)
+      .padding(.vertical, 4)
+  }
+  private var avatar: some View {
+    Group {
+      if isUser {
+        Image(systemName: "person.fill").font(.system(size: 17, weight: .semibold))
+          .foregroundColor(accent).frame(width: 34, height: 34)
+          .background(Circle().fill(accent.opacity(0.12)))
+      } else {
+        Image("ChatIcon").resizable().scaledToFit().frame(width: 34, height: 34)
+          .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+      }
+    }.fixedSize()
+      .accessibilityLabel(T(isUser ? "You" : "OnlyIdeas"))
+      .accessibilityIdentifier("chat-avatar-\(message.id)")
+  }
+  private var content: some View {
     VStack(alignment: .leading, spacing: 10) {
-      Text(T(message.role == "user" ? "You" : "OnlyIdeas")).font(.subheadline.weight(.semibold))
-        .foregroundColor(.secondary)
-      Text(message.role == "assistant" ? T(message.text) : message.text).font(.body).textSelection(.enabled).fixedSize(
-        horizontal: false, vertical: true)
+      HStack(spacing: 6) {
+        Text(T(isUser ? "You" : "OnlyIdeas")).font(.subheadline.weight(.semibold)).foregroundColor(.secondary)
+        Spacer(minLength: 4)
+        Button {
+          UIPasteboard.general.string = displayedText;copied = true
+          Task {try? await Task.sleep(nanoseconds: 2_000_000_000);copied = false}
+        } label: {Image(systemName: copied ? "checkmark" : "doc.on.doc").frame(width: 32, height: 32)}
+          .buttonStyle(.plain).foregroundColor(.secondary).accessibilityLabel(T("Copy message"))
+          .accessibilityIdentifier("chat-copy-\(message.id)")
+        if !isUser {
+          Menu {
+            Button(T("Report AI response")) {store.reportContext = "Agent message \(message.id) in conversation \(store.conversationID ?? "")";store.showReport = true}
+          } label: {Image(systemName: "ellipsis").frame(width: 32, height: 32)}
+            .fixedSize().accessibilityLabel(T("Report AI response"))
+        }
+      }
+      NativeMessageText(text: displayedText, identifier: "chat-text-\(message.id)")
       ForEach(message.attachments ?? []) { file in
         HStack { Image(systemName:"doc.fill").foregroundColor(accent);VStack(alignment:.leading){Text(file.name).font(.subheadline);Text(file.state=="ready" ? T("Ready") : file.state=="failed" ? T("Could not prepare file") : T("Preparing your attachments")).font(.caption).foregroundColor(.secondary)};Spacer()
           if let id=file.paperId { NavigationLink(destination:NativePaper(paper:ResearchPaper(id:id,title:file.name))) {Image(systemName:"arrow.up.right")} }
@@ -500,9 +542,7 @@ struct AgentBubble: View {
           if action.jobId != nil {Button(T("Your requests")){requests=true}}
         }.padding(12).frame(maxWidth:.infinity,alignment:.leading).background(accent.opacity(0.06)).cornerRadius(14)
       }
-    }.padding(message.role == "user" ? 18 : 0)
-      .frame(maxWidth: .infinity, alignment: .leading)
-      .background(message.role == "user" ? accent.opacity(0.09) : Color.clear).cornerRadius(20)
+    }.frame(maxWidth: .infinity, alignment: .leading)
   }
 }
 struct NativeAgentResult:View {
@@ -684,20 +724,27 @@ struct NativeCreditSection: View {
   @EnvironmentObject var store:ReadingStore
   let names=["welcome":"Welcome credits","private_import":"Private import","unused_reservation":"Unused reservation","failed_import":"Import refund","public_reward":"Public contribution","subscription":"Monthly plan credits","purchase_refund":"Purchase refund"]
   var body: some View {
-    Group {
-      if let credits=store.credits,credits.enabled {
-        Section(T("Reading credits")) {
-          HStack(alignment:.firstTextBaseline) {Text(String(credits.balance)).font(.largeTitle.bold()).foregroundStyle(ideaGradient);Text(T("Available credits")).foregroundColor(.secondary)}
+    Section(T("LAC · LazyingArt Coins")) {
+      if let credits=store.credits {
+          HStack(alignment:.firstTextBaseline) {Text(String(credits.balance)).font(.largeTitle.bold()).foregroundStyle(ideaGradient).accessibilityIdentifier("lac-balance");Text(T("OnlyIdeas balance")).foregroundColor(.secondary)}
+          Text(T("Non-transferable app credits. No cash value.")).font(.footnote).foregroundColor(.secondary)
           if credits.held>0 {Text(T("Reserved for imports")+": \(credits.held)").foregroundColor(.secondary)}
-          NativeCreditRules(credits:credits).font(.footnote)
+          if credits.enabled {NativeCreditRules(credits:credits).font(.footnote)}
+          else {Text(T("Earning and spending are not enabled for this account. Your balance is preserved.")).font(.footnote).foregroundColor(.secondary)}
           DisclosureGroup(T("Credit history")) {
             ForEach(Array(credits.history.enumerated()),id:\.offset) { _, entry in
               HStack {VStack(alignment:.leading) {Text(T(names[entry.kind] ?? entry.kind));Text(Date(timeIntervalSince1970:entry.created/1000),style:.date).font(.caption).foregroundColor(.secondary)};Spacer();Text((entry.delta>0 ? "+":"")+String(entry.delta)).monospacedDigit()}
             }
           }
-        }
+      } else if store.creditsError.isEmpty {
+        ProgressView(T("Loading balance…")).accessibilityIdentifier("lac-loading")
       }
-    }.task {await store.loadCredits()}
+      if !store.creditsError.isEmpty {
+        Text(T("Could not refresh your balance.")).font(.footnote).foregroundColor(.secondary)
+        if store.credits != nil {Text(T("Last known balance")).font(.caption).foregroundColor(.secondary)}
+        Button(T("Retry")) {Task {await store.loadCredits()}}.accessibilityIdentifier("lac-retry")
+      }
+    }.task(id:store.account?.id) {await store.loadCredits()}
   }
 }
 struct NativeSharingOptions: View {
@@ -1788,6 +1835,9 @@ private func dismissReadingKeyboard() {
 }
 private struct ReadingKeyboardDismiss: ViewModifier {
   @ViewBuilder func body(content: Content) -> some View {
+    #if targetEnvironment(macCatalyst)
+    content
+    #else
     let dismissible = content.contentShape(Rectangle()).simultaneousGesture(
       DragGesture(minimumDistance: 18).onChanged { value in
         if value.translation.height > 40 && value.translation.height > abs(value.translation.width) * 1.3 {
@@ -1796,6 +1846,42 @@ private struct ReadingKeyboardDismiss: ViewModifier {
       })
     if #available(iOS 16.0, *) { dismissible.scrollDismissesKeyboard(.interactively) }
     else { dismissible }
+    #endif
+  }
+}
+private struct NativeMessageText: UIViewRepresentable {
+  let text: String
+  let identifier: String
+  func makeUIView(context: Context) -> MessageTextView {
+    let view = MessageTextView()
+    view.isEditable = false;view.isSelectable = true;view.isScrollEnabled = false
+    view.backgroundColor = .clear;view.textColor = .label
+    view.font = .preferredFont(forTextStyle: .body);view.adjustsFontForContentSizeCategory = true
+    view.textContainerInset = .zero;view.textContainer.lineFragmentPadding = 0
+    view.accessibilityIdentifier = identifier
+    view.isAccessibilityElement = true
+    view.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+    return view
+  }
+  func updateUIView(_ view: MessageTextView, context: Context) {
+    view.accessibilityIdentifier = identifier
+    if view.text != text {view.text = text;view.invalidateIntrinsicContentSize()}
+  }
+  @available(iOS 16.0, *)
+  func sizeThatFits(_ proposal: ProposedViewSize, uiView: MessageTextView, context: Context) -> CGSize? {
+    guard let width = proposal.width else {return nil}
+    return uiView.sizeThatFits(CGSize(width: width, height: .greatestFiniteMagnitude))
+  }
+  final class MessageTextView: UITextView {
+    private var measuredWidth: CGFloat = 0
+    override var intrinsicContentSize: CGSize {
+      guard bounds.width > 0 else {return super.intrinsicContentSize}
+      return CGSize(width: UIView.noIntrinsicMetric, height: sizeThatFits(CGSize(width: bounds.width, height: .greatestFiniteMagnitude)).height)
+    }
+    override func layoutSubviews() {
+      super.layoutSubviews()
+      if abs(bounds.width - measuredWidth) > 0.5 {measuredWidth = bounds.width;invalidateIntrinsicContentSize()}
+    }
   }
 }
 private struct AgentBottomPosition: PreferenceKey {

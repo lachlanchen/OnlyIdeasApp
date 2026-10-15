@@ -163,6 +163,7 @@ final class ReadingStore: NSObject, ObservableObject,
   @Published var showReport = false
   @Published var sharedImports = true
   @Published var credits:ReadingCredits?
+  @Published var creditsError = ""
   @Published var subscriptionCatalog:SubscriptionCatalog?
   @Published var subscriptionProducts:[Product]=[]
   @Published var trialProducts:Set<String>=[]
@@ -548,6 +549,7 @@ final class ReadingStore: NSObject, ObservableObject,
     try? saveToken(nil)
     account = nil
     credits = nil
+    creditsError = ""
     subscriptionCatalog=nil;subscriptionProducts=[];trialProducts=[];purchaseNotice=nil
     resolveCreditPrompt(false)
     draftAttachments = []
@@ -876,10 +878,11 @@ final class ReadingStore: NSObject, ObservableObject,
     } catch { self.error = error.localizedDescription }
   }
   func loadCredits() async {
-    guard account != nil else {credits=nil;return}
+    guard account != nil else {credits=nil;creditsError="";return}
     let identity=token
-    do {let value=try JSONDecoder().decode(ReadingCredits.self,from:await request("/api/credits"));if identity==token {credits=value}}
-    catch {if identity==token {credits=nil;self.error=error.localizedDescription}}
+    creditsError = ""
+    do {let value=try JSONDecoder().decode(ReadingCredits.self,from:await request("/api/credits"));if identity==token {credits=value;creditsError=""}}
+    catch {if identity==token {creditsError=error.localizedDescription}}
   }
   func resolveCreditPrompt(_ allowed:Bool) {
     let pending=creditDecision;creditDecision=nil;creditPrompt=nil;pending?.resume(returning:allowed)

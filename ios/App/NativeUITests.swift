@@ -1,6 +1,42 @@
 import XCTest
+import UIKit
 
 final class NativeUITests: XCTestCase {
+  func testChatMessageLayout() {
+    continueAfterFailure=false
+    let app=XCUIApplication()
+    app.launchArguments=["-onlyideas.native.language","en","-onlyideas.native.appearance","light","--onlyideas-space-qa","--onlyideas-mac-qa"]
+    app.launchEnvironment["ONLYIDEAS_QA_ORIGIN"]="http://127.0.0.1:18649"
+    let path=URL(fileURLWithPath:NSHomeDirectory()).appendingPathComponent("Documents/onlyideas-qa34-token")
+    guard let token=try? String(contentsOf:path,encoding:.utf8) else {XCTFail("Missing synthetic QA token");return}
+    app.launchEnvironment["ONLYIDEAS_QA_TOKEN"]=token.trimmingCharacters(in:.whitespacesAndNewlines)
+    app.launch()
+    XCTAssertTrue(app.tabBars.buttons["Agent"].waitForExistence(timeout:30));app.tabBars.buttons["Agent"].tap()
+    app.buttons["Conversation history"].tap()
+    let chat=app.buttons["Chat layout verification"];XCTAssertTrue(chat.waitForExistence(timeout:15));chat.tap()
+    let user=app.images["chat-avatar-qa-user"],assistant=app.images["chat-avatar-qa-assistant"]
+    XCTAssertTrue(user.waitForExistence(timeout:15));XCTAssertTrue(assistant.exists)
+    let scroll=app.scrollViews.allElementsBoundByIndex.filter{$0.frame.height>120}.max{$0.frame.height<$1.frame.height}!
+    scroll.swipeDown()
+    for avatar in [user,assistant] {
+      XCTAssertGreaterThanOrEqual(avatar.frame.width,32);XCTAssertGreaterThanOrEqual(avatar.frame.height,32)
+      XCTAssertGreaterThanOrEqual(avatar.frame.minX,scroll.frame.minX+8)
+      XCTAssertLessThanOrEqual(avatar.frame.maxX,scroll.frame.maxX-8)
+    }
+    XCTAssertGreaterThan(user.frame.midX,assistant.frame.midX+100)
+    let assistantName=app.staticTexts.matching(identifier:"OnlyIdeas").allElementsBoundByIndex.filter{$0.frame.minY>assistant.frame.minY-4}.first!
+    XCTAssertGreaterThan(assistantName.frame.minX,assistant.frame.maxX+8)
+    let response="I found the paper in the research index. You can read the abstract or fetch its full text."
+    XCTAssertTrue(app.descendants(matching:.any)["chat-text-qa-assistant"].exists)
+    shot("Test34-phone-chat-light")
+    app.buttons["chat-copy-qa-assistant"].tap()
+    XCTAssertEqual(UIPasteboard.general.string,response)
+    app.tabBars.buttons["Profile"].tap()
+    let balance=app.staticTexts["lac-balance"]
+    XCTAssertTrue(balance.waitForExistence(timeout:15));XCTAssertEqual(balance.label,"45")
+    shot("Test34-phone-lac-balance")
+    app.terminate()
+  }
   func testOwnerPublicationAndCompactAttachment() {
     continueAfterFailure=false
     let app=XCUIApplication()

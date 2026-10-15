@@ -781,7 +781,18 @@
     "Make public": "Make public",
     "Your paper becomes public after you confirm permission. Administrators review it afterward. Your chats and notes stay private.": "Your paper becomes public after you confirm permission. Administrators review it afterward. Your chats and notes stay private.",
     "Your paper is public. Administrator review is pending.": "Your paper is public. Administrator review is pending.",
-    "By making this paper public, you accept the Community Terms.": "By making this paper public, you accept the Community Terms."
+    "By making this paper public, you accept the Community Terms.": "By making this paper public, you accept the Community Terms.",
+    "Copy": "Copy",
+    "Copy message": "Copy message",
+    "Copied": "Copied",
+    "Select the message to copy it.": "Select the message to copy it.",
+    "LAC · LazyingArt Coins": "LAC · LazyingArt Coins",
+    "OnlyIdeas balance": "OnlyIdeas balance",
+    "Non-transferable app credits. No cash value.": "Non-transferable app credits. No cash value.",
+    "Earning and spending are not enabled for this account. Your balance is preserved.": "Earning and spending are not enabled for this account. Your balance is preserved.",
+    "Loading balance…": "Loading balance…",
+    "Could not refresh your balance.": "Could not refresh your balance.",
+    "Last known balance": "Last known balance"
   },
   "zh-Hans": {
     "Choose a valid PDF.": "请选择有效的 PDF。",
@@ -1569,7 +1580,18 @@
     "Make public": "公开论文",
     "Your paper becomes public after you confirm permission. Administrators review it afterward. Your chats and notes stay private.": "确认分享权限后，论文将立即公开，管理员会在之后审核。聊天和笔记仍保持私密。",
     "Your paper is public. Administrator review is pending.": "论文已公开，等待管理员后续审核。",
-    "By making this paper public, you accept the Community Terms.": "公开论文即表示你同意社区条款。"
+    "By making this paper public, you accept the Community Terms.": "公开论文即表示你同意社区条款。",
+    "Copy": "复制",
+    "Copy message": "复制消息",
+    "Copied": "已复制",
+    "Select the message to copy it.": "请选择消息内容以复制。",
+    "LAC · LazyingArt Coins": "LAC · LazyingArt 积分",
+    "OnlyIdeas balance": "OnlyIdeas 余额",
+    "Non-transferable app credits. No cash value.": "不可转让的应用积分，不具有现金价值。",
+    "Earning and spending are not enabled for this account. Your balance is preserved.": "此账户暂未开启积分获取和使用，已有余额将保留。",
+    "Loading balance…": "正在加载余额…",
+    "Could not refresh your balance.": "无法刷新余额。",
+    "Last known balance": "上次已知余额"
   },
   "zh-Hant": {
     ". Public comments are reviewed.": "公開評論會經過審核。",
@@ -2357,7 +2379,18 @@
     "Make public": "公開論文",
     "Your paper becomes public after you confirm permission. Administrators review it afterward. Your chats and notes stay private.": "確認分享權限後，論文將立即公開，管理員會在之後審核。聊天和筆記仍保持私密。",
     "Your paper is public. Administrator review is pending.": "論文已公開，等待管理員後續審核。",
-    "By making this paper public, you accept the Community Terms.": "公開論文即表示你同意社群條款。"
+    "By making this paper public, you accept the Community Terms.": "公開論文即表示你同意社群條款。",
+    "Copy": "複製",
+    "Copy message": "複製訊息",
+    "Copied": "已複製",
+    "Select the message to copy it.": "請選取訊息內容以複製。",
+    "LAC · LazyingArt Coins": "LAC · LazyingArt 積分",
+    "OnlyIdeas balance": "OnlyIdeas 餘額",
+    "Non-transferable app credits. No cash value.": "不可轉讓的應用程式積分，不具有現金價值。",
+    "Earning and spending are not enabled for this account. Your balance is preserved.": "此帳戶暫未開啟積分獲取和使用，已有餘額將保留。",
+    "Loading balance…": "正在載入餘額…",
+    "Could not refresh your balance.": "無法更新餘額。",
+    "Last known balance": "上次已知餘額"
   },
   "ja": {
     ". Public comments are reviewed.": "公開コメントは審査されます。",
@@ -3145,7 +3178,18 @@
     "Make public": "論文を公開",
     "Your paper becomes public after you confirm permission. Administrators review it afterward. Your chats and notes stay private.": "共有権限を確認すると論文が公開され、管理者が後から審査します。チャットとメモは非公開のままです。",
     "Your paper is public. Administrator review is pending.": "論文を公開しました。管理者の審査待ちです。",
-    "By making this paper public, you accept the Community Terms.": "論文を公開すると、コミュニティ規約に同意したことになります。"
+    "By making this paper public, you accept the Community Terms.": "論文を公開すると、コミュニティ規約に同意したことになります。",
+    "Copy": "コピー",
+    "Copy message": "メッセージをコピー",
+    "Copied": "コピーしました",
+    "Select the message to copy it.": "メッセージを選択してコピーしてください。",
+    "LAC · LazyingArt Coins": "LAC · LazyingArt コイン",
+    "OnlyIdeas balance": "OnlyIdeas の残高",
+    "Non-transferable app credits. No cash value.": "譲渡できないアプリ内ポイントです。換金はできません。",
+    "Earning and spending are not enabled for this account. Your balance is preserved.": "このアカウントではポイントの獲得と利用はまだ有効ではありません。残高は保持されます。",
+    "Loading balance…": "残高を読み込み中…",
+    "Could not refresh your balance.": "残高を更新できませんでした。",
+    "Last known balance": "前回確認した残高"
   },
   "ko": {
     ". Public comments are reviewed.": "공개 댓글은 검토됩니다.",
@@ -3933,7 +3977,18 @@
     "Make public": "논문 공개",
     "Your paper becomes public after you confirm permission. Administrators review it afterward. Your chats and notes stay private.": "공유 권한을 확인하면 논문이 공개되고 관리자가 나중에 검토합니다. 채팅과 메모는 비공개로 유지됩니다.",
     "Your paper is public. Administrator review is pending.": "논문이 공개되었습니다. 관리자 검토를 기다리고 있습니다.",
-    "By making this paper public, you accept the Community Terms.": "논문을 공개하면 커뮤니티 약관에 동의하게 됩니다."
+    "By making this paper public, you accept the Community Terms.": "논문을 공개하면 커뮤니티 약관에 동의하게 됩니다.",
+    "Copy": "복사",
+    "Copy message": "메시지 복사",
+    "Copied": "복사됨",
+    "Select the message to copy it.": "메시지를 선택하여 복사하세요.",
+    "LAC · LazyingArt Coins": "LAC · LazyingArt 코인",
+    "OnlyIdeas balance": "OnlyIdeas 잔액",
+    "Non-transferable app credits. No cash value.": "양도할 수 없는 앱 포인트이며 현금 가치가 없습니다.",
+    "Earning and spending are not enabled for this account. Your balance is preserved.": "이 계정의 포인트 적립 및 사용은 아직 활성화되지 않았습니다. 잔액은 유지됩니다.",
+    "Loading balance…": "잔액 불러오는 중…",
+    "Could not refresh your balance.": "잔액을 새로고침하지 못했습니다.",
+    "Last known balance": "마지막으로 확인한 잔액"
   },
   "ar": {
     ". Public comments are reviewed.": "التعليقات العامة تخضع للمراجعة.",
@@ -4721,7 +4776,18 @@
     "Make public": "نشر الورقة للعامة",
     "Your paper becomes public after you confirm permission. Administrators review it afterward. Your chats and notes stay private.": "تصبح الورقة متاحة للعامة بعد تأكيد إذن المشاركة. يراجعها المشرفون لاحقًا. تظل محادثاتك وملاحظاتك خاصة.",
     "Your paper is public. Administrator review is pending.": "أصبحت الورقة عامة، وهي بانتظار مراجعة المشرفين.",
-    "By making this paper public, you accept the Community Terms.": "بنشر هذه الورقة للعامة، فإنك توافق على شروط المجتمع."
+    "By making this paper public, you accept the Community Terms.": "بنشر هذه الورقة للعامة، فإنك توافق على شروط المجتمع.",
+    "Copy": "نسخ",
+    "Copy message": "نسخ الرسالة",
+    "Copied": "تم النسخ",
+    "Select the message to copy it.": "حدد الرسالة لنسخها.",
+    "LAC · LazyingArt Coins": "LAC · عملات LazyingArt",
+    "OnlyIdeas balance": "رصيد OnlyIdeas",
+    "Non-transferable app credits. No cash value.": "نقاط داخل التطبيق غير قابلة للتحويل وليس لها قيمة نقدية.",
+    "Earning and spending are not enabled for this account. Your balance is preserved.": "كسب النقاط واستخدامها غير مفعّلين لهذا الحساب بعد. يبقى رصيدك محفوظًا.",
+    "Loading balance…": "جارٍ تحميل الرصيد…",
+    "Could not refresh your balance.": "تعذّر تحديث رصيدك.",
+    "Last known balance": "آخر رصيد معروف"
   },
   "fr": {
     ". Public comments are reviewed.": ". Les commentaires publics sont examinés.",
@@ -5509,7 +5575,18 @@
     "Make public": "Rendre public",
     "Your paper becomes public after you confirm permission. Administrators review it afterward. Your chats and notes stay private.": "Votre article devient public après confirmation des droits. Les administrateurs le vérifieront ensuite. Vos discussions et notes restent privées.",
     "Your paper is public. Administrator review is pending.": "Votre article est public. La vérification est en attente.",
-    "By making this paper public, you accept the Community Terms.": "En rendant cet article public, vous acceptez les conditions de la communauté."
+    "By making this paper public, you accept the Community Terms.": "En rendant cet article public, vous acceptez les conditions de la communauté.",
+    "Copy": "Copier",
+    "Copy message": "Copier le message",
+    "Copied": "Copié",
+    "Select the message to copy it.": "Sélectionnez le message pour le copier.",
+    "LAC · LazyingArt Coins": "LAC · LazyingArt Coins",
+    "OnlyIdeas balance": "Solde OnlyIdeas",
+    "Non-transferable app credits. No cash value.": "Crédits non transférables dans l’application, sans valeur monétaire.",
+    "Earning and spending are not enabled for this account. Your balance is preserved.": "Le gain et l’utilisation des crédits ne sont pas activés pour ce compte. Le solde est conservé.",
+    "Loading balance…": "Chargement du solde…",
+    "Could not refresh your balance.": "Impossible d’actualiser le solde.",
+    "Last known balance": "Dernier solde connu"
   },
   "de": {
     ". Public comments are reviewed.": "Öffentliche Kommentare werden geprüft.",
@@ -6297,7 +6374,18 @@
     "Make public": "Veröffentlichen",
     "Your paper becomes public after you confirm permission. Administrators review it afterward. Your chats and notes stay private.": "Nach Bestätigung der Freigaberechte wird der Artikel öffentlich. Administratoren prüfen ihn anschließend. Chats und Notizen bleiben privat.",
     "Your paper is public. Administrator review is pending.": "Der Artikel ist öffentlich. Die Prüfung steht noch aus.",
-    "By making this paper public, you accept the Community Terms.": "Mit der Veröffentlichung akzeptierst du die Community-Bedingungen."
+    "By making this paper public, you accept the Community Terms.": "Mit der Veröffentlichung akzeptierst du die Community-Bedingungen.",
+    "Copy": "Kopieren",
+    "Copy message": "Nachricht kopieren",
+    "Copied": "Kopiert",
+    "Select the message to copy it.": "Wähle die Nachricht aus, um sie zu kopieren.",
+    "LAC · LazyingArt Coins": "LAC · LazyingArt Coins",
+    "OnlyIdeas balance": "OnlyIdeas-Guthaben",
+    "Non-transferable app credits. No cash value.": "Nicht übertragbare App-Punkte ohne Geldwert.",
+    "Earning and spending are not enabled for this account. Your balance is preserved.": "Sammeln und Einlösen sind für dieses Konto noch nicht aktiviert. Das Guthaben bleibt erhalten.",
+    "Loading balance…": "Guthaben wird geladen…",
+    "Could not refresh your balance.": "Das Guthaben konnte nicht aktualisiert werden.",
+    "Last known balance": "Zuletzt bekanntes Guthaben"
   },
   "es": {
     ". Public comments are reviewed.": "Los comentarios públicos se revisan.",
@@ -7085,7 +7173,18 @@
     "Make public": "Hacer público",
     "Your paper becomes public after you confirm permission. Administrators review it afterward. Your chats and notes stay private.": "El artículo será público cuando confirmes el permiso. Los administradores lo revisarán después. Tus chats y notas seguirán siendo privados.",
     "Your paper is public. Administrator review is pending.": "El artículo ya es público. La revisión está pendiente.",
-    "By making this paper public, you accept the Community Terms.": "Al hacer público este artículo, aceptas las Normas de la comunidad."
+    "By making this paper public, you accept the Community Terms.": "Al hacer público este artículo, aceptas las Normas de la comunidad.",
+    "Copy": "Copiar",
+    "Copy message": "Copiar mensaje",
+    "Copied": "Copiado",
+    "Select the message to copy it.": "Selecciona el mensaje para copiarlo.",
+    "LAC · LazyingArt Coins": "LAC · LazyingArt Coins",
+    "OnlyIdeas balance": "Saldo de OnlyIdeas",
+    "Non-transferable app credits. No cash value.": "Créditos de la aplicación no transferibles y sin valor monetario.",
+    "Earning and spending are not enabled for this account. Your balance is preserved.": "La obtención y el uso de créditos no están habilitados para esta cuenta. Se conserva tu saldo.",
+    "Loading balance…": "Cargando saldo…",
+    "Could not refresh your balance.": "No se pudo actualizar el saldo.",
+    "Last known balance": "Último saldo conocido"
   },
   "ru": {
     ". Public comments are reviewed.": "Публичные комментарии проходят проверку.",
@@ -7873,7 +7972,18 @@
     "Make public": "Опубликовать",
     "Your paper becomes public after you confirm permission. Administrators review it afterward. Your chats and notes stay private.": "Статья станет общедоступной после подтверждения права на публикацию. Администраторы проверят её позже. Чаты и заметки останутся личными.",
     "Your paper is public. Administrator review is pending.": "Статья опубликована и ожидает проверки администратора.",
-    "By making this paper public, you accept the Community Terms.": "Публикуя статью, вы принимаете правила сообщества."
+    "By making this paper public, you accept the Community Terms.": "Публикуя статью, вы принимаете правила сообщества.",
+    "Copy": "Копировать",
+    "Copy message": "Копировать сообщение",
+    "Copied": "Скопировано",
+    "Select the message to copy it.": "Выделите сообщение, чтобы скопировать его.",
+    "LAC · LazyingArt Coins": "LAC · LazyingArt Coins",
+    "OnlyIdeas balance": "Баланс OnlyIdeas",
+    "Non-transferable app credits. No cash value.": "Баллы приложения нельзя передавать или обменивать на деньги.",
+    "Earning and spending are not enabled for this account. Your balance is preserved.": "Начисление и использование баллов для этого аккаунта пока не включены. Баланс сохранён.",
+    "Loading balance…": "Загрузка баланса…",
+    "Could not refresh your balance.": "Не удалось обновить баланс.",
+    "Last known balance": "Последний известный баланс"
   },
   "vi": {
     ". Public comments are reviewed.": "Bình luận công khai sẽ được kiểm duyệt.",
@@ -8661,6 +8771,17 @@
     "Make public": "Công khai bài báo",
     "Your paper becomes public after you confirm permission. Administrators review it afterward. Your chats and notes stay private.": "Bài báo sẽ được công khai sau khi bạn xác nhận quyền chia sẻ. Quản trị viên sẽ kiểm duyệt sau. Trò chuyện và ghi chú vẫn riêng tư.",
     "Your paper is public. Administrator review is pending.": "Bài báo đã công khai và đang chờ quản trị viên kiểm duyệt.",
-    "By making this paper public, you accept the Community Terms.": "Khi công khai bài báo này, bạn đồng ý với Điều khoản cộng đồng."
+    "By making this paper public, you accept the Community Terms.": "Khi công khai bài báo này, bạn đồng ý với Điều khoản cộng đồng.",
+    "Copy": "Sao chép",
+    "Copy message": "Sao chép tin nhắn",
+    "Copied": "Đã sao chép",
+    "Select the message to copy it.": "Chọn tin nhắn để sao chép.",
+    "LAC · LazyingArt Coins": "LAC · LazyingArt Coins",
+    "OnlyIdeas balance": "Số dư OnlyIdeas",
+    "Non-transferable app credits. No cash value.": "Điểm trong ứng dụng không thể chuyển nhượng và không có giá trị tiền mặt.",
+    "Earning and spending are not enabled for this account. Your balance is preserved.": "Tài khoản này chưa được bật tính năng tích và sử dụng điểm. Số dư vẫn được giữ nguyên.",
+    "Loading balance…": "Đang tải số dư…",
+    "Could not refresh your balance.": "Không thể cập nhật số dư.",
+    "Last known balance": "Số dư được ghi nhận gần nhất"
   }
 }

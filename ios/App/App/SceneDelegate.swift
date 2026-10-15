@@ -14,8 +14,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         windowScene.sizeRestrictions?.minimumSize = CGSize(width: 820, height: 600)
         #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("--onlyideas-mac-qa") {
-            windowScene.sizeRestrictions?.minimumSize = CGSize(width: 1280, height: 800)
-            windowScene.sizeRestrictions?.maximumSize = CGSize(width: 1280, height: 800)
+            let height:CGFloat = ProcessInfo.processInfo.arguments.contains("--onlyideas-chat-qa") ? 720 : 800
+            windowScene.sizeRestrictions?.minimumSize = CGSize(width: 1280, height: height)
+            windowScene.sizeRestrictions?.maximumSize = CGSize(width: 1280, height: height)
         }
         #endif
         #endif
@@ -166,6 +167,33 @@ import WebKit
     private func run() async {
         do {
             try FileManager.default.createDirectory(at: output, withIntermediateDirectories: true)
+            if ProcessInfo.processInfo.arguments.contains("--onlyideas-chat-qa") {
+              await store.refresh();await store.loadConversations()
+              guard let chat=store.conversations.first(where:{$0.title=="Chat layout verification"}) else {throw store.failure("Missing synthetic chat fixture")}
+              await store.selectConversation(chat)
+              NotificationCenter.default.post(name:Notification.Name("OnlyIdeas.QA.Tab"),object:1)
+              await pause(3)
+              try check("Synthetic user and assistant messages loaded",store.messages.contains{$0.id=="qa-user"} && store.messages.contains{$0.id=="qa-assistant"})
+              func textViews(_ parent:UIView)->[UITextView] {
+                (parent as? UITextView).map{[$0]} ?? parent.subviews.flatMap{textViews($0)}
+              }
+              guard let message=textViews(view).first(where:{$0.text.hasPrefix("I found the paper in the research index.")}) else {throw store.failure("Missing native selectable message")}
+              try check("Mac message is selectable and read-only",message.isSelectable && !message.isEditable && !message.isScrollEnabled)
+              let frame=message.convert(message.bounds,to:view)
+              try check("Mac message fits a readable column",frame.width>200 && frame.width<=720 && frame.minX>14 && frame.maxX<view.bounds.width-14)
+              message.becomeFirstResponder();message.selectAll(nil);message.copy(nil)
+              try check("Mac native selection copies complete message",UIPasteboard.general.string==message.text)
+              result["messageFrame"]=["x":frame.minX,"y":frame.minY,"width":frame.width,"height":frame.height]
+              store.credits=nil
+              NotificationCenter.default.post(name:Notification.Name("OnlyIdeas.QA.Tab"),object:2)
+              try await wait {self.store.credits != nil}
+              try check("Mac Profile loads the fixture balance from a cold section",store.credits?.balance==45 && store.creditsError.isEmpty)
+              result["fixtureBalance"]=store.credits?.balance
+              NotificationCenter.default.post(name:Notification.Name("OnlyIdeas.QA.Tab"),object:1)
+              result["ok"]=true;result["checks"]=checks;result["windowWidth"]=view.window?.bounds.width
+              if let data=try? JSONSerialization.data(withJSONObject:result,options:[.prettyPrinted,.sortedKeys]) {try data.write(to:output.appendingPathComponent("chat-result.json"))}
+              return
+            }
             try check("QA preserves signed-in accounts", store.account == nil)
             try await wait { !self.store.papers.isEmpty }
             await pause(2)

@@ -87,3 +87,18 @@ html,body,#root{max-width:100%;overflow-x:hidden;overscroll-behavior-x:none}
 .chat-composer textarea { flex:1 1 0; width:0; min-width:0; resize:none; }
 
 @media(max-width:640px){.toast{left:14px;right:14px;width:auto;transform:none;max-width:none;box-sizing:border-box}}
+
+/* Shared chat proportions: readable columns and stable, fully visible identity. */
+.agent-conversation{max-width:960px}
+.chat-message{width:calc(100% - 28px);max-width:720px;margin:12px 28px 18px 0;padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-radius:18px}
+.chat-message.user{width:fit-content;max-width:min(560px,calc(100% - 28px));margin:12px 0 18px auto;padding:14px 16px}
+.chat-author{display:flex;align-items:center;gap:9px;min-height:34px;color:var(--muted);font-size:14px}
+.chat-avatar{display:flex;align-items:center;justify-content:center;flex:0 0 34px;width:34px;height:34px;border-radius:50%;background:var(--green);color:var(--surface)}
+.chat-avatar svg{flex:none;display:block}
+.chat-message.user .chat-author{flex-direction:row-reverse;justify-content:flex-start}
+.chat-message.user .chat-avatar{color:var(--green);background:var(--surface)}
+@media(max-width:640px){.agent-conversation{padding-inline:12px}.chat-message,.chat-message.user{padding:12px}.chat-message>p{font-size:17px}}
+
+.chat-avatar img{display:block;width:34px;height:34px;object-fit:contain;border-radius:8px}
+
+.chat-copy{margin-inline-start:auto;display:flex;align-items:center;justify-content:center;width:36px;height:36px;color:var(--muted);border-radius:9px}.chat-copy:hover{background:var(--soft)}.chat-message.user .chat-copy{margin-inline-start:0;margin-inline-end:auto}

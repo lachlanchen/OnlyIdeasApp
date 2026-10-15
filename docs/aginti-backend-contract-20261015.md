@@ -89,6 +89,22 @@ activation remains an app-owned qualification decision.
   Protected configuration, cloud API release, queues and native builds were
   preserved. No store submission or new binary was needed for this routing change.
 - Contract and owner priority clarification were queued to the existing AgInTi
-  thread. No peer implementation receipt has been received at this checkpoint.
+  thread. Its later assessment is recorded below.
   One Codex helper launch was attempted after a passing quota check; exact model
   token consumption is unknown because it emitted no completion events.
+
+## AgInTi owner assessment received
+
+The existing owner returned `AGINTI-BACKEND-RESPONSE-20261015.md` in the shared
+OnlyIdeasApp handoff directory. It confirms the direct-model/app pipeline first.
+The installed CLI is the qualified helper used here; the restricted SDK candidate
+at `e4c16b0610c41e690d9288739561a5a7e187cc9d` is separate, uninstalled source.
+Peer-reported validation: 19 SDK smoke tests, eight offline contract probes and
+syntax checks. No live model/app qualification or implementation was performed.
+
+Outstanding broader-use gaps include typed provider/search failures, grounding
+references in actual observations, translation coverage/figure preservation and
+private-document isolation. The installed `public-research` wrapper itself calls
+Codex and would not be an independent fallback; our adapter uses the independent
+AgInTi/DeepSeek CLI instead. The app's independent metadata checks and durable
+processing remain required. No wider migration is made from this assessment.

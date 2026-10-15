@@ -1,8 +1,16 @@
-# OnlyIdeas reading credits
+# OnlyIdeas LAC app credits
 
+The profile label is **LAC · LazyingArt Coins**, scoped as **OnlyIdeas balance**.
 These are non-transferable database usage credits, not LAC cryptocurrency. They
 have no cash value and do not expire. Accounting is per OnlyIdeas account; no
 cross-product balance or automatic linking of separate provider accounts exists.
+
+The 15 October display update keeps the section mounted before its first request,
+shows loading/retry and preserves a last-known balance on transient failures.
+Disabled earning/spending does not erase an existing balance or hide its history.
+It does not change ledger entries, grants, costs, paid lineage or rollout settings.
+Shared nonmonetary points are a separate proposed asset; see
+[the current coordination decision](lac-app-credits-20261015.md).
 
 ## First slice: accounting
 
