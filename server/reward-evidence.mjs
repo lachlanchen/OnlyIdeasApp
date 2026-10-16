@@ -37,20 +37,20 @@ export function createRewardEvidence(store,{authorize,now=()=>Date.now()}={}){
    });
  }
  const intent=row=>({policy_id:'lac-daily-activity',policy_version:1,event_id:row.event,occurred_at:row.occurred,evidence_ref:row.reference,evidence_sha256:row.digest});
- async function read({issuer,subject,actor,reference,scope}){
+ async function read({issuer,subject,actor,reference,scope,signal}){
    requireValue(issuer===B.issuer&&actor===B.clientId&&['lac.points.intents.write','lac.points.intents.reverse'].includes(scope),'Evidence not available.',404);
    const row=store.db.prepare('SELECT * FROM lac_source_evidence WHERE reference=? AND subject=?').get(reference,subject);
    requireValue(row&&row.state==='active'&&store.active(row.owner),'Evidence not available.',404);
-   const identity=await authorize(row.owner,scope);sameIdentity(identity,subject);
+   const identity=await authorize(row.owner,scope,{signal});sameIdentity(identity,subject);
    const current=store.db.prepare('SELECT * FROM lac_source_evidence WHERE reference=?').get(reference);
    requireValue(current?.state==='active'&&store.active(row.owner),'Evidence not available.',404);
    return {record:JSON.parse(row.record),eligible:true};
  }
- async function eligible({issuer,subject,actor,policy_id,policy_version,phase,event}){
+ async function eligible({issuer,subject,actor,policy_id,policy_version,phase,event,signal}){
    if(policy_id!=='lac-daily-activity'||policy_version!==1||!['intake','award'].includes(phase))return false;
    const row=store.db.prepare('SELECT * FROM lac_source_evidence WHERE reference=? AND subject=?').get(event.evidence_ref,subject);
    if(!row||row.state!=='active'||!store.active(row.owner)||canonicalEvidence(intent(row))!==canonicalEvidence(event))return false;
-   try{return (await read({issuer,subject,actor,reference:row.reference,scope:'lac.points.intents.write'})).eligible}
+   try{return (await read({issuer,subject,actor,reference:row.reference,scope:'lac.points.intents.write',signal})).eligible}
    catch(e){if([401,403,404].includes(e.status))return false;throw e}
  }
  function hold(owner){store.db.prepare("UPDATE lac_source_evidence SET state='held' WHERE owner=? AND state='active'").run(owner)}

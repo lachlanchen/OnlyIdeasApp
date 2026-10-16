@@ -31,11 +31,12 @@ import { createAppleAuth } from './apple-auth.mjs';
 import { sourceKey, reusedImport, reusablePaper } from './import-reuse.mjs';
 import { creditTransaction, creditSummary, reserveImport, retryImportCredits, finishImportCredits, seedCreditPublications } from './credits.mjs';
 import {createLacBalance,LacReadError} from './lac-balance.mjs';
+import {createRewardSourceRoutes} from './reward-source-routes.mjs';
 import { createProfileStore } from './lazyingart-store.mjs';
 import { ProfileLinkError, PROFILE_BINDING } from './lazyingart-profile.mjs';
 const uuid = /^[a-f0-9-]{36}$/;
 const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif', '.woff2': 'font/woff2', '.ttf': 'font/ttf', '.json': 'application/json' };
-export function createApp(store, config, { worker = true, provider = providerJSON, billingOptions = {}, discoveryOptions = {}, profileOptions = {}, pointsProvider } = {}) {
+export function createApp(store, config, { worker = true, provider = providerJSON, billingOptions = {}, discoveryOptions = {}, profileOptions = {}, pointsProvider, rewardSourceOptions = {} } = {}) {
   const origin = config.origin || 'http://127.0.0.1:4182';
   const secure = origin.startsWith('https://');
   requireValue(secure || /^http:\/\/(127\.0\.0\.1|localhost):\d+$/.test(origin), 'Only HTTPS or explicit loopback origins are permitted.');
@@ -43,6 +44,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
   const cookieName = secure ? '__Host-onlyideas' : 'onlyideas-local';
   const cookie = (name, value, seconds) => `${name}=${value}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${seconds}${secure ? '; Secure' : ''}`;
   seedCreditPublications(store, config);
+  const rewardSource=createRewardSourceRoutes(store,config,rewardSourceOptions);
   const stopWorker = worker ? startWorker(store, config) : () => {};
   const discovery = createDiscovery(store,discoveryOptions);
   const social = createPaperSocial(store,discovery);
@@ -94,6 +96,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
     try {
       const url = new URL(req.url, origin), path = url.pathname, method = req.method;
       requireValue(!/%2f|%5c|%00|(?:^|\/)\.\.(?:\/|$)/i.test(req.url.split('?')[0]), 'Invalid path.');
+      if(await rewardSource.route(req,res))return;
       if(path.startsWith('/api/worker/retrieval/')) {
         requireValue(retrieval.authorized(req),'Retrieval worker authorization required.',401);
         requireValue(method==='POST','Method not allowed.',405);
