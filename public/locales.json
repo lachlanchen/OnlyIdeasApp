@@ -800,7 +800,10 @@
     "Account connected": "Account connected",
     "Could not load account connection.": "Could not load account connection.",
     "Connect the same account across LazyingArt apps. Your papers, chats and purchases stay in OnlyIdeas.": "Connect the same account across LazyingArt apps. Your papers, chats and purchases stay in OnlyIdeas.",
-    "Sign in again to connect your LazyingArt account.": "Sign in again to connect your LazyingArt account."
+    "Sign in again to connect your LazyingArt account.": "Sign in again to connect your LazyingArt account.",
+    "Checking account connection…": "Checking account connection…",
+    "Updating account connection…": "Updating account connection…",
+    "Reconnect LazyingArt": "Reconnect LazyingArt"
   },
   "zh-Hans": {
     "Choose a valid PDF.": "请选择有效的 PDF。",
@@ -1607,7 +1610,10 @@
     "Account connected": "账户已关联",
     "Could not load account connection.": "无法加载账户关联状态。",
     "Connect the same account across LazyingArt apps. Your papers, chats and purchases stay in OnlyIdeas.": "在 LazyingArt 各应用中关联同一账户。论文、聊天和购买记录仍保留在 OnlyIdeas。",
-    "Sign in again to connect your LazyingArt account.": "请重新登录，以关联 LazyingArt 账户。"
+    "Sign in again to connect your LazyingArt account.": "请重新登录，以关联 LazyingArt 账户。",
+    "Checking account connection…": "正在检查账号连接…",
+    "Updating account connection…": "正在更新账号连接…",
+    "Reconnect LazyingArt": "重新连接 LazyingArt"
   },
   "zh-Hant": {
     ". Public comments are reviewed.": "公開評論會經過審核。",
@@ -2414,7 +2420,10 @@
     "Account connected": "帳戶已連結",
     "Could not load account connection.": "無法載入帳戶連結狀態。",
     "Connect the same account across LazyingArt apps. Your papers, chats and purchases stay in OnlyIdeas.": "在 LazyingArt 各應用程式中連結同一帳戶。論文、聊天和購買紀錄仍保留在 OnlyIdeas。",
-    "Sign in again to connect your LazyingArt account.": "請重新登入，以連結 LazyingArt 帳戶。"
+    "Sign in again to connect your LazyingArt account.": "請重新登入，以連結 LazyingArt 帳戶。",
+    "Checking account connection…": "正在檢查帳號連線…",
+    "Updating account connection…": "正在更新帳號連線…",
+    "Reconnect LazyingArt": "重新連接 LazyingArt"
   },
   "ja": {
     ". Public comments are reviewed.": "公開コメントは審査されます。",
@@ -3221,7 +3230,10 @@
     "Account connected": "アカウント連携済み",
     "Could not load account connection.": "アカウントの連携状態を読み込めませんでした。",
     "Connect the same account across LazyingArt apps. Your papers, chats and purchases stay in OnlyIdeas.": "LazyingArt の各アプリで同じアカウントを連携できます。論文、チャット、購入情報は OnlyIdeas に保持されます。",
-    "Sign in again to connect your LazyingArt account.": "LazyingArt アカウントを連携するには、もう一度ログインしてください。"
+    "Sign in again to connect your LazyingArt account.": "LazyingArt アカウントを連携するには、もう一度ログインしてください。",
+    "Checking account connection…": "アカウントの接続を確認中…",
+    "Updating account connection…": "アカウントの接続を更新中…",
+    "Reconnect LazyingArt": "LazyingArt に再接続"
   },
   "ko": {
     ". Public comments are reviewed.": "공개 댓글은 검토됩니다.",
@@ -4028,7 +4040,10 @@
     "Account connected": "계정 연결됨",
     "Could not load account connection.": "계정 연결 상태를 불러오지 못했습니다.",
     "Connect the same account across LazyingArt apps. Your papers, chats and purchases stay in OnlyIdeas.": "LazyingArt 앱에서 같은 계정을 연결하세요. 논문, 채팅, 구매 내역은 OnlyIdeas에 유지됩니다.",
-    "Sign in again to connect your LazyingArt account.": "LazyingArt 계정을 연결하려면 다시 로그인하세요."
+    "Sign in again to connect your LazyingArt account.": "LazyingArt 계정을 연결하려면 다시 로그인하세요.",
+    "Checking account connection…": "계정 연결 확인 중…",
+    "Updating account connection…": "계정 연결 갱신 중…",
+    "Reconnect LazyingArt": "LazyingArt 다시 연결"
   },
   "ar": {
     ". Public comments are reviewed.": "التعليقات العامة تخضع للمراجعة.",
@@ -4835,7 +4850,10 @@
     "Account connected": "تم ربط الحساب",
     "Could not load account connection.": "تعذر تحميل حالة ربط الحساب.",
     "Connect the same account across LazyingArt apps. Your papers, chats and purchases stay in OnlyIdeas.": "اربط الحساب نفسه عبر تطبيقات LazyingArt. تبقى أوراقك ومحادثاتك ومشترياتك في OnlyIdeas.",
-    "Sign in again to connect your LazyingArt account.": "سجّل الدخول مجددًا لربط حساب LazyingArt."
+    "Sign in again to connect your LazyingArt account.": "سجّل الدخول مجددًا لربط حساب LazyingArt.",
+    "Checking account connection…": "جارٍ التحقق من اتصال الحساب…",
+    "Updating account connection…": "جارٍ تحديث اتصال الحساب…",
+    "Reconnect LazyingArt": "إعادة الاتصال بـ LazyingArt"
   },
   "fr": {
     ". Public comments are reviewed.": ". Les commentaires publics sont examinés.",
@@ -5642,7 +5660,10 @@
     "Account connected": "Compte connecté",
     "Could not load account connection.": "Impossible de charger la connexion du compte.",
     "Connect the same account across LazyingArt apps. Your papers, chats and purchases stay in OnlyIdeas.": "Connectez le même compte dans les applications LazyingArt. Vos articles, discussions et achats restent dans OnlyIdeas.",
-    "Sign in again to connect your LazyingArt account.": "Reconnectez-vous pour associer votre compte LazyingArt."
+    "Sign in again to connect your LazyingArt account.": "Reconnectez-vous pour associer votre compte LazyingArt.",
+    "Checking account connection…": "Vérification de la connexion du compte…",
+    "Updating account connection…": "Actualisation de la connexion du compte…",
+    "Reconnect LazyingArt": "Reconnecter LazyingArt"
   },
   "de": {
     ". Public comments are reviewed.": "Öffentliche Kommentare werden geprüft.",
@@ -6449,7 +6470,10 @@
     "Account connected": "Konto verknüpft",
     "Could not load account connection.": "Kontoverbindung konnte nicht geladen werden.",
     "Connect the same account across LazyingArt apps. Your papers, chats and purchases stay in OnlyIdeas.": "Verknüpfe dasselbe Konto in den LazyingArt-Apps. Deine Artikel, Chats und Käufe bleiben in OnlyIdeas.",
-    "Sign in again to connect your LazyingArt account.": "Melde dich erneut an, um dein LazyingArt-Konto zu verknüpfen."
+    "Sign in again to connect your LazyingArt account.": "Melde dich erneut an, um dein LazyingArt-Konto zu verknüpfen.",
+    "Checking account connection…": "Kontoverbindung wird geprüft…",
+    "Updating account connection…": "Kontoverbindung wird aktualisiert…",
+    "Reconnect LazyingArt": "LazyingArt erneut verbinden"
   },
   "es": {
     ". Public comments are reviewed.": "Los comentarios públicos se revisan.",
@@ -7256,7 +7280,10 @@
     "Account connected": "Cuenta conectada",
     "Could not load account connection.": "No se pudo cargar la conexión de la cuenta.",
     "Connect the same account across LazyingArt apps. Your papers, chats and purchases stay in OnlyIdeas.": "Conecta la misma cuenta en las apps de LazyingArt. Tus artículos, chats y compras permanecen en OnlyIdeas.",
-    "Sign in again to connect your LazyingArt account.": "Vuelve a iniciar sesión para conectar tu cuenta de LazyingArt."
+    "Sign in again to connect your LazyingArt account.": "Vuelve a iniciar sesión para conectar tu cuenta de LazyingArt.",
+    "Checking account connection…": "Comprobando la conexión de la cuenta…",
+    "Updating account connection…": "Actualizando la conexión de la cuenta…",
+    "Reconnect LazyingArt": "Volver a conectar LazyingArt"
   },
   "ru": {
     ". Public comments are reviewed.": "Публичные комментарии проходят проверку.",
@@ -8063,7 +8090,10 @@
     "Account connected": "Аккаунт подключён",
     "Could not load account connection.": "Не удалось загрузить состояние подключения.",
     "Connect the same account across LazyingArt apps. Your papers, chats and purchases stay in OnlyIdeas.": "Подключите один аккаунт в приложениях LazyingArt. Статьи, чаты и покупки останутся в OnlyIdeas.",
-    "Sign in again to connect your LazyingArt account.": "Войдите снова, чтобы подключить аккаунт LazyingArt."
+    "Sign in again to connect your LazyingArt account.": "Войдите снова, чтобы подключить аккаунт LazyingArt.",
+    "Checking account connection…": "Проверка подключения аккаунта…",
+    "Updating account connection…": "Обновление подключения аккаунта…",
+    "Reconnect LazyingArt": "Подключить LazyingArt заново"
   },
   "vi": {
     ". Public comments are reviewed.": "Bình luận công khai sẽ được kiểm duyệt.",
@@ -8870,6 +8900,9 @@
     "Account connected": "Đã liên kết tài khoản",
     "Could not load account connection.": "Không thể tải trạng thái liên kết tài khoản.",
     "Connect the same account across LazyingArt apps. Your papers, chats and purchases stay in OnlyIdeas.": "Liên kết cùng một tài khoản trong các ứng dụng LazyingArt. Bài báo, trò chuyện và giao dịch mua vẫn ở OnlyIdeas.",
-    "Sign in again to connect your LazyingArt account.": "Đăng nhập lại để liên kết tài khoản LazyingArt."
+    "Sign in again to connect your LazyingArt account.": "Đăng nhập lại để liên kết tài khoản LazyingArt.",
+    "Checking account connection…": "Đang kiểm tra kết nối tài khoản…",
+    "Updating account connection…": "Đang cập nhật kết nối tài khoản…",
+    "Reconnect LazyingArt": "Kết nối lại LazyingArt"
   }
 }

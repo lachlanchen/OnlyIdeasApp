@@ -27,7 +27,13 @@ export function CreditRules({credits}:{credits:Credits}) {
 }
 export function CreditsPanel() {
  const [credits,setCredits]=useState<Credits|null>(null),[error,setError]=useState(''),[attempt,setAttempt]=useState(0)
- useEffect(()=>{let active=true;setError('');api<Credits>('/credits').then(c=>{if(active)setCredits(c)}).catch(e=>{if(active)setError(e.message)});return()=>{active=false}},[attempt])
+ useEffect(()=>{
+  const refresh=()=>setAttempt(n=>n+1),visible=()=>{if(document.visibilityState==='visible')refresh()}
+  const events=['online','pageshow','onlyideas:resume']
+  events.forEach(name=>window.addEventListener(name,refresh));document.addEventListener('visibilitychange',visible)
+  return()=>{events.forEach(name=>window.removeEventListener(name,refresh));document.removeEventListener('visibilitychange',visible)}
+ },[])
+ useEffect(()=>{let active=true;api<Credits>('/credits').then(c=>{if(active){setCredits(c);setError('')}}).catch(e=>{if(active)setError(e.message)});return()=>{active=false}},[attempt])
  return <section className="credit-panel"><h2>{t('LAC · LazyingArt Coins')}</h2>{!credits&&!error&&<p role="status">{t('Loading balance…')}</p>}{credits&&<><div className="credit-balance"><strong>{credits.balance}</strong><span>{t('OnlyIdeas balance')}</span></div><p className="fine">{t('Non-transferable app credits. No cash value.')}</p>{credits.held>0&&<p>{t('Reserved for imports')}: {credits.held}</p>}{(credits.earningEnabled??credits.enabled)?<CreditRules credits={credits}/>:<p>{t('Earning and spending are not enabled for this account. Your balance is preserved.')}</p>}<details><summary>{t('Credit history')}</summary><ul className="credit-history">{credits.history.map((item,i)=><li key={i}><span>{t(creditLabels[item.kind]||item.kind)}<small>{new Date(item.created).toLocaleDateString()}</small></span><strong>{item.delta>0?'+':''}{item.delta}</strong></li>)}</ul></details></>}{error&&<div role="status"><p>{t('Could not refresh your balance.')}{credits&&' '+t('Last known balance')}</p><button className="secondary" onClick={()=>setAttempt(v=>v+1)}>{t('Retry')}</button></div>}</section>
 }
 export function SharingOptions({sharing,setSharing}:{sharing:string;setSharing:(s:string)=>void}) {

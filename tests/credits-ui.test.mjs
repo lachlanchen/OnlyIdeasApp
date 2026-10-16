@@ -21,3 +21,11 @@ test('disabled earning preserves visible saved balance and an old account respon
  w.api=async()=>({...balance,enabled:false,balance:7});w.render('account-B');await settle();resolve(balance);await settle();
  assert.equal(w.document.querySelector('.credit-balance strong').textContent,'7');assert.match(w.document.body.textContent,/Your balance is preserved/);
 });
+test('resume refreshes balance, offline keeps a labeled prior value, and reconnect does not reset it to zero',async t=>{
+ const {w,settle}=await fixture(t);w.api=async()=>balance;w.render('reader');await settle();
+ w.api=async()=>{throw Error('offline')};w.dispatchEvent(new w.Event('onlyideas:resume'));await settle();
+ assert.equal(w.document.querySelector('.credit-balance strong').textContent,'45');assert.match(w.document.body.textContent,/Last known balance/);
+ let finish;w.api=()=>new Promise(r=>{finish=r});w.dispatchEvent(new w.Event('online'));await settle();
+ assert.match(w.document.body.textContent,/Last known balance/);assert.equal(w.document.querySelector('.credit-balance strong').textContent,'45');
+ finish({...balance,balance:55});await settle();assert.equal(w.document.querySelector('.credit-balance strong').textContent,'55');assert.doesNotMatch(w.document.body.textContent,/Last known balance/);
+});
