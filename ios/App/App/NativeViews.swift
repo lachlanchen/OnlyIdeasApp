@@ -128,6 +128,7 @@ struct NativeSignIn: View {
         Button { Task { await store.signInWithGitHub() } } label: {
           Text(T("Continue with GitHub")).font(.headline).frame(maxWidth: .infinity).padding()
         }.buttonStyle(.bordered).disabled(store.signingIn)
+        if store.sharedLoginEnabled {Button(T("Continue with LazyingArt")){Task{await store.signInWithLazyingArt()}}.buttonStyle(.bordered).disabled(store.signingIn)}
         Text(T("Use the same sign-in method to return to your account. Apple and GitHub accounts are separate.")).font(.footnote).foregroundColor(.secondary).fixedSize(horizontal: false, vertical: true)
         Link(T("Privacy"), destination: URL(string: "https://lachlan.lazying.art/OnlyIdeasApp/privacy.html")!)
       }.padding(28).frame(maxWidth: 560, alignment: .leading).frame(maxWidth: .infinity)
@@ -585,6 +586,11 @@ struct NativeProfile: View {
       }
       Section {Button {plans=true} label: {Label(T("Plans & usage"),systemImage:"sparkles").font(.headline)}.accessibilityIdentifier("plans-entry")}
       if store.account != nil { NativeCreditSection() }
+      if store.account != nil && store.sharedLoginEnabled {Section(T("LazyingArt account")){
+        Text(T("Connect the same account across LazyingArt apps. Your papers, chats and purchases stay in OnlyIdeas.")).font(.footnote)
+        if store.sharedLinked {Text(T("Account connected"));Button(T("Disconnect LazyingArt")){Task{await store.disconnectLazyingArt()}}}
+        else {Button(T("Connect LazyingArt")){Task{await store.signInWithLazyingArt(link:true)}}.disabled(store.signingIn)}
+      }}
       Section(T("Reading")) {
         Picker(T("App language"), selection:Binding(get:{store.language},set:{store.language=$0;store.objectWillChange.send()})) {
           Text(T("System")).tag("system")
@@ -717,7 +723,7 @@ struct NativeCreditRules: View {
   let credits:ReadingCredits
   var body: some View {
     Text(T("Shared papers earn {reward} credits once approved and published. Duplicate papers earn no extra credits. Up to {limit} credits per day.",["reward":String(credits.policy.publication),"limit":String(credits.policy.rewardPerDay)]))
-    Text(T("Private PDFs cost 1 credit per page; other files cost 1 credit. Credits never expire."))
+    if credits.enabled {Text(T("Private PDFs cost 1 credit per page; other files cost 1 credit. Credits never expire."))}
   }
 }
 struct NativeCreditSection: View {
@@ -729,7 +735,7 @@ struct NativeCreditSection: View {
           HStack(alignment:.firstTextBaseline) {Text(String(credits.balance)).font(.largeTitle.bold()).foregroundStyle(ideaGradient).accessibilityIdentifier("lac-balance");Text(T("OnlyIdeas balance")).foregroundColor(.secondary)}
           Text(T("Non-transferable app credits. No cash value.")).font(.footnote).foregroundColor(.secondary)
           if credits.held>0 {Text(T("Reserved for imports")+": \(credits.held)").foregroundColor(.secondary)}
-          if credits.enabled {NativeCreditRules(credits:credits).font(.footnote)}
+          if credits.earningEnabled ?? credits.enabled {NativeCreditRules(credits:credits).font(.footnote)}
           else {Text(T("Earning and spending are not enabled for this account. Your balance is preserved.")).font(.footnote).foregroundColor(.secondary)}
           DisclosureGroup(T("Credit history")) {
             ForEach(Array(credits.history.enumerated()),id:\.offset) { _, entry in

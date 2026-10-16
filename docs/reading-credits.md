@@ -12,6 +12,15 @@ It does not change ledger entries, grants, costs, paid lineage or rollout settin
 Shared nonmonetary points are a separate proposed asset; see
 [the current coordination decision](lac-app-credits-20261015.md).
 
+## Independent earning rollout · 16 October 2026
+
+`credits.earningEnabled: true` enables welcome and publication rewards for all
+active accounts. `credits.enabled` and its account list continue to control
+private-import charges and existing billing quota eligibility. The API reports
+`earningEnabled` separately; client cost confirmation still follows `enabled`.
+This rollout does not create shared points or merge balances. See the
+[account rewards integration](account-rewards-20261016.md).
+
 ## First slice: accounting
 
 | Action | Credits |
@@ -23,8 +32,8 @@ Shared nonmonetary points are a separate proposed asset; see
 | Other private file / Markdown import | −1 per file |
 | Shared imports, reading, chat, shared translations | 0 |
 
-Existing service quotas still bound conversion and agent usage. Shared papers are
-not public until rights and community review succeeds. Rejected papers earn
+Existing service quotas still bound conversion and agent usage. Confirmed, licensed Shared papers can become readable before administrator
+review; rewards still require approval and successful publication. Rejected papers earn
 nothing; there is no surprise private-import charge. Repeated unsuitable sharing
 requests are subject to the existing account moderation tools.
 

@@ -1,5 +1,5 @@
 /**
- * Disabled preparation for OnlyIdeas' optional LazyingArt profile login.
+ * Protocol adapter for OnlyIdeas' optional LazyingArt profile login.
  * Protocol port of LazyingArtLinkPrivate@309dab92. Not imported by app.mjs.
  * No local account linking, session issuance, Coin or billing permissions here.
  */
@@ -138,7 +138,7 @@ export function createProfileAdapter(config = {}, { attempts, transport = profil
       scopes_supported: ['profile'],
     })) check(Array.isArray(d[key]) && d[key].every(v => typeof v === 'string') && required.every(v => d[key].includes(v)), 'discovery_not_qualified');
     check(object(d.providers) && ['password', 'google', 'apple', 'github'].every(k => typeof d.providers[k] === 'boolean'), 'discovery_not_qualified');
-    return Object.freeze({ providers: Object.freeze(Object.fromEntries(['password', 'google', 'apple', 'github'].map(k => [k, d.providers[k]]))) });
+    return { ...d, providers: Object.freeze(Object.fromEntries(['password', 'google', 'apple', 'github'].map(k => [k, d.providers[k]]))) };
   }
   async function ready() { check(enabled, 'shared_login_disabled'); await discovery(); }
   function credentialEnvelope(value) {
@@ -174,11 +174,24 @@ export function createProfileAdapter(config = {}, { attempts, transport = profil
     return Object.freeze({ issuer, subject: v.sub, displayName: a.display_name, clientId, audience,
       authenticatedAt: v.auth_time, issuedAt: v.iat, expiresAt: v.exp });
   }
-  async function begin({ binding, attemptId }) {
+  async function begin({ binding, attemptId, fresh = false }) {
     const browserHash = bindingHash(binding);
     check(typeof attemptId === 'string' && /^[A-Za-z0-9_-]{32,128}$/.test(attemptId), 'local_attempt_required');
     check(typeof attempts?.create === 'function' && typeof attempts?.consume === 'function', 'attempt_store_required');
-    await ready();
+    check(typeof fresh === 'boolean', 'invalid_configuration');
+    check(enabled, 'shared_login_disabled');
+    const d = await discovery();
+    if (fresh) {
+      const c = d.authorization_extensions?.['provider-select-v1'];
+      check(Array.isArray(d.adapter_contracts) && d.adapter_contracts.includes('provider-select-v1')
+        && keys(c, ['parameter','provider_parameter','prompt_parameter','reuse_consent_parameter','scope','consent_ttl_seconds','providers','prompt_values'])
+        && c.parameter === 'authorization_contract' && c.provider_parameter === 'provider'
+        && c.prompt_parameter === 'prompt' && c.reuse_consent_parameter === 'reuse_consent'
+        && c.scope === 'profile' && c.consent_ttl_seconds === 2592000
+        && Array.isArray(c.providers) && [...c.providers].sort().join(' ') === 'apple github google lazyingart'
+        && Array.isArray(c.prompt_values) && [...c.prompt_values].sort().join(' ') === 'consent login select_account'
+        && d.providers.password, 'discovery_not_qualified');
+    }
     const state = randomBytes(32).toString('base64url'), verifier = randomBytes(32).toString('base64url');
     const issuedAt = clock();
     try {
@@ -188,6 +201,7 @@ export function createProfileAdapter(config = {}, { attempts, transport = profil
     const url = new URL(issuer + '/account/authorize');
     url.search = new URLSearchParams({ response_type: 'code', client_id: clientId, audience, redirect_uri: redirectUri,
       scope: 'profile', state, code_challenge: createHash('sha256').update(verifier).digest('base64url'), code_challenge_method: 'S256' }).toString();
+    if (fresh) for (const [key,value] of Object.entries({authorization_contract:'provider-select-v1',provider:'lazyingart',prompt:'login',reuse_consent:'false'})) url.searchParams.set(key,value);
     return { authorizationUrl: url.href };
   }
   async function complete({ callbackUrl, binding }) {

@@ -1,5 +1,22 @@
 # OnlyIdeas · product contract
 
+## Daily and shared LAC rewards · 2026-10-16
+
+The owner requests daily bonuses, usage and public-paper rewards accumulated
+across opted-in LazyingArt apps through explicit shared account linking. Preserve
+existing app usage credits, purchased balances, subscriptions and on-chain LAC.
+Use the distinct Coin-owned earned-only nonmonetary points ledger and one
+canonical account balance; no email/name merging or copied app totals. Candidate
+shared defaults are daily 5, reading 1 up to 5/day, approved unique paper 10 up to
+50/day, subject to qualified evidence and finite central policy limits.
+
+Repair local earning eligibility independently of spending enforcement. The
+existing welcome/publication policy can apply to all active accounts through
+`credits.earningEnabled` while the private-import/billing rollout remains intact.
+Shared login and rewards require actual issuer/app qualification before activation.
+See `docs/account-rewards-20261016.md` and the reusable accounts/rewards skill.
+
+
 ## Exact paper requests · 2026-10-15
 
 Publisher punctuation must not make a literal title dependent on a successful

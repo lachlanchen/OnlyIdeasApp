@@ -1,0 +1,4 @@
+interface:
+  display_name: "LazyingArt Accounts & Rewards"
+  short_description: "Link app accounts and award shared LAC points"
+  default_prompt: "Use $lazyingart-accounts-and-rewards to integrate this app with shared LazyingArt login and LAC rewards."

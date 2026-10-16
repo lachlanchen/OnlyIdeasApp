@@ -792,7 +792,15 @@
     "Earning and spending are not enabled for this account. Your balance is preserved.": "Earning and spending are not enabled for this account. Your balance is preserved.",
     "Loading balance…": "Loading balance…",
     "Could not refresh your balance.": "Could not refresh your balance.",
-    "Last known balance": "Last known balance"
+    "Last known balance": "Last known balance",
+    "LazyingArt account": "LazyingArt account",
+    "Continue with LazyingArt": "Continue with LazyingArt",
+    "Connect LazyingArt": "Connect LazyingArt",
+    "Disconnect LazyingArt": "Disconnect LazyingArt",
+    "Account connected": "Account connected",
+    "Could not load account connection.": "Could not load account connection.",
+    "Connect the same account across LazyingArt apps. Your papers, chats and purchases stay in OnlyIdeas.": "Connect the same account across LazyingArt apps. Your papers, chats and purchases stay in OnlyIdeas.",
+    "Sign in again to connect your LazyingArt account.": "Sign in again to connect your LazyingArt account."
   },
   "zh-Hans": {
     "Choose a valid PDF.": "请选择有效的 PDF。",
@@ -1591,7 +1599,15 @@
     "Earning and spending are not enabled for this account. Your balance is preserved.": "此账户暂未开启积分获取和使用，已有余额将保留。",
     "Loading balance…": "正在加载余额…",
     "Could not refresh your balance.": "无法刷新余额。",
-    "Last known balance": "上次已知余额"
+    "Last known balance": "上次已知余额",
+    "LazyingArt account": "LazyingArt 账户",
+    "Continue with LazyingArt": "使用 LazyingArt 继续",
+    "Connect LazyingArt": "关联 LazyingArt",
+    "Disconnect LazyingArt": "断开 LazyingArt 关联",
+    "Account connected": "账户已关联",
+    "Could not load account connection.": "无法加载账户关联状态。",
+    "Connect the same account across LazyingArt apps. Your papers, chats and purchases stay in OnlyIdeas.": "在 LazyingArt 各应用中关联同一账户。论文、聊天和购买记录仍保留在 OnlyIdeas。",
+    "Sign in again to connect your LazyingArt account.": "请重新登录，以关联 LazyingArt 账户。"
   },
   "zh-Hant": {
     ". Public comments are reviewed.": "公開評論會經過審核。",
@@ -2390,7 +2406,15 @@
     "Earning and spending are not enabled for this account. Your balance is preserved.": "此帳戶暫未開啟積分獲取和使用，已有餘額將保留。",
     "Loading balance…": "正在載入餘額…",
     "Could not refresh your balance.": "無法更新餘額。",
-    "Last known balance": "上次已知餘額"
+    "Last known balance": "上次已知餘額",
+    "LazyingArt account": "LazyingArt 帳戶",
+    "Continue with LazyingArt": "使用 LazyingArt 繼續",
+    "Connect LazyingArt": "連結 LazyingArt",
+    "Disconnect LazyingArt": "取消 LazyingArt 連結",
+    "Account connected": "帳戶已連結",
+    "Could not load account connection.": "無法載入帳戶連結狀態。",
+    "Connect the same account across LazyingArt apps. Your papers, chats and purchases stay in OnlyIdeas.": "在 LazyingArt 各應用程式中連結同一帳戶。論文、聊天和購買紀錄仍保留在 OnlyIdeas。",
+    "Sign in again to connect your LazyingArt account.": "請重新登入，以連結 LazyingArt 帳戶。"
   },
   "ja": {
     ". Public comments are reviewed.": "公開コメントは審査されます。",
@@ -3189,7 +3213,15 @@
     "Earning and spending are not enabled for this account. Your balance is preserved.": "このアカウントではポイントの獲得と利用はまだ有効ではありません。残高は保持されます。",
     "Loading balance…": "残高を読み込み中…",
     "Could not refresh your balance.": "残高を更新できませんでした。",
-    "Last known balance": "前回確認した残高"
+    "Last known balance": "前回確認した残高",
+    "LazyingArt account": "LazyingArt アカウント",
+    "Continue with LazyingArt": "LazyingArt で続ける",
+    "Connect LazyingArt": "LazyingArt と連携",
+    "Disconnect LazyingArt": "LazyingArt との連携を解除",
+    "Account connected": "アカウント連携済み",
+    "Could not load account connection.": "アカウントの連携状態を読み込めませんでした。",
+    "Connect the same account across LazyingArt apps. Your papers, chats and purchases stay in OnlyIdeas.": "LazyingArt の各アプリで同じアカウントを連携できます。論文、チャット、購入情報は OnlyIdeas に保持されます。",
+    "Sign in again to connect your LazyingArt account.": "LazyingArt アカウントを連携するには、もう一度ログインしてください。"
   },
   "ko": {
     ". Public comments are reviewed.": "공개 댓글은 검토됩니다.",
@@ -3988,7 +4020,15 @@
     "Earning and spending are not enabled for this account. Your balance is preserved.": "이 계정의 포인트 적립 및 사용은 아직 활성화되지 않았습니다. 잔액은 유지됩니다.",
     "Loading balance…": "잔액 불러오는 중…",
     "Could not refresh your balance.": "잔액을 새로고침하지 못했습니다.",
-    "Last known balance": "마지막으로 확인한 잔액"
+    "Last known balance": "마지막으로 확인한 잔액",
+    "LazyingArt account": "LazyingArt 계정",
+    "Continue with LazyingArt": "LazyingArt로 계속",
+    "Connect LazyingArt": "LazyingArt 연결",
+    "Disconnect LazyingArt": "LazyingArt 연결 해제",
+    "Account connected": "계정 연결됨",
+    "Could not load account connection.": "계정 연결 상태를 불러오지 못했습니다.",
+    "Connect the same account across LazyingArt apps. Your papers, chats and purchases stay in OnlyIdeas.": "LazyingArt 앱에서 같은 계정을 연결하세요. 논문, 채팅, 구매 내역은 OnlyIdeas에 유지됩니다.",
+    "Sign in again to connect your LazyingArt account.": "LazyingArt 계정을 연결하려면 다시 로그인하세요."
   },
   "ar": {
     ". Public comments are reviewed.": "التعليقات العامة تخضع للمراجعة.",
@@ -4787,7 +4827,15 @@
     "Earning and spending are not enabled for this account. Your balance is preserved.": "كسب النقاط واستخدامها غير مفعّلين لهذا الحساب بعد. يبقى رصيدك محفوظًا.",
     "Loading balance…": "جارٍ تحميل الرصيد…",
     "Could not refresh your balance.": "تعذّر تحديث رصيدك.",
-    "Last known balance": "آخر رصيد معروف"
+    "Last known balance": "آخر رصيد معروف",
+    "LazyingArt account": "حساب LazyingArt",
+    "Continue with LazyingArt": "المتابعة باستخدام LazyingArt",
+    "Connect LazyingArt": "ربط LazyingArt",
+    "Disconnect LazyingArt": "إلغاء ربط LazyingArt",
+    "Account connected": "تم ربط الحساب",
+    "Could not load account connection.": "تعذر تحميل حالة ربط الحساب.",
+    "Connect the same account across LazyingArt apps. Your papers, chats and purchases stay in OnlyIdeas.": "اربط الحساب نفسه عبر تطبيقات LazyingArt. تبقى أوراقك ومحادثاتك ومشترياتك في OnlyIdeas.",
+    "Sign in again to connect your LazyingArt account.": "سجّل الدخول مجددًا لربط حساب LazyingArt."
   },
   "fr": {
     ". Public comments are reviewed.": ". Les commentaires publics sont examinés.",
@@ -5586,7 +5634,15 @@
     "Earning and spending are not enabled for this account. Your balance is preserved.": "Le gain et l’utilisation des crédits ne sont pas activés pour ce compte. Le solde est conservé.",
     "Loading balance…": "Chargement du solde…",
     "Could not refresh your balance.": "Impossible d’actualiser le solde.",
-    "Last known balance": "Dernier solde connu"
+    "Last known balance": "Dernier solde connu",
+    "LazyingArt account": "Compte LazyingArt",
+    "Continue with LazyingArt": "Continuer avec LazyingArt",
+    "Connect LazyingArt": "Connecter LazyingArt",
+    "Disconnect LazyingArt": "Déconnecter LazyingArt",
+    "Account connected": "Compte connecté",
+    "Could not load account connection.": "Impossible de charger la connexion du compte.",
+    "Connect the same account across LazyingArt apps. Your papers, chats and purchases stay in OnlyIdeas.": "Connectez le même compte dans les applications LazyingArt. Vos articles, discussions et achats restent dans OnlyIdeas.",
+    "Sign in again to connect your LazyingArt account.": "Reconnectez-vous pour associer votre compte LazyingArt."
   },
   "de": {
     ". Public comments are reviewed.": "Öffentliche Kommentare werden geprüft.",
@@ -6385,7 +6441,15 @@
     "Earning and spending are not enabled for this account. Your balance is preserved.": "Sammeln und Einlösen sind für dieses Konto noch nicht aktiviert. Das Guthaben bleibt erhalten.",
     "Loading balance…": "Guthaben wird geladen…",
     "Could not refresh your balance.": "Das Guthaben konnte nicht aktualisiert werden.",
-    "Last known balance": "Zuletzt bekanntes Guthaben"
+    "Last known balance": "Zuletzt bekanntes Guthaben",
+    "LazyingArt account": "LazyingArt-Konto",
+    "Continue with LazyingArt": "Mit LazyingArt fortfahren",
+    "Connect LazyingArt": "LazyingArt verknüpfen",
+    "Disconnect LazyingArt": "LazyingArt trennen",
+    "Account connected": "Konto verknüpft",
+    "Could not load account connection.": "Kontoverbindung konnte nicht geladen werden.",
+    "Connect the same account across LazyingArt apps. Your papers, chats and purchases stay in OnlyIdeas.": "Verknüpfe dasselbe Konto in den LazyingArt-Apps. Deine Artikel, Chats und Käufe bleiben in OnlyIdeas.",
+    "Sign in again to connect your LazyingArt account.": "Melde dich erneut an, um dein LazyingArt-Konto zu verknüpfen."
   },
   "es": {
     ". Public comments are reviewed.": "Los comentarios públicos se revisan.",
@@ -7184,7 +7248,15 @@
     "Earning and spending are not enabled for this account. Your balance is preserved.": "La obtención y el uso de créditos no están habilitados para esta cuenta. Se conserva tu saldo.",
     "Loading balance…": "Cargando saldo…",
     "Could not refresh your balance.": "No se pudo actualizar el saldo.",
-    "Last known balance": "Último saldo conocido"
+    "Last known balance": "Último saldo conocido",
+    "LazyingArt account": "Cuenta de LazyingArt",
+    "Continue with LazyingArt": "Continuar con LazyingArt",
+    "Connect LazyingArt": "Conectar LazyingArt",
+    "Disconnect LazyingArt": "Desconectar LazyingArt",
+    "Account connected": "Cuenta conectada",
+    "Could not load account connection.": "No se pudo cargar la conexión de la cuenta.",
+    "Connect the same account across LazyingArt apps. Your papers, chats and purchases stay in OnlyIdeas.": "Conecta la misma cuenta en las apps de LazyingArt. Tus artículos, chats y compras permanecen en OnlyIdeas.",
+    "Sign in again to connect your LazyingArt account.": "Vuelve a iniciar sesión para conectar tu cuenta de LazyingArt."
   },
   "ru": {
     ". Public comments are reviewed.": "Публичные комментарии проходят проверку.",
@@ -7983,7 +8055,15 @@
     "Earning and spending are not enabled for this account. Your balance is preserved.": "Начисление и использование баллов для этого аккаунта пока не включены. Баланс сохранён.",
     "Loading balance…": "Загрузка баланса…",
     "Could not refresh your balance.": "Не удалось обновить баланс.",
-    "Last known balance": "Последний известный баланс"
+    "Last known balance": "Последний известный баланс",
+    "LazyingArt account": "Аккаунт LazyingArt",
+    "Continue with LazyingArt": "Продолжить с LazyingArt",
+    "Connect LazyingArt": "Подключить LazyingArt",
+    "Disconnect LazyingArt": "Отключить LazyingArt",
+    "Account connected": "Аккаунт подключён",
+    "Could not load account connection.": "Не удалось загрузить состояние подключения.",
+    "Connect the same account across LazyingArt apps. Your papers, chats and purchases stay in OnlyIdeas.": "Подключите один аккаунт в приложениях LazyingArt. Статьи, чаты и покупки останутся в OnlyIdeas.",
+    "Sign in again to connect your LazyingArt account.": "Войдите снова, чтобы подключить аккаунт LazyingArt."
   },
   "vi": {
     ". Public comments are reviewed.": "Bình luận công khai sẽ được kiểm duyệt.",
@@ -8782,6 +8862,14 @@
     "Earning and spending are not enabled for this account. Your balance is preserved.": "Tài khoản này chưa được bật tính năng tích và sử dụng điểm. Số dư vẫn được giữ nguyên.",
     "Loading balance…": "Đang tải số dư…",
     "Could not refresh your balance.": "Không thể cập nhật số dư.",
-    "Last known balance": "Số dư được ghi nhận gần nhất"
+    "Last known balance": "Số dư được ghi nhận gần nhất",
+    "LazyingArt account": "Tài khoản LazyingArt",
+    "Continue with LazyingArt": "Tiếp tục với LazyingArt",
+    "Connect LazyingArt": "Liên kết LazyingArt",
+    "Disconnect LazyingArt": "Ngắt liên kết LazyingArt",
+    "Account connected": "Đã liên kết tài khoản",
+    "Could not load account connection.": "Không thể tải trạng thái liên kết tài khoản.",
+    "Connect the same account across LazyingArt apps. Your papers, chats and purchases stay in OnlyIdeas.": "Liên kết cùng một tài khoản trong các ứng dụng LazyingArt. Bài báo, trò chuyện và giao dịch mua vẫn ở OnlyIdeas.",
+    "Sign in again to connect your LazyingArt account.": "Đăng nhập lại để liên kết tài khoản LazyingArt."
   }
 }

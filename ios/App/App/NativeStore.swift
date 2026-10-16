@@ -119,7 +119,7 @@ struct ReadingJob: Codable, Identifiable {
 struct ReadingCredits: Decodable {
   struct Policy: Decodable { var publication:Int; var rewardPerDay:Int }
   struct Entry: Decodable { var kind:String; var delta:Int; var created:Double }
-  var enabled:Bool; var balance:Int; var held:Int; var maxPDF:Int
+  var enabled:Bool; var earningEnabled:Bool?; var balance:Int; var held:Int; var maxPDF:Int
   var policy:Policy; var history:[Entry]
 }
 struct SubscriptionCatalog: Decodable {
@@ -160,6 +160,8 @@ final class ReadingStore: NSObject, ObservableObject,
   @Published var offline = false
   @Published var signingIn = false
   @Published var showSignIn = false
+  @Published var sharedLoginEnabled = false
+  @Published var sharedLinked = false
   @Published var showReport = false
   @Published var sharedImports = true
   @Published var credits:ReadingCredits?
@@ -376,6 +378,7 @@ final class ReadingStore: NSObject, ObservableObject,
     do {
       let session = try await json("/api/session")
       guard current == token else { return }
+      sharedLoginEnabled=(session["capabilities"] as? [String:Any])?["lazyingart"] as? Bool ?? false
       if let user = session["user"] as? [String: Any] {
         account = try decoded(ReadingAccount.self, user)
         UserDefaults.standard.set(
@@ -389,6 +392,11 @@ final class ReadingStore: NSObject, ObservableObject,
         clearPrivateDownloads()
         UserDefaults.standard.removeObject(forKey: "onlyideas.native.account")
       }
+      if sharedLoginEnabled && account != nil {
+        let state=try? await json("/api/auth/lazyingart/status")
+        guard current == token else {return}
+        sharedLinked=state?["linked"] as? Bool ?? false
+      } else {sharedLinked=false}
       let paperIdentity = token
       let result = try await json("/api/papers")
       guard paperIdentity == token else { return }
@@ -471,7 +479,10 @@ final class ReadingStore: NSObject, ObservableObject,
     signingIn = false; appleFlow = nil; appleController = nil
     if (error as NSError).code != ASAuthorizationError.canceled.rawValue { self.error = error.localizedDescription }
   }
-  func signInWithGitHub() async {
+  func signInWithGitHub() async {await signInWithBrowser()}
+  func signInWithLazyingArt(link:Bool=false) async {await signInWithBrowser(shared:true,link:link)}
+  func disconnectLazyingArt() async {do{_ = try await json("/api/auth/lazyingart/disconnect",method:"POST",body:[:]);sharedLinked=false}catch{self.error=error.localizedDescription}}
+  private func signInWithBrowser(shared:Bool=false,link:Bool=false) async {
     showSignIn = false
     guard !signingIn else { return }
     signingIn = true
@@ -481,7 +492,7 @@ final class ReadingStore: NSObject, ObservableObject,
       let verifier = Data((0..<32).map { _ in UInt8.random(in: 0...255) }).base64URLEncoded
       let challenge = Data(SHA256.hash(data: Data(verifier.utf8))).base64URLEncoded
       let flow = try await json(
-        "/api/auth/native/start", method: "POST", body: ["challenge": challenge])
+        shared ? "/api/auth/lazyingart/start" : "/api/auth/native/start", method: "POST", body: shared ? ["challenge": challenge,"mode":link ? "link":"login"] : ["challenge":challenge])
       guard let urlText = flow["url"] as? String, let url = URL(string: urlText),
         url.scheme == "https", url.host == "agent.onlyideas.art", let id = flow["flow"] as? String
       else { throw failure(T("Could not start sign-in.")) }

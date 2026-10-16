@@ -30,9 +30,11 @@ import { createBilling } from './billing.mjs';
 import { createAppleAuth } from './apple-auth.mjs';
 import { sourceKey, reusedImport, reusablePaper } from './import-reuse.mjs';
 import { creditTransaction, creditSummary, reserveImport, retryImportCredits, finishImportCredits, seedCreditPublications } from './credits.mjs';
+import { createProfileStore } from './lazyingart-store.mjs';
+import { ProfileLinkError, PROFILE_BINDING } from './lazyingart-profile.mjs';
 const uuid = /^[a-f0-9-]{36}$/;
 const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif', '.woff2': 'font/woff2', '.ttf': 'font/ttf', '.json': 'application/json' };
-export function createApp(store, config, { worker = true, provider = providerJSON, billingOptions = {}, discoveryOptions = {} } = {}) {
+export function createApp(store, config, { worker = true, provider = providerJSON, billingOptions = {}, discoveryOptions = {}, profileOptions = {} } = {}) {
   const origin = config.origin || 'http://127.0.0.1:4182';
   const secure = origin.startsWith('https://');
   requireValue(secure || /^http:\/\/(127\.0\.0\.1|localhost):\d+$/.test(origin), 'Only HTTPS or explicit loopback origins are permitted.');
@@ -45,6 +47,9 @@ export function createApp(store, config, { worker = true, provider = providerJSO
   const social = createPaperSocial(store,discovery);
   const space=createReadingSpace(store,social,discovery);
   const apple = createAppleAuth(store, config, provider);
+  const profile = createProfileStore(store,config.lazyingart,profileOptions);
+  if(profile.enabled)requireValue(origin===new URL(PROFILE_BINDING.redirectUri).origin,'Shared login requires its registered HTTPS origin.');
+  const revokeTimer=worker&&profile.flushRevocations?setInterval(()=>void profile.flushRevocations(),30_000):null;revokeTimer?.unref();
   const billing = createBilling(store,config,billingOptions);
   const reviews = createPublicationReview(store,config);
   const limits = new Map();
@@ -128,8 +133,42 @@ export function createApp(store, config, { worker = true, provider = providerJSO
       const token = native ? String(req.headers.authorization || '').match(/^Bearer ([a-f0-9-]{72})$/)?.[1] : nativeOrigin ? null : cookies[cookieName];
       const user = store.session(token);
       req.onlyideasUser = user;
+      if(user?.provider==='lazyingart'&&path.startsWith('/api/')&&!['/api/auth/logout','/api/auth/lazyingart/disconnect'].includes(path)){
+        requireValue(profile.authorizeSession,'Please sign in again.',401);
+        try{await profile.authorizeSession(user.id,{fresh:!['GET','HEAD'].includes(method)})}
+        catch(e){if(e.code==='issuer_unavailable')throw new AppError('Account service is temporarily unavailable. Please try again.',503);throw new AppError('Please reconnect your LazyingArt account.',401)}
+        requireValue(store.db.prepare('SELECT 1 FROM sessions WHERE id=? AND expires>?').get(hash(token),Date.now()),'Please sign in again.',401);
+      }
       if (user && !native) res.setHeader('Set-Cookie', cookie(cookieName, token, 90 * 86400));
       const requireUser = () => { requireValue(user, 'Sign in to save papers and join the conversation.', 401); return user; };
+      if(path==='/api/auth/lazyingart/status'&&method==='GET'){requireUser();return response(res,profile.status?.(user.id)||{enabled:false,linked:false,state:'unavailable'})}
+      if(path==='/api/auth/lazyingart/start'&&method==='POST'){
+        requireValue(profile.enabled,'Shared sign-in is not available yet.',503);limit(`shared-login:${req.socket.remoteAddress}`,10);
+        const body=await json(req);requireValue(body.mode==='login'||body.mode==='link','Choose sign-in or account linking.');
+        if(body.mode==='link')requireUser();
+        const flow=native?startNative(store,body.challenge,origin).flow:null;
+        const ticket=randomBytes(32).toString('base64url');
+        const context={flow,...(body.mode==='link'?{owner:user.id,sessionHash:hash(token),authenticatedAt:user.authenticatedAt}:{} )};
+        store.db.prepare('INSERT INTO oauth VALUES(?,?,?)').run('profile-ticket:'+hash(ticket),JSON.stringify(context),Date.now()+600_000);
+        return response(res,{flow,url:origin+'/api/auth/lazyingart?ticket='+ticket});
+      }
+      if(path==='/api/auth/lazyingart'&&method==='GET'){
+        requireValue(profile.enabled,'Shared sign-in is not available yet.',503);limit(`shared-browser:${req.socket.remoteAddress}`,10);
+        const ticket='profile-ticket:'+hash(url.searchParams.get('ticket')||'');
+        const row=store.db.prepare('SELECT body FROM oauth WHERE id=? AND expires>?').get(ticket,Date.now());requireValue(row,'Sign-in expired. Please try again.',400);
+        store.db.prepare('DELETE FROM oauth WHERE id=?').run(ticket);
+        const binder=randomBytes(32).toString('base64url');
+        const result=await profile.begin({binding:binder,...JSON.parse(row.body)});
+        res.setHeader('Set-Cookie',cookie(`${cookieName}-profile`,binder,600));res.writeHead(303,{Location:result.authorizationUrl});return res.end();
+      }
+      if(path==='/api/auth/lazyingart/callback'&&method==='GET'){
+        requireValue(profile.enabled,'Shared sign-in is not available yet.',503);
+        const result=await profile.complete({callbackUrl:url.href,binding:cookies[`${cookieName}-profile`]});
+        res.setHeader('Set-Cookie',cookie(`${cookieName}-profile`,'',0));
+        if(result.flow){finishNative(store,result.flow,result.user);res.writeHead(200,{'Content-Type':'text/html; charset=utf-8'});return res.end(`<!doctype html><html lang="en"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Signed in · OnlyIdeas</title><body><h1>Account connected</h1><p>Return to OnlyIdeas to keep reading.</p><a href="art.onlyideas.app://oauth/complete?flow=${result.flow}">Open OnlyIdeas</a></body></html>`)}
+        res.setHeader('Set-Cookie',[cookie(cookieName,store.createSession(result.user),90*86400),cookie(`${cookieName}-profile`,'',0)]);res.writeHead(303,{Location:'/'});return res.end();
+      }
+      if(path==='/api/auth/lazyingart/disconnect'&&method==='POST'){requireUser();profile.disconnect?.(user.id);return response(res,{ok:true})}
       if (path === '/api/attachments' && method === 'POST') {
         requireUser();limit(`attachment:${user.id}`,10);
         const name=decodeURIComponent(req.headers['x-file-name']||'file');
@@ -210,7 +249,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         requireValue(native, 'Open sign-in from the app.', 403);
         const b = await json(req); return response(res, redeemNative(store, b.flow, b.verifier));
       }
-      if (path === '/api/session' && method === 'GET') return response(res, { user, development: !!config.development, capabilities: { login: !!config.github?.clientId, apple: apple.enabled, pdf: !!config.mathpix?.appKey, assistant: !!config.model?.url, publishing: !!(config.github?.contentToken || config.github?.checkout), publicationReview:isReviewer(store,config,user) }, languages, maxPages: config.maxPages || 30 });
+      if (path === '/api/session' && method === 'GET') return response(res, { user, development: !!config.development, capabilities: { login: !!config.github?.clientId, apple: apple.enabled, lazyingart:profile.enabled, pdf: !!config.mathpix?.appKey, assistant: !!config.model?.url, publishing: !!(config.github?.contentToken || config.github?.checkout), publicationReview:isReviewer(store,config,user) }, languages, maxPages: config.maxPages || 30 });
       if (path === '/api/auth/local' && method === 'POST') {
         requireValue(config.development && ['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(req.socket.remoteAddress), 'Not available.', 404);
         const local = { id: 'local-reader', name: 'Local reader', login: 'local-reader' };
@@ -220,6 +259,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         requireUser(); const b = await json(req);
         requireValue(b.confirm === 'DELETE', 'Confirm permanent account deletion.');
         await apple.revoke(user);
+        profile.remove?.(user.id);
         await deleteAccount(store, user);
         if (!native) res.setHeader('Set-Cookie', cookie(cookieName, '', 0));
         return response(res, { ok: true });
@@ -243,6 +283,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
       }
       if (path === '/api/auth/logout' && method === 'POST') {
         store.db.prepare('DELETE FROM sessions WHERE id=?').run(hash(token || ''));
+        if(user)profile.disconnect?.(user.id);
         if (!native) res.setHeader('Set-Cookie', cookie(cookieName, '', 0)); return response(res, { ok: true });
       }
       if (path === '/api/auth/github' && method === 'GET') {
@@ -269,7 +310,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         requireValue(result.access_token, 'GitHub did not complete sign-in. Please try again.', 502);
         const account = await provider('https://api.github.com/user', { headers: { Authorization: `Bearer ${result.access_token}`, Accept: 'application/vnd.github+json' } });
         requireValue(account.id && account.login, 'GitHub account details are unavailable.', 502);
-        const u = { id: store.identity(`github-${account.id}`), name: account.name || account.login, login: account.login };
+        const u = { id: store.identity(`github-${account.id}`), name: account.name || account.login, login: account.login, authenticatedAt:Date.now() };
         if (data.flow) {
           finishNative(store, data.flow, u);
           res.setHeader('Set-Cookie', cookie(`${cookieName}-oauth`, '', 0));
@@ -429,9 +470,9 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         res.writeHead(200, { 'Content-Type': mime[extname(filename)] || 'application/octet-stream', 'Cache-Control': path.startsWith('/assets/') ? 'public, max-age=31536000, immutable' : 'no-cache' }); return res.end(method === 'HEAD' ? undefined : bytes);
       }
       throw new AppError('Not found.', 404);
-    } catch (e) { if (!res.headersSent) response(res, { error: e instanceof AppError ? e.message : 'Something went wrong. Please try again.' }, e instanceof AppError ? e.status : 500); else res.end(); }
+    } catch (e) { if (!res.headersSent) response(res, { error: e instanceof ProfileLinkError ? (e.code==='local_reauthentication_required'?'Sign in again to connect your LazyingArt account.':'Account connection did not finish. Return to OnlyIdeas and try again.') : e instanceof AppError ? e.message : 'Something went wrong. Please try again.' }, e instanceof ProfileLinkError?400:e instanceof AppError ? e.status : 500); else res.end(); }
   });
   server.requestTimeout = 60_000; server.headersTimeout = 15_000;
-  server.on('close', () => {stopWorker();billing.stop();if(agentTimer)clearInterval(agentTimer);});
+  server.on('close', () => {stopWorker();billing.stop();if(agentTimer)clearInterval(agentTimer);if(revokeTimer)clearInterval(revokeTimer);});
   return server;
 }

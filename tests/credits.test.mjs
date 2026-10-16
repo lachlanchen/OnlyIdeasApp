@@ -12,7 +12,7 @@ import { createApp } from '../server/app.mjs';
 import { deleteAccount } from '../server/community.mjs';
 import { createChats } from '../server/chat.mjs';
 import { convertAttachment } from '../server/attachments.mjs';
-import { creditTransaction as tx, creditSummary, reserveImport, finishImportCredits, retryImportCredits, rewardPublication, seedCreditPublications, publicationAliases } from '../server/credits.mjs';
+import { creditTransaction as tx, creditSummary, creditsEnabled, reserveImport, finishImportCredits, retryImportCredits, rewardPublication, seedCreditPublications, publicationAliases } from '../server/credits.mjs';
 const config={credits:{enabled:true},maxPages:30};
 function fixture(t) {
   const dir=mkdtempSync(join(tmpdir(),'onlyideas-credits-')),store=new Store(dir);
@@ -57,6 +57,33 @@ test('shared imports cost no credits; legacy jobs and disabled rollout are not c
   const {store}=fixture(t),shared=job({sharing:'shared'});reserve(store,shared,undefined);finish(store,shared);assert.equal(balance(store),30);
   const legacy=job();finish(store,legacy);assert.equal(balance(store),30);
   const disabled=job();tx(store,()=>reserveImport(store,{},disabled));assert.equal(disabled.credit,undefined);
+});
+test('earning rollout gives every active account its welcome once without expanding charges or quota eligibility',t=>{
+  const {store}=fixture(t), rollout={credits:{enabled:true,accounts:['pilot'],earningEnabled:true}};
+  const first=creditSummary(store,'ordinary',rollout);
+  assert.equal(first.balance,30);assert.equal(first.enabled,false);assert.equal(first.earningEnabled,true);
+  assert.equal(creditsEnabled(rollout,'ordinary'),false);assert.equal(creditsEnabled(rollout,'pilot'),true);
+  assert.equal(creditSummary(store,'ordinary',rollout).balance,30);
+  const j=job({owner:'ordinary',sharing:'private'});
+  tx(store,()=>reserveImport(store,rollout,j));assert.equal(j.credit,undefined);
+  assert.equal(store.db.prepare('SELECT count(*) AS n FROM credit_holds').get().n,0);
+  assert.equal(creditSummary(store,'ordinary',rollout).balance,30);
+  store.db.prepare('INSERT INTO suspensions VALUES(?,?)').run('suspended',Date.now());
+  assert.throws(()=>creditSummary(store,'suspended',rollout),/no longer/);
+  assert.equal(store.db.prepare('SELECT count(*) AS n FROM credit_ledger WHERE owner=?').get('suspended').n,0);
+});
+test('earning-only accounts receive approved unique publication rewards with no private-import holds',t=>{
+  const {store}=fixture(t), rollout={credits:{earningEnabled:true}};
+  seedCreditPublications(store,rollout);
+  const j=job({owner:'ordinary',sharing:'shared'});
+  tx(store,()=>reserveImport(store,rollout,j));assert.equal(j.credit,undefined);
+  const p=makePaper({id:j.id,owner:j.owner,title:'Unique',mmd:'Unique public research',source:'https://doi.org/10.1234/new',license:'CC-BY-4.0'});
+  p.visibility='public';p.publication={commit:'abc'};store.savePaper(p);
+  const publication={...j,paperId:j.id,kind:'publish',reviewed:true};
+  assert.equal(tx(store,()=>rewardPublication(store,publication)),10);
+  assert.equal(tx(store,()=>rewardPublication(store,publication)),0);
+  assert.equal(creditSummary(store,j.owner,rollout).balance,40);
+  assert.equal(creditSummary(store,j.owner,{}).balance,40);
 });
 test('reward follows approved publication, canonical/content aliases prevent rewards across users',t=>{
   const {store}=fixture(t);seedCreditPublications(store,config);

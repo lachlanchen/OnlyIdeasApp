@@ -73,6 +73,18 @@ export async function signIn() {
   await SecureStorage.set(flowKey, JSON.stringify({ ...flow, verifier, expires: Date.now() + 600_000 }), false, false, KeychainAccess.whenUnlockedThisDeviceOnly)
   await Browser.open({ url: flow.url, toolbarColor: '#244f45' })
 }
+export async function sharedSignIn(mode:'login'|'link'='login') {
+  authGeneration++
+  const verifier=random(),digest=new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(verifier)))
+  const challenge=btoa(String.fromCharCode(...digest)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')
+  const response=await request('/api/auth/lazyingart/start',{method:'POST',body:JSON.stringify({mode,...(native?{challenge}:{})})})
+  const flow=await response.json();if(!response.ok)throw new Error(flow.error||'Could not start sign-in.')
+  const url=new URL(flow.url),expected=native?serviceOrigin:location.origin
+  if(url.origin!==expected||url.pathname!=='/api/auth/lazyingart')throw new Error('Invalid sign-in address.')
+  if(!native){location.assign(url.href);return}
+  await SecureStorage.set(flowKey,JSON.stringify({...flow,verifier,expires:Date.now()+600_000}),false,false,KeychainAccess.whenUnlockedThisDeviceOnly)
+  await Browser.open({url:url.href,toolbarColor:'#244f45'})
+}
 export async function openExternal(url: string) {
   if (!/^https?:\/\//i.test(url)) return
   if (native) await Browser.open({ url, toolbarColor: '#244f45' })

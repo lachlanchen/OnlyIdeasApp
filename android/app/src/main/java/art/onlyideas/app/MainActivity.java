@@ -64,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
   private TextView progress;
   private Button sendButton;
   private JSONObject account, document;
+  private boolean sharedLoginEnabled=false,sharedLinked=false;
   private boolean derived = false;
   private String readLanguage="zh-Hans",readingMode="original";
   private JSONObject alignedReading;
@@ -461,7 +462,7 @@ public class MainActivity extends AppCompatActivity {
     return t("Shared papers earn {reward} credits once approved and published. Duplicate papers earn no extra credits. Up to {limit} credits per day.")
       .replace("{reward}",String.valueOf(policy==null?10:policy.optInt("publication")))
       .replace("{limit}",String.valueOf(policy==null?50:policy.optInt("rewardPerDay")))+"\n\n"+
-      t("Private PDFs cost 1 credit per page; other files cost 1 credit. Credits never expire.");
+      (credits.optBoolean("enabled")?t("Private PDFs cost 1 credit per page; other files cost 1 credit. Credits never expire."):"");
   }
   Button sharingButton() {
     Button button=button("◎",false,()->{});button.setContentDescription(t("Sharing & credits"));
@@ -478,7 +479,7 @@ public class MainActivity extends AppCompatActivity {
       caption(options,t("PDF and image recognition uses Mathpix. Word and text files are converted on the server."));
       ScrollView scroll=new ScrollView(this);scroll.addView(options);
       new AlertDialog.Builder(this).setTitle(t("Sharing & credits")).setView(scroll).setPositiveButton(t("Done"),(d,w)->{shareUpload=choices.getCheckedRadioButtonId()==sharedID;button.setText(t(shareUpload?"Shared":"Private"));if(page.equals("agent"))renderMessages();}).setNegativeButton(t("Cancel"),null).show();
-      if(account!=null)job(()->api.json("/api/credits","GET",null),credits->{if(credits.optBoolean("enabled"))rules.setText(creditRules(credits)+"\n");});
+      if(account!=null)job(()->api.json("/api/credits","GET",null),credits->{if(credits.optBoolean("earningEnabled",credits.optBoolean("enabled")))rules.setText(creditRules(credits)+"\n");});
     });button.setText(t(shareUpload?"Shared":"Private"));return button;
   }
   void renderCredits(LinearLayout container,JSONObject credits) {
@@ -487,7 +488,7 @@ public class MainActivity extends AppCompatActivity {
     title(card,String.valueOf(credits.optInt("balance")),36);caption(card,t("OnlyIdeas balance"));
     caption(card,t("Non-transferable app credits. No cash value."));
     if(credits.optInt("held")>0)caption(card,t("Reserved for imports")+": "+credits.optInt("held"));
-    gap(card,12);caption(card,credits.optBoolean("enabled")?creditRules(credits):t("Earning and spending are not enabled for this account. Your balance is preserved."));
+    gap(card,12);caption(card,credits.optBoolean("earningEnabled",credits.optBoolean("enabled"))?creditRules(credits):t("Earning and spending are not enabled for this account. Your balance is preserved."));
     card.addView(button(t("Credit history"),false,()->{
       JSONArray entries=credits.optJSONArray("history");ArrayList<String> lines=new ArrayList<>();
       Map<String,String> labels=Map.of("welcome","Welcome credits","private_import","Private import","unused_reservation","Unused reservation","failed_import","Import refund","public_reward","Public contribution","subscription","Monthly plan credits","purchase_refund","Purchase refund");
@@ -531,6 +532,8 @@ public class MainActivity extends AppCompatActivity {
           JSONObject result = new JSONObject();
           try {
             result.put("session", api.json("/api/session", "GET", null));
+            JSONObject sharedSession=result.getJSONObject("session");
+            if(sharedSession.optJSONObject("capabilities")!=null&&sharedSession.getJSONObject("capabilities").optBoolean("lazyingart")&&sharedSession.optJSONObject("user")!=null)result.put("sharedAccount",api.json("/api/auth/lazyingart/status","GET",null));
             result.put("papers", api.json("/api/papers", "GET", null).getJSONArray("papers"));
           } catch (Exception e) {
             result.put("offline", true);
@@ -546,6 +549,8 @@ public class MainActivity extends AppCompatActivity {
           offline = r.optBoolean("offline");
           JSONObject session = r.optJSONObject("session");
           if (session != null) {
+            sharedLoginEnabled=session.optJSONObject("capabilities")!=null&&session.optJSONObject("capabilities").optBoolean("lazyingart");
+            sharedLinked=r.optJSONObject("sharedAccount")!=null&&r.optJSONObject("sharedAccount").optBoolean("linked");
             JSONObject next = session.optJSONObject("user");
             if (!Objects.equals(account == null ? null : account.optString("id"), next == null ? null : next.optString("id"))) authEpoch++;
             account = next;
@@ -770,6 +775,7 @@ public class MainActivity extends AppCompatActivity {
     gap(c, 14);
     if (account == null) {
       c.addView(button(t("Continue with GitHub"), true, this::signIn));
+      if(sharedLoginEnabled)c.addView(button(t("Continue with LazyingArt"),false,()->signInBrowser(true,false)));
       gap(c, 12);
     }
     c.addView(button("Plans & usage",true,this::showPlans));gap(c,12);
@@ -778,6 +784,9 @@ public class MainActivity extends AppCompatActivity {
       c.addView(button(t("Interests & notifications"),false,this::showReadingPreferences));
       LinearLayout wallet=column();creditContainer=wallet;c.addView(wallet);
       loadCreditSection(wallet);
+      if(sharedLoginEnabled){LinearLayout link=card();title(link,t("LazyingArt account"),20);caption(link,t("Connect the same account across LazyingArt apps. Your papers, chats and purchases stay in OnlyIdeas."));
+      if(sharedLinked){caption(link,t("Account connected"));link.addView(button(t("Disconnect LazyingArt"),false,()->job(()->api.json("/api/auth/lazyingart/disconnect","POST",new JSONObject()),r->{sharedLinked=false;showProfile();})));}
+      else link.addView(button(t("Connect LazyingArt"),false,()->signInBrowser(true,true)));c.addView(link);}
     }
     LinearLayout reading = card();
     title(reading, t("Reading preferences"), 22);
@@ -1217,7 +1226,8 @@ public class MainActivity extends AppCompatActivity {
     });
   }
 
-  void signIn() {
+  void signIn() {signInBrowser(false,false);}
+  void signInBrowser(boolean shared,boolean link) {
     if (busy) return;
     busy = true;
     job(
@@ -1229,7 +1239,7 @@ public class MainActivity extends AppCompatActivity {
                       .digest(verifier.getBytes(StandardCharsets.UTF_8)),
                   Base64.URL_SAFE | Base64.NO_WRAP | Base64.NO_PADDING);
           JSONObject flow =
-              api.json("/api/auth/native/start", "POST", object("challenge", challenge));
+              api.json(shared?"/api/auth/lazyingart/start":"/api/auth/native/start", "POST", shared?object("challenge",challenge).put("mode",link?"link":"login"):object("challenge", challenge));
           flow.put("verifier", verifier);
           flow.put("expires", System.currentTimeMillis() + 600000);
           api.set("onlyideas.native.flow", flow.toString());

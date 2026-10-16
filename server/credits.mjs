@@ -46,23 +46,30 @@ function welcome(store, owner) {
   }
 }
 export const creditsEnabled=(config,owner)=>config.credits?.enabled===true && (!Array.isArray(config.credits.accounts)||config.credits.accounts.includes(owner));
+// Earning can be opened independently of private-import charges and paid quotas.
+// Never remove the spending rollout allowlist merely to repair a zero balance.
+export const creditEarningEnabled=(config,owner)=>config.credits?.earningEnabled===true || creditsEnabled(config,owner);
 export function creditSummary(store, owner, config) {
   const enabled = creditsEnabled(config,owner);
+  const earningEnabled = creditEarningEnabled(config,owner);
   return creditTransaction(store, () => {
-    if (enabled && owner) welcome(store, owner);
+    if (earningEnabled && owner) welcome(store, owner);
     const held = owner ? store.db.prepare("SELECT coalesce(sum(amount),0) AS n FROM credit_holds WHERE owner=? AND state='held'").get(owner).n : 0;
-    return { enabled, policy: creditPolicy, maxPDF: config.maxPages || 30, balance: owner ? balance(store, owner) : 0, held,
+    return { enabled, earningEnabled, policy: creditPolicy, maxPDF: config.maxPages || 30, balance: owner ? balance(store, owner) : 0, held,
       history: owner ? store.db.prepare('SELECT delta,kind,created FROM credit_ledger WHERE owner=? ORDER BY created DESC,rowid DESC LIMIT 40').all(owner) : [] };
   });
 }
 export function reserveImport(store, config, job, limit) {
-  if (!creditsEnabled(config,job.owner) || !['import', 'attachment', 'markdown'].includes(job.kind)) return;
-  welcome(store, job.owner);
+  if (!['import', 'attachment', 'markdown'].includes(job.kind)) return;
+  if (creditEarningEnabled(config,job.owner)) {
+    welcome(store, job.owner);
+    store.db.prepare('INSERT OR IGNORE INTO credit_candidates VALUES(?,?,?)').run(job.id, job.owner, job.sourceDigest || null);
+  }
+  if (!creditsEnabled(config,job.owner)) return;
   const amount = job.sharing === 'shared' ? 0 : (job.kind === 'import' || job.ext === 'pdf' ? job.pages || config.maxPages || 30 : 1);
   if (amount) requireValue(Number.isSafeInteger(limit) && limit >= amount, 'Confirm the private import credit cost in the latest app.', 428);
   job.credit = { version: creditPolicy.version, amount, attempt: 0 };
   hold(store, job);
-  store.db.prepare('INSERT OR IGNORE INTO credit_candidates VALUES(?,?,?)').run(job.id, job.owner, job.sourceDigest || null);
 }
 function hold(store, job) {
   const { amount, attempt } = job.credit, id = `${job.id}:${attempt}`;
@@ -108,7 +115,7 @@ function recordAliases(store, aliases, reward) {
   for (const alias of aliases) store.db.prepare('INSERT OR IGNORE INTO credit_reward_aliases VALUES(?,?)').run(alias, reward);
 }
 export function seedCreditPublications(store, config) {
-  if (config.credits?.enabled !== true) return;
+  if (config.credits?.enabled !== true && config.credits?.earningEnabled !== true) return;
   creditTransaction(store, () => {
     if (store.db.prepare("SELECT 1 FROM credit_meta WHERE name='public_baseline'").get()) return;
     for (const row of store.db.prepare("SELECT body FROM papers WHERE visibility='public'").all()) {

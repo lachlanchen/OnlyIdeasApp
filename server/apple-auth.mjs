@@ -72,7 +72,7 @@ export function createAppleAuth(store, config, provider = providerJSON, fetcher 
       const prior = store.db.prepare('SELECT body FROM apple_tokens WHERE owner=?').get(owner);
       const previous = prior ? unseal(prior.body) : null;
       const name = typeof body.name === 'string' ? body.name.trim().slice(0, 80) : '';
-      const user = { id: owner, name: name || previous?.name || 'Reader', login: 'Apple account', provider: 'apple' };
+      const user = { id: owner, name: name || previous?.name || 'Reader', login: 'Apple account', provider: 'apple', authenticatedAt:Date.now() };
       store.db.prepare('INSERT OR REPLACE INTO apple_tokens VALUES(?,?)').run(owner, seal({ token: result.refresh_token, name: user.name, sub: claims.sub }));
       return { user, token: store.createSession(user) };
     },
