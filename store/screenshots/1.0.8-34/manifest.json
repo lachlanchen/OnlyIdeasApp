@@ -3,7 +3,7 @@
   "build": 34,
   "sourceCommit": "7a26b9d",
   "testCommit": "520a240",
-  "status": "reviewed local draft; not uploaded to production listings",
+  "status": "Selected native captures uploaded and submitted on 2026-10-17; remaining captures are local evidence",
   "content": "Synthetic local reading account and conversation; no private account content",
   "screenshots": [
     {
@@ -12,7 +12,12 @@
       "height": 2868,
       "sha256": "4366c522516404ec4209160efc28c88364db8d171ddbf39f47f74894cb73ff3b",
       "source": "native UI",
-      "reviewed": true
+      "reviewed": true,
+      "storeDelivery": {
+        "platform": "Apple iPhone",
+        "build": 34,
+        "state": "processed and submitted; not yet approved"
+      }
     },
     {
       "file": "iphone-lac-profile.png",
@@ -20,7 +25,12 @@
       "height": 2868,
       "sha256": "05fc49592e15c330b6dcac49cf921753f7adad290ee4cd5d11dcabed8d0a593a",
       "source": "native UI",
-      "reviewed": true
+      "reviewed": true,
+      "storeDelivery": {
+        "platform": "Apple iPhone",
+        "build": 34,
+        "state": "processed and submitted; not yet approved"
+      }
     },
     {
       "file": "android-chat.png",
@@ -28,7 +38,12 @@
       "height": 1920,
       "sha256": "c9c078017f1d41a516003e02937c7bf846dc84f1c41c9d0df16bf160a0ed11e3",
       "source": "native UI",
-      "reviewed": true
+      "reviewed": true,
+      "storeDelivery": {
+        "platform": "Google Play phone",
+        "build": 34,
+        "state": "uploaded and submitted; not yet approved"
+      }
     },
     {
       "file": "web-chat-desktop.png",

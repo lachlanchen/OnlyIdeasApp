@@ -1,0 +1,131 @@
+{
+  "version": "1.0.8",
+  "build": 34,
+  "verifiedAt": "2026-10-16T21:57:22.465Z",
+  "binarySource": "7a26b9dc3e281d640eb2ed913068aec636dc0779",
+  "nativeTestSource": "520a240",
+  "apple": [
+    {
+      "app": "6816392935",
+      "platform": "IOS",
+      "version": "a49e138f-2a9b-42e8-899e-993962b66722",
+      "base": "15a3c5a1-4864-4fd7-b75f-40d2c3793bf4",
+      "build": "4005e205-56d5-4c34-a4fd-c467bbf9e2e4",
+      "buildNumber": "34",
+      "marketing": "1.0.8",
+      "releaseType": "AFTER_APPROVAL",
+      "screenshots": [
+        {
+          "locale": "en-US",
+          "type": "APP_IPAD_PRO_3GEN_129",
+          "count": 3,
+          "files": [
+            "Final10-01-library.png",
+            "Final10-02-agent.png",
+            "Final10-03-profile.png"
+          ],
+          "complete": true
+        },
+        {
+          "locale": "en-US",
+          "type": "APP_IPHONE_67",
+          "count": 5,
+          "files": [
+            "current-iphone-04-reader.png",
+            "current-iphone-01-discovery.png",
+            "current-iphone-02-library.png",
+            "current-1.0.8-34-iphone-chat.png",
+            "current-1.0.8-34-iphone-lac-profile.png"
+          ],
+          "complete": true
+        },
+        {
+          "locale": "en-US",
+          "type": "APP_WATCH_SERIES_10",
+          "count": 2,
+          "files": [
+            "library.png",
+            "reader.png"
+          ],
+          "complete": true
+        }
+      ],
+      "reviewerCredentialsPreserved": true,
+      "reviewId": "8b5c851a-7499-440f-a45e-08bd39f9b103",
+      "reviewState": "WAITING_FOR_REVIEW",
+      "versionState": "WAITING_FOR_REVIEW",
+      "submittedAt": "2026-10-16T21:49:49.633Z",
+      "verifiedAt": "2026-10-16T21:49:52.263321+00:00"
+    },
+    {
+      "app": "6816392935",
+      "platform": "MAC_OS",
+      "version": "4f9d8b9a-235c-428f-a646-3eed856bb036",
+      "base": "7acb6fb1-c66b-47e7-8add-dcd42180bf29",
+      "build": "e974a08d-c4cf-42df-ac5d-176636efad3a",
+      "buildNumber": "34",
+      "marketing": "1.0.8",
+      "releaseType": "AFTER_APPROVAL",
+      "screenshots": [
+        {
+          "locale": "en-US",
+          "type": "APP_DESKTOP",
+          "count": 3,
+          "files": [
+            "current-macos-01-reader.png",
+            "current-macos-02-equations.png",
+            "current-macos-03-interlaced.png"
+          ],
+          "complete": true
+        }
+      ],
+      "reviewerCredentialsPreserved": true,
+      "reviewId": "d56a68ed-eaa3-4d6b-9ef1-86000080bac4",
+      "reviewState": "WAITING_FOR_REVIEW",
+      "versionState": "WAITING_FOR_REVIEW",
+      "submittedAt": "2026-10-16T21:50:07.417Z",
+      "verifiedAt": "2026-10-16T21:50:10.821019+00:00"
+    }
+  ],
+  "google": {
+    "package": "art.onlyideas.app",
+    "versionCode": 34,
+    "state": "Changes in review",
+    "quickChecks": "Completed; no running-check banner or unsent changes at final readback",
+    "changesSubmitted": 4,
+    "rolloutPercent": 100,
+    "managedPublishing": false,
+    "countries": 178,
+    "zeroNewDeviceExclusions": true,
+    "verifiedAt": "2026-10-16T21:57:22.465Z",
+    "unsentChanges": false
+  },
+  "qualification": {
+    "reusedQualifiedBuild": 34,
+    "binaryAutomatedTests": 227,
+    "currentSourceTests": 302,
+    "liveAnonymousPapers": 3,
+    "newPhysicalDeviceOrPurchaseTest": false
+  },
+  "screenshots": {
+    "iphone": {
+      "count": 5,
+      "newBuild34Captures": [
+        "iphone-chat.png",
+        "iphone-lac-profile.png"
+      ],
+      "otherCaptures": "previously qualified reading/library/discovery"
+    },
+    "mac": {
+      "count": 3,
+      "source": "previously qualified unchanged reader captures"
+    },
+    "ipadAndWatch": "inherited approved sets; processed state verified, no recapture",
+    "googlePhone": {
+      "count": 6,
+      "newBuild34Capture": "android-chat.png",
+      "oldAgentReplaced": true
+    }
+  },
+  "notIncluded": "Staged optional shared-account and cross-app earned-points work; no billing/reward activation"
+}

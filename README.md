@@ -8,6 +8,14 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
+## Update in review · 2026-10-17
+
+OnlyIdeas 1.0.8 (34) is submitted for iOS/Watch, Mac and Google Play review.
+It adds clearer chat, native text selection and Copy, and a more reliable
+app-credit balance panel. Version 1.0.7 (32) remains public during review.
+
+[Submission and verification](docs/latest-review-20261017.md)
+
 ## Public distribution · 2026-10-14
 
 iOS/Watch 1.0.7 (32) is public. Google Play 1.0.7 (32) is public. Mac 1.0.7 (32) is now public too.
