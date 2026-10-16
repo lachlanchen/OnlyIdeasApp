@@ -30,11 +30,12 @@ import { createBilling } from './billing.mjs';
 import { createAppleAuth } from './apple-auth.mjs';
 import { sourceKey, reusedImport, reusablePaper } from './import-reuse.mjs';
 import { creditTransaction, creditSummary, reserveImport, retryImportCredits, finishImportCredits, seedCreditPublications } from './credits.mjs';
+import {createLacBalance,LacReadError} from './lac-balance.mjs';
 import { createProfileStore } from './lazyingart-store.mjs';
 import { ProfileLinkError, PROFILE_BINDING } from './lazyingart-profile.mjs';
 const uuid = /^[a-f0-9-]{36}$/;
 const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif', '.woff2': 'font/woff2', '.ttf': 'font/ttf', '.json': 'application/json' };
-export function createApp(store, config, { worker = true, provider = providerJSON, billingOptions = {}, discoveryOptions = {}, profileOptions = {} } = {}) {
+export function createApp(store, config, { worker = true, provider = providerJSON, billingOptions = {}, discoveryOptions = {}, profileOptions = {}, pointsProvider } = {}) {
   const origin = config.origin || 'http://127.0.0.1:4182';
   const secure = origin.startsWith('https://');
   requireValue(secure || /^http:\/\/(127\.0\.0\.1|localhost):\d+$/.test(origin), 'Only HTTPS or explicit loopback origins are permitted.');
@@ -50,6 +51,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
   const profile = createProfileStore(store,config.lazyingart,profileOptions);
   if(profile.enabled)requireValue(origin===new URL(PROFILE_BINDING.redirectUri).origin,'Shared login requires its registered HTTPS origin.');
   const revokeTimer=worker&&profile.flushRevocations?setInterval(()=>void profile.flushRevocations(),30_000):null;revokeTimer?.unref();
+  const lacBalance=createLacBalance(store.db,config.lacPoints,{binding:PROFILE_BINDING,profile,provider:pointsProvider});
   const billing = createBilling(store,config,billingOptions);
   const reviews = createPublicationReview(store,config);
   const limits = new Map();
@@ -141,6 +143,11 @@ export function createApp(store, config, { worker = true, provider = providerJSO
       }
       if (user && !native) res.setHeader('Set-Cookie', cookie(cookieName, token, 90 * 86400));
       const requireUser = () => { requireValue(user, 'Sign in to save papers and join the conversation.', 401); return user; };
+      if(path==='/api/lac/balance'&&method==='GET'){
+        requireUser();requireValue(lacBalance.enabled,'Shared LAC balance is not available yet.',503);
+        try{const result=await lacBalance.read(user.id);requireValue(store.session(token)?.id===user.id,'Please sign in again.',401);return response(res,result)}
+        catch(e){if(e instanceof AppError)throw e;return response(res,{state:e.code==='points_consent_required'?'consent-required':e.code==='points_link_required'?'link-required':'unavailable'},e instanceof LacReadError&&['points_consent_required','points_link_required'].includes(e.code)?403:503)}
+      }
       if(path==='/api/auth/lazyingart/status'&&method==='GET'){requireUser();return response(res,profile.status?.(user.id)||{enabled:false,linked:false,state:'unavailable'})}
       if(path==='/api/auth/lazyingart/start'&&method==='POST'){
         requireValue(profile.enabled,'Shared sign-in is not available yet.',503);limit(`shared-login:${req.socket.remoteAddress}`,10);
@@ -253,7 +260,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         requireValue(native, 'Open sign-in from the app.', 403);
         const b = await json(req); return response(res, redeemNative(store, b.flow, b.verifier));
       }
-      if (path === '/api/session' && method === 'GET') return response(res, { user, development: !!config.development, capabilities: { login: !!config.github?.clientId, apple: apple.enabled, lazyingart:profile.enabled, pdf: !!config.mathpix?.appKey, assistant: !!config.model?.url, publishing: !!(config.github?.contentToken || config.github?.checkout), publicationReview:isReviewer(store,config,user) }, languages, maxPages: config.maxPages || 30 });
+      if (path === '/api/session' && method === 'GET') return response(res, { user, development: !!config.development, capabilities: { login: !!config.github?.clientId, apple: apple.enabled, lazyingart:profile.enabled, lacPoints:lacBalance.enabled, pdf: !!config.mathpix?.appKey, assistant: !!config.model?.url, publishing: !!(config.github?.contentToken || config.github?.checkout), publicationReview:isReviewer(store,config,user) }, languages, maxPages: config.maxPages || 30 });
       if (path === '/api/auth/local' && method === 'POST') {
         requireValue(config.development && ['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(req.socket.remoteAddress), 'Not available.', 404);
         const local = { id: 'local-reader', name: 'Local reader', login: 'local-reader' };

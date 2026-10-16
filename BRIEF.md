@@ -2,6 +2,10 @@
 
 ## Daily and shared LAC rewards · 2026-10-16
 
+The first coordinated rollout is explicit linking and a consent-backed read-only
+canonical balance. It activates no reward policy. Missing issuer, SDK, callback or
+native capabilities stay disabled; existing accounts and releases remain intact.
+
 The owner requests daily bonuses, usage and public-paper rewards accumulated
 across opted-in LazyingArt apps through explicit shared account linking. Preserve
 existing app usage credits, purchased balances, subscriptions and on-chain LAC.

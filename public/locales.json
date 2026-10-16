@@ -803,7 +803,16 @@
     "Sign in again to connect your LazyingArt account.": "Sign in again to connect your LazyingArt account.",
     "Checking account connection…": "Checking account connection…",
     "Updating account connection…": "Updating account connection…",
-    "Reconnect LazyingArt": "Reconnect LazyingArt"
+    "Reconnect LazyingArt": "Reconnect LazyingArt",
+    "Shared LAC points": "Shared LAC points",
+    "Recognition points across linked LazyingArt apps. Separate from app credits and purchases.": "Recognition points across linked LazyingArt apps. Separate from app credits and purchases.",
+    "Loading shared points…": "Loading shared points…",
+    "Pending recognition": "Pending recognition",
+    "Non-transferable. No cash value, purchases or redemption.": "Non-transferable. No cash value, purchases or redemption.",
+    "Connect your LazyingArt account to view shared points.": "Connect your LazyingArt account to view shared points.",
+    "Reading shared points requires separate consent.": "Reading shared points requires separate consent.",
+    "Shared points are temporarily unavailable.": "Shared points are temporarily unavailable.",
+    "Refresh shared points": "Refresh shared points"
   },
   "zh-Hans": {
     "Choose a valid PDF.": "请选择有效的 PDF。",
@@ -1613,7 +1622,16 @@
     "Sign in again to connect your LazyingArt account.": "请重新登录，以关联 LazyingArt 账户。",
     "Checking account connection…": "正在检查账号连接…",
     "Updating account connection…": "正在更新账号连接…",
-    "Reconnect LazyingArt": "重新连接 LazyingArt"
+    "Reconnect LazyingArt": "重新连接 LazyingArt",
+    "Shared LAC points": "共享 LAC 积分",
+    "Recognition points across linked LazyingArt apps. Separate from app credits and purchases.": "已关联的 LazyingArt 应用共用的荣誉积分，与应用额度和购买项目分开。",
+    "Loading shared points…": "正在加载共享积分…",
+    "Pending recognition": "待确认积分",
+    "Non-transferable. No cash value, purchases or redemption.": "不可转让，无现金价值，不可购买或兑换。",
+    "Connect your LazyingArt account to view shared points.": "连接 LazyingArt 账号以查看共享积分。",
+    "Reading shared points requires separate consent.": "查看共享积分需要单独授权读取余额。",
+    "Shared points are temporarily unavailable.": "共享积分暂时无法加载。",
+    "Refresh shared points": "刷新共享积分"
   },
   "zh-Hant": {
     ". Public comments are reviewed.": "公開評論會經過審核。",
@@ -2423,7 +2441,16 @@
     "Sign in again to connect your LazyingArt account.": "請重新登入，以連結 LazyingArt 帳戶。",
     "Checking account connection…": "正在檢查帳號連線…",
     "Updating account connection…": "正在更新帳號連線…",
-    "Reconnect LazyingArt": "重新連接 LazyingArt"
+    "Reconnect LazyingArt": "重新連接 LazyingArt",
+    "Shared LAC points": "共享 LAC 積分",
+    "Recognition points across linked LazyingArt apps. Separate from app credits and purchases.": "已連結的 LazyingArt 應用共用的榮譽積分，與應用額度和購買項目分開。",
+    "Loading shared points…": "正在載入共享積分…",
+    "Pending recognition": "待確認積分",
+    "Non-transferable. No cash value, purchases or redemption.": "不可轉讓，無現金價值，不可購買或兌換。",
+    "Connect your LazyingArt account to view shared points.": "連接 LazyingArt 帳號以查看共享積分。",
+    "Reading shared points requires separate consent.": "查看共享積分需要另行授權讀取餘額。",
+    "Shared points are temporarily unavailable.": "共享積分暫時無法載入。",
+    "Refresh shared points": "重新整理共享積分"
   },
   "ja": {
     ". Public comments are reviewed.": "公開コメントは審査されます。",
@@ -3233,7 +3260,16 @@
     "Sign in again to connect your LazyingArt account.": "LazyingArt アカウントを連携するには、もう一度ログインしてください。",
     "Checking account connection…": "アカウントの接続を確認中…",
     "Updating account connection…": "アカウントの接続を更新中…",
-    "Reconnect LazyingArt": "LazyingArt に再接続"
+    "Reconnect LazyingArt": "LazyingArt に再接続",
+    "Shared LAC points": "共通 LAC ポイント",
+    "Recognition points across linked LazyingArt apps. Separate from app credits and purchases.": "連携した LazyingArt アプリで共通の貢献ポイントです。アプリ内クレジットや購入とは別に管理されます。",
+    "Loading shared points…": "共通ポイントを読み込み中…",
+    "Pending recognition": "確認待ちポイント",
+    "Non-transferable. No cash value, purchases or redemption.": "譲渡・購入・交換はできません。金銭的価値はありません。",
+    "Connect your LazyingArt account to view shared points.": "共通ポイントを見るには LazyingArt アカウントを連携してください。",
+    "Reading shared points requires separate consent.": "共通ポイントの残高を読むには、別途許可が必要です。",
+    "Shared points are temporarily unavailable.": "共通ポイントを一時的に読み込めません。",
+    "Refresh shared points": "共通ポイントを更新"
   },
   "ko": {
     ". Public comments are reviewed.": "공개 댓글은 검토됩니다.",
@@ -4043,7 +4079,16 @@
     "Sign in again to connect your LazyingArt account.": "LazyingArt 계정을 연결하려면 다시 로그인하세요.",
     "Checking account connection…": "계정 연결 확인 중…",
     "Updating account connection…": "계정 연결 갱신 중…",
-    "Reconnect LazyingArt": "LazyingArt 다시 연결"
+    "Reconnect LazyingArt": "LazyingArt 다시 연결",
+    "Shared LAC points": "공유 LAC 포인트",
+    "Recognition points across linked LazyingArt apps. Separate from app credits and purchases.": "연결한 LazyingArt 앱에서 공유하는 활동 포인트입니다. 앱 크레딧과 구매 내역은 별도입니다.",
+    "Loading shared points…": "공유 포인트 불러오는 중…",
+    "Pending recognition": "확인 대기 포인트",
+    "Non-transferable. No cash value, purchases or redemption.": "양도, 구매, 교환이 불가능하며 현금 가치가 없습니다.",
+    "Connect your LazyingArt account to view shared points.": "공유 포인트를 보려면 LazyingArt 계정을 연결하세요.",
+    "Reading shared points requires separate consent.": "공유 포인트 잔액 조회에는 별도 동의가 필요합니다.",
+    "Shared points are temporarily unavailable.": "공유 포인트를 잠시 불러올 수 없습니다.",
+    "Refresh shared points": "공유 포인트 새로고침"
   },
   "ar": {
     ". Public comments are reviewed.": "التعليقات العامة تخضع للمراجعة.",
@@ -4853,7 +4898,16 @@
     "Sign in again to connect your LazyingArt account.": "سجّل الدخول مجددًا لربط حساب LazyingArt.",
     "Checking account connection…": "جارٍ التحقق من اتصال الحساب…",
     "Updating account connection…": "جارٍ تحديث اتصال الحساب…",
-    "Reconnect LazyingArt": "إعادة الاتصال بـ LazyingArt"
+    "Reconnect LazyingArt": "إعادة الاتصال بـ LazyingArt",
+    "Shared LAC points": "نقاط LAC المشتركة",
+    "Recognition points across linked LazyingArt apps. Separate from app credits and purchases.": "نقاط تقدير مشتركة عبر تطبيقات LazyingArt المرتبطة، منفصلة عن أرصدة التطبيقات والمشتريات.",
+    "Loading shared points…": "جارٍ تحميل النقاط المشتركة…",
+    "Pending recognition": "نقاط قيد التأكيد",
+    "Non-transferable. No cash value, purchases or redemption.": "غير قابلة للتحويل أو الشراء أو الاستبدال، وليس لها قيمة نقدية.",
+    "Connect your LazyingArt account to view shared points.": "اربط حساب LazyingArt لعرض النقاط المشتركة.",
+    "Reading shared points requires separate consent.": "تتطلب قراءة رصيد النقاط المشتركة موافقة منفصلة.",
+    "Shared points are temporarily unavailable.": "النقاط المشتركة غير متاحة مؤقتًا.",
+    "Refresh shared points": "تحديث النقاط المشتركة"
   },
   "fr": {
     ". Public comments are reviewed.": ". Les commentaires publics sont examinés.",
@@ -5663,7 +5717,16 @@
     "Sign in again to connect your LazyingArt account.": "Reconnectez-vous pour associer votre compte LazyingArt.",
     "Checking account connection…": "Vérification de la connexion du compte…",
     "Updating account connection…": "Actualisation de la connexion du compte…",
-    "Reconnect LazyingArt": "Reconnecter LazyingArt"
+    "Reconnect LazyingArt": "Reconnecter LazyingArt",
+    "Shared LAC points": "Points LAC partagés",
+    "Recognition points across linked LazyingArt apps. Separate from app credits and purchases.": "Des points de reconnaissance communs aux apps LazyingArt liées, distincts des crédits et achats de chaque app.",
+    "Loading shared points…": "Chargement des points partagés…",
+    "Pending recognition": "Reconnaissance en attente",
+    "Non-transferable. No cash value, purchases or redemption.": "Non transférables, sans valeur monétaire, achat ni échange.",
+    "Connect your LazyingArt account to view shared points.": "Connectez votre compte LazyingArt pour voir les points partagés.",
+    "Reading shared points requires separate consent.": "La consultation du solde partagé nécessite une autorisation distincte.",
+    "Shared points are temporarily unavailable.": "Les points partagés sont temporairement indisponibles.",
+    "Refresh shared points": "Actualiser les points partagés"
   },
   "de": {
     ". Public comments are reviewed.": "Öffentliche Kommentare werden geprüft.",
@@ -6473,7 +6536,16 @@
     "Sign in again to connect your LazyingArt account.": "Melde dich erneut an, um dein LazyingArt-Konto zu verknüpfen.",
     "Checking account connection…": "Kontoverbindung wird geprüft…",
     "Updating account connection…": "Kontoverbindung wird aktualisiert…",
-    "Reconnect LazyingArt": "LazyingArt erneut verbinden"
+    "Reconnect LazyingArt": "LazyingArt erneut verbinden",
+    "Shared LAC points": "Gemeinsame LAC-Punkte",
+    "Recognition points across linked LazyingArt apps. Separate from app credits and purchases.": "Anerkennungspunkte für verknüpfte LazyingArt-Apps, getrennt von App-Guthaben und Käufen.",
+    "Loading shared points…": "Gemeinsame Punkte werden geladen…",
+    "Pending recognition": "Ausstehende Anerkennung",
+    "Non-transferable. No cash value, purchases or redemption.": "Nicht übertragbar, käuflich oder einlösbar. Kein Geldwert.",
+    "Connect your LazyingArt account to view shared points.": "Verbinde dein LazyingArt-Konto, um gemeinsame Punkte anzusehen.",
+    "Reading shared points requires separate consent.": "Das Lesen des gemeinsamen Punktestands erfordert eine gesonderte Einwilligung.",
+    "Shared points are temporarily unavailable.": "Gemeinsame Punkte sind vorübergehend nicht verfügbar.",
+    "Refresh shared points": "Gemeinsame Punkte aktualisieren"
   },
   "es": {
     ". Public comments are reviewed.": "Los comentarios públicos se revisan.",
@@ -7283,7 +7355,16 @@
     "Sign in again to connect your LazyingArt account.": "Vuelve a iniciar sesión para conectar tu cuenta de LazyingArt.",
     "Checking account connection…": "Comprobando la conexión de la cuenta…",
     "Updating account connection…": "Actualizando la conexión de la cuenta…",
-    "Reconnect LazyingArt": "Volver a conectar LazyingArt"
+    "Reconnect LazyingArt": "Volver a conectar LazyingArt",
+    "Shared LAC points": "Puntos LAC compartidos",
+    "Recognition points across linked LazyingArt apps. Separate from app credits and purchases.": "Puntos de reconocimiento comunes a las apps LazyingArt vinculadas, separados de los créditos y compras de cada app.",
+    "Loading shared points…": "Cargando puntos compartidos…",
+    "Pending recognition": "Reconocimiento pendiente",
+    "Non-transferable. No cash value, purchases or redemption.": "No transferibles. Sin valor monetario, compra ni canje.",
+    "Connect your LazyingArt account to view shared points.": "Conecta tu cuenta LazyingArt para ver los puntos compartidos.",
+    "Reading shared points requires separate consent.": "Consultar el saldo compartido requiere un permiso independiente.",
+    "Shared points are temporarily unavailable.": "Los puntos compartidos no están disponibles temporalmente.",
+    "Refresh shared points": "Actualizar puntos compartidos"
   },
   "ru": {
     ". Public comments are reviewed.": "Публичные комментарии проходят проверку.",
@@ -8093,7 +8174,16 @@
     "Sign in again to connect your LazyingArt account.": "Войдите снова, чтобы подключить аккаунт LazyingArt.",
     "Checking account connection…": "Проверка подключения аккаунта…",
     "Updating account connection…": "Обновление подключения аккаунта…",
-    "Reconnect LazyingArt": "Подключить LazyingArt заново"
+    "Reconnect LazyingArt": "Подключить LazyingArt заново",
+    "Shared LAC points": "Общие баллы LAC",
+    "Recognition points across linked LazyingArt apps. Separate from app credits and purchases.": "Баллы признания в связанных приложениях LazyingArt, отдельно от кредитов и покупок каждого приложения.",
+    "Loading shared points…": "Загрузка общих баллов…",
+    "Pending recognition": "Ожидает подтверждения",
+    "Non-transferable. No cash value, purchases or redemption.": "Нельзя передавать, покупать или обменивать. Денежной ценности нет.",
+    "Connect your LazyingArt account to view shared points.": "Подключите аккаунт LazyingArt, чтобы видеть общие баллы.",
+    "Reading shared points requires separate consent.": "Для просмотра общего баланса требуется отдельное согласие.",
+    "Shared points are temporarily unavailable.": "Общие баллы временно недоступны.",
+    "Refresh shared points": "Обновить общие баллы"
   },
   "vi": {
     ". Public comments are reviewed.": "Bình luận công khai sẽ được kiểm duyệt.",
@@ -8903,6 +8993,15 @@
     "Sign in again to connect your LazyingArt account.": "Đăng nhập lại để liên kết tài khoản LazyingArt.",
     "Checking account connection…": "Đang kiểm tra kết nối tài khoản…",
     "Updating account connection…": "Đang cập nhật kết nối tài khoản…",
-    "Reconnect LazyingArt": "Kết nối lại LazyingArt"
+    "Reconnect LazyingArt": "Kết nối lại LazyingArt",
+    "Shared LAC points": "Điểm LAC dùng chung",
+    "Recognition points across linked LazyingArt apps. Separate from app credits and purchases.": "Điểm ghi nhận dùng chung giữa các ứng dụng LazyingArt đã liên kết, tách biệt với tín dụng và giao dịch mua trong từng ứng dụng.",
+    "Loading shared points…": "Đang tải điểm dùng chung…",
+    "Pending recognition": "Điểm chờ xác nhận",
+    "Non-transferable. No cash value, purchases or redemption.": "Không thể chuyển nhượng, mua hay đổi và không có giá trị tiền mặt.",
+    "Connect your LazyingArt account to view shared points.": "Liên kết tài khoản LazyingArt để xem điểm dùng chung.",
+    "Reading shared points requires separate consent.": "Cần sự đồng ý riêng để đọc số dư điểm dùng chung.",
+    "Shared points are temporarily unavailable.": "Tạm thời không thể tải điểm dùng chung.",
+    "Refresh shared points": "Làm mới điểm dùng chung"
   }
 }

@@ -1,4 +1,6 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {mkdtempSync,rmSync,readFileSync} from 'node:fs';import {tmpdir} from 'node:os';import {join} from 'node:path';import {Store} from '../server/store.mjs';import {hash} from '../server/domain.mjs';import {createProfileStore} from '../server/lazyingart-store.mjs';import {PROFILE_BINDING as B} from '../server/lazyingart-profile.mjs';
+import {createHash} from 'node:crypto';
+import {LAC_READ,LAC_ASSET} from '../server/lac-balance.mjs';
 const config={...B,enabled:true,clientSecret:'s'.repeat(64),encryptionKey:'a'.repeat(64)},binding='b'.repeat(43),subject='la_'+'1'.repeat(32);
 function fixture(t){
  const dir=mkdtempSync(join(tmpdir(),'onlyideas-profile-')),store=new Store(dir);t.after(()=>{store.close();rmSync(dir,{recursive:true,force:true})});
@@ -150,4 +152,25 @@ test('rotated credentials survive failed refresh introspection for later revoke'
  await assert.rejects(s.link.proof(user.id));assert.equal(s.link.status(user.id).state,'reauthorize');
  assert.equal(s.store.db.prepare('SELECT count(*) AS n FROM profile_revocations').get().n,1);
  s.hook=null;await s.link.flushRevocations();assert.equal(s.store.db.prepare('SELECT count(*) AS n FROM profile_revocations').get().n,0);
+});
+test('actual points endpoint requires local login, separate consent and the unchanged linked subject',async t=>{
+ const s=fixture(t),{createApp}=await import('../server/app.mjs');
+ const user={id:'github-fixture',provider:'github',authenticatedAt:s.time},token=s.store.createSession(user);
+ await s.finish({owner:user.id,sessionHash:hash(token),authenticatedAt:s.time});
+ s.store.db.prepare('INSERT INTO credit_ledger VALUES(?,?,?,?,?,?)').run('preserved',user.id,45,'subscription',null,s.time);
+ let consent=false,calls=0,release,entered;
+ const provider={qualified:true,binding:B,contract:LAC_READ.contract,scope:LAC_READ.scope,origin:LAC_READ.origin,audience:LAC_READ.audience,
+  authorize:async()=>({issuer:B.issuer,subject,actor:B.clientId,sourceAudience:B.audience,scope:consent?LAC_READ.scope:'profile'}),
+  balance:async()=>{calls++;if(entered){entered();await new Promise(r=>release=r)}return{schema_version:1,contract:LAC_READ.contract,as_of:Math.floor(Date.now()/1000),account:{issuer:B.issuer,subject},balance_id:'lac_fun_points_'+createHash('sha256').update(JSON.stringify([B.issuer,subject,LAC_READ.asset])).digest('hex'),revision:'1',asset:LAC_ASSET,ledger:'fun_points',pending_points:'0',awarded_points:'0',reversed_points:'0',counts:{pending:0,awarded:0,reversed:0},spendable:false,aggregation:'canonical_account_snapshot_do_not_sum_across_apps'}}};
+ const app=createApp(s.store,{origin:new URL(B.redirectUri).origin,lazyingart:config,lacPoints:{enabled:true}},{worker:false,profileOptions:s.options,pointsProvider:provider});await new Promise(r=>app.listen(0,'127.0.0.1',r));t.after(()=>new Promise(r=>{app.close(r);app.closeAllConnections()}));
+ const base=`http://127.0.0.1:${app.address().port}`,headers={Cookie:'__Host-onlyideas='+token};
+ assert.equal((await fetch(base+'/api/lac/balance')).status,401);
+ const denied=await fetch(base+'/api/lac/balance',{headers});assert.equal(denied.status,403);assert.equal((await denied.json()).state,'consent-required');assert.equal(calls,0);
+ consent=true;const ok=await fetch(base+'/api/lac/balance',{headers});assert.equal(ok.status,200);assert.equal((await ok.json()).balance,'0');assert.equal(s.store.db.prepare('SELECT sum(delta) n FROM credit_ledger').get().n,45);
+ const started=new Promise(r=>entered=r),pending=fetch(base+'/api/lac/balance',{headers});await started;s.link.disconnect(user.id);release();const late=await pending;assert.equal(late.status,403);assert.equal((await late.json()).state,'link-required');
+});
+test('points configuration alone cannot advertise or expose an unqualified SDK consumer',async t=>{
+ const s=fixture(t),{createApp}=await import('../server/app.mjs'),token=s.store.createSession({id:'github-fixture'});
+ const app=createApp(s.store,{origin:new URL(B.redirectUri).origin,lazyingart:config,lacPoints:{enabled:true}},{worker:false,profileOptions:s.options});await new Promise(r=>app.listen(0,'127.0.0.1',r));t.after(()=>new Promise(r=>{app.close(r);app.closeAllConnections()}));const base=`http://127.0.0.1:${app.address().port}`,headers={Cookie:'__Host-onlyideas='+token};
+ assert.equal((await(await fetch(base+'/api/session',{headers})).json()).capabilities.lacPoints,false);assert.equal((await fetch(base+'/api/lac/balance',{headers})).status,503);
 });

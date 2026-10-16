@@ -1,6 +1,6 @@
 import { request } from './native'
 export type User = { id: string; name: string; login: string }
-export type Session = { user: User | null; development: boolean; capabilities: { login: boolean; lazyingart?:boolean; pdf: boolean; assistant: boolean; publishing: boolean; publicationReview?:boolean }; languages: Record<string, string>; maxPages: number }
+export type Session = { user: User | null; development: boolean; capabilities: { login: boolean; lazyingart?:boolean; lacPoints?:boolean; pdf: boolean; assistant: boolean; publishing: boolean; publicationReview?:boolean }; languages: Record<string, string>; maxPages: number }
 export type Section = { id: string; title: string; text: string }
 export type Paper = { review?:{state:string;message?:string};publication?:{publishedAt:string};sharing?:string;provenance?:{licenseUrl?:string;changes?:string}; discipline?:string; subdiscipline?:string; year?:string; journal?:string; doi?:string; id: string; title: string; authors: string; category: string; language: string; license: string; source: string; visibility: string; revision: string; createdAt: string; mmd?: string; sections?: Section[]; sectionCount?: number; words?: number; sample?: boolean; isOwner?: boolean; assets: { path: string; bytes?: number }[] }
 export type Comment = { id: string; author: string; login: string; text: string; quote: string; sectionId: string | null; paragraphId?:string; createdAt: string; canDelete: boolean; pending?: boolean }

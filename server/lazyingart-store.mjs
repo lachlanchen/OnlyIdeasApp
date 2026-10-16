@@ -126,5 +126,5 @@ export function createProfileStore(store,config,{transport,now=()=>Date.now()}={
   }
   function remove(owner) {transaction(store,()=>{disconnect(owner);db.prepare('DELETE FROM profile_links WHERE owner=?').run(owner)})}
   const status=owner=>{const row=current(owner);return {enabled:adapter.enabled,linked:row?.state==='active',state:row?.state||'unlinked'}};
-  return {enabled:adapter.enabled,begin,complete,proof,authorizeSession,disconnect,remove,flushRevocations,status};
+  return {enabled:adapter.enabled,begin,complete,proof,authorizeSession,disconnect,remove,flushRevocations,status,connection:owner=>{const row=current(owner);return row?{issuer:row.issuer,subject:row.subject,generation:row.generation,state:row.state}:null}};
 }

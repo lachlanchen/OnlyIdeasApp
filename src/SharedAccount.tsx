@@ -38,6 +38,7 @@ export function SharedAccount({notify,signedOut}:{notify:(message:string)=>void;
   try{
    const result=await post<{signedOut:boolean}>('/auth/lazyingart/disconnect',{})
    if(generation!==lifetime.current)return
+   window.dispatchEvent(new Event('lazyingart:connection-changed'))
    if(result.signedOut)await signedOut()
    else setStatus({linked:false,state:'disconnected'})
   }catch(e){if(generation===lifetime.current)notify((e as Error).message)}
