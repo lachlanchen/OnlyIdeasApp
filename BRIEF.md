@@ -1,5 +1,22 @@
 # OnlyIdeas · product contract
 
+## Final reward reconciliation · 2026-10-16
+
+OnlyIdeas accepts Coin's `app-lac-source-final-v1` lifecycle for the future shared
+points rollout: expired pending events close without an award; reversed events
+may seal immediately; awarded events seal no earlier than their policy end plus
+180 days. A sealed decision is immutable and new reversals receive 409; a later
+correction requires a separately reviewed accounting process. Existing accepted
+reversal replays retain their idempotent behavior.
+
+The producer stores the exact final decision and first durable adoption time
+before acknowledging its digest. Evidence retention begins 90 days after the
+later of finalization and first adoption. Pending intake, SDK acknowledgment or
+failed delivery cannot start that timer. Unknown/conflicting evidence remains
+unresolved. Reconciliation after consent withdrawal or deletion never restores
+eligibility or changes app credits. The dispatcher and retention are qualified
+with disposable fixtures; no purge job, reward policy or public canary is enabled.
+
 ## Daily and shared LAC rewards · 2026-10-16
 
 The first coordinated rollout is explicit linking and a consent-backed read-only

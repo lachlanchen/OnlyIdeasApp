@@ -18,8 +18,9 @@ test('eligibility pins the full original event; evidence retention never removes
  const s=fixture(t),a=await s.evidence.checkIn({id:'reader'}),q={issuer:B.issuer,subject:s.identity.subject,actor:B.clientId,policy_id:a.policy_id,policy_version:1,phase:'intake',event:a};
  assert.equal(await s.evidence.eligible(q),true);assert.equal(await s.evidence.eligible({...q,event:{...a,event_id:'different'}}),false);
  assert.equal(await s.evidence.eligible({...q,policy_id:'lac-approved-public-paper'}),false);
- s.time+=91*86400_000;assert.equal(s.evidence.purge(),0);s.evidence.decided(a.evidence_ref,s.identity.subject);assert.equal(s.evidence.purge(),0);
- s.time+=91*86400_000;assert.equal(s.evidence.purge(),1);assert.equal(await s.evidence.eligible(q),false);
+ s.time+=91*86400_000;assert.equal(s.evidence.purge(),0);
+ s.store.db.prepare('UPDATE lac_source_evidence SET decided=?').run(Math.floor(s.time/1000));
+ s.time+=91*86400_000;assert.equal(s.evidence.purge(),0);assert.equal(await s.evidence.eligible(q),true);
 });
 test('suspension while authorization is in flight cannot create activity evidence',async t=>{
  const s=fixture(t);const evidence=createRewardEvidence(s.store,{now:()=>s.time,authorize:async()=>{s.store.db.prepare('INSERT INTO suspensions VALUES(?,?)').run('reader',s.time);return s.identity}});

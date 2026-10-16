@@ -1,4 +1,4 @@
-/** Authenticated Coin-to-app evidence reads. No user token or award endpoint. */
+/** Authenticated Coin-to-app reads and final reconciliation. No award endpoint. */
 import {timingSafeEqual} from 'node:crypto';
 import {AppError,requireValue} from './domain.mjs';
 import {uniqueJSON,PROFILE_BINDING as B} from './lazyingart-profile.mjs';
@@ -14,10 +14,13 @@ export function createRewardSource({secret,evidence,now=()=>Date.now()}){
    requireValue(headers['content-type']==='application/json'&&Buffer.isBuffer(body)&&body.length<=8192,'Invalid source request.');
    let data;try{data=uniqueJSON(body)}catch{throw new AppError('Invalid source request.',400)}
    const common=['schema_version','issuer','subject','actor','nonce'];
-   requireValue(['evidence','eligibility'].includes(operation)&&exact(data,[...common,...(operation==='evidence'?['evidence_ref']:['policy_id','policy_version','phase','event'])]),'Invalid source request.');
+   const extra={evidence:['evidence_ref'],eligibility:['policy_id','policy_version','phase','event'],final:['decision']};
+   requireValue(Object.hasOwn(extra,operation)&&exact(data,[...common,...extra[operation]]),'Invalid source request.');
    requireValue(data.schema_version===1&&data.issuer===B.issuer&&data.actor===B.clientId&&typeof data.subject==='string'&&/^la_[a-f0-9]{32}$/.test(data.subject)&&typeof data.nonce==='string'&&/^[a-f0-9]{48}$/.test(data.nonce),'Invalid source request.');
    let result;
-   if(operation==='evidence'){
+   if(operation==='final'){
+     try{result=await evidence.adoptFinal(data)}catch(e){if(e instanceof AppError&&[400,409].includes(e.status))throw e;throw new AppError('Source temporarily unavailable.',503)}
+   }else if(operation==='evidence'){
      requireValue(id(data.evidence_ref),'Invalid source request.');
      try{result=(await evidence.read({...data,reference:data.evidence_ref,scope:'lac.points.intents.write',signal})).record}
      catch(e){if([401,403,404].includes(e.status))result=null;else throw new AppError('Source temporarily unavailable.',503)}
@@ -26,7 +29,7 @@ export function createRewardSource({secret,evidence,now=()=>Date.now()}){
      const e=data.event;requireValue(e.policy_id===data.policy_id&&e.policy_version===data.policy_version&&id(e.event_id)&&id(e.evidence_ref)&&Number.isSafeInteger(e.occurred_at)&&e.occurred_at>0&&typeof e.evidence_sha256==='string'&&/^[a-f0-9]{64}$/.test(e.evidence_sha256),'Invalid source request.');
      try{result=await evidence.eligible({...data,signal})}catch{throw new AppError('Source temporarily unavailable.',503)}
    }
-   return {schema_version:1,actor:B.clientId,nonce:data.nonce,as_of:Math.floor(now()/1000),[operation==='evidence'?'evidence':'eligible']:result};
+   return {schema_version:1,actor:B.clientId,nonce:data.nonce,as_of:Math.floor(now()/1000),[{evidence:'evidence',eligibility:'eligible',final:'decision_sha256'}[operation]]:result};
  }
  return {authorized,handle};
 }

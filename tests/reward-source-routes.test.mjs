@@ -1,6 +1,7 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {mkdtempSync,rmSync,writeFileSync,chmodSync,symlinkSync} from 'node:fs';import {tmpdir} from 'node:os';import {join} from 'node:path';import {request as httpRequest} from 'node:http';
 import {Store} from '../server/store.mjs';import {createRewardEvidence} from '../server/reward-evidence.mjs';import {createRewardSourceRoutes,readSourceSecret} from '../server/reward-source-routes.mjs';import {PROFILE_BINDING as B} from '../server/lazyingart-profile.mjs';
+import {hash} from '../server/domain.mjs';import {canonicalEvidence} from '../server/reward-evidence.mjs';
 const {createApp}=await import(process.env.ONLYIDEAS_SOURCE_CANDIDATE_APP||'../server/app.mjs');
 const subject='la_'+'1'.repeat(32),secret='s'.repeat(64),origin='https://agent.onlyideas.art';
 const common={schema_version:1,issuer:B.issuer,subject,actor:B.clientId,nonce:'a'.repeat(48)};
@@ -21,7 +22,7 @@ test('real source routes authenticate exact requests, preserve event and return 
  const retry=await s.call('/api/lac/source/v1/evidence',{...s.query,nonce:'b'.repeat(48)});assert.equal(retry.body.nonce,'b'.repeat(48));assert.deepEqual(retry.body.evidence,a.body.evidence);
  for(const headers of [{'X-Lac-Source-Key':''},{'X-Lac-Source-Key':'x'.repeat(64)},{Origin:origin},{Origin:''},{Cookie:''},{Authorization:'Bearer app-token'}])assert.equal((await s.call('/api/lac/source/v1/evidence',s.query,{headers})).status,401);
  assert.equal((await s.call('/api/lac/source/v1/evidence',s.query,{method:'GET'})).status,405);
- for(const path of ['/api/lac/source/v1/evidence?x=1','/api/lac/source/v1/evidence/','/api/lac/source/v1/final','/api/lac/source/v1/unknown'])assert.equal((await s.call(path,s.query)).status,404);
+ for(const path of ['/api/lac/source/v1/evidence?x=1','/api/lac/source/v1/evidence/','/api/lac/source/v1/unknown'])assert.equal((await s.call(path,s.query)).status,404);
  assert.equal((await s.call('/api/lac/source/v1/evidence',s.query,{headers:{Host:'foreign.invalid'}})).status,404);
  for(const data of [{...s.query,actor:'bunko-server'},{...s.query,nonce:'short'},{...s.query,extra:true}])assert.equal((await s.call('/api/lac/source/v1/evidence',data)).status,400);
  assert.equal((await s.call('/api/lac/source/v1/evidence',null,{raw:JSON.stringify(s.query).replace('"schema_version":1','"schema_version":1,"schema_version":1')})).status,400);
@@ -35,6 +36,21 @@ test('original subject, current consent, held/deleted state and outages cannot b
 test('transport can qualify empty reads while absent operation proof fails closed for existing events',async t=>{
  const s=await fixture(t,{qualified:false});assert.equal((await s.call('/api/lac/source/v1/evidence',s.query)).status,503);assert.equal((await s.call('/api/lac/source/v1/eligibility',s.eligibility)).status,503);
  assert.equal((await s.call('/api/lac/source/v1/evidence',{...s.query,evidence_ref:'unknown'})).body.evidence,null);assert.equal((await s.call('/api/lac/source/v1/eligibility',{...s.eligibility,event:{...s.event,evidence_ref:'unknown'}})).body.eligible,false);
+});
+test('real final route durably reconciles without a qualified user proof; ACK retries use the current nonce',async t=>{
+ const s=await fixture(t,{qualified:false});
+ const decision={contract:'app-lac-source-final-v1',decision_id:'final_'+'1'.repeat(32),receipt_id:'coin-receipt',issuer:B.issuer,subject,actor:B.clientId,event:s.event,outcome:'awarded',awarded_points:'5',finalized_at:Math.floor(Date.now()/1000)};
+ const query={...common,decision};s.evidence.hold('reader');s.error=Error('no user consent');
+ const response=await s.call('/api/lac/source/v1/final',query);assert.equal(response.status,200);assert.equal(response.headers['cache-control'],'no-store');assert.equal(response.headers['access-control-allow-origin'],undefined);
+ assert.deepEqual(Object.keys(response.body).sort(),['actor','as_of','decision_sha256','nonce','schema_version']);assert.equal(response.body.decision_sha256,hash(canonicalEvidence(decision)));
+ const first=s.store.db.prepare('SELECT * FROM lac_source_finals').get();assert.equal(first.digest,response.body.decision_sha256);
+ const retry=await s.call('/api/lac/source/v1/final',{...query,nonce:'c'.repeat(48)});assert.equal(retry.status,200);assert.equal(retry.body.nonce,'c'.repeat(48));assert.deepEqual(s.store.db.prepare('SELECT * FROM lac_source_finals').get(),first);
+ assert.equal((await s.call('/api/lac/source/v1/eligibility',s.eligibility)).body.eligible,false);assert.equal(s.store.db.prepare('SELECT count(*) n FROM credit_ledger').get().n,0);
+ for(const headers of [{'X-Lac-Source-Key':''},{Origin:''},{Cookie:''},{Authorization:'Bearer app-token'}])assert.equal((await s.call('/api/lac/source/v1/final',query,{headers})).status,401);
+ assert.equal((await s.call('/api/lac/source/v1/final',{...query,decision:{...decision,awarded_points:'6'}})).status,409);
+ assert.equal((await s.call('/api/lac/source/v1/final',{...query,decision:{...decision,event:{...decision.event,evidence_ref:'unknown'}}})).status,409);
+ assert.equal((await s.call('/api/lac/source/v1/final',query,{method:'GET'})).status,405);
+ assert.equal((await s.call('/api/lac/source/v1/final?alias=1',query)).status,404);
 });
 test('deadline aborts fresh proof and closes the response without leaking a later success',async t=>{
  const s=await fixture(t,{deadlineMs:40});let aborted=false;s.hook=({signal})=>new Promise((_,reject)=>signal.addEventListener('abort',()=>{aborted=true;reject(Error('aborted'))},{once:true}));

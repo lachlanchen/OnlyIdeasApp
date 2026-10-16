@@ -1,4 +1,4 @@
-/** OnlyIdeas-owned Coin evidence reads. No check-in, award or maintenance route. */
+/** OnlyIdeas-owned Coin source/reconciliation routes. No award or maintenance. */
 import {openSync,closeSync,fstatSync,readFileSync,constants} from 'node:fs';
 import {resolve,isAbsolute} from 'node:path';
 import {AppError,requireValue} from './domain.mjs';
@@ -19,7 +19,7 @@ export function readSourceSecret(file){
 }
 export function createRewardSourceRoutes(store,config,{authorization,now=Date.now,deadlineMs=4000}={}){
  const enabled=config.rewardSource?.enabled===true;
- const pathPrefix='/api/lac/source/',paths=new Map(['evidence','eligibility'].map(x=>[pathPrefix+'v1/'+x,x]));
+ const pathPrefix='/api/lac/source/',paths=new Map(['evidence','eligibility','final'].map(x=>[pathPrefix+'v1/'+x,x]));
  let source,proofReady=false,active=0,windowStart=0,requests=0;
  if(enabled){
   requireValue(config.origin===new URL(B.redirectUri).origin,'Reward source requires its registered origin.',503);

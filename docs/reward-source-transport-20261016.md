@@ -52,8 +52,11 @@ independent qualification of the explicit daily action.
 
 The later final-decision protocol still requires atomic decision adoption and
 retention measured from the later of sealing and first durable adoption.
-`/api/lac/source/v1/final` remains unavailable. Intake receipts do not authorize
-purging evidence. No purge or central-deletion retirement runs in OnlyIdeas.
+`/api/lac/source/v1/final` remains unavailable in production. Its staged
+[dispatcher and retention implementation](reward-final-reconciliation-20261016.md)
+now qualifies atomic adoption and lost-response/restart behavior on disposable
+stores. Intake receipts do not authorize purging evidence. No purge or
+central-deletion retirement runs in OnlyIdeas.
 
 ## Verification and deployment scope
 
