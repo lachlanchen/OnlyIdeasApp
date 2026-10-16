@@ -136,7 +136,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
       if(user?.provider==='lazyingart'&&path.startsWith('/api/')&&!['/api/auth/logout','/api/auth/lazyingart/disconnect'].includes(path)){
         requireValue(profile.authorizeSession,'Please sign in again.',401);
         try{await profile.authorizeSession(user.id,{fresh:!['GET','HEAD'].includes(method)})}
-        catch(e){if(e.code==='issuer_unavailable')throw new AppError('Account service is temporarily unavailable. Please try again.',503);throw new AppError('Please reconnect your LazyingArt account.',401)}
+        catch(e){if(['issuer_unavailable','profile_refresh_busy'].includes(e.code))throw new AppError('Account service is temporarily unavailable. Please try again.',503);throw new AppError('Please reconnect your LazyingArt account.',401)}
         requireValue(store.db.prepare('SELECT 1 FROM sessions WHERE id=? AND expires>?').get(hash(token),Date.now()),'Please sign in again.',401);
       }
       if (user && !native) res.setHeader('Set-Cookie', cookie(cookieName, token, 90 * 86400));
@@ -168,7 +168,11 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         if(result.flow){finishNative(store,result.flow,result.user);res.writeHead(200,{'Content-Type':'text/html; charset=utf-8'});return res.end(`<!doctype html><html lang="en"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Signed in · OnlyIdeas</title><body><h1>Account connected</h1><p>Return to OnlyIdeas to keep reading.</p><a href="art.onlyideas.app://oauth/complete?flow=${result.flow}">Open OnlyIdeas</a></body></html>`)}
         res.setHeader('Set-Cookie',[cookie(cookieName,store.createSession(result.user),90*86400),cookie(`${cookieName}-profile`,'',0)]);res.writeHead(303,{Location:'/'});return res.end();
       }
-      if(path==='/api/auth/lazyingart/disconnect'&&method==='POST'){requireUser();profile.disconnect?.(user.id);return response(res,{ok:true})}
+      if(path==='/api/auth/lazyingart/disconnect'&&method==='POST'){
+        requireUser();profile.disconnect?.(user.id);const signedOut=user.provider==='lazyingart';
+        if(signedOut){store.db.prepare('DELETE FROM sessions WHERE id=?').run(hash(token));if(!native)res.setHeader('Set-Cookie',cookie(cookieName,'',0))}
+        return response(res,{ok:true,signedOut});
+      }
       if (path === '/api/attachments' && method === 'POST') {
         requireUser();limit(`attachment:${user.id}`,10);
         const name=decodeURIComponent(req.headers['x-file-name']||'file');

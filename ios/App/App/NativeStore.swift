@@ -481,7 +481,7 @@ final class ReadingStore: NSObject, ObservableObject,
   }
   func signInWithGitHub() async {await signInWithBrowser()}
   func signInWithLazyingArt(link:Bool=false) async {await signInWithBrowser(shared:true,link:link)}
-  func disconnectLazyingArt() async {do{_ = try await json("/api/auth/lazyingart/disconnect",method:"POST",body:[:]);sharedLinked=false}catch{self.error=error.localizedDescription}}
+  func disconnectLazyingArt() async {do{let result = try await json("/api/auth/lazyingart/disconnect",method:"POST",body:[:]);sharedLinked=false;if result["signedOut"] as? Bool == true {await signOut()}}catch{self.error=error.localizedDescription}}
   private func signInWithBrowser(shared:Bool=false,link:Bool=false) async {
     showSignIn = false
     guard !signingIn else { return }

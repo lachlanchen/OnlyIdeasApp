@@ -1,7 +1,7 @@
 /**
  * Protocol adapter for OnlyIdeas' optional LazyingArt profile login.
- * Protocol port of LazyingArtLinkPrivate@309dab92. Not imported by app.mjs.
- * No local account linking, session issuance, Coin or billing permissions here.
+ * Protocol port of LazyingArtLinkPrivate@309dab92, used through the app store.
+ * No Coin or billing permissions here.
  */
 import { request as httpsRequest } from 'node:https';
 import { createHash, randomBytes } from 'node:crypto';
@@ -111,7 +111,7 @@ export async function profileHTTPS(method, url, fields, { request = httpsRequest
   });
 }
 
-export function createProfileAdapter(config = {}, { attempts, transport = profileHTTPS, now = () => Date.now() } = {}) {
+export function createProfileAdapter(config = {}, { attempts, credentials, transport = profileHTTPS, now = () => Date.now() } = {}) {
   const configured = object(config) && Object.entries(PROFILE_BINDING).every(([k, v]) => config[k] === v)
     && typeof config.clientSecret === 'string' && /^[A-Za-z0-9_-]{64}$/.test(config.clientSecret)
     && typeof config.enabled === 'boolean';
@@ -141,6 +141,18 @@ export function createProfileAdapter(config = {}, { attempts, transport = profil
     return { ...d, providers: Object.freeze(Object.fromEntries(['password', 'google', 'apple', 'github'].map(k => [k, d.providers[k]]))) };
   }
   async function ready() { check(enabled, 'shared_login_disabled'); await discovery(); }
+  async function qualify(tokens, expectedSubject) {
+    let credentialId;
+    if(credentials){
+      try{credentialId=await credentials.stage(tokens)}
+      catch{try{await revoke(tokens.refreshToken)}catch{}throw new ProfileLinkError('profile_store_unavailable')}
+    }
+    try{
+      const identity=await introspect(tokens.accessToken,expectedSubject);
+      check(identity!==null,'authorization_rejected');
+      return {tokens,identity,...(credentialId?{credentialId}:{})};
+    }catch(e){if(credentialId)await credentials.failed(credentialId);throw e}
+  }
   function credentialEnvelope(value) {
     check(keys(value, ['access_token', 'refresh_token', 'expires_in', 'token_type', 'scope'])
       && value.scope === 'profile' && value.token_type === 'Bearer'
@@ -229,18 +241,14 @@ export function createProfileAdapter(config = {}, { attempts, transport = profil
     if (query.has('error')) throw new ProfileLinkError('authorization_cancelled');
     const tokens = credentialEnvelope(await post('/account/token', { grant_type: 'authorization_code', code: query.get('code'),
       redirect_uri: redirectUri, code_verifier: record.verifier }));
-    const identity = await introspect(tokens.accessToken);
-    check(identity !== null, 'authorization_rejected');
-    return { attemptId: record.attemptId, tokens, identity };
+    return { attemptId: record.attemptId, ...await qualify(tokens) };
   }
   async function refreshOnce(refreshToken, expectedSubject) {
     check(typeof expectedSubject === 'string' && SUBJECT.test(expectedSubject), 'identity_invalid');
     check(typeof refreshToken === 'string' && /^[A-Za-z0-9_-]{64}$/.test(refreshToken), 'invalid_credential');
     await ready();
     const tokens = credentialEnvelope(await post('/account/token', { grant_type: 'refresh_token', refresh_token: refreshToken }));
-    const identity = await introspect(tokens.accessToken, expectedSubject);
-    check(identity !== null, 'authorization_rejected');
-    return { tokens, identity };
+    return qualify(tokens,expectedSubject);
   }
   async function revoke(token) {
     opaque(token);

@@ -44,12 +44,24 @@ on-chain LAC. Coin's implemented contract is `app-lac-fun-points-v1`, with asset
 qualified reading (up to 5/day), and 10 for approved unique public papers (up to
 50/day). Daily and work eligibility deduplicate across participating apps.
 
-The Coin and issuer owners are implementing the shared ledger, explicit operation
-consent and reusable adapter. No shared points are awarded by this source change.
+Coin and LinkPrivate now implement the shared ledger, explicit operation consent,
+policy validators and reusable points client/outbox. OnlyIdeas has a durable
+daily check-in evidence module and exact authenticated source-read dispatcher.
+They are staged source; no shared points are awarded by this change.
 A qualified evidence source, canonical work registry, finite pilot limits,
 retention/reversal behavior and actual app callback remain activation requirements.
 Pending events and an unavailable service must never appear as earned points or
 as a fabricated zero balance. Purchased credits and subscriptions stay app-local.
+
+The explicit daily action fixes the original subject and server UTC day. Repeated
+clicks retain one immutable event. Held/deleted activity cannot be re-enqueued;
+source verification rejects changed policy, event, digest or identity. Coin's
+source-read key is independent of OAuth and user credentials. Browser cookies,
+extra/duplicate request fields and unknown consent results cannot authorize it.
+
+Source evidence has an explicit bounded 90-day purge after a verified final
+decision. Pending intake does not start that clock. Final-decision delivery,
+backups and actual live transport remain coordinated qualification work.
 
 ## Reusable skill
 
@@ -60,7 +72,7 @@ their own protocol and payment responsibilities.
 
 ## Verification
 
-- 248 Node tests pass, including ordinary-account earning without new charges,
+- The initial complete gate passed 248 Node tests, including ordinary-account earning without new charges,
   durable callbacks, browser-origin/binding checks, independent native PKCE,
   account-link collisions, concurrent refresh, late responses, key mismatch and
   revocation retry.
@@ -73,3 +85,11 @@ their own protocol and payment responsibilities.
   existing spending/billing configuration were preserved.
 - Android Java compile/lint and Mac Catalyst debug compilation pass. No new
   distributed native binary or formal store submission is claimed by this checkpoint.
+- The subsequent complete source gate passed 261 tests; focused additions cover
+  failed post-exchange introspection, durable credential cleanup, concurrent
+  refresh and expired crash recovery. Browser disconnect clears a central-only
+  app session while retaining an independently signed-in local account.
+- An isolated integration run generated evidence with the actual Node producer,
+  accepted it with Coin's Python verifier/store, and validated full intake,
+  award, exact retry, reversal and balance results with LinkPrivate's SDK. It
+  used a disposable database and synthetic identity, with no live award.

@@ -53,7 +53,7 @@ test('refresh has one durable claim across service instances and an uncertain re
  const second=createProfileStore(s.store,config,s.options);let release,entered;const started=new Promise(r=>entered=r);
  s.hook=async(url,body)=>{if(url.endsWith('/token')&&body.grant_type==='refresh_token'){entered();await new Promise(r=>release=r);throw Error('lost response')}};
  const pending=s.link.proof(user.id);await started;
- await assert.rejects(second.proof(user.id),{code:'reconnect_required'});release();await assert.rejects(pending);
+ await assert.rejects(second.proof(user.id),{code:'profile_refresh_busy'});release();await assert.rejects(pending);
  s.link=createProfileStore(s.store,config,s.options);await assert.rejects(s.link.proof(user.id),{code:'reconnect_required'});
  assert.equal(s.requests.filter(r=>r.body?.grant_type==='refresh_token').length,1);
 });
@@ -89,6 +89,20 @@ test('web routes enforce Origin, browser binding and one-use callback before iss
  const session=result.headers.getSetCookie().find(x=>x.startsWith('__Host-onlyideas=')).split(';')[0];
  const user=await (await fetch(base+'/api/session',{headers:{Cookie:session}})).json();assert.equal(user.user.login,'LazyingArt');
  assert.equal(user.capabilities.lazyingart,true);
+ const disconnected=await fetch(base+'/api/auth/lazyingart/disconnect',{method:'POST',headers:{Cookie:session,Origin:origin,'Content-Type':'application/json'},body:'{}'});assert.deepEqual(await disconnected.json(),{ok:true,signedOut:true});
+ assert.equal((await (await fetch(base+'/api/session',{headers:{Cookie:session}})).json()).user,null);
+});
+test('concurrent app reads share one refresh without sending the user back to login',async t=>{
+ const s=fixture(t),user=(await s.finish()).user;s.time+=580_000;let release,entered;const started=new Promise(r=>entered=r);
+ s.hook=async(url,body)=>{if(url.endsWith('/token')&&body.grant_type==='refresh_token'){entered();await new Promise(r=>release=r)}};
+ const first=s.link.authorizeSession(user.id);await started;const second=s.link.authorizeSession(user.id,{fresh:true});release();await Promise.all([first,second]);
+ assert.equal(s.requests.filter(r=>r.body?.grant_type==='refresh_token').length,1);assert.equal(s.link.status(user.id).linked,true);
+});
+test('a crashed refresh lease expires into reconnect instead of permanent busy or token replay',async t=>{
+ const s=fixture(t),user=(await s.finish()).user;s.store.db.prepare("UPDATE profile_links SET state='refreshing',lease=? WHERE owner=?").run(s.time+90_000,user.id);
+ await assert.rejects(s.link.proof(user.id),{code:'profile_refresh_busy'});s.time+=91_000;s.link=createProfileStore(s.store,config,s.options);
+ await assert.rejects(s.link.proof(user.id),{code:'reconnect_required'});assert.equal(s.link.status(user.id).state,'reauthorize');
+ assert.equal(s.requests.filter(r=>r.body?.grant_type==='refresh_token').length,0);
 });
 test('native shared login returns an independent PKCE flow and callback never exposes credentials',async t=>{
  const s=fixture(t),{createApp}=await import('../server/app.mjs'),origin=new URL(B.redirectUri).origin;
@@ -115,4 +129,25 @@ test('central app sessions revalidate writes and stop cached reads after revocat
  await assert.rejects(s.link.authorizeSession(user.id),{code:'reconnect_required'});
  s.active=true;await s.finish();await s.link.authorizeSession(user.id);s.active=false;s.time+=31_000;
  await assert.rejects(s.link.authorizeSession(user.id),{code:'reconnect_required'});
+});
+test('an exchange followed by failed introspection leaves encrypted durable revocation work',async t=>{
+ const s=fixture(t);s.hook=async url=>{if(url.endsWith('/introspect'))throw Error('offline')};
+ await assert.rejects(s.finish());assert.equal(s.store.db.prepare('SELECT count(*) AS n FROM profile_links').get().n,0);
+ const row=s.store.db.prepare('SELECT * FROM profile_revocations').get();assert.ok(row);assert.ok(!row.body.includes('r'.repeat(64)));
+ s.link=createProfileStore(s.store,config,s.options);s.hook=null;await s.link.flushRevocations();
+ assert.equal(s.store.db.prepare('SELECT count(*) AS n FROM profile_revocations').get().n,0);
+});
+test('the cleanup worker cannot revoke credentials while their bounded callback is completing',async t=>{
+ const s=fixture(t);let release,entered;const started=new Promise(r=>entered=r);
+ s.hook=async url=>{if(url.endsWith('/introspect')){entered();await new Promise(r=>release=r)}};
+ const pending=s.finish();await started;assert.equal(s.store.db.prepare('SELECT count(*) AS n FROM profile_revocations').get().n,1);
+ await s.link.flushRevocations();assert.equal(s.requests.filter(r=>r.url.endsWith('/revoke')).length,0);
+ release();await pending;assert.equal(s.store.db.prepare('SELECT count(*) AS n FROM profile_revocations').get().n,0);
+});
+test('rotated credentials survive failed refresh introspection for later revoke',async t=>{
+ const s=fixture(t),user=(await s.finish()).user;s.time+=580_000;
+ s.hook=async url=>{if(url.endsWith('/introspect'))throw Error('offline')};
+ await assert.rejects(s.link.proof(user.id));assert.equal(s.link.status(user.id).state,'reauthorize');
+ assert.equal(s.store.db.prepare('SELECT count(*) AS n FROM profile_revocations').get().n,1);
+ s.hook=null;await s.link.flushRevocations();assert.equal(s.store.db.prepare('SELECT count(*) AS n FROM profile_revocations').get().n,0);
 });

@@ -785,7 +785,7 @@ public class MainActivity extends AppCompatActivity {
       LinearLayout wallet=column();creditContainer=wallet;c.addView(wallet);
       loadCreditSection(wallet);
       if(sharedLoginEnabled){LinearLayout link=card();title(link,t("LazyingArt account"),20);caption(link,t("Connect the same account across LazyingArt apps. Your papers, chats and purchases stay in OnlyIdeas."));
-      if(sharedLinked){caption(link,t("Account connected"));link.addView(button(t("Disconnect LazyingArt"),false,()->job(()->api.json("/api/auth/lazyingart/disconnect","POST",new JSONObject()),r->{sharedLinked=false;showProfile();})));}
+      if(sharedLinked){caption(link,t("Account connected"));link.addView(button(t("Disconnect LazyingArt"),false,()->job(()->api.json("/api/auth/lazyingart/disconnect","POST",new JSONObject()),r->{sharedLinked=false;if(r.optBoolean("signedOut"))signOut();else showProfile();})));}
       else link.addView(button(t("Connect LazyingArt"),false,()->signInBrowser(true,true)));c.addView(link);}
     }
     LinearLayout reading = card();

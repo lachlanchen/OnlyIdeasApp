@@ -1,117 +1,62 @@
-# Optional LazyingArt profile adapter · 3 October 2026
+# Optional LazyingArt account connection
 
-**Disabled source preparation. No shared-login button or live callback yet.**
+OnlyIdeas uses its own confidential client, audience and callback. Existing
+Apple and GitHub accounts, papers, chats and purchases keep their local owners.
+The connection does not merge accounts by email, username or display name.
 
-The owner wants independent apps with optional shared LazyingArt login and
-canonical LAC accumulation through the Coin service. OnlyIdeas retains its own
-accounts, papers, private content, reading credits and subscriptions. Shared
-identity does not grant another app's purchases or convert reading credits to LAC.
-
-## Accepted app-specific contract
-
-| Field | Exact accepted value |
+| Field | Accepted value |
 | --- | --- |
 | Issuer | `https://chat.lazying.art` |
-| Confidential client | `onlyideas-server` |
+| Client | `onlyideas-server` |
 | Audience | `onlyideas-service` |
-| HTTPS callback | `https://agent.onlyideas.art/api/auth/lazyingart/callback` |
-| Scope | `profile` |
+| Callback | `https://agent.onlyideas.art/api/auth/lazyingart/callback` |
+| Profile scope | `profile` |
 | Flow | Authorization code, S256, `client_secret_post` |
 
-This is the existing custom LazyingArt protocol, not OIDC. Bunko and Platform
-credentials are never valid for OnlyIdeas. The independent profile-only contract
-does not require `bunko-v1` or a fresh GitHub legacy-link proof. Central issuer
-registration, provisioning and provider qualification remain EchoMind-owned.
+This is the custom LazyingArt account protocol. Profile login and separate earned
+points consent have distinct token families; neither grants billing access.
 
-The shared private owner response accepted this tuple. Anonymous verified-TLS
-GET at 03:30:37 UTC found the OnlyIdeas origin healthy (`/api/session`: 200), but
-the proposed callback returned 404 JSON. It does not collide with the existing
-GitHub `/api/auth/callback` or native Apple routes. Discovery advertised central
-password login; central Google/Apple/GitHub were false. OnlyIdeas' own currently
-available Apple/GitHub login is a separate capability.
+## App implementation
 
-## Prepared protocol module
+`server/lazyingart-profile.mjs` validates pinned discovery, exact schemas,
+issuer/client/audience/subject and bounded HTTPS responses. It rejects duplicate
+JSON keys, callback parameters, redirects and replay. `server/lazyingart-store.mjs`
+provides encrypted durable attempts, unique account mappings, serialized refresh
+and revocation retry. `server/app.mjs` supplies the optional routes.
 
-`server/lazyingart-profile.mjs` ports the profile protocol from the owner-delivered
-private LazyingArtLinkPrivate source `309dab92e30c03720ebd10dbfb62e4d1849363f4`.
-It is not imported by `server/app.mjs` or any client. No production configuration
-loader, callback route, credential delivery or provider activation was added.
+Existing-account linking requires an active, recently authenticated local
+session and fresh central authentication. A newly signed-in central identity
+creates a separate local account unless it already has an explicit mapping.
+Conflicting mappings fail without moving data or balances.
 
-- Exact issuer/client/audience/callback binding, fresh discovery, only `profile`.
-- Independent random state/verifier, browser binding and expiring attempts.
-  Callback path/issuer/parameters are exact; duplicates, unknown fields and replay
-  are rejected before exchange. Cancellation consumes only its matching attempt.
-- Direct verified HTTPS with no redirects, proxies, cookies or automatic retry;
-  a 15-second deadline, 64 KiB limit, JSON/no-store requirements and repeated-key
-  rejection. Transport/storage failures expose fixed diagnostic codes only.
-- Strict token and introspection schemas: exact subject/audience/client/scope,
-  active account, timestamps, empty legacy proof list and expected subject on
-  refresh. No positive introspection cache or email/name matching.
-- Returned credentials are server-only, immutable and omitted by JSON
-  serialization. Persistence must access their properties explicitly and encrypt
-  them. Plain profile identity supplies no posting, billing or Coin permission.
-- `refreshOnce` never retries. It must be called under a durable generation claim;
-  an ambiguous response requires new authorization. A configured disabled client
-  can still revoke existing credentials, and requires acknowledgement.
+New credentials are encrypted in a pending cleanup record before introspection.
+A successful mapping or refresh removes that record in the same transaction that
+accepts the credentials. Failed or interrupted completion retains revocation
+work. A bounded cleanup delay prevents a worker from racing a live callback.
+Unknown refresh outcomes require reconnecting; old refresh tokens are not retried.
 
-## Required integration before enablement
+Central-origin app sessions revalidate writes and permit at most 30 seconds of
+cached read authorization. Local sign-out and account deletion work during issuer
+outages. The native app's independent PKCE challenge is still required before its
+opaque app session can be redeemed; issuer tokens never reach the client.
 
-The Python framework includes encrypted coordinated storage. **That storage has
-not been ported here.** This module requires a trusted attempt-store adapter:
+PWA, iOS/macOS and Android source show the optional login and account connection
+only when the backend advertises readiness. Other providers remain available.
 
-| Method | Required implementation |
-| --- | --- |
-| `create(record)` | Durably insert the exact tuple, local attempt ID, state/binding hashes, encrypted verifier and issue/expiry times; reject collisions. |
-| `consume(query)` | Atomically match the tuple, state, browser binding and expiry and consume once across processes; a wrong binding must not consume the legitimate attempt. |
+## Current qualification boundary · 16 October 2026
 
-An attempt ID refers to a server-owned local workflow. The HTTP handler must bind
-it to its initiating web session or the independent native PKCE flow. The central
-verifier never substitutes for the native verifier. `server/native-auth.mjs`
-currently starts GitHub only; native shared login is not qualified by that code's
-existing tests. Callback URLs must never be logged with authorization parameters.
+The issuer has registered the accepted binding and reported actual HTTPS binding
+checks. The app's protocol, durable store, browser and native-flow fixtures pass;
+Android compile/lint and Mac Catalyst compilation pass. The deployed credit
+repair does not enable this account connection. Actual issuer callback and new
+native binary qualification are still required before activation.
 
-Add encrypted credential storage with serialized refresh, generation checks,
-absolute family expiry and a bounded revocation outbox. Unknown refresh outcome
-must not replay an old token. Concurrent logout/deletion must reject late identity
-or token writes. Preserve inactive versus unavailable results. Revalidate before
-protected writes/private sync and on foreground/reconnect; central suspension
-must invalidate old sessions even after reactivation.
+Run the profile suites with:
 
-The protocol helper currently returns credentials only after successful
-introspection. Add a protected pending-credential persistence/revocation hook
-before integration so an exchange followed by failed introspection cannot leave
-an untracked central family. This cleanup is not supplied by the fixture store.
+```sh
+node --test tests/lazyingart-profile.test.mjs tests/lazyingart-store.test.mjs
+```
 
-Use unique, transactional `(issuer, subject)` mappings to existing local account
-IDs. Explicit linking requires fresh local and central proof and consent; an
-email/name match never links accounts. Conflicts need an explicit recovery path.
-Do not change authorship, libraries, privacy, purchases or subscription owners.
-The currently implemented `Store.identity()` does not provide this linking policy.
-
-Only after callback/session/mapping tests pass may the exact separately registered
-client be privately provisioned and real web/iOS/Android/Mac flows qualified.
-Keep general registration separate from any EchoMind invitation requirement.
-Provider display follows current central readiness. Local login and anonymous
-reading remain available independently of central availability.
-
-Coin operation consent, policy/event IDs, canonical settlement and authoritative
-balance receipts are a separate future adapter. Pending intents are not available
-LAC; do not sum the same canonical balance across apps. Existing reading credits
-stay local. Shared subscriptions and discounts remain unselected design notes.
-
-## Validation boundary
-
-Run `node --test tests/lazyingart-profile.test.mjs`. Contract fixtures cover pinned
-registration, independent PKCE, wrong browser/issuer/parameters, replay/expiry,
-cancellation, cross-app identity and scope, malformed credentials, inactive versus
-unavailable responses, uncertain exchange/refresh, subject substitution, no secret
-serialization, strict JSON/TLS/response limits and request timeout cleanup.
-
-The attempt store in these tests is an **in-memory fixture**, not a durable or
-encrypted implementation. These tests do not exercise the real issuer, concurrent
-service processes, native UI, account linking or a Coin/payment transaction.
-Preparation validation: all **14 profile protocol tests** passed; full
-`npm run check` passed **174 tests**, renderer checks, TypeScript and web/native
-reader asset builds with the existing configured Pandoc 3.11. No installed
-binary, live backend, database, central registry or store review is changed by
-this preparation.
+Shared daily/reading/publication rewards use the separate Coin-owned points
+contract. See [account rewards](account-rewards-20261016.md) and the reusable
+`lazyingart-accounts-and-rewards` skill for the current source/rollout boundary.
