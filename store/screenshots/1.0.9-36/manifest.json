@@ -1,0 +1,44 @@
+{
+  "version": "1.0.9",
+  "build": 36,
+  "sourceCommit": "aa37e1b",
+  "content": "Synthetic chat fixture and real public research paper; no private messages",
+  "screenshots": [
+    {
+      "file": "web-chat-phone.png",
+      "width": 390,
+      "height": 844,
+      "sha256": "64640e8da7306111876c327c34574b962445c60be469cff852c9eac1741e7697",
+      "capture": "browser; synthetic local fixture",
+      "reviewed": true,
+      "storeState": "local draft; not uploaded"
+    },
+    {
+      "file": "web-chat-desktop.png",
+      "width": 1280,
+      "height": 800,
+      "sha256": "a194f700c6853522e7193e651339e92797fda5eb3e89a4bfae0dcf768850001a",
+      "capture": "browser; synthetic local fixture",
+      "reviewed": true,
+      "storeState": "local draft; not uploaded"
+    },
+    {
+      "file": "web-sharing-compact.png",
+      "width": 320,
+      "height": 640,
+      "sha256": "183fa5e28fa3ff2dbac3db5ce1344fab2753f019be5e4cead1dfd19c4ed96776",
+      "capture": "browser; synthetic local fixture",
+      "reviewed": true,
+      "storeState": "local draft; not uploaded"
+    },
+    {
+      "file": "android-reader-sharing.png",
+      "width": 1080,
+      "height": 1920,
+      "sha256": "713dbec813e9cb2b89527883c5ed915aa847707879679b9ede26e44366333e41",
+      "capture": "signed Android36; public paper",
+      "reviewed": true,
+      "storeState": "local draft; not uploaded"
+    }
+  ]
+}

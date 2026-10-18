@@ -33,5 +33,6 @@ the native reader share menu passed. Three isolated Android UI tests covered
 quotes, paper context, copy and rotation. Sixteen browser interaction checks
 covered compact/desktop layouts, quote/reference submission, failed-send draft
 retention and the distinct AiMemo/EchoMind copy drafts. No messages were sent to
-contacts. Apple36 iOS upload succeeded; Apple processing and Mac delivery are
-tracked separately and are not claimed by this source receipt.
+contacts. Both Apple36 builds are VALID and IN_BETA_TESTING in the existing
+OnlyIdeas internal group. Current screenshot drafts are recorded under
+`store/screenshots/1.0.9-36`; they have not replaced the public listing.

@@ -1,0 +1,50 @@
+{
+  "date": "2026-10-18",
+  "version": "1.0.9",
+  "build": 36,
+  "sourceCommit": "aa37e1b",
+  "distribution": {
+    "ios": "VALID / IN_BETA_TESTING",
+    "macos": "VALID / IN_BETA_TESTING",
+    "android": "Available to internal testers"
+  },
+  "appleArtifacts": [
+    {
+      "platform": "ios",
+      "version": "1.0.9",
+      "build": "36",
+      "bundle": "art.onlyideas.app",
+      "minimumOS": "15.0",
+      "sha256": "430e2794a156ddda7074d5ef8e4eedaad2ae123fa44ecd843555364f352c28cc"
+    },
+    {
+      "platform": "macos",
+      "version": "1.0.9",
+      "build": "36",
+      "bundle": "art.onlyideas.app",
+      "minimumOS": "12.0",
+      "sha256": "5c3a77b470d958483945f93009b6576a8fa7833b87047ff3a38d0af1c3613f1a"
+    }
+  ],
+  "androidArtifacts": {
+    "code": 36,
+    "signatureVerified": true,
+    "apkSha256": "43cb404c045e5a8a5e7c62f1418aaede3110c8be0c870f909a98c8627443b54e",
+    "aabSha256": "c8f4ec6979e3cc5b10c35a306c8846aa755af2552025d84afabc0ddcf6f7082c",
+    "aabBytes": 6864005
+  },
+  "checks": {
+    "fullSuite": 305,
+    "browserInteractions": 16,
+    "androidInstrumentation": 3,
+    "universalCatalystCompile": true,
+    "iphoneAdaptiveDraftTest": true,
+    "physicalMonterey": false,
+    "foldableHardware": false
+  },
+  "formalReviewChanged": false,
+  "receiverState": {
+    "EchoMind": "copy draft; direct receiver pending",
+    "AiMemo": "copy reading-list or research-idea draft; direct receiver pending"
+  }
+}
