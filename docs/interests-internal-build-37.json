@@ -1,0 +1,35 @@
+{
+  "version": "1.0.9",
+  "build": 37,
+  "featureSource": "149d5ff",
+  "qualificationSource": "c3226cab1c4371c5a1495ec2309d4eed6798ddbd",
+  "android": {
+    "track": "internal",
+    "state": "Available to internal testers",
+    "verifiedAt": "2026-10-18T04:03:00Z",
+    "artifacts": {
+      "app-release.aab": {
+        "sha256": "84cb187cee2980c430d629c46b31cfb6ce48fee6af580164619112d1bc30ab39",
+        "bytes": 6873978
+      },
+      "app-release.apk": {
+        "sha256": "2b1f2a26ab30d4f32eafc4e6d559eba76d70dafe73baa20c4946b6e154dcd616",
+        "bytes": 6282672
+      }
+    }
+  },
+  "apple": {
+    "ios": "prepared; awaiting serialized host admission",
+    "macos": "prepared; awaiting serialized host admission"
+  },
+  "tests": {
+    "server": 309,
+    "webChecks": 9,
+    "overlayApi": 9,
+    "androidInterestUI": "passed after dialog-root harness correction",
+    "androidQuoteContext": "passed",
+    "releaseLint": "passed"
+  },
+  "rewards": "disabled; no live points minted",
+  "productionReviewChanged": false
+}

@@ -38,7 +38,8 @@ paper sharing return200, and anonymous preference/activity writes return401.
 The immutable overlay is `interests-78d88332d23d4b44`, based on the prior
 qualified service. A consistent database backup was retained; all52 application
 tables and protected configuration were unchanged. Native build36 does not
-contain the new interest editor; build37 is being qualified.
+contain the new interest editor. Android37 is now available on the existing
+internal track. Apple37 is locally prepared for its separate serialized slot.
 The reward source remains disabled. Actual app callback/points consent,
 authenticated delivery/outbox dispatch and a bounded live round trip remain
 required. Reading/discussion producers and the shared work/rights registry are
