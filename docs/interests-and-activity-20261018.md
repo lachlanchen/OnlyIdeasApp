@@ -28,7 +28,13 @@ verifier/ledger in a disposable database: one5-point award and one semantic
 duplicate conflict for the same canonical subject/day. No live points were
 created. New iOS/Catalyst code still needs the next serialized Apple build/QA.
 
-The new recommendation UI is source-qualified, not yet deployed or in build36.
+The recommendation backend/PWA overlay was deployed on 2026-10-18 at
+03:54:43 UTC. The public bundle matches the candidate hash, health and public
+paper sharing return200, and anonymous preference/activity writes return401.
+The immutable overlay is `interests-78d88332d23d4b44`, based on the prior
+qualified service. A consistent database backup was retained; all52 application
+tables and protected configuration were unchanged. Native build36 does not
+contain the new interest editor; build37 is being qualified.
 The reward source remains disabled. Actual app callback/points consent,
 authenticated delivery/outbox dispatch and a bounded live round trip remain
 required. Reading/discussion producers and the shared work/rights registry are

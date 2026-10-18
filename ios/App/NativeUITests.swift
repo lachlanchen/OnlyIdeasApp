@@ -2,6 +2,34 @@ import XCTest
 import UIKit
 
 final class NativeUITests: XCTestCase {
+  func testInterestPromptPreservesDraft() {
+    continueAfterFailure=false
+    let app=XCUIApplication()
+    app.launchArguments=["-onlyideas.native.language","en","--onlyideas-space-qa","--onlyideas-mac-qa"]
+    app.launchEnvironment["ONLYIDEAS_QA_ORIGIN"]="http://127.0.0.1:18649"
+    app.launchEnvironment["ONLYIDEAS_QA_TOKEN"]="synthetic-interests37-token"
+    app.launch()
+    defer {app.terminate()}
+    let agent=app.tabBars.buttons["Agent"]
+    XCTAssertTrue(agent.waitForExistence(timeout:30));agent.tap()
+    let prompt=app.buttons["What would you like to follow?"]
+    XCTAssertTrue(prompt.waitForExistence(timeout:15))
+    let composer=app.textViews["Message the paper agent"]
+    composer.tap();composer.typeText("Keep my unsent paper question")
+    if app.buttons["Done"].firstMatch.exists {app.buttons["Done"].firstMatch.tap()}
+    prompt.tap()
+    let topics=app.textFields["Topics you enjoy"]
+    XCTAssertTrue(topics.waitForExistence(timeout:10));topics.tap();topics.typeText("history, climate")
+    shot("Interests37-editor")
+    app.buttons["Save interests"].tap()
+    XCTAssertTrue(app.buttons["Reading interests"].waitForExistence(timeout:15))
+    XCTAssertEqual(composer.value as? String,"Keep my unsent paper question")
+    app.buttons["Reading interests"].tap()
+    XCTAssertTrue(topics.waitForExistence(timeout:10));XCTAssertEqual(topics.value as? String,"history, climate")
+    app.buttons["Cancel"].tap()
+    XCTAssertEqual(composer.value as? String,"Keep my unsent paper question")
+    shot("Interests37-saved")
+  }
   func testAdaptiveComposerPreservesDraft() {
     continueAfterFailure = false
     let app = XCUIApplication()
