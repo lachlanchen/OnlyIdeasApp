@@ -45,3 +45,24 @@ authenticated delivery/outbox dispatch and a bounded live round trip remain
 required. Reading/discussion producers and the shared work/rights registry are
 the next integration slice. Opening a share sheet cannot prove external delivery.
 Existing app credits, purchases, store prices and formal reviews are unchanged.
+
+## Apple qualification at 04:35 UTC
+
+Build37 passed the universal Catalyst Debug compile and both native iPhone
+tests: draft preservation through rotation/tab changes, and interest editing,
+saving and reopening without losing the draft. Both tests used a synthetic
+loopback fixture with activity rewards disabled. The owned simulator was shut
+down afterward; the peer simulator and signing search list were preserved.
+
+Signed iOS/Watch and universal Mac archives and exports passed. Validation checked
+the app identity, build/version, signatures, minimum OS and31 bundled reader
+resources per platform. Native captures are retained with their screenshot
+manifest; the saved-state image includes a system keyboard tutorial and is QA
+evidence only. Physical Monterey and iPhone Duo runtime checks remain outstanding.
+
+The first Apple provider validation returned401 because the upload helper had an
+incorrect issuer ID. The bounded round stopped before any upload. Corrected
+helpers match the working authenticated API client, but native provider validation
+and TestFlight delivery still require a new upload-only slot. The existing signed
+packages can be reused; no rebuild is required. Android37 remains internally
+available, and current Apple testers retain build36.

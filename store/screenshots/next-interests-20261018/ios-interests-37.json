@@ -1,0 +1,47 @@
+[
+  {
+    "file": "ios-interests-37-draft.png",
+    "sha256": "95266aa14711ff44c8b960b2c05288c3f177123a578ee7dd245dab3824522f63",
+    "pixels": [
+      1320,
+      2868
+    ],
+    "reviewed": true,
+    "source": "d4a3bb257e705079755288d00378421bea731370",
+    "build": 37,
+    "platform": "iOS Simulator",
+    "content": "synthetic local interest fixture",
+    "note": "Draft retained after four rotations and tab return; keyboard visible.",
+    "storeUploaded": false
+  },
+  {
+    "file": "ios-interests-37-editor.png",
+    "sha256": "4b2b1fe9905c99ce56474877a44aa3924d74e17492b127b8c46e9b04d5d52eea",
+    "pixels": [
+      1320,
+      2868
+    ],
+    "reviewed": true,
+    "source": "d4a3bb257e705079755288d00378421bea731370",
+    "build": 37,
+    "platform": "iOS Simulator",
+    "content": "synthetic local interest fixture",
+    "note": "Native interest editor; Save and Cancel visible above the keyboard.",
+    "storeUploaded": false
+  },
+  {
+    "file": "ios-interests-37-saved.png",
+    "sha256": "f5214ce76d81d4cac5a52463abd5ba0168507c06364edb972f42291b0f9f43e0",
+    "pixels": [
+      1320,
+      2868
+    ],
+    "reviewed": true,
+    "source": "d4a3bb257e705079755288d00378421bea731370",
+    "build": 37,
+    "platform": "iOS Simulator",
+    "content": "synthetic local interest fixture",
+    "note": "Saved interest conversation and retained draft; system keyboard tutorial overlays bottom. QA evidence only, unsuitable as a store-listing screenshot.",
+    "storeUploaded": false
+  }
+]

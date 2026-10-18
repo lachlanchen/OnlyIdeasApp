@@ -19,14 +19,38 @@
     }
   },
   "apple": {
-    "ios": "prepared; awaiting serialized host admission",
-    "macos": "prepared; awaiting serialized host admission",
+    "ios": "signed archive/export and bundle checks passed; upload pending corrected provider configuration and a new bounded slot",
+    "macos": "universal signed archive/export and bundle checks passed; upload pending corrected provider configuration and a new bounded slot",
     "qualificationSource": "d4a3bb257e705079755288d00378421bea731370",
     "sourceArchiveSha256": "5c0ad04b105f15ae8a6de2105af4019a9055b8b66db3b120c24dee16cefe6d4c",
     "sourceArchiveFiles": 139,
     "nativeResourceManifestSha256": "41df6a00776fef9d9f9ae772e6298aea9f4c0eb68daa1c1af35536f0f42c70db",
     "uiTestTransport": "both exact cases use a local synthetic fixture; native execution pending",
-    "internalUploadsStarted": false
+    "internalUploadsStarted": false,
+    "firstValidation": "failed401 from incorrect uploader issuer; corrected helper prepared, not retried",
+    "artifacts": [
+      {
+        "platform": "ios",
+        "bundle": "art.onlyideas.app",
+        "version": "1.0.9",
+        "build": "37",
+        "source": "d4a3bb257e705079755288d00378421bea731370",
+        "minimumOS": "15.0",
+        "sha256": "d2c8a1f1419dfa3a95bf851346c3b56d20ebd58b408c21da8db067b1e6a3c9bf",
+        "bytes": 13623486
+      },
+      {
+        "platform": "macos",
+        "bundle": "art.onlyideas.app",
+        "version": "1.0.9",
+        "build": "37",
+        "source": "d4a3bb257e705079755288d00378421bea731370",
+        "minimumOS": "12.0",
+        "sha256": "6165fd68c4566ae7faa189322e0936abd40f72358de4c1880856e7b43beabc6c",
+        "bytes": 12555952
+      }
+    ],
+    "bundleReaderResourcesVerifiedPerPlatform": 31
   },
   "tests": {
     "server": 309,
@@ -35,7 +59,22 @@
     "androidInterestUI": "passed after dialog-root harness correction",
     "androidQuoteContext": "passed",
     "releaseLint": "passed",
-    "appleReadiness": "local fixture checks and seven result-verifier cases passed; not a native runtime pass"
+    "appleReadiness": "local fixture checks and seven result-verifier cases passed; not a native runtime pass",
+    "appleUniversalDebug": "passed arm64+x86_64",
+    "appleUI": {
+      "testAdaptiveComposerPreservesDraft": {
+        "state": "passed",
+        "seconds": 45.008
+      },
+      "testInterestPromptPreservesDraft": {
+        "state": "passed",
+        "seconds": 25.518
+      }
+    },
+    "appleUITransport": "synthetic loopback fixture; activity disabled; no live account/model",
+    "appleSimulatorCleanup": "owned simulator shutdown verified; peer preserved",
+    "macOS12PhysicalRuntime": "not tested in this bounded round",
+    "iPhoneDuoRuntime": "not tested"
   },
   "rewards": "disabled; no live points minted",
   "productionReviewChanged": false
