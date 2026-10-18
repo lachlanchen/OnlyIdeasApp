@@ -6,6 +6,7 @@ real app in tests/research-preferences.test.mjs. No live account or model is use
 """
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
+import os
 import time
 
 state = {"state": "pending", "interests": ""}
@@ -40,7 +41,7 @@ class Handler(BaseHTTPRequestHandler):
         if path.startswith("/api/discovery"):
             return self.reply({"papers": [], "items": [], "next": None})
         if path == "/api/health":
-            return self.reply({"ok": True, "synthetic": True})
+            return self.reply({"ok": True, "synthetic": True, "pid": os.getpid()})
         return self.reply({})
 
     def do_POST(self):

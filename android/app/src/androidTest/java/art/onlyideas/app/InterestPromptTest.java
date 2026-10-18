@@ -5,6 +5,7 @@ import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.*;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.*;
+import static androidx.test.espresso.matcher.RootMatchers.isDialog;
 import android.content.Intent;
 import android.widget.EditText;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -39,14 +40,16 @@ public class InterestPromptTest {
       onView(withText("What would you like to follow?")).check(matches(isDisplayed()));
       onView(withText("Not now")).check(matches(isDisplayed()));
       instrumentation.runOnMainSync(activity::editInterests);
-      onView(withContentDescription("Topics you enjoy")).perform(replaceText("history, climate"),closeSoftKeyboard());
-      onView(withText("Cancel")).perform(click());
+      onView(withContentDescription("Topics you enjoy")).inRoot(isDialog()).perform(replaceText("history, climate"),closeSoftKeyboard());
+      var shot=instrumentation.getUiAutomation().takeScreenshot();
+      try(var out=new java.io.FileOutputStream(new java.io.File(context.getExternalFilesDir(null),"interests37-editor.png"))){assertTrue(shot.compress(android.graphics.Bitmap.CompressFormat.PNG,100,out));}
+      onView(withText("Cancel")).inRoot(isDialog()).perform(click());
       assertEquals("Keep my unsent paper question",((EditText)field(activity,"composer")).getText().toString());
       instrumentation.runOnMainSync(()->{try {
         set(activity,"recommendations",new JSONObject().put("state","chosen").put("interests","history, climate"));activity.renderMessages();activity.editInterests();
       }catch(Exception e){throw new RuntimeException(e);}});
-      onView(withContentDescription("Topics you enjoy")).check(matches(withText("history, climate")));
-      onView(withText("Cancel")).perform(click());
+      onView(withContentDescription("Topics you enjoy")).inRoot(isDialog()).check(matches(withText("history, climate")));
+      onView(withText("Cancel")).inRoot(isDialog()).perform(click());
       assertEquals("Keep my unsent paper question",((EditText)field(activity,"composer")).getText().toString());
     }finally{instrumentation.runOnMainSync(()->{try{set(activity,"account",null);}catch(Exception e){throw new RuntimeException(e);}activity.finish();});}
   }

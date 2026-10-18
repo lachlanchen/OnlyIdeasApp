@@ -22,7 +22,11 @@ central subject. Existing final-decision retention remains in force.
 
 Qualification: 309 server tests, renderer checks and web build passed. Nine
 browser checks at320/390/1280 widths passed, including persistence, draft
-preservation and model-independent operation. Android Java compilation passed.
+preservation and model-independent operation. Android release lint and signed build passed. Native emulator checks passed for
+interest-editor cancellation/reopen with an unsent draft and existing quote/paper
+context through rotation. The first interest UI attempt selected the inactive
+parent window; the corrected dialog-scoped test passed. The actual Android
+editor screenshot is reviewed and retained as a local draft.
 The app-emitted Bunko and OnlyIdeas daily records passed Coin's actual candidate
 verifier/ledger in a disposable database: one5-point award and one semantic
 duplicate conflict for the same canonical subject/day. No live points were

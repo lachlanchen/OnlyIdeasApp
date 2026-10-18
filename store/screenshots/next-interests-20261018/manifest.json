@@ -15,6 +15,15 @@
       "channel": "local web fixture",
       "width": 1280,
       "reviewed": true
+    },
+    {
+      "file": "android-interests-37.png",
+      "sha256": "cc2bac29997b3984fc60d6d121af518ba69526104b45eaf6e4f35cf766b671fa",
+      "channel": "Android API34 emulator, isolated chatqa package",
+      "build": "1.0.9 (37)",
+      "width": 1080,
+      "height": 1920,
+      "reviewed": true
     }
   ]
 }
