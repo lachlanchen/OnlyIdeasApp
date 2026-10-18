@@ -20,13 +20,13 @@ export function readSourceSecret(file){
 export function createRewardSourceRoutes(store,config,{authorization,now=Date.now,deadlineMs=4000}={}){
  const enabled=config.rewardSource?.enabled===true;
  const pathPrefix='/api/lac/source/',paths=new Map(['evidence','eligibility','final'].map(x=>[pathPrefix+'v1/'+x,x]));
- let source,proofReady=false,active=0,windowStart=0,requests=0;
+ let source,evidence,proofReady=false,active=0,windowStart=0,requests=0;
  if(enabled){
   requireValue(config.origin===new URL(B.redirectUri).origin,'Reward source requires its registered origin.',503);
   const secret=readSourceSecret(config.rewardSource.secretFile);
   proofReady=authorization?.qualified===true;
   if(proofReady)requireValue(authorization.binding&&Object.keys(authorization.binding).sort().join('|')===Object.keys(B).sort().join('|')&&Object.entries(B).every(([k,v])=>authorization.binding[k]===v)&&typeof authorization.prove==='function','Reward authorization binding mismatch.',503);
-  const evidence=createRewardEvidence(store,{now,authorize:async(owner,scope,options)=>{
+  evidence=createRewardEvidence(store,{now,authorize:async(owner,scope,options)=>{
    requireValue(proofReady,'Reward consent is not qualified.',503);
    const proof=await authorization.prove(owner,scope,options);
    requireValue(proof?.scope===scope,'Reward consent is required.',403);
@@ -55,5 +55,12 @@ export function createRewardSourceRoutes(store,config,{authorization,now=Date.no
    res.writeHead(200,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'});res.end(JSON.stringify(value));return true;
   }finally{clearTimeout(timer);if(controller.signal.aborted){if(!res.headersSent)res.setHeader('Connection','close');res.once('finish',()=>req.destroy())}req.resume()}
  }
- return {enabled,proofReady,route};
+ return {enabled,proofReady,route,
+  hold:owner=>evidence?.hold(owner),remove:owner=>evidence?.remove(owner),
+  async foreground(user){
+   if(!enabled||!proofReady||config.rewardSource.foregroundEnabled!==true)return {enabled:false};
+   const intent=await evidence.checkIn(user,{foreground:true});
+   return {enabled:true,state:'pending',eventId:intent.event_id};
+  }
+ };
 }

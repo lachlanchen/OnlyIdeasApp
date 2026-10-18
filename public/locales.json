@@ -831,7 +831,15 @@
     "Copied. Paste into EchoMind to choose who to send it to.": "Copied. Paste into EchoMind to choose who to send it to.",
     "Copied. Paste into AiMemo and review before sending.": "Copied. Paste into AiMemo and review before sending.",
     "Link copied. Paste it into your chat.": "Link copied. Paste it into your chat.",
-    "Could not share. Try copying the link.": "Could not share. Try copying the link."
+    "Could not share. Try copying the link.": "Could not share. Try copying the link.",
+    "Reading interests": "Reading interests",
+    "What would you like to follow?": "What would you like to follow?",
+    "Tell me a few topics you enjoy. I can use them for your daily papers.": "Tell me a few topics you enjoy. I can use them for your daily papers.",
+    "For example: health, technology, art or climate": "For example: health, technology, art or climate",
+    "Save interests": "Save interests",
+    "Not now": "Not now",
+    "Tell me a few topics you enjoy.": "Tell me a few topics you enjoy.",
+    "Your interests are saved. Your daily papers will follow these topics. You can change them anytime.": "Your interests are saved. Your daily papers will follow these topics. You can change them anytime."
   },
   "zh-Hans": {
     "Choose a valid PDF.": "请选择有效的 PDF。",
@@ -1669,7 +1677,15 @@
     "Copied. Paste into EchoMind to choose who to send it to.": "已复制。粘贴到 EchoMind 后选择发送对象。",
     "Copied. Paste into AiMemo and review before sending.": "已复制。粘贴到 AiMemo，确认后再发送。",
     "Link copied. Paste it into your chat.": "链接已复制，可粘贴到聊天中。",
-    "Could not share. Try copying the link.": "分享失败，请尝试复制链接。"
+    "Could not share. Try copying the link.": "分享失败，请尝试复制链接。",
+    "Reading interests": "阅读兴趣",
+    "What would you like to follow?": "你想关注哪些主题？",
+    "Tell me a few topics you enjoy. I can use them for your daily papers.": "说说你感兴趣的主题，我可以据此推荐每日论文。",
+    "For example: health, technology, art or climate": "例如：健康、科技、艺术或气候",
+    "Save interests": "保存兴趣",
+    "Not now": "暂时跳过",
+    "Tell me a few topics you enjoy.": "说说你感兴趣的主题。",
+    "Your interests are saved. Your daily papers will follow these topics. You can change them anytime.": "兴趣已保存。每日论文将围绕这些主题推荐，你可以随时修改。"
   },
   "zh-Hant": {
     ". Public comments are reviewed.": "公開評論會經過審核。",
@@ -2507,7 +2523,15 @@
     "Copied. Paste into EchoMind to choose who to send it to.": "已複製。貼到 EchoMind 後選擇傳送對象。",
     "Copied. Paste into AiMemo and review before sending.": "已複製。貼到 AiMemo，確認後再傳送。",
     "Link copied. Paste it into your chat.": "連結已複製，可貼到聊天中。",
-    "Could not share. Try copying the link.": "分享失敗，請嘗試複製連結。"
+    "Could not share. Try copying the link.": "分享失敗，請嘗試複製連結。",
+    "Reading interests": "閱讀興趣",
+    "What would you like to follow?": "你想關注哪些主題？",
+    "Tell me a few topics you enjoy. I can use them for your daily papers.": "說說你感興趣的主題，我可以據此推薦每日論文。",
+    "For example: health, technology, art or climate": "例如：健康、科技、藝術或氣候",
+    "Save interests": "儲存興趣",
+    "Not now": "暫時略過",
+    "Tell me a few topics you enjoy.": "說說你感興趣的主題。",
+    "Your interests are saved. Your daily papers will follow these topics. You can change them anytime.": "興趣已儲存。每日論文將圍繞這些主題推薦，你可以隨時修改。"
   },
   "ja": {
     ". Public comments are reviewed.": "公開コメントは審査されます。",
@@ -3345,7 +3369,15 @@
     "Copied. Paste into EchoMind to choose who to send it to.": "コピーしました。EchoMind に貼り付けて送信先を選んでください。",
     "Copied. Paste into AiMemo and review before sending.": "コピーしました。AiMemo に貼り付け、確認して送信してください。",
     "Link copied. Paste it into your chat.": "リンクをコピーしました。チャットに貼り付けてください。",
-    "Could not share. Try copying the link.": "共有できませんでした。リンクをコピーしてください。"
+    "Could not share. Try copying the link.": "共有できませんでした。リンクをコピーしてください。",
+    "Reading interests": "読書の関心分野",
+    "What would you like to follow?": "どんなテーマを追いかけたいですか？",
+    "Tell me a few topics you enjoy. I can use them for your daily papers.": "興味のあるテーマを教えてください。毎日の論文のおすすめに反映します。",
+    "For example: health, technology, art or climate": "例：健康、技術、芸術、気候",
+    "Save interests": "関心分野を保存",
+    "Not now": "今はスキップ",
+    "Tell me a few topics you enjoy.": "興味のあるテーマを教えてください。",
+    "Your interests are saved. Your daily papers will follow these topics. You can change them anytime.": "関心分野を保存しました。毎日の論文のおすすめに反映します。いつでも変更できます。"
   },
   "ko": {
     ". Public comments are reviewed.": "공개 댓글은 검토됩니다.",
@@ -4183,7 +4215,15 @@
     "Copied. Paste into EchoMind to choose who to send it to.": "복사했습니다. EchoMind에 붙여넣고 받는 사람을 선택하세요.",
     "Copied. Paste into AiMemo and review before sending.": "복사했습니다. AiMemo에 붙여넣고 확인 후 보내세요.",
     "Link copied. Paste it into your chat.": "링크를 복사했습니다. 채팅에 붙여넣으세요.",
-    "Could not share. Try copying the link.": "공유하지 못했습니다. 링크를 복사해 보세요."
+    "Could not share. Try copying the link.": "공유하지 못했습니다. 링크를 복사해 보세요.",
+    "Reading interests": "읽기 관심사",
+    "What would you like to follow?": "어떤 주제를 살펴보고 싶으세요?",
+    "Tell me a few topics you enjoy. I can use them for your daily papers.": "관심 있는 주제를 알려 주세요. 매일 추천하는 논문에 반영할게요.",
+    "For example: health, technology, art or climate": "예: 건강, 기술, 예술, 기후",
+    "Save interests": "관심사 저장",
+    "Not now": "나중에",
+    "Tell me a few topics you enjoy.": "관심 있는 주제를 알려 주세요.",
+    "Your interests are saved. Your daily papers will follow these topics. You can change them anytime.": "관심사를 저장했어요. 매일 추천하는 논문에 반영됩니다. 언제든 변경할 수 있어요."
   },
   "ar": {
     ". Public comments are reviewed.": "التعليقات العامة تخضع للمراجعة.",
@@ -5021,7 +5061,15 @@
     "Copied. Paste into EchoMind to choose who to send it to.": "تم النسخ. الصق في EchoMind واختر المستلم.",
     "Copied. Paste into AiMemo and review before sending.": "تم النسخ. الصق في AiMemo وراجع قبل الإرسال.",
     "Link copied. Paste it into your chat.": "تم نسخ الرابط. الصقه في الدردشة.",
-    "Could not share. Try copying the link.": "تعذرت المشاركة. جرّب نسخ الرابط."
+    "Could not share. Try copying the link.": "تعذرت المشاركة. جرّب نسخ الرابط.",
+    "Reading interests": "اهتمامات القراءة",
+    "What would you like to follow?": "ما الموضوعات التي تود متابعتها؟",
+    "Tell me a few topics you enjoy. I can use them for your daily papers.": "أخبرني ببعض الموضوعات التي تهمك لأستخدمها في اقتراح أبحاثك اليومية.",
+    "For example: health, technology, art or climate": "مثلاً: الصحة أو التقنية أو الفن أو المناخ",
+    "Save interests": "حفظ الاهتمامات",
+    "Not now": "ليس الآن",
+    "Tell me a few topics you enjoy.": "أخبرني ببعض الموضوعات التي تهمك.",
+    "Your interests are saved. Your daily papers will follow these topics. You can change them anytime.": "تم حفظ اهتماماتك. ستعكس الأبحاث اليومية هذه الموضوعات، ويمكنك تغييرها في أي وقت."
   },
   "fr": {
     ". Public comments are reviewed.": ". Les commentaires publics sont examinés.",
@@ -5859,7 +5907,15 @@
     "Copied. Paste into EchoMind to choose who to send it to.": "Copié. Collez dans EchoMind et choisissez le destinataire.",
     "Copied. Paste into AiMemo and review before sending.": "Copié. Collez dans AiMemo et vérifiez avant d’envoyer.",
     "Link copied. Paste it into your chat.": "Lien copié. Collez-le dans votre discussion.",
-    "Could not share. Try copying the link.": "Partage impossible. Essayez de copier le lien."
+    "Could not share. Try copying the link.": "Partage impossible. Essayez de copier le lien.",
+    "Reading interests": "Centres d’intérêt",
+    "What would you like to follow?": "Quels sujets souhaitez-vous suivre ?",
+    "Tell me a few topics you enjoy. I can use them for your daily papers.": "Indiquez quelques sujets qui vous intéressent pour personnaliser vos articles quotidiens.",
+    "For example: health, technology, art or climate": "Par exemple : santé, technologie, art ou climat",
+    "Save interests": "Enregistrer mes intérêts",
+    "Not now": "Pas maintenant",
+    "Tell me a few topics you enjoy.": "Indiquez quelques sujets qui vous intéressent.",
+    "Your interests are saved. Your daily papers will follow these topics. You can change them anytime.": "Vos intérêts sont enregistrés. Vos articles quotidiens suivront ces thèmes. Vous pouvez les modifier à tout moment."
   },
   "de": {
     ". Public comments are reviewed.": "Öffentliche Kommentare werden geprüft.",
@@ -6697,7 +6753,15 @@
     "Copied. Paste into EchoMind to choose who to send it to.": "Kopiert. In EchoMind einfügen und Empfänger wählen.",
     "Copied. Paste into AiMemo and review before sending.": "Kopiert. In AiMemo einfügen und vor dem Senden prüfen.",
     "Link copied. Paste it into your chat.": "Link kopiert. Füge ihn im Chat ein.",
-    "Could not share. Try copying the link.": "Teilen fehlgeschlagen. Kopiere den Link."
+    "Could not share. Try copying the link.": "Teilen fehlgeschlagen. Kopiere den Link.",
+    "Reading interests": "Leseinteressen",
+    "What would you like to follow?": "Welche Themen möchtest du verfolgen?",
+    "Tell me a few topics you enjoy. I can use them for your daily papers.": "Nenne ein paar Themen, die dich interessieren. Ich nutze sie für deine täglichen Artikel.",
+    "For example: health, technology, art or climate": "Zum Beispiel: Gesundheit, Technik, Kunst oder Klima",
+    "Save interests": "Interessen speichern",
+    "Not now": "Nicht jetzt",
+    "Tell me a few topics you enjoy.": "Nenne ein paar Themen, die dich interessieren.",
+    "Your interests are saved. Your daily papers will follow these topics. You can change them anytime.": "Deine Interessen sind gespeichert. Deine täglichen Artikel folgen diesen Themen. Du kannst sie jederzeit ändern."
   },
   "es": {
     ". Public comments are reviewed.": "Los comentarios públicos se revisan.",
@@ -7535,7 +7599,15 @@
     "Copied. Paste into EchoMind to choose who to send it to.": "Copiado. Pega en EchoMind y elige el destinatario.",
     "Copied. Paste into AiMemo and review before sending.": "Copiado. Pega en AiMemo y revisa antes de enviar.",
     "Link copied. Paste it into your chat.": "Enlace copiado. Pégalo en tu chat.",
-    "Could not share. Try copying the link.": "No se pudo compartir. Prueba a copiar el enlace."
+    "Could not share. Try copying the link.": "No se pudo compartir. Prueba a copiar el enlace.",
+    "Reading interests": "Intereses de lectura",
+    "What would you like to follow?": "¿Qué temas te gustaría seguir?",
+    "Tell me a few topics you enjoy. I can use them for your daily papers.": "Cuéntame qué temas te interesan para personalizar tus artículos diarios.",
+    "For example: health, technology, art or climate": "Por ejemplo: salud, tecnología, arte o clima",
+    "Save interests": "Guardar intereses",
+    "Not now": "Ahora no",
+    "Tell me a few topics you enjoy.": "Cuéntame qué temas te interesan.",
+    "Your interests are saved. Your daily papers will follow these topics. You can change them anytime.": "Tus intereses están guardados. Tus artículos diarios seguirán estos temas. Puedes cambiarlos cuando quieras."
   },
   "ru": {
     ". Public comments are reviewed.": "Публичные комментарии проходят проверку.",
@@ -8373,7 +8445,15 @@
     "Copied. Paste into EchoMind to choose who to send it to.": "Скопировано. Вставьте в EchoMind и выберите получателя.",
     "Copied. Paste into AiMemo and review before sending.": "Скопировано. Вставьте в AiMemo и проверьте перед отправкой.",
     "Link copied. Paste it into your chat.": "Ссылка скопирована. Вставьте её в чат.",
-    "Could not share. Try copying the link.": "Не удалось поделиться. Скопируйте ссылку."
+    "Could not share. Try copying the link.": "Не удалось поделиться. Скопируйте ссылку.",
+    "Reading interests": "Интересы для чтения",
+    "What would you like to follow?": "Какие темы вы хотите отслеживать?",
+    "Tell me a few topics you enjoy. I can use them for your daily papers.": "Расскажите, какие темы вам интересны, чтобы настроить ежедневную подборку статей.",
+    "For example: health, technology, art or climate": "Например: здоровье, технологии, искусство или климат",
+    "Save interests": "Сохранить интересы",
+    "Not now": "Не сейчас",
+    "Tell me a few topics you enjoy.": "Расскажите, какие темы вам интересны.",
+    "Your interests are saved. Your daily papers will follow these topics. You can change them anytime.": "Интересы сохранены. Ежедневная подборка будет учитывать эти темы. Их можно изменить в любое время."
   },
   "vi": {
     ". Public comments are reviewed.": "Bình luận công khai sẽ được kiểm duyệt.",
@@ -9211,6 +9291,14 @@
     "Copied. Paste into EchoMind to choose who to send it to.": "Đã sao chép. Dán vào EchoMind và chọn người nhận.",
     "Copied. Paste into AiMemo and review before sending.": "Đã sao chép. Dán vào AiMemo và kiểm tra trước khi gửi.",
     "Link copied. Paste it into your chat.": "Đã sao chép liên kết. Dán vào cuộc trò chuyện.",
-    "Could not share. Try copying the link.": "Không thể chia sẻ. Hãy sao chép liên kết."
+    "Could not share. Try copying the link.": "Không thể chia sẻ. Hãy sao chép liên kết.",
+    "Reading interests": "Sở thích đọc",
+    "What would you like to follow?": "Bạn muốn theo dõi chủ đề nào?",
+    "Tell me a few topics you enjoy. I can use them for your daily papers.": "Hãy cho biết vài chủ đề bạn quan tâm để tôi gợi ý bài báo hằng ngày.",
+    "For example: health, technology, art or climate": "Ví dụ: sức khỏe, công nghệ, nghệ thuật hoặc khí hậu",
+    "Save interests": "Lưu sở thích",
+    "Not now": "Để sau",
+    "Tell me a few topics you enjoy.": "Hãy cho biết vài chủ đề bạn quan tâm.",
+    "Your interests are saved. Your daily papers will follow these topics. You can change them anytime.": "Đã lưu sở thích. Bài báo hằng ngày sẽ theo các chủ đề này. Bạn có thể thay đổi bất cứ lúc nào."
   }
 }

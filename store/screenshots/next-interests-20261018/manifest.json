@@ -1,0 +1,20 @@
+{
+  "status": "local draft; not store uploaded",
+  "content": "Synthetic reading-tester account; real app UI",
+  "screenshots": [
+    {
+      "file": "agent-interests-390.png",
+      "sha256": "f03287ab7933d73312ccf094cb2ff6cdd0a3a978b5c2a446f257058ac44fbfde",
+      "channel": "local web fixture",
+      "width": 390,
+      "reviewed": true
+    },
+    {
+      "file": "agent-interests-1280.png",
+      "sha256": "fdc9afa97d482ac06e94f648caa7edb91a39e6acf0847259979e1eda2f91472a",
+      "channel": "local web fixture",
+      "width": 1280,
+      "reviewed": true
+    }
+  ]
+}

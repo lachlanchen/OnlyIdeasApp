@@ -1,10 +1,8 @@
-// Owner-selected starting interests, supported by the public publication profile
-// and OpenHI project. Readers can replace these in their own preferences.
+// Keep historical values readable without rewriting a reader's saved choices.
 export const previousDefaultInterests='neuromorphic imaging, event cameras, hyperspectral imaging, biomedical imaging, organoids, computational optics';
-// Professor Shaohua Ma: https://www.sigs.tsinghua.edu.cn/msh_en/main.psp
-// Tsinghua SIGS, ORCID 0000-0002-4995-2032: organoids and biomanufacturing.
-export const defaultInterests='neuromorphic imaging, Shaohua Ma organoids, event cameras, hyperspectral imaging, biomedical imaging, optics';
-export const currentInterests=value=>value===previousDefaultInterests?defaultInterests:value;
+// New readers start across disciplines and choose their own interests in Agent.
+export const defaultInterests='';
+export const currentInterests=value=>value;
 export function interestTopics(store,user){
  const exists=store.db.prepare("SELECT 1 FROM sqlite_master WHERE name='reading_preferences'").get();
  const row=user&&exists?store.db.prepare('SELECT body FROM reading_preferences WHERE owner=?').get(user.id):null;

@@ -149,7 +149,7 @@ final class ReadingStore: NSObject, ObservableObject,
 {
   @Published var papers: [ResearchPaper] = []
   @Published var account: ReadingAccount? {
-    didSet { if oldValue?.id != account?.id { agentDraft = ""; draftReferences=[]; draftQuote=nil } }
+    didSet { if oldValue?.id != account?.id { agentDraft = ""; draftReferences=[]; draftQuote=nil; recommendationSetup=nil; researchInterests="" } }
   }
   // Owned by the scene store so layout/language reconstruction retains unsent work.
   @Published var agentDraft = ""
@@ -162,6 +162,8 @@ final class ReadingStore: NSObject, ObservableObject,
     didSet { if let id = account?.id { UserDefaults.standard.set(conversationID ?? "new", forKey: "onlyideas.last-chat." + id) } }
   }
   @Published var agentStatus = ""
+  @Published var recommendationSetup:String?
+  @Published var researchInterests=""
   @Published var inboxUnread = 0
   @Published var error: String?
   @Published var busy = false
@@ -817,6 +819,9 @@ final class ReadingStore: NSObject, ObservableObject,
       let r = try await json("/api/chats")
       guard identity == token else { return }
       conversations = try decoded([Conversation].self, r["chats"] ?? [])
+      let recommendations=r["recommendations"] as? [String:Any]
+      recommendationSetup=recommendations?["state"] as? String
+      researchInterests=recommendations?["interests"] as? String ?? ""
     } catch { self.error = error.localizedDescription }
   }
   func resumeConversation() async {
@@ -853,6 +858,20 @@ final class ReadingStore: NSObject, ObservableObject,
     conversationID = nil
     messages = []
     agentStatus = ""
+  }
+  func saveResearchInterests(_ text:String, requestID:String, skip:Bool=false) async -> Bool {
+    guard account != nil else {return false}
+    let identity=token, selectedChat=conversationID
+    do {
+      var body:[String:Any]=["text":text,"requestId":requestID,"skip":skip]
+      if let id=selectedChat {body["chatId"]=id}
+      let r=try await json("/api/chats/interests",method:"POST",body:body)
+      guard identity==token else {return false}
+      if let value=r["recommendations"] as? [String:Any] {recommendationSetup=value["state"] as? String;researchInterests=value["interests"] as? String ?? ""}
+      if conversationID==selectedChat, let c=r["chat"] as? [String:Any],let id=c["id"] as? String {conversationID=id;await loadConversation(id)}
+      await loadConversations()
+      return true
+    } catch {if identity==token {self.error=error.localizedDescription};return false}
   }
   func selectConversation(_ chat: Conversation) async {
     draftQuote=nil;draftReferences=[]
@@ -904,6 +923,10 @@ final class ReadingStore: NSObject, ObservableObject,
       await loadConversation(id)
       await loadJobs()
     } catch { self.error = error.localizedDescription }
+  }
+  func recordForegroundUse() async {
+    guard account != nil, UIApplication.shared.applicationState == .active else {return}
+    _ = try? await json("/api/lac/activity",method:"POST",body:["kind":"foreground"])
   }
   func loadCredits() async {
     guard account != nil else {credits=nil;creditsError="";return}

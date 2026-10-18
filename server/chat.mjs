@@ -1,4 +1,5 @@
 import {resolveChatReferences} from './chat-references.mjs';
+import {createResearchPreferences} from './research-preferences.mjs';
 import {sharingConsent} from './sharing-consent.mjs';
 import {compactChatHistory} from './chat-context.mjs';
 import {libraryCards} from './library-search.mjs';
@@ -13,6 +14,7 @@ import { canReusePaper } from './import-reuse.mjs';
 
 export function createChats(store, config, agentActions) {
   const db = store.db;
+  const interests=createResearchPreferences(store);
   db.exec(`CREATE TABLE IF NOT EXISTS chats(id TEXT PRIMARY KEY, owner TEXT NOT NULL, title TEXT NOT NULL, created INTEGER NOT NULL);
     CREATE TABLE IF NOT EXISTS chat_messages(id TEXT PRIMARY KEY, chat TEXT NOT NULL, role TEXT NOT NULL, body TEXT NOT NULL, created INTEGER NOT NULL);
     CREATE TABLE IF NOT EXISTS chat_tasks(id TEXT PRIMARY KEY, chat TEXT NOT NULL, owner TEXT NOT NULL, state TEXT NOT NULL, body TEXT NOT NULL, created INTEGER NOT NULL);
@@ -34,10 +36,31 @@ export function createChats(store, config, agentActions) {
     status: () => ({ enabled: !!config.agentWorkerToken, online: Date.now() - lastSeen < 45_000 }),
     authorized(req) { const value = String(req.headers.authorization || '').replace(/^Bearer /, ''); const expected = config.agentWorkerToken; return !!expected && timingSafeEqual(Buffer.from(hash(value)), Buffer.from(hash(expected))); },
     async client(path, method, user, body, enqueue) {
+      if(path==='/api/chats/interests') {
+        requireValue(user,'Sign in to keep your conversations private.',401);
+        requireValue(method==='POST','Method not allowed.',405);
+        if(body.skip===true)return {recommendations:interests.update(user,{skip:true})};
+        requireValue(typeof body.requestId==='string'&&/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(body.requestId),'Invalid request.');
+        const prior=db.prepare('SELECT * FROM chat_messages WHERE id=?').get(body.requestId);
+        if(prior) {
+          const chat=owned(prior.chat,user),saved=JSON.parse(prior.body);
+          requireValue(saved.kind==='preferences'&&saved.text===body.text,'This request has already been used.',409);
+          return {chat,messages:messages(chat.id),recommendations:interests.status(user)};
+        }
+        const chat=body.chatId?owned(body.chatId,user):{id:randomUUID(),owner:user.id,title:'Reading interests',created:Date.now()};
+        db.exec('BEGIN IMMEDIATE');
+        try {
+          const recommendations=interests.update(user,{text:body.text});
+          if(!body.chatId){requireValue(db.prepare('SELECT count(*) AS n FROM chats WHERE owner=?').get(user.id).n<100,'Choose an existing conversation.');db.prepare('INSERT INTO chats VALUES(?,?,?,?)').run(chat.id,user.id,chat.title,chat.created)}
+          add(chat.id,'user',{text:body.text,kind:'preferences'},body.requestId);
+          add(chat.id,'assistant',{text:'Your interests are saved. Your daily papers will follow these topics. You can change them anytime.',kind:'preferences'});
+          db.exec('COMMIT');return {chat,messages:messages(chat.id),recommendations};
+        } catch(error){db.exec('ROLLBACK');throw error}
+      }
       const m = path.match(/^\/api\/chats(?:\/([a-f0-9-]{36})(?:\/(messages|import))?)?$/); if (!m) return null;
       requireValue(user, 'Sign in to keep your conversations private.', 401);
       const [, id, action] = m;
-      if (!id && method === 'GET') return { chats: db.prepare('SELECT id,title,created FROM chats WHERE owner=? ORDER BY created DESC LIMIT 100').all(user.id), agent: this.status() };
+      if (!id && method === 'GET') return { chats: db.prepare('SELECT id,title,created FROM chats WHERE owner=? ORDER BY created DESC LIMIT 100').all(user.id), agent: this.status(), recommendations:interests.status(user) };
       if (!id && method === 'POST') {
         requireValue(db.prepare('SELECT count(*) AS n FROM chats WHERE owner=?').get(user.id).n < 100, 'Delete an old conversation before starting another.');
         const id = randomUUID(), title = 'New conversation'; db.prepare('INSERT INTO chats VALUES(?,?,?,?)').run(id,user.id,title,Date.now()); return { chat: {id,title}, messages: [] };
@@ -83,7 +106,7 @@ export function createChats(store, config, agentActions) {
         if(files.some(a=>a.state!=='ready')) {data.status='Preparing your attachments';db.prepare('UPDATE chat_tasks SET body=? WHERE id=?').run(JSON.stringify(data),row.id);continue;}
         const body={...data,lease:randomUUID(),leaseUntil:Date.now()+180_000,status:files.length?'Reading your attachments':'Looking for papers'};
         db.prepare("UPDATE chat_tasks SET state='running',body=? WHERE id=?").run(JSON.stringify(body),row.id);
-        const history=messages(row.chat).slice(-16), ids=[...new Set(history.flatMap(m=>(m.attachments||[]).filter(a=>a.state==='ready').map(a=>a.id)))].slice(-6);
+        const history=messages(row.chat).filter(m=>m.kind!=='preferences').slice(-16), ids=[...new Set(history.flatMap(m=>(m.attachments||[]).filter(a=>a.state==='ready').map(a=>a.id)))].slice(-6);
         let budget=60_000;
         const documents=ids.map(id=>{const a=attachment(store,id,row.owner),p=store.paper(a.paperId);if(!canReusePaper(store,p,row.owner))return null;const text=p.mmd.slice(0,Math.min(20_000,budget));budget-=text.length;return {name:a.name,text,truncated:text.length<p.mmd.length};}).filter(Boolean);
         db.exec('COMMIT');return {task:{id:row.id,lease:body.lease,text:body.text,...context,language:body.language,sharing:body.sharing,agentActions:body.agentActions===true,hasNewAttachments:files.length>0,documents,library:libraryCards(store,{id:row.owner}),messages:compactChatHistory(history)}};

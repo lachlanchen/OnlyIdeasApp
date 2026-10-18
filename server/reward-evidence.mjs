@@ -26,10 +26,13 @@ export function createRewardEvidence(store,{authorize,now=()=>Date.now()}={}){
      reference TEXT PRIMARY KEY,receipt TEXT UNIQUE NOT NULL);
    CREATE TABLE IF NOT EXISTS lac_source_finals(
      reference TEXT PRIMARY KEY,decision_id TEXT UNIQUE NOT NULL,receipt TEXT UNIQUE NOT NULL,
-     decision TEXT NOT NULL,digest TEXT NOT NULL,finalized INTEGER NOT NULL,adopted INTEGER NOT NULL);`);
+     decision TEXT NOT NULL,digest TEXT NOT NULL,finalized INTEGER NOT NULL,adopted INTEGER NOT NULL);
+   CREATE TABLE IF NOT EXISTS lac_activity_outbox(
+     reference TEXT PRIMARY KEY,owner TEXT NOT NULL,subject TEXT NOT NULL,
+     intent TEXT NOT NULL,state TEXT NOT NULL DEFAULT 'pending',created INTEGER NOT NULL);`);
  const finalized=reference=>!!store.db.prepare('SELECT 1 FROM lac_source_finals WHERE reference=?').get(reference);
  function sameIdentity(identity,subject){requireValue(identity?.issuer===B.issuer&&identity.clientId===B.clientId&&identity.audience===B.audience&&/^la_[a-f0-9]{32}$/.test(identity.subject)&&(!subject||identity.subject===subject),'Reconnect the original LazyingArt account.',401)}
- async function checkIn(user){
+ async function checkIn(user,{foreground=false}={}){
    store.requireActive(user.id);
    // This dependency must freshly validate separate points-operation consent,
    // not merely a profile token or an object from the client's request body.
@@ -39,15 +42,16 @@ export function createRewardEvidence(store,{authorize,now=()=>Date.now()}={}){
    return tx(store,()=>{
      store.requireActive(user.id);
      const existing=store.db.prepare('SELECT * FROM lac_source_evidence WHERE reference=?').get(reference);
-     if(existing){requireValue(existing.owner===user.id&&existing.subject===identity.subject,'Reward identity conflict.',409);requireValue(existing.state==='active'&&!finalized(reference),'This activity is no longer eligible.',409);return intent(existing)}
-     const record={schema:'lac-reward-evidence-v1',issuer:B.issuer,subject:identity.subject,actor:B.clientId,event_id:event,occurred_at:occurred,evidence_ref:reference,kind:'daily-activity',review_reference:'oi-checkin-'+key,
-       facts:{source_record_id:event,activity_rule:'onlyideas-daily-check-in-v1',successful_activity:true,server_observed:true}};
+     const enqueue=row=>{const event=intent(row);if(foreground)store.db.prepare('INSERT OR IGNORE INTO lac_activity_outbox(reference,owner,subject,intent,created) VALUES(?,?,?,?,?)').run(reference,user.id,identity.subject,canonicalEvidence(event),occurred);return event};
+     if(existing){requireValue(existing.owner===user.id&&existing.subject===identity.subject,'Reward identity conflict.',409);requireValue(existing.state==='active'&&!finalized(reference),'This activity is no longer eligible.',409);return enqueue(existing)}
+     const record={schema:foreground?'lac-activity-evidence-v2':'lac-reward-evidence-v1',issuer:B.issuer,subject:identity.subject,actor:B.clientId,event_id:event,occurred_at:occurred,evidence_ref:reference,kind:'daily-activity',review_reference:'oi-checkin-'+key,
+       facts:{source_record_id:event,activity_rule:foreground?'onlyideas-foreground-use-v2':'onlyideas-daily-check-in-v1',successful_activity:true,server_observed:true}};
      const raw=canonicalEvidence(record);requireValue(Buffer.byteLength(raw)<=8192,'Evidence is too large.');
      store.db.prepare('INSERT INTO lac_source_evidence(reference,owner,subject,event,kind,occurred,record,digest) VALUES(?,?,?,?,?,?,?,?)').run(reference,user.id,identity.subject,event,record.kind,occurred,raw,hash(raw));
-     return intent(store.db.prepare('SELECT * FROM lac_source_evidence WHERE reference=?').get(reference));
+     return enqueue(store.db.prepare('SELECT * FROM lac_source_evidence WHERE reference=?').get(reference));
    });
  }
- const intent=row=>({policy_id:'lac-daily-activity',policy_version:1,event_id:row.event,occurred_at:row.occurred,evidence_ref:row.reference,evidence_sha256:row.digest});
+ const intent=row=>({policy_id:'lac-daily-activity',policy_version:JSON.parse(row.record).schema==='lac-activity-evidence-v2'?2:1,event_id:row.event,occurred_at:row.occurred,evidence_ref:row.reference,evidence_sha256:row.digest});
  async function read({issuer,subject,actor,reference,scope,signal}){
    requireValue(issuer===B.issuer&&actor===B.clientId&&['lac.points.intents.write','lac.points.intents.reverse'].includes(scope),'Evidence not available.',404);
    const row=store.db.prepare('SELECT * FROM lac_source_evidence WHERE reference=? AND subject=?').get(reference,subject);
@@ -58,16 +62,16 @@ export function createRewardEvidence(store,{authorize,now=()=>Date.now()}={}){
    return {record:JSON.parse(row.record),eligible:true};
  }
  async function eligible({issuer,subject,actor,policy_id,policy_version,phase,event,signal}){
-   if(policy_id!=='lac-daily-activity'||policy_version!==1||!['intake','award'].includes(phase))return false;
+   if(policy_id!=='lac-daily-activity'||![1,2].includes(policy_version)||!['intake','award'].includes(phase))return false;
    const row=store.db.prepare('SELECT * FROM lac_source_evidence WHERE reference=? AND subject=?').get(event.evidence_ref,subject);
-   if(!row||row.state!=='active'||!store.active(row.owner)||canonicalEvidence(intent(row))!==canonicalEvidence(event))return false;
+   if(!row||row.state!=='active'||!store.active(row.owner)||event.policy_version!==policy_version||canonicalEvidence(intent(row))!==canonicalEvidence(event))return false;
    try{return (await read({issuer,subject,actor,reference:row.reference,scope:'lac.points.intents.write',signal})).eligible}
    catch(e){if([401,403,404].includes(e.status))return false;throw e}
  }
- function hold(owner){store.db.prepare("UPDATE lac_source_evidence SET state='held' WHERE owner=? AND state='active'").run(owner)}
+ function hold(owner){tx(store,()=>{store.db.prepare("UPDATE lac_source_evidence SET state='held' WHERE owner=? AND state='active'").run(owner);store.db.prepare("UPDATE lac_activity_outbox SET state='held' WHERE owner=? AND state='pending'").run(owner)})}
  // A verified original-subject reconnection can resume only that subject's rows.
- async function resume(owner){store.requireActive(owner);const identity=await authorize(owner,'lac.points.intents.write');sameIdentity(identity);store.requireActive(owner);store.db.prepare("UPDATE lac_source_evidence SET state='active' WHERE owner=? AND subject=? AND state='held'").run(owner,identity.subject)}
- function remove(owner){store.db.prepare("UPDATE lac_source_evidence SET state='deleted' WHERE owner=?").run(owner)}
+ async function resume(owner){store.requireActive(owner);const identity=await authorize(owner,'lac.points.intents.write');sameIdentity(identity);store.requireActive(owner);tx(store,()=>{store.db.prepare("UPDATE lac_source_evidence SET state='active' WHERE owner=? AND subject=? AND state='held'").run(owner,identity.subject);store.db.prepare("UPDATE lac_activity_outbox SET state='pending' WHERE owner=? AND subject=? AND state='held'").run(owner,identity.subject)})}
+ function remove(owner){tx(store,()=>{store.db.prepare("UPDATE lac_source_evidence SET state='deleted' WHERE owner=?").run(owner);store.db.prepare("UPDATE lac_activity_outbox SET state='deleted' WHERE owner=?").run(owner)})}
  function validateBinding({issuer,subject,actor,event}){
    requireValue(issuer===B.issuer&&actor===B.clientId&&typeof subject==='string'&&/^la_[a-f0-9]{32}$/.test(subject),'Source decision binding conflict.',409);
    requireValue(exact(event,eventKeys)&&identifier(event.policy_id)&&positive(event.policy_version)&&identifier(event.event_id)&&positive(event.occurred_at)&&identifier(event.evidence_ref)&&typeof event.evidence_sha256==='string'&&/^[a-f0-9]{64}$/.test(event.evidence_sha256),'Invalid source decision.');
@@ -136,6 +140,7 @@ export function createRewardEvidence(store,{authorize,now=()=>Date.now()}={}){
        store.db.prepare('DELETE FROM lac_source_evidence WHERE reference=?').run(reference);
        store.db.prepare('DELETE FROM lac_source_intakes WHERE reference=?').run(reference);
        store.db.prepare('DELETE FROM lac_source_finals WHERE reference=?').run(reference);
+       store.db.prepare('DELETE FROM lac_activity_outbox WHERE reference=?').run(reference);
      }
      return rows.length;
    });

@@ -56,6 +56,8 @@ public class MainActivity extends AppCompatActivity {
   private ScrollView chatScroll;
   private EditText composer;
   private String agentDraft="";
+  private JSONObject recommendations;
+  private int recommendationsEpoch=-1;
   private int agentScrollY=0;
   private boolean followAgent=true;
   private Button jumpLatest;
@@ -164,6 +166,7 @@ public class MainActivity extends AppCompatActivity {
   @Override
   protected void onResume() {
     super.onResume();
+    if(api!=null&&account!=null){final String session=api.token();io.execute(()->{try{api.jsonBound("/api/lac/activity","POST",object("kind","foreground"),session);}catch(Exception ignored){}});}
     handler.removeCallbacks(poll);
     handler.postDelayed(poll, 2000);
     if (api != null && api.get("onlyideas.native.flow") != null) completeLogin();
@@ -923,6 +926,7 @@ public class MainActivity extends AppCompatActivity {
             }),
         new LinearLayout.LayoutParams(0, dp(48), 1));
     actions.addView(sharingButton());
+    Button interests=button("◎",false,this::editInterests);interests.setContentDescription(t("Reading interests"));actions.addView(interests,new LinearLayout.LayoutParams(dp(44),dp(48)));
     content.addView(actions);
     chatScroll = new ScrollView(this);
     chatScroll.setFillViewport(true);
@@ -978,6 +982,45 @@ public class MainActivity extends AppCompatActivity {
     chatScroll.post(()->chatScroll.scrollTo(0,agentScrollY));
     if (!chatId.isEmpty()) loadChat(false);
     else resumeChat();
+    loadInterests();
+  }
+
+  void loadInterests() {
+    if(account==null){recommendations=null;return;}
+    final int epoch=authEpoch;final String session=api.token();
+    job(()->api.jsonBound("/api/chats","GET",null,session),r->{
+      if(epoch!=authEpoch||!Objects.equals(session,api.token()))return;
+      JSONObject value=r.optJSONObject("recommendations");
+      boolean changed=recommendationsEpoch!=epoch||!String.valueOf(value).equals(String.valueOf(recommendations));
+      recommendations=value;recommendationsEpoch=epoch;
+      if(changed&&page.equals("agent"))renderMessages();
+    },false);
+  }
+  void editInterests() {
+    if(account==null){signIn();return;}
+    if(recommendationsEpoch!=authEpoch||recommendations==null){loadInterests();return;}
+    final int epoch=authEpoch;
+    EditText input=new EditText(this);input.setText(recommendations.optString("interests"));input.setTextSize(17);
+    input.setHint(t("For example: health, technology, art or climate"));input.setContentDescription(t("Topics you enjoy"));
+    input.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(120)});
+    LinearLayout form=column();form.setPadding(dp(20),dp(8),dp(20),dp(8));caption(form,t("Tell me a few topics you enjoy. I can use them for your daily papers."));form.addView(input);
+    final String[] attempt={"", ""};
+    AlertDialog dialog=new AlertDialog.Builder(this).setTitle(t("Reading interests")).setView(form).setNegativeButton(t("Cancel"),null).setPositiveButton(t("Save interests"),null).create();
+    dialog.setOnShowListener(d->dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v->{
+      if(epoch!=authEpoch){dialog.dismiss();return;}
+      String text=input.getText().toString().trim();if(text.isEmpty()){input.setError(t("Tell me a few topics you enjoy."));return;}
+      if(!attempt[0].equals(text)||attempt[1].isEmpty()){attempt[0]=text;attempt[1]=java.util.UUID.randomUUID().toString();}
+      saveInterests(text,false,attempt[1],dialog);
+    }));dialog.show();
+  }
+  void saveInterests(String text,boolean skip,String requestID,AlertDialog dialog) {
+    final int epoch=authEpoch;final String session=api.token(),selectedChat=chatId;
+    job(()->api.jsonBound("/api/chats/interests","POST",new JSONObject().put("text",text).put("skip",skip).put("requestId",requestID).put("chatId",selectedChat),session),r->{
+      if(epoch!=authEpoch||!Objects.equals(session,api.token())){if(dialog!=null)dialog.dismiss();return;}
+      recommendations=r.optJSONObject("recommendations");recommendationsEpoch=epoch;
+      if(chatId.equals(selectedChat)&&r.optJSONObject("chat")!=null){chatId=r.optJSONObject("chat").optString("id");rememberChat();chatMessages=r.optJSONArray("messages");lastMessages="";}
+      if(dialog!=null)dialog.dismiss();if(page.equals("agent"))renderMessages();
+    });
   }
 
   void renderDraftAttachments() {
@@ -991,6 +1034,13 @@ public class MainActivity extends AppCompatActivity {
   void renderMessages() {
     if (!page.equals("agent") || messages == null) return;
     messages.removeAllViews();
+    if(recommendationsEpoch==authEpoch && recommendations!=null && recommendations.optString("state").equals("pending")) {
+      LinearLayout prompt=card();title(prompt,t("What would you like to follow?"),20);
+      caption(prompt,t("Tell me a few topics you enjoy. I can use them for your daily papers."));
+      LinearLayout choices=row();choices.addView(button(t("Reading interests"),false,this::editInterests));
+      choices.addView(button(t("Not now"),false,()->saveInterests("",true,java.util.UUID.randomUUID().toString(),null)));
+      prompt.addView(choices);messages.addView(prompt);gap(messages,12);
+    }
     if (chatMessages.length() == 0) {
       title(messages, t("What are you curious about?"), 27);
       gap(messages, 16);

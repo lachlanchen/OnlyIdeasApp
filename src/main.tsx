@@ -1,4 +1,5 @@
 import {ReadingShare} from './ReadingShare'
+import {observeForegroundUse} from './activity'
 import {SharedPoints,type SharedPointsState} from './SharedPoints'
 import {SharedAccount} from './SharedAccount'
 import {sharedSignIn} from './native'
@@ -36,6 +37,8 @@ function App() {
   const openRequest = useRef(0)
   function clearPaper() { openRequest.current++; setPaper(null) }
   const [session, setSession] = useState<Session | null>(null), [papers, setPapers] = useState<Paper[]>([]), [paper, setPaper] = useState<Paper | null>(null)
+  const activityUser=useRef(false);activityUser.current=!!session?.user
+  useEffect(()=>observeForegroundUse(()=>activityUser.current),[])
   useEffect(()=>{let active=true;const id=session?.user?.id;if(!id){setInboxUnread(0);return};const load=async()=>{try{const r=await api<{unread:number}>('/inbox');if(active)setInboxUnread(r.unread)}catch{}};void load();const timer=setInterval(()=>{if(document.visibilityState==='visible')void load()},30000);return()=>{active=false;clearInterval(timer)}},[session?.user?.id,page])
   const [loading, setLoading] = useState(true), [message, setMessage] = useState(''), [query, setQuery] = useState(''), [shelf, setShelf] = useState(new URLSearchParams(location.search).get('view')==='community'?'Community':'All papers')
   const [add, setAdd] = useState(false), [login, setLogin] = useState(false), [jobs, setJobs] = useState<Job[]>([]), [jobPanel, setJobPanel] = useState(false)

@@ -1,5 +1,22 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {mkdtempSync,rmSync} from 'node:fs';import {tmpdir} from 'node:os';import {join} from 'node:path';import {Store} from '../server/store.mjs';import {hash} from '../server/domain.mjs';import {PROFILE_BINDING as B} from '../server/lazyingart-profile.mjs';import {canonicalEvidence,createRewardEvidence} from '../server/reward-evidence.mjs';
 function fixture(t){const dir=mkdtempSync(join(tmpdir(),'onlyideas-rewards-')),store=new Store(dir);t.after(()=>{store.close();rmSync(dir,{recursive:true,force:true})});const s={store,time:1900000000000,identity:{...B,subject:'la_'+'1'.repeat(32)},active:true};s.authorize=async(owner,scope)=>{assert.equal(owner,'reader');assert.ok(scope.startsWith('lac.points.'));if(!s.active)throw Error('consent revoked');return s.identity};s.evidence=createRewardEvidence(store,{authorize:s.authorize,now:()=>s.time});s.read=intent=>s.evidence.read({issuer:B.issuer,actor:B.clientId,subject:s.identity.subject,reference:intent.evidence_ref,scope:'lac.points.intents.write'});return s}
+test('foreground use records v2 evidence and outbox atomically, deduplicating old check-in and concurrent opens',async t=>{
+ const s=fixture(t),user={id:'reader'};
+ const old=await s.evidence.checkIn(user);
+ assert.deepEqual(await s.evidence.checkIn(user,{foreground:true}),old);
+ assert.equal(s.store.db.prepare('SELECT count(*) n FROM lac_activity_outbox').get().n,1);
+ s.time+=86400_000;
+ const claims=await Promise.all(Array.from({length:8},()=>s.evidence.checkIn(user,{foreground:true})));
+ assert.ok(claims.every(c=>c.event_id===claims[0].event_id));assert.equal(claims[0].policy_version,2);
+ const {record}=await s.read(claims[0]);assert.equal(record.schema,'lac-activity-evidence-v2');assert.equal(record.facts.activity_rule,'onlyideas-foreground-use-v2');
+ assert.equal(s.store.db.prepare('SELECT count(*) n FROM lac_source_evidence').get().n,2);assert.equal(s.store.db.prepare('SELECT count(*) n FROM lac_activity_outbox').get().n,2);
+ s.evidence.hold(user.id);assert.equal(s.store.db.prepare("SELECT count(*) n FROM lac_activity_outbox WHERE state='pending'").get().n,0);
+ s.identity.subject='la_'+'2'.repeat(32);await s.evidence.resume(user.id);assert.equal(s.store.db.prepare("SELECT count(*) n FROM lac_activity_outbox WHERE state='pending'").get().n,0);
+ s.identity.subject='la_'+'1'.repeat(32);await s.evidence.resume(user.id);assert.equal(s.store.db.prepare("SELECT count(*) n FROM lac_activity_outbox WHERE state='pending'").get().n,2);
+ s.time+=86400_000;s.store.db.exec("CREATE TRIGGER refuse_outbox BEFORE INSERT ON lac_activity_outbox BEGIN SELECT RAISE(ABORT,'fixture disk failure'); END");
+ await assert.rejects(s.evidence.checkIn(user,{foreground:true}));assert.equal(s.store.db.prepare('SELECT count(*) n FROM lac_source_evidence').get().n,2);
+ assert.equal(s.store.db.prepare('SELECT count(*) n FROM credit_ledger').get().n,0);
+});
 test('daily check-in is durable and idempotent; source never grants a local or shared balance',async t=>{
  const s=fixture(t),a=await s.evidence.checkIn({id:'reader'}),b=await s.evidence.checkIn({id:'reader'});assert.deepEqual(a,b);
  const result=await s.read(a);assert.equal(result.eligible,true);assert.equal(hash(canonicalEvidence(result.record)),a.evidence_sha256);assert.equal(result.record.facts.activity_rule,'onlyideas-daily-check-in-v1');

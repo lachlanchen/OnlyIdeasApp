@@ -53,3 +53,9 @@ mjx-assistive-mml { position: absolute !important; width: 1px !important; height
 
 .agent-conversation { position: relative; }
 .agent-jump { position:absolute;right:16px;bottom:80px;z-index:2;display:flex;align-items:center;gap:6px;border-radius:24px;padding:9px 12px;box-shadow:0 3px 14px #0002;background:var(--surface);font-size:13px; }
+
+.agent-interests {max-width:46rem;margin:0 auto 1rem;padding:.75rem 1rem;border:1px solid var(--line,#d6dce1);border-radius:16px;}
+.agent-interests p {margin:.5rem 0;font-size:1rem;}
+.agent-interests label {display:block;font-size:.9rem;}
+.agent-interests input {width:100%;min-width:0;box-sizing:border-box;margin-top:.3rem;padding:.7rem .8rem;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);font:inherit;}
+.interest-actions {display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.6rem;}

@@ -1,5 +1,21 @@
 # OnlyIdeas · product contract
 
+## Personal recommendations and foreground rewards · 2026-10-18
+
+New readers start with research across disciplines. Agent asks which topics they
+would like to follow and lets them save or skip the choice. Interests remain
+editable; existing saved topics and notification preferences are preserved.
+This preference operation must work without an inference provider and must not
+change the meaning of ordinary research requests or consume an agent turn.
+
+The owner now requests the daily shared LAC reward from opening and using the
+app, without a check-in button, plus reading, public contributions, comments and
+replies. This supersedes the manual-check-in-only candidate. Coin owns policy
+amounts, caps and canonical deduplication; apps supply durable authenticated
+evidence. The foreground producer and atomic outbox are prepared but disabled
+until app-specific consent, delivery and live qualification pass. No local
+credit grant or cryptocurrency conversion follows from recording an event.
+
 ## Final reward reconciliation · 2026-10-16
 
 OnlyIdeas accepts Coin's `app-lac-source-final-v1` lifecycle for the future shared

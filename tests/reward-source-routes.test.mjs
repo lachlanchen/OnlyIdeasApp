@@ -5,12 +5,12 @@ import {hash} from '../server/domain.mjs';import {canonicalEvidence} from '../se
 const {createApp}=await import(process.env.ONLYIDEAS_SOURCE_CANDIDATE_APP||'../server/app.mjs');
 const subject='la_'+'1'.repeat(32),secret='s'.repeat(64),origin='https://agent.onlyideas.art';
 const common={schema_version:1,issuer:B.issuer,subject,actor:B.clientId,nonce:'a'.repeat(48)};
-async function fixture(t,{qualified=true,deadlineMs=4000,enabled=true}={}){
+async function fixture(t,{qualified=true,deadlineMs=4000,enabled=true,foregroundEnabled=false}={}){
  const dir=mkdtempSync(join(tmpdir(),'oi-source-routes-')),secretFile=join(dir,'source.secret');writeFileSync(secretFile,secret,{mode:0o600});const store=new Store(dir);t.after(()=>{store.close();rmSync(dir,{recursive:true,force:true})});
  const s={store,dir,secretFile,scope:'lac.points.intents.write',subject,error:null,hook:null};
  const authorize=async(owner,scope,options)=>{assert.equal(owner,'reader');await s.hook?.(options);if(s.error)throw s.error;return{...B,subject:s.subject,scope:s.scope}};
  s.evidence=createRewardEvidence(store,{authorize});s.event=await s.evidence.checkIn({id:'reader'});
- const config={origin,rewardSource:{enabled,secretFile}};
+ const config={origin,rewardSource:{enabled,secretFile,foregroundEnabled}};
  const app=createApp(store,config,{worker:false,rewardSourceOptions:{deadlineMs,...(qualified?{authorization:{qualified:true,binding:B,prove:authorize}}:{})}});
  await new Promise(r=>app.listen(0,'127.0.0.1',r));t.after(()=>new Promise(r=>{app.close(r);app.closeAllConnections()}));
  s.call=(path,data,options={})=>new Promise((resolve,reject)=>{
@@ -68,4 +68,16 @@ test('timed-out proofs retain concurrency slots until they settle',async t=>{
 test('disabled configuration performs no secret I/O or source-table migration; key permissions are enforced',t=>{
  const dir=mkdtempSync(join(tmpdir(),'oi-source-key-')),store=new Store(dir);t.after(()=>{store.close();rmSync(dir,{recursive:true,force:true})});assert.equal(createRewardSourceRoutes(store,{origin,rewardSource:{enabled:false,secretFile:'/nonexistent'}}).enabled,false);assert.equal(store.db.prepare("SELECT count(*) n FROM sqlite_master WHERE name='lac_source_evidence'").get().n,0);
  const file=join(dir,'key');writeFileSync(file,secret,{mode:0o600});assert.equal(readSourceSecret(file),secret);chmodSync(file,0o644);assert.throws(()=>readSourceSecret(file),{status:503});chmodSync(file,0o600);symlinkSync(file,join(dir,'symlink'));assert.throws(()=>readSourceSecret(join(dir,'symlink')),{status:503});assert.throws(()=>readSourceSecret('relative'),{status:503});
+});
+
+test('foreground client endpoint uses app authentication and separate points consent; no client award amount',async t=>{
+ const s=await fixture(t,{foregroundEnabled:true});const token=s.store.createSession({id:'reader'});
+ const headers={'X-Lac-Source-Key':'',Cookie:`__Host-onlyideas=${token}`,Origin:origin};
+ assert.equal((await s.call('/api/lac/activity',{kind:'foreground'},{headers:{Origin:origin}})).status,401);
+ assert.equal((await s.call('/api/lac/activity',{kind:'foreground'},{headers:{...headers,Origin:'https://evil.test'}})).status,403);
+ assert.equal((await s.call('/api/lac/activity',{kind:'foreground',points:500},{headers})).status,400);
+ const response=await s.call('/api/lac/activity',{kind:'foreground'},{headers});assert.equal(response.status,200);assert.equal(response.body.state,'pending');
+ assert.equal(s.store.db.prepare('SELECT count(*) n FROM lac_activity_outbox').get().n,1);
+ s.scope='profile';assert.equal((await s.call('/api/lac/activity',{kind:'foreground'},{headers})).status,403);
+ assert.equal(s.store.db.prepare('SELECT count(*) n FROM credit_ledger').get().n,0);
 });

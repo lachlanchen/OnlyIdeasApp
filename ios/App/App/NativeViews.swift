@@ -78,12 +78,12 @@ struct NativeReadingApp: View {
       if value != nil {tab=2;if store.account==nil {store.showSignIn=true}}
     }
     .sheet(item:$sharedPaper){paper in NavigationView{NativePaper(paper:paper).toolbar{Button(T("Done")){sharedPaper=nil}}}.environmentObject(store)}
-    .task { await store.refresh();if let link=ReadingLink.pending{openReadingLink(link)} }
+    .task { await store.refresh();await store.recordForegroundUse();if let link=ReadingLink.pending{openReadingLink(link)} }
     .onReceive(NotificationCenter.default.publisher(for: Notification.Name("OnlyIdeas.SignInReturn"))) { event in
       if let url = event.object as? URL { if ReadingLink.accepts(url){openReadingLink(url)}else{store.handleSignInURL(url)} }
     }
     .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
-      Task { await store.resumeSignIn() }
+      Task { await store.recordForegroundUse();await store.resumeSignIn() }
     }
     .onChange(of:tab){_ in dismissReadingKeyboard()}
     .onChange(of:store.account?.id){id in if id==nil {ReadingReminder.cancel();store.inboxUnread=0}}
@@ -284,12 +284,22 @@ struct NativeAgent: View {
   @State private var awayFromLatest = false
   @State private var draggingMessages = false
   @State private var paperMention=false
+  @State private var interestEditor=false
   var body: some View {
     VStack(spacing: 0) {
       ScrollViewReader { proxy in
         GeometryReader { viewport in
         ScrollView {
           VStack(alignment: .leading, spacing: 12) {
+            if store.recommendationSetup != nil {
+              VStack(alignment:.leading,spacing:8) {
+                Button(T(store.recommendationSetup=="pending" ? "What would you like to follow?":"Reading interests")){interestEditor=true}
+                if store.recommendationSetup=="pending" {
+                  Text(T("Tell me a few topics you enjoy. I can use them for your daily papers.")).font(.subheadline).foregroundColor(.secondary)
+                  Button(T("Not now")){Task{_ = await store.saveResearchInterests("",requestID:UUID().uuidString.lowercased(),skip:true)}}.font(.subheadline)
+                }
+              }.padding(12).frame(maxWidth:.infinity,alignment:.leading).background(Color(.secondarySystemGroupedBackground)).cornerRadius(14)
+            }
             if store.messages.isEmpty { welcome }
             ForEach(store.messages) { message in
               AgentBubble(message: message, requests: $requests, availableWidth: min(900, max(0, viewport.size.width - 28)))
@@ -376,6 +386,7 @@ struct NativeAgent: View {
     }
     .sheet(isPresented: $requests) { NativeRequests() }
     .sheet(isPresented: $options) { NativeSharingOptions() }
+    .sheet(isPresented:$interestEditor){NativeAgentInterests().environmentObject(store)}
     .sheet(isPresented:$paperMention){NativePaperMentionPicker { paper in
       if store.draftReferences.count<3 && !store.draftReferences.contains(where:{$0.id==paper.id}) {store.draftReferences.append(paper)}
       if store.agentDraft.hasSuffix("@") {store.agentDraft.removeLast()};paperMention=false
@@ -399,8 +410,9 @@ struct NativeAgent: View {
     .sheet(isPresented:$photoPicker) { NativePhotoPicker { bytes in photoPicker=false;if let bytes { Task { await store.attachData(bytes,name:"Photo.jpg") } } } }
     .onChange(of: requests) { if $0 { dismissReadingKeyboard() } }
     .onChange(of: isActive) { if !$0 { dismissReadingKeyboard() } }
-    .task(id: isActive) {
+    .task(id: "\(isActive)-\(store.account?.id ?? "")") {
       guard isActive else { return }
+      await store.loadConversations()
       await store.resumeConversation()
       while !Task.isCancelled {
         if let id = store.conversationID { await store.loadConversation(id) }
@@ -467,6 +479,29 @@ struct NativeAgent: View {
       }.padding(8).background(Color(.secondarySystemGroupedBackground)).cornerRadius(22)
     }.frame(maxWidth: 900).padding(.horizontal, 12).padding(.vertical, 6)
       .frame(maxWidth: .infinity).background(Color(.systemGroupedBackground))
+  }
+}
+struct NativeAgentInterests:View {
+  @EnvironmentObject var store:ReadingStore
+  @Environment(\.dismiss) private var dismiss
+  @State private var text=""
+  @State private var requestID=UUID().uuidString.lowercased()
+  @State private var busy=false
+  @State private var owner:String?
+  var body:some View {
+    NavigationView {
+      Form {
+        Text(T("Tell me a few topics you enjoy. I can use them for your daily papers."))
+        TextField(T("For example: health, technology, art or climate"),text:$text).accessibilityLabel(T("Topics you enjoy"))
+          .onChange(of:text){value in if value.count>120 {text=String(value.prefix(120))};requestID=UUID().uuidString.lowercased()}
+        Button(T("Save interests")) {
+          guard owner==store.account?.id else {dismiss();return}
+          busy=true
+          Task{let saved=await store.saveResearchInterests(text,requestID:requestID);busy=false;if saved {dismiss()}}
+        }.disabled(busy||text.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty)
+      }.navigationTitle(T("Reading interests")).toolbar{Button(T("Cancel")){dismiss()}}
+    }.onAppear{owner=store.account?.id;text=store.researchInterests}
+      .onChange(of:store.account?.id){_ in dismiss()}
   }
 }
 struct AgentBubble: View {

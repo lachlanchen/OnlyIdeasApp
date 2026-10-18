@@ -2,6 +2,7 @@ import {randomUUID} from 'node:crypto';
 import {requireValue,hash,languages} from './domain.mjs';
 import {taxonomy} from './research-indexes.mjs';
 import {defaultInterests,currentInterests} from './research-focus.mjs';
+import {interestState} from './research-preferences.mjs';
 export function initReadingSpace(store){store.db.exec(`
  CREATE TABLE IF NOT EXISTS reading_preferences(owner TEXT PRIMARY KEY,body TEXT NOT NULL);
  CREATE TABLE IF NOT EXISTS reading_activity(id TEXT PRIMARY KEY,owner TEXT NOT NULL,kind TEXT NOT NULL,ref TEXT NOT NULL,body TEXT NOT NULL,created INTEGER NOT NULL);
@@ -16,10 +17,10 @@ export function recordActivity(store,owner,kind,ref,body={},id=randomUUID()){
 export function createReadingSpace(store,social,discovery){
  initReadingSpace(store);const db=store.db,pending=new Map();
  const defaults={interests:defaultInterests,discipline:'',language:'en',dailyEnabled:false,dailyTime:'09:00',timezone:'UTC',commentAlerts:true,likeAlerts:true};
- function preferences(user){const p={...defaults,...JSON.parse(db.prepare('SELECT body FROM reading_preferences WHERE owner=?').get(user.id)?.body||'{}')};p.interests=currentInterests(p.interests);return p}
+ function preferences(user){const p={...defaults,...JSON.parse(db.prepare('SELECT body FROM reading_preferences WHERE owner=?').get(user.id)?.body||'{}')};p.interests=currentInterests(p.interests);p.interestSetup=interestState(p).state;return p}
  function savePreferences(user,b){const old=preferences(user),p={...old};
   for(const k of ['dailyEnabled','commentAlerts','likeAlerts']){if(k in b){requireValue(typeof b[k]==='boolean','Choose a valid notification setting.');p[k]=b[k]}}
-  if('interests'in b){requireValue(typeof b.interests==='string'&&b.interests.length<=120,'Use up to 120 characters for your interests.');p.interests=b.interests.replace(/[\x00-\x1f]/g,' ').trim()}
+  if('interests'in b){requireValue(typeof b.interests==='string'&&b.interests.length<=120,'Use up to 120 characters for your interests.');p.interests=b.interests.replace(/[\x00-\x1f]/g,' ').trim();p.interestSetup=p.interests?'chosen':'skipped'}
   if('discipline'in b){requireValue(b.discipline===''||taxonomy.openalex.some(d=>d.id===b.discipline),'Choose a discipline.');p.discipline=b.discipline}
   if('language'in b){requireValue(languages[b.language],'Choose a supported reading language.');p.language=b.language}
   if('dailyTime'in b){requireValue(/^([01]\d|2[0-3]):[0-5]\d$/.test(b.dailyTime),'Choose a valid daily time.');p.dailyTime=b.dailyTime}

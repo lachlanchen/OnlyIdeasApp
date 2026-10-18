@@ -191,7 +191,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         res.setHeader('Set-Cookie',[cookie(cookieName,store.createSession(result.user),90*86400),cookie(`${cookieName}-profile`,'',0)]);res.writeHead(303,{Location:'/'});return res.end();
       }
       if(path==='/api/auth/lazyingart/disconnect'&&method==='POST'){
-        requireUser();profile.disconnect?.(user.id);const signedOut=user.provider==='lazyingart';
+        requireUser();rewardSource.hold(user.id);profile.disconnect?.(user.id);const signedOut=user.provider==='lazyingart';
         if(signedOut){store.db.prepare('DELETE FROM sessions WHERE id=?').run(hash(token));if(!native)res.setHeader('Set-Cookie',cookie(cookieName,'',0))}
         return response(res,{ok:true,signedOut});
       }
@@ -208,6 +208,11 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         limit(`chat:${user?.id || req.socket.remoteAddress}`, 60);
         const result = await chats.client(path, method, user, method === 'POST' ? await json(req) : {}, enqueue);
         requireValue(result, 'Not found.', 404); return response(res, result);
+      }
+      if(path==='/api/lac/activity'&&method==='POST') {
+        requireUser();limit(`lac-activity:${user.id}`,12);
+        const body=await json(req);requireValue(body&&Object.keys(body).length===1&&body.kind==='foreground','Invalid activity.');
+        return response(res,await rewardSource.foreground(user));
       }
       const paperFor = id => { const p = store.paper(id); requireValue(p && store.active(p.owner) && !store.blocked(user?.id, p.owner) && (p.visibility === 'public' || p.owner === user?.id), 'Paper not found.', 404); return p; };
       if (path.startsWith('/api/')) limit(user?.id || req.socket.remoteAddress, 240);
@@ -286,7 +291,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         requireUser(); const b = await json(req);
         requireValue(b.confirm === 'DELETE', 'Confirm permanent account deletion.');
         await apple.revoke(user);
-        profile.remove?.(user.id);
+        rewardSource.remove(user.id);profile.remove?.(user.id);
         await deleteAccount(store, user);
         if (!native) res.setHeader('Set-Cookie', cookie(cookieName, '', 0));
         return response(res, { ok: true });
