@@ -2,6 +2,35 @@ import XCTest
 import UIKit
 
 final class NativeUITests: XCTestCase {
+  func testAdaptiveComposerPreservesDraft() {
+    continueAfterFailure = false
+    let app = XCUIApplication()
+    app.launchArguments = ["-onlyideas.native.language", "en", "--onlyideas-mac-qa"]
+    app.launch()
+    defer { XCUIDevice.shared.orientation = .portrait; app.terminate() }
+    let agent = app.tabBars.buttons["Agent"]
+    XCTAssertTrue(agent.waitForExistence(timeout: 30)); agent.tap()
+    let editor = app.textViews["Message the paper agent"]
+    XCTAssertTrue(editor.waitForExistence(timeout: 10))
+    let draft = "Keep this research question while the reading window changes."
+    editor.tap(); editor.typeText(draft)
+    let done = app.buttons["Done"].firstMatch
+    if done.exists { done.tap() }
+    for orientation in [UIDeviceOrientation.landscapeLeft, .portrait, .landscapeRight, .portrait] {
+      XCUIDevice.shared.orientation = orientation
+      XCTAssertTrue(editor.waitForExistence(timeout: 10))
+      XCTAssertEqual(editor.value as? String, draft)
+      XCTAssertGreaterThan(editor.frame.width, 100)
+      XCTAssertGreaterThanOrEqual(editor.frame.minX, app.frame.minX)
+      XCTAssertLessThanOrEqual(editor.frame.maxX, app.frame.maxX)
+      XCTAssertTrue(app.buttons["Attach files"].isHittable)
+      XCTAssertTrue(app.buttons["Send message"].isHittable)
+    }
+    app.tabBars.buttons["Library"].tap(); agent.tap()
+    XCTAssertEqual(editor.value as? String, draft)
+    XCTAssertFalse(app.alerts.firstMatch.exists)
+    shot("Compatibility35-draft-portrait")
+  }
   func testChatMessageLayout() {
     continueAfterFailure=false
     let app=XCUIApplication()

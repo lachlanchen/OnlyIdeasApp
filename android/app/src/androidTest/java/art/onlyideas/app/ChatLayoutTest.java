@@ -24,6 +24,35 @@ public class ChatLayoutTest {
     if(view instanceof ViewGroup group)for(int i=0;i<group.getChildCount();i++){View found=avatar(group.getChildAt(i),label);if(found!=null)return found;}
     return null;
   }
+  @Test public void rotationPreservesComposerAndReaderInstance() throws Exception {
+    var instrumentation=InstrumentationRegistry.getInstrumentation();
+    var context=instrumentation.getTargetContext();
+    assertTrue(context.getPackageName().endsWith(".chatqa"));
+    MainActivity activity=(MainActivity)instrumentation.startActivitySync(new Intent(context,MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+    var composer=MainActivity.class.getDeclaredField("composer");composer.setAccessible(true);
+    var reader=MainActivity.class.getDeclaredField("reader");reader.setAccessible(true);
+    var document=MainActivity.class.getDeclaredField("document");document.setAccessible(true);
+    try {
+      instrumentation.runOnMainSync(()->{activity.showAgent();try{((android.widget.EditText)composer.get(activity)).setText("Unsent compatibility draft");}catch(Exception e){throw new RuntimeException(e);}});
+      Object initialComposer=composer.get(activity);
+      instrumentation.runOnMainSync(()->activity.setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE));
+      for(int i=0;i<50&&activity.getResources().getConfiguration().orientation!=android.content.res.Configuration.ORIENTATION_LANDSCAPE;i++)Thread.sleep(100);
+      instrumentation.waitForIdleSync();
+      assertEquals(android.content.res.Configuration.ORIENTATION_LANDSCAPE,activity.getResources().getConfiguration().orientation);
+      assertSame(initialComposer,composer.get(activity));
+      assertEquals("Unsent compatibility draft",((android.widget.EditText)composer.get(activity)).getText().toString());
+      JSONObject fixture=new JSONObject().put("paper",new JSONObject().put("id","compatibility-fixture").put("title","Reading resize check").put("language","en").put("mmd","# Reading resize check\n\n"+"A paragraph with $E=mc^2$.\n\n".repeat(80))).put("figures",new JSONObject());
+      instrumentation.runOnMainSync(()->{try{document.set(activity,fixture);activity.showReader();}catch(Exception e){throw new RuntimeException(e);}});
+      Object initialReader=reader.get(activity);
+      Thread.sleep(1500);
+      instrumentation.runOnMainSync(()->activity.setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT));
+      for(int i=0;i<50&&activity.getResources().getConfiguration().orientation!=android.content.res.Configuration.ORIENTATION_PORTRAIT;i++)Thread.sleep(100);
+      instrumentation.waitForIdleSync();
+      assertEquals(android.content.res.Configuration.ORIENTATION_PORTRAIT,activity.getResources().getConfiguration().orientation);
+      assertSame(initialReader,reader.get(activity));
+      assertFalse(activity.isFinishing());
+    } finally {instrumentation.runOnMainSync(activity::finish);}
+  }
   @Test public void messagesHaveVisibleAvatarsAndSeparateSides() throws Exception {
     var instrumentation=InstrumentationRegistry.getInstrumentation();
     var context=instrumentation.getTargetContext();

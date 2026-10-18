@@ -31,3 +31,6 @@ article>*{max-width:100%;min-width:0}
 .paragraph-comment{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;margin-inline-start:5px;padding:5px;border:1px solid transparent;border-radius:50%;vertical-align:middle;background:var(--soft);color:var(--accent);opacity:.8;cursor:pointer;touch-action:manipulation;user-select:none}.paragraph-comment:focus-visible{outline:2px solid var(--accent)}
 
 .source-attribution{font-size:.8em;line-height:1.5;opacity:.75;margin-top:2em;border-top:1px solid #8885;padding-top:1em;overflow-wrap:anywhere}
+
+/* Native safe areas and document insets stay independent on each edge. */
+body { padding-left: max(clamp(14px,3vw,24px), env(safe-area-inset-left,0px)); padding-right: max(clamp(14px,3vw,24px), env(safe-area-inset-right,0px)); }

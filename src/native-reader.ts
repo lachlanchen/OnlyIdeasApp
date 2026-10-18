@@ -1,3 +1,4 @@
+import { preserveReadingViewport } from './reading-viewport'
 import { watchEditions } from './watch-prose'
 import { paragraphActions } from './paragraphs'
 import {cleanDocument,pairReading,readingMode,type ReadingView,type ReadingMode} from './parallel-reader'
@@ -8,11 +9,13 @@ const host = window as unknown as { markdownToHTML: (s: string,o: object)=>strin
 const root=document.getElementById('paper')!
 host.OnlyIdeasStyle=(size,dark)=>{document.documentElement.style.setProperty('--size',`${Math.max(15,Math.min(72,size))}px`);document.documentElement.dataset.theme=dark?'dark':'light'}
 host.OnlyIdeasMode=mode=>readingMode(root,mode)
+let stopViewport: (()=>void)|undefined
 let ready=false,pending:DocumentData|undefined
 host.OnlyIdeasRender=p=>{
   if(!ready){pending=p;return}
   host.OnlyIdeasStyle(p.fontSize||18,!!p.dark)
   const render=(text:string)=>host.markdownToHTML(text,{htmlTags:false,lineNumbering:true,width:Math.max(280,root.clientWidth),linkify:false,typographer:false,accessibility:{assistiveMml:true},outMath:{include_svg:true}})
+  stopViewport?.()
   root.innerHTML=cleanDocument(render(p.mmd))
   if(p.comments)paragraphActions(root,p.commentLabel||'Discuss paragraph',(quote,paragraphId)=>{host.webkit?.messageHandlers.onlyideas.postMessage({action:'paragraph',quote,paragraphId});host.NativeReader?.paragraph?.(quote,paragraphId)})
   if(p.reading)pairReading(root,p.reading,render,p.labels||{source:p.language||'Original',translation:p.reading.language,partial:'Remaining passages use the original.'})
@@ -23,6 +26,7 @@ host.OnlyIdeasRender=p=>{
   if(p.attribution){const credit=document.createElement('footer');credit.className='source-attribution';credit.textContent=p.attribution;root.append(credit)}
   host.webkit?.messageHandlers.onlyideas.postMessage({watchEditions:watchEditions(root),watchLanguage:p.reading?.language||''})
   root.dataset.ready='true'
+  stopViewport=preserveReadingViewport(document.scrollingElement as HTMLElement,root,':scope > *')
 }
 const script=document.createElement('script');script.src=rendererUrl;script.onload=()=>{ready=true;if(pending)host.OnlyIdeasRender(pending);host.NativeReader?.ready?.();host.webkit?.messageHandlers.onlyideas.postMessage({ready:true})};script.onerror=()=>{root.textContent='The equation renderer could not load. Reopen this paper to try again.'};document.head.append(script)
 document.addEventListener('selectionchange',()=>{const text=window.getSelection()?.toString().trim().slice(0,2000)||'';host.webkit?.messageHandlers.onlyideas.postMessage({quote:text});host.NativeReader?.selection(text)})

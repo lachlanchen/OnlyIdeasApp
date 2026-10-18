@@ -144,7 +144,11 @@ final class ReadingStore: NSObject, ObservableObject,
   ASWebAuthenticationPresentationContextProviding, ASAuthorizationControllerDelegate, ASAuthorizationControllerPresentationContextProviding
 {
   @Published var papers: [ResearchPaper] = []
-  @Published var account: ReadingAccount?
+  @Published var account: ReadingAccount? {
+    didSet { if oldValue?.id != account?.id { agentDraft = "" } }
+  }
+  // Owned by the scene store so layout/language reconstruction retains unsent work.
+  @Published var agentDraft = ""
   @Published var conversations: [Conversation] = []
   @Published var messages: [AgentMessage] = []
   @Published var jobs: [ReadingJob] = []
@@ -837,6 +841,7 @@ final class ReadingStore: NSObject, ObservableObject,
     } catch { if conversationID == id, identity == token { agentStatus = "Connection interrupted. Your conversation is saved." } }
   }
   func newConversation() {
+    agentDraft = ""
     draftAttachments = []
     conversationID = nil
     messages = []
@@ -846,31 +851,33 @@ final class ReadingStore: NSObject, ObservableObject,
     conversationID = chat.id
     await loadConversation(chat.id)
   }
-  func send(_ text: String) async {
+  @discardableResult
+  func send(_ text: String) async -> Bool {
     guard account != nil else {
       await signIn()
-      return
+      return false
     }
     guard !busy, !attachmentBusy, agentStatus.isEmpty, (!text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || !draftAttachments.isEmpty)
-    else { return }
+    else { return false }
     busy = true
     let identity = token
     defer { busy = false }
     do {
       await resumeConversation()
-      guard identity == token else { return }
+      guard identity == token else { return false }
       if conversationID == nil {
         let r = try await json("/api/chats", method: "POST", body: [:])
-        guard identity == token else { return }
+        guard identity == token else { return false }
         conversationID = (r["chat"] as? [String: Any])?["id"] as? String
       }
       guard let id = conversationID else { throw failure(T("Could not start the conversation.")) }
       _ = try await json("/api/chats/\(id)/messages", method: "POST", body: ["text": text, "attachments":draftAttachments.map(\.id), "language":UILanguage.current,"agentActions":true,"sharing":sharedImports ? "shared":"private"])
-      guard identity == token, conversationID == id else { return }
+      guard identity == token, conversationID == id else { return false }
       draftAttachments = []
       await loadConversation(id)
       await loadConversations()
-    } catch { self.error = error.localizedDescription }
+      return true
+    } catch { self.error = error.localizedDescription; return false }
   }
   func deleteConversation(_ chat: Conversation) async {
     do {

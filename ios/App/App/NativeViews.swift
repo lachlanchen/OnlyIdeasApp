@@ -269,7 +269,6 @@ struct PaperRow: View {
 struct NativeAgent: View {
   var isActive = true
   @EnvironmentObject var store: ReadingStore
-  @State private var draft = ""
   @State private var history = false
   @State private var requests = false
   @State private var attachPicker = false
@@ -432,22 +431,23 @@ struct NativeAgent: View {
           Button(T("Choose photo")) { if store.account==nil {Task {await store.signIn()}} else {photoPicker=true} }
         } label:{Image(systemName:"paperclip").font(.title2).frame(width:40,height:40)}.fixedSize().frame(width:44,height:44).accessibilityLabel(T("Attach files")).disabled(store.attachmentBusy||store.draftAttachments.count>=3)
         ZStack(alignment: .topLeading) {
-          if draft.isEmpty { Text(T("Ask a question or attach a file…")).font(.body).lineLimit(1).foregroundColor(.secondary).padding(.top, 7).padding(.leading, 4).allowsHitTesting(false) }
-          NativeComposerInput(text: $draft, height: $inputHeight).frame(maxWidth:.infinity).frame(height: inputHeight)
+          if store.agentDraft.isEmpty { Text(T("Ask a question or attach a file…")).font(.body).lineLimit(1).foregroundColor(.secondary).padding(.top, 7).padding(.leading, 4).allowsHitTesting(false) }
+          NativeComposerInput(text: $store.agentDraft, height: $inputHeight).frame(maxWidth:.infinity).frame(height: inputHeight)
             .accessibilityLabel(T("Message the paper agent"))
         }
         Button {
-          let text = draft
+          let text = store.agentDraft
+          let accountID = store.account?.id
           Task {
-            await store.send(text)
-            if store.error == nil { draft = "" }
+            let sent = await store.send(text)
+            if sent, accountID == store.account?.id, store.agentDraft == text { store.agentDraft = "" }
           }
         } label: {
           Image(systemName: "arrow.up").font(.title3.weight(.bold)).foregroundColor(.white)
             .frame(width: 40, height: 40).background(ideaGradient).clipShape(Circle())
         }.accessibilityLabel(T("Send message"))
           .disabled(
-            (draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && store.draftAttachments.isEmpty) || store.busy || store.attachmentBusy
+            (store.agentDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && store.draftAttachments.isEmpty) || store.busy || store.attachmentBusy
               || !store.agentStatus.isEmpty)
       }.padding(8).background(Color(.secondarySystemGroupedBackground)).cornerRadius(22)
     }.frame(maxWidth: 900).padding(.horizontal, 12).padding(.vertical, 6)

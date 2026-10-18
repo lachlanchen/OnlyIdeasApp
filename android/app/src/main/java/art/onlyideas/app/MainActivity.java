@@ -43,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
   private final ExecutorService io = Executors.newFixedThreadPool(3);
   private final Handler handler = new Handler(Looper.getMainLooper());
   private NativeSession api;
+  private Configuration previousConfiguration;
   private NativeBilling billing;
   private JSONObject billingCatalog;
   private int billingEpoch=-1,billingRequestGeneration=0;
@@ -106,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
   public void onCreate(Bundle saved) {
     androidx.core.splashscreen.SplashScreen.installSplashScreen(this);
     super.onCreate(saved);
+    previousConfiguration = new Configuration(getResources().getConfiguration());
     if(saved!=null){uploadResearch=saved.getString("uploadResearch","");uploadRecovery=saved.getString("uploadRecovery","");uploadOwner=saved.getString("uploadOwner","");recoveryShared=saved.getBoolean("recoveryShared",true);}
     getOnBackPressedDispatcher().addCallback(this, navigateBack);
     setTheme(art.onlyideas.app.R.style.AppTheme_NoActionBar);
@@ -130,8 +132,23 @@ public class MainActivity extends AppCompatActivity {
 
   @Override
   public void onConfigurationChanged(Configuration next) {
+    int changes = previousConfiguration == null ? ~0 : previousConfiguration.diff(next);
+    previousConfiguration = new Configuration(next);
     super.onConfigurationChanged(next);
     if (root == null) return;
+    int geometry = android.content.pm.ActivityInfo.CONFIG_ORIENTATION
+        | android.content.pm.ActivityInfo.CONFIG_SCREEN_SIZE
+        | android.content.pm.ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE
+        | android.content.pm.ActivityInfo.CONFIG_SCREEN_LAYOUT
+        | android.content.pm.ActivityInfo.CONFIG_KEYBOARD
+        | android.content.pm.ActivityInfo.CONFIG_KEYBOARD_HIDDEN
+        | android.content.pm.ActivityInfo.CONFIG_NAVIGATION;
+    if ((changes & ~geometry) == 0) {
+      // Existing Views and WebView reflow without throwing away the current
+      // document, selection, composer, attachment picker or in-flight operation.
+      ViewCompat.requestApplyInsets(root);
+      return;
+    }
     String current = page;
     buildRoot();
     if (current.equals("space")) showSpace();

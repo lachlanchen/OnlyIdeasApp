@@ -183,6 +183,17 @@ import WebKit
               try check("Mac message fits a readable column",frame.width>200 && frame.width<=720 && frame.minX>14 && frame.maxX<view.bounds.width-14)
               message.becomeFirstResponder();message.selectAll(nil);message.copy(nil)
               try check("Mac native selection copies complete message",UIPasteboard.general.string==message.text)
+              store.agentDraft = "Unsent research question — 未送信"
+              let oldLanguage = store.language
+              store.language = oldLanguage == "ja" ? "en" : "ja"
+              await pause()
+              store.language = oldLanguage
+              await pause()
+              try check("Composer survives native view reconstruction", textViews(view).contains { $0.isEditable && $0.text == "Unsent research question — 未送信" })
+              store.busy = true
+              let sent = await store.send(store.agentDraft)
+              store.busy = false
+              try check("Rejected send preserves unsent draft", !sent && store.agentDraft == "Unsent research question — 未送信")
               result["messageFrame"]=["x":frame.minX,"y":frame.minY,"width":frame.width,"height":frame.height]
               store.credits=nil
               NotificationCenter.default.post(name:Notification.Name("OnlyIdeas.QA.Tab"),object:2)
