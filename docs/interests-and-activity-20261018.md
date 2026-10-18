@@ -30,7 +30,7 @@ editor screenshot is reviewed and retained as a local draft.
 The app-emitted Bunko and OnlyIdeas daily records passed Coin's actual candidate
 verifier/ledger in a disposable database: one5-point award and one semantic
 duplicate conflict for the same canonical subject/day. No live points were
-created. New iOS/Catalyst code still needs the next serialized Apple build/QA.
+created. The Apple build and native QA results are recorded below.
 
 The recommendation backend/PWA overlay was deployed on 2026-10-18 at
 03:54:43 UTC. The public bundle matches the candidate hash, health and public
@@ -39,7 +39,7 @@ The immutable overlay is `interests-78d88332d23d4b44`, based on the prior
 qualified service. A consistent database backup was retained; all52 application
 tables and protected configuration were unchanged. Native build36 does not
 contain the new interest editor. Android37 is now available on the existing
-internal track. Apple37 is locally prepared for its separate serialized slot.
+internal track. Apple37 passed native QA and packaging; its delivery result is recorded below.
 The reward source remains disabled. Actual app callback/points consent,
 authenticated delivery/outbox dispatch and a bounded live round trip remain
 required. Reading/discussion producers and the shared work/rights registry are
@@ -66,3 +66,24 @@ helpers match the working authenticated API client, but native provider validati
 and TestFlight delivery still require a new upload-only slot. The existing signed
 packages can be reused; no rebuild is required. Android37 remains internally
 available, and current Apple testers retain build36.
+
+## Corrected Apple upload round at 05:03 UTC
+
+The corrected iOS provider validation passed at04:54:32 UTC. The existing signed
+package was reused with its source, resources and signature verified again.
+The iOS upload started but returned no receipt before the bounded phase ended.
+Its process-group cleanup probe raised a permission error; the round exited1
+and did not start Mac validation or upload. No retry was made.
+
+A fresh authenticated App Store Connect query at05:02:53 UTC found no build37
+records. The upload outcome remains unconfirmed; absence from that query is not
+proof that Apple cannot complete a delayed import. Further provider reconciliation
+must precede another upload. Exact owned process groups and uploader tools were
+subsequently absent, the owned launch agent was removed, and the signing search
+list matched its preflight value before the matching guard was released.
+The shared Mac was handed back at05:03:05 UTC.
+
+Both signed packages are retained. Android37 remains available internally;
+Apple36 remains the current verified TestFlight build. No public review or release
+was changed. Future upload work requires a new serialized admission and a fresh
+provider readback; this completed round does not authorize a retry.
