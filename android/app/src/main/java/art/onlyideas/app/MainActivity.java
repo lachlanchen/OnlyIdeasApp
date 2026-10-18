@@ -132,18 +132,16 @@ public class MainActivity extends AppCompatActivity {
 
   @Override
   public void onConfigurationChanged(Configuration next) {
-    int changes = previousConfiguration == null ? ~0 : previousConfiguration.diff(next);
+    boolean sameAppearance = previousConfiguration != null
+        && previousConfiguration.uiMode == next.uiMode
+        && previousConfiguration.fontScale == next.fontScale
+        && previousConfiguration.densityDpi == next.densityDpi
+        && previousConfiguration.getLocales().equals(next.getLocales())
+        && previousConfiguration.getLayoutDirection() == next.getLayoutDirection();
     previousConfiguration = new Configuration(next);
     super.onConfigurationChanged(next);
     if (root == null) return;
-    int geometry = android.content.pm.ActivityInfo.CONFIG_ORIENTATION
-        | android.content.pm.ActivityInfo.CONFIG_SCREEN_SIZE
-        | android.content.pm.ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE
-        | android.content.pm.ActivityInfo.CONFIG_SCREEN_LAYOUT
-        | android.content.pm.ActivityInfo.CONFIG_KEYBOARD
-        | android.content.pm.ActivityInfo.CONFIG_KEYBOARD_HIDDEN
-        | android.content.pm.ActivityInfo.CONFIG_NAVIGATION;
-    if ((changes & ~geometry) == 0) {
+    if (sameAppearance) {
       // Existing Views and WebView reflow without throwing away the current
       // document, selection, composer, attachment picker or in-flight operation.
       ViewCompat.requestApplyInsets(root);
