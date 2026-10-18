@@ -2,12 +2,16 @@ import XCTest
 import UIKit
 
 final class NativeUITests: XCTestCase {
+  private func interestFixtureApp() -> XCUIApplication {
+    let app = XCUIApplication()
+    app.launchArguments = ["-onlyideas.native.language", "en", "--onlyideas-space-qa", "--onlyideas-mac-qa"]
+    app.launchEnvironment["ONLYIDEAS_QA_ORIGIN"] = "http://127.0.0.1:18649"
+    app.launchEnvironment["ONLYIDEAS_QA_TOKEN"] = "synthetic-interests37-token"
+    return app
+  }
   func testInterestPromptPreservesDraft() {
     continueAfterFailure=false
-    let app=XCUIApplication()
-    app.launchArguments=["-onlyideas.native.language","en","--onlyideas-space-qa","--onlyideas-mac-qa"]
-    app.launchEnvironment["ONLYIDEAS_QA_ORIGIN"]="http://127.0.0.1:18649"
-    app.launchEnvironment["ONLYIDEAS_QA_TOKEN"]="synthetic-interests37-token"
+    let app = interestFixtureApp()
     app.launch()
     defer {app.terminate()}
     let agent=app.tabBars.buttons["Agent"]
@@ -32,12 +36,15 @@ final class NativeUITests: XCTestCase {
   }
   func testAdaptiveComposerPreservesDraft() {
     continueAfterFailure = false
-    let app = XCUIApplication()
-    app.launchArguments = ["-onlyideas.native.language", "en", "--onlyideas-mac-qa"]
+    let app = interestFixtureApp()
     app.launch()
     defer { XCUIDevice.shared.orientation = .portrait; app.terminate() }
     let agent = app.tabBars.buttons["Agent"]
     XCTAssertTrue(agent.waitForExistence(timeout: 30)); agent.tap()
+    // Account restoration clears account-scoped drafts. Wait for the synthetic
+    // session and preferences before entering the draft we intend to preserve.
+    let interests = app.buttons.matching(NSPredicate(format: "label IN %@", ["What would you like to follow?", "Reading interests"])).firstMatch
+    XCTAssertTrue(interests.waitForExistence(timeout: 15))
     let editor = app.textViews["Message the paper agent"]
     XCTAssertTrue(editor.waitForExistence(timeout: 10))
     let draft = "Keep this research question while the reading window changes."
@@ -57,7 +64,7 @@ final class NativeUITests: XCTestCase {
     app.tabBars.buttons["Library"].tap(); agent.tap()
     XCTAssertEqual(editor.value as? String, draft)
     XCTAssertFalse(app.alerts.firstMatch.exists)
-    shot("Compatibility35-draft-portrait")
+    shot("Interests37-adaptive-draft")
   }
   func testChatMessageLayout() {
     continueAfterFailure=false
