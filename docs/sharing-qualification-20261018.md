@@ -24,3 +24,14 @@ Candidate: OnlyIdeas 1.0.9 (36), cumulative with the pending compatibility work.
 
 Native internal upload/processing receipts follow the signed archive checks.
 Current formal review candidates and public release selections are preserved.
+
+## Internal Android delivery
+
+OnlyIdeas1.0.9(36) is available to the existing Google Play internal test track.
+The signed release upgraded35 without clearing data. Real public-paper links and
+the native reader share menu passed. Three isolated Android UI tests covered
+quotes, paper context, copy and rotation. Sixteen browser interaction checks
+covered compact/desktop layouts, quote/reference submission, failed-send draft
+retention and the distinct AiMemo/EchoMind copy drafts. No messages were sent to
+contacts. Apple36 iOS upload succeeded; Apple processing and Mac delivery are
+tracked separately and are not claimed by this source receipt.
