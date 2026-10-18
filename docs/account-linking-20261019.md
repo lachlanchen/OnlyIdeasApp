@@ -40,3 +40,16 @@ Legacy Apple/GitHub buttons retain their existing local identity mapping; no
 email-based aliasing or claim of live bidirectional provider parity is made.
 This checkpoint changes source only. Releases, provider activation, plans, paid
 credits, reward grants and production data remain unchanged.
+
+## Peer comparison
+
+AiMemo's October 19 implementation uses the same initiating-account and refusal
+rule. The app-owned source retains its existing mapping and purchase boundaries.
+A subsequent copy correction distinguishes a login owned by another local account
+from an attempt to replace this account's existing LazyingArt connection. The
+latter now asks the reader to reconnect the original LazyingArt account, matching
+the structured recovery action and translated UI.
+
+AiMemo's deployed and native-test evidence does not qualify this app's runtime.
+Central management destinations and direct-provider convergence remain separate
+qualification requirements.
