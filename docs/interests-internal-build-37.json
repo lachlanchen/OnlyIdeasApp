@@ -20,7 +20,13 @@
   },
   "apple": {
     "ios": "prepared; awaiting serialized host admission",
-    "macos": "prepared; awaiting serialized host admission"
+    "macos": "prepared; awaiting serialized host admission",
+    "qualificationSource": "d4a3bb257e705079755288d00378421bea731370",
+    "sourceArchiveSha256": "5c0ad04b105f15ae8a6de2105af4019a9055b8b66db3b120c24dee16cefe6d4c",
+    "sourceArchiveFiles": 139,
+    "nativeResourceManifestSha256": "41df6a00776fef9d9f9ae772e6298aea9f4c0eb68daa1c1af35536f0f42c70db",
+    "uiTestTransport": "both exact cases use a local synthetic fixture; native execution pending",
+    "internalUploadsStarted": false
   },
   "tests": {
     "server": 309,
@@ -28,7 +34,8 @@
     "overlayApi": 9,
     "androidInterestUI": "passed after dialog-root harness correction",
     "androidQuoteContext": "passed",
-    "releaseLint": "passed"
+    "releaseLint": "passed",
+    "appleReadiness": "local fixture checks and seven result-verifier cases passed; not a native runtime pass"
   },
   "rewards": "disabled; no live points minted",
   "productionReviewChanged": false
