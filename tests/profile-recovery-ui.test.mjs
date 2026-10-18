@@ -18,7 +18,7 @@ test('the actual Profile keeps one account, balance and plan section across resu
   if(path==='/blocks')return{blocks:[]};
   return{papers:[],results:[],items:[],taxonomy:{}};
  };
- const native=`export const native=false,serviceOrigin='';export const authRevision=async()=>0;export const hasToken=async()=>false;${['saveToken','request','completeSignIn','cancelSignIn','signIn','sharedSignIn','openExternal','clearExportCache','exportMarkdown','initNative'].map(n=>`export const ${n}=async()=>{};`).join('')}`;
+ const native=`export const native=false,serviceOrigin='';export const authRevision=async()=>0;export const hasToken=async()=>false;${['saveToken','request','completeSignIn','cancelSignIn','cancelSharedSignIn','signIn','sharedSignIn','openExternal','clearExportCache','exportMarkdown','initNative'].map(n=>`export const ${n}=async()=>{};`).join('')}`;
  const offline=`export const offlineSession=async()=>null;export const downloadedPapers=async()=>[];export const cachedLibrary=async()=>[];${['rememberSession','downloadedPaper','downloadPaper','cacheReading','removeDownload','clearPrivateDownloads','rememberLibrary','reconcileCache','unpinPaper'].map(n=>`export const ${n}=async()=>{};`).join('')}`;
  const result=await build({entryPoints:['src/main.tsx'],bundle:true,write:false,format:'iife',jsx:'automatic',plugins:[{name:'profile-fixture',setup(b){
   b.onResolve({filter:/^\.\/(api|native|offline)$/},a=>({path:a.path,namespace:'fixture'}));

@@ -53,6 +53,13 @@ test('Apple sign-in verifies signature/audience/nonce/PKCE/expiry, consumes flow
     assert.equal(exchanged,1);
     const saved = store.db.prepare('SELECT body FROM apple_tokens WHERE owner=?').get(result.user.id).body;
     assert.equal(saved.includes('sensitive-apple-refresh'),false);
+    // Reauthentication is bound to the existing app account before code exchange.
+    const reauth={owner:result.user.id,sessionHash:hash(result.token)};
+    const verifier=randomBytes(32).toString('base64url');
+    const wrong=apple.start(Buffer.from(hash(verifier),'hex').toString('base64url'),reauth);
+    await assert.rejects(apple.complete({...wrong,verifier,code:'test-code',identityToken:token(wrong.nonce,{sub:'different-apple'})},reauth),{code:'local_session_changed'});
+    assert.equal(exchanged,1);assert.equal(store.session(result.token).id,result.user.id);
+    assert.equal(store.db.prepare('SELECT body FROM apple_tokens WHERE owner=?').get(result.user.id).body,saved);
     revocationFails = true;
     await assert.rejects(apple.revoke(result.user), /could not revoke/);
     assert.ok(store.db.prepare('SELECT body FROM apple_tokens WHERE owner=?').get(result.user.id));

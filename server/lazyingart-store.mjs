@@ -41,28 +41,32 @@ export function createProfileStore(store,config,{transport,now=()=>Date.now()}={
   const current=owner=>db.prepare('SELECT * FROM profile_links WHERE owner=?').get(owner);
   function deferRevoke(tokens,delay=0){const id=randomUUID();db.prepare('INSERT INTO profile_revocations VALUES(?,?,?)').run(id,encrypt('revoke',id,{token:tokens.refreshToken}),now()+delay);return id}
   function contextValid(context) {
+    if(context.loginOwner){const row=db.prepare('SELECT user FROM sessions WHERE id=? AND expires>?').get(context.loginSessionHash,now());check(row&&JSON.parse(row.user).id===context.loginOwner,'local_session_changed');store.requireActive(context.loginOwner);check(context.flow&&db.prepare('SELECT 1 FROM oauth WHERE id=? AND expires>?').get('native:'+hash(context.flow),now()),'local_session_changed')}
     if(!context.owner)return;
     store.requireActive(context.owner);
+    if(context.flow)check(db.prepare('SELECT 1 FROM oauth WHERE id=? AND expires>?').get('native:'+hash(context.flow),now()),'local_session_changed');
     const row=db.prepare('SELECT user FROM sessions WHERE id=? AND expires>?').get(context.sessionHash,now());
     check(row&&JSON.parse(row.user).id===context.owner,'local_session_changed');
     check(JSON.parse(row.user).authenticatedAt===context.authenticatedAt,'local_reauthentication_required');
     check(Number.isSafeInteger(context.authenticatedAt)&&context.authenticatedAt<=now()&&context.authenticatedAt>=now()-600_000,'local_reauthentication_required');
   }
-  async function begin({binding,owner=null,sessionHash=null,authenticatedAt=null,flow=null}) {
-    const context={owner,sessionHash,authenticatedAt,flow,started:now()};contextValid(context);
+  async function begin({binding,owner=null,sessionHash=null,authenticatedAt=null,flow=null,loginOwner=null,loginSessionHash=null}) {
+    const context={owner,sessionHash,authenticatedAt,flow,loginOwner,loginSessionHash,started:now()};contextValid(context);
     const id=randomBytes(32).toString('base64url');
     transaction(store,()=>{db.prepare('DELETE FROM profile_attempts WHERE expires<=?').run(now());db.prepare('INSERT INTO profile_attempts(id,expires,body) VALUES(?,?,?)').run(id,now()+600_000,encrypt('attempt',id,{context}))});
-    try{return await adapter.begin({binding,attemptId:id,fresh:!!owner})}catch(e){db.prepare('DELETE FROM profile_attempts WHERE id=?').run(id);throw e}
+    try{return await adapter.begin({binding,attemptId:id,fresh:!!(owner||loginOwner)})}catch(e){db.prepare('DELETE FROM profile_attempts WHERE id=?').run(id);throw e}
   }
   async function complete({callbackUrl,binding}) {
     const result=await adapter.complete({callbackUrl,binding});
+    let completionFlow;
     try{return transaction(store,()=>{
       const row=db.prepare('SELECT * FROM profile_attempts WHERE id=? AND consumed=1 AND expires>?').get(result.attemptId,now());check(row,'attempt_expired');
-      const {context}=decrypt('attempt',row.id,row.body);contextValid(context);
+      const {context}=decrypt('attempt',row.id,row.body);completionFlow=context.flow;contextValid(context);
       const {identity,tokens}=result;
       check(db.prepare('SELECT 1 FROM profile_revocations WHERE id=? AND created>?').get(result.credentialId,now()),'profile_session_changed');
-      if(context.owner)check(identity.authenticatedAt*1000>=context.started-30_000,'central_reauthentication_required');
+      if(context.owner||context.loginOwner)check(identity.authenticatedAt*1000>=context.started-30_000,'central_reauthentication_required');
       const existing=db.prepare('SELECT * FROM profile_links WHERE issuer=? AND subject=?').get(identity.issuer,identity.subject);
+      if(context.loginOwner)check(existing?.owner===context.loginOwner,'local_session_changed');
       const owner=context.owner||existing?.owner||store.identity('lazyingart-'+identity.subject);
       store.requireActive(owner);
       check(!existing||existing.owner===owner,'account_already_linked');
@@ -74,7 +78,7 @@ export function createProfileStore(store,config,{transport,now=()=>Date.now()}={
       // Retain the original app profile when explicitly linking. No data/credit move.
       const local=context.owner?JSON.parse(db.prepare('SELECT user FROM sessions WHERE id=?').get(context.sessionHash).user):{id:owner,name:identity.displayName||'LazyingArt reader',login:'LazyingArt',provider:'lazyingart',authenticatedAt:identity.authenticatedAt*1000};
       return {user:local,flow:context.flow,linked:!!context.owner};
-    })}catch(e){credentials.failed(result.credentialId);throw e}
+    })}catch(e){credentials.failed(result.credentialId);if(completionFlow&&e instanceof ProfileLinkError)e.linkFlow=completionFlow;throw e}
   }
   const proofs=new Map();
   function proof(owner){

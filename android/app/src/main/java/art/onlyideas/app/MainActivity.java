@@ -68,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
   private Button sendButton;
   private JSONObject account, document;
   private boolean sharedLoginEnabled=false,sharedLinked=false;
+  private String sharedConnectionNotice="";
   private boolean derived = false;
   private String readLanguage="zh-Hans",readingMode="original";
   private JSONObject alignedReading;
@@ -426,6 +427,7 @@ public class MainActivity extends AppCompatActivity {
             handler.post(
                 () -> {
                   if (reportFailure && !isFinishing() && epoch == authEpoch) {
+                    if(e instanceof NativeSession.HttpError&&((NativeSession.HttpError)e).details.has("action")){sharedConnectionNotice=e.getMessage();if(page.equals("profile"))showProfile();}
                     busy = false;
                     alert(e.getMessage() == null ? "Please try again." : e.getMessage());
                     if (sendButton != null) sendButton.setEnabled(true);
@@ -575,7 +577,7 @@ public class MainActivity extends AppCompatActivity {
             sharedLoginEnabled=session.optJSONObject("capabilities")!=null&&session.optJSONObject("capabilities").optBoolean("lazyingart");
             sharedLinked=r.optJSONObject("sharedAccount")!=null&&r.optJSONObject("sharedAccount").optBoolean("linked");
             JSONObject next = session.optJSONObject("user");
-            if (!Objects.equals(account == null ? null : account.optString("id"), next == null ? null : next.optString("id"))) authEpoch++;
+            if (!Objects.equals(account == null ? null : account.optString("id"), next == null ? null : next.optString("id"))) {authEpoch++;sharedConnectionNotice="";}
             account = next;
             if (account == null && api.token() != null) {
               try {
@@ -807,7 +809,7 @@ public class MainActivity extends AppCompatActivity {
       c.addView(button(t("Interests & notifications"),false,this::showReadingPreferences));
       LinearLayout wallet=column();creditContainer=wallet;c.addView(wallet);
       loadCreditSection(wallet);
-      if(sharedLoginEnabled){LinearLayout link=card();title(link,t("LazyingArt account"),20);caption(link,t("Connect the same account across LazyingArt apps. Your papers, chats and purchases stay in OnlyIdeas."));
+      if(sharedLoginEnabled){LinearLayout link=card();title(link,t("Sign-in methods"),20);caption(link,account.optString("provider").equals("lazyingart")?"LazyingArt":account.optString("provider").equals("apple")?"Apple":"GitHub");caption(link,t("Start from the app account with the data and plan you want to keep. Connecting never combines accounts or transfers a plan."));if(!sharedConnectionNotice.isEmpty()){caption(link,t(sharedConnectionNotice));if(!account.optString("provider").equals("lazyingart")&&!account.optString("provider").equals("apple")&&sharedConnectionNotice.equals("Sign in again with the same app account, then retry connecting. Your data and plan are unchanged."))link.addView(button(t("Continue with GitHub"),false,this::signIn));}caption(link,t("Connect the same account across LazyingArt apps. Your papers, chats and purchases stay in OnlyIdeas."));
       if(sharedLinked){caption(link,t("Account connected"));link.addView(button(t("Disconnect LazyingArt"),false,()->job(()->api.json("/api/auth/lazyingart/disconnect","POST",new JSONObject()),r->{sharedLinked=false;if(r.optBoolean("signedOut"))signOut();else showProfile();})));}
       else link.addView(button(t("Connect LazyingArt"),false,()->signInBrowser(true,true)));c.addView(link);}
     }
@@ -1325,6 +1327,7 @@ public class MainActivity extends AppCompatActivity {
   void signInBrowser(boolean shared,boolean link) {
     if (busy) return;
     busy = true;
+    if(shared)sharedConnectionNotice="";
     job(
         () -> {
           String verifier = NativeSession.random();
@@ -1336,6 +1339,7 @@ public class MainActivity extends AppCompatActivity {
           JSONObject flow =
               api.json(shared?"/api/auth/lazyingart/start":"/api/auth/native/start", "POST", shared?object("challenge",challenge).put("mode",link?"link":"login"):object("challenge", challenge));
           flow.put("verifier", verifier);
+          flow.put("sharedLink",shared&&link);
           flow.put("expires", System.currentTimeMillis() + 600000);
           api.set("onlyideas.native.flow", flow.toString());
           return flow;
@@ -1352,6 +1356,7 @@ public class MainActivity extends AppCompatActivity {
   }
 
   void completeLogin() {
+    final int loginEpoch=authEpoch;final String loginToken=api.token();
     String saved = api.get("onlyideas.native.flow");
     if (saved == null || busy) return;
     busy = true;
@@ -1362,22 +1367,27 @@ public class MainActivity extends AppCompatActivity {
             api.set("onlyideas.native.flow", null);
             throw new Exception("Sign-in expired. Please try again.");
           }
-          JSONObject result =
-              api.json(
+          JSONObject result;
+          try { result = api.json(
                   "/api/auth/native/complete",
                   "POST",
                   new JSONObject()
                       .put("flow", flow.getString("flow"))
                       .put("verifier", flow.getString("verifier")));
-          if (result.has("token")) {
-            api.token(result.getString("token"));
-            api.set("onlyideas.native.flow", null);
+          } catch(NativeSession.HttpError e){
+            if(flow.optBoolean("sharedLink")&&e.details.has("code")){
+              api.set("onlyideas.native.flow",null);
+              String notice=e.getMessage();handler.post(()->{if(loginEpoch==authEpoch&&Objects.equals(loginToken,api.token())){sharedConnectionNotice=notice;if(page.equals("profile"))showProfile();}});
+            }
+            throw e;
           }
           return result;
         },
         r -> {
           busy = false;
-          if (r.has("token")) {
+          if (r.has("token")&&Objects.equals(loginToken,api.token())) {
+            try{api.token(r.optString("token"));api.set("onlyideas.native.flow", null);}
+            catch(Exception e){alert(t("Could not save sign-in."));return;}
             authEpoch++;
             refresh();
             if (page.equals("profile")) showProfile();

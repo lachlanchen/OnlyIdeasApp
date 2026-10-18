@@ -1,3 +1,4 @@
+import {ProfileLinkError} from './lazyingart-profile.mjs';
 import { randomBytes, createPublicKey, verify, sign, createCipheriv, createDecipheriv } from 'node:crypto';
 import { hash, requireValue } from './domain.mjs';
 import { proof } from './native-auth.mjs';
@@ -45,15 +46,15 @@ export function createAppleAuth(store, config, provider = providerJSON, fetcher 
   }
   return {
     enabled,
-    start(challenge) {
+    start(challenge, reauth = null) {
       requireValue(enabled, 'Apple sign-in is unavailable.', 503);
       requireValue(proof.test(challenge || ''), 'A valid sign-in challenge is required.');
       const flow = randomBytes(32).toString('base64url'), nonce = randomBytes(32).toString('base64url');
       store.db.prepare('DELETE FROM oauth WHERE expires<?').run(Date.now());
-      store.db.prepare('INSERT INTO oauth VALUES(?,?,?)').run(`apple:${hash(flow)}`, JSON.stringify({ nonce, challenge }), Date.now() + 600_000);
+      store.db.prepare('INSERT INTO oauth VALUES(?,?,?)').run(`apple:${hash(flow)}`, JSON.stringify({ nonce, challenge, ...(reauth?{reauth}:{}) }), Date.now() + 600_000);
       return { flow, nonce };
     },
-    async complete(body) {
+    async complete(body, context = {}) {
       requireValue(enabled, 'Apple sign-in is unavailable.', 503);
       requireValue(proof.test(body.flow || '') && proof.test(body.verifier || ''), 'Sign-in expired.');
       const id = `apple:${hash(body.flow)}`, row = store.db.prepare('SELECT body FROM oauth WHERE id=? AND expires>?').get(id, Date.now());
@@ -64,10 +65,15 @@ export function createAppleAuth(store, config, provider = providerJSON, fetcher 
       // Consume before any await to reject concurrent replay of this flow.
       store.db.prepare('DELETE FROM oauth WHERE id=?').run(id);
       const claims = await identity(body.identityToken, flow.nonce);
+      if(flow.reauth){
+        const local=store.db.prepare('SELECT user FROM sessions WHERE id=? AND expires>?').get(flow.reauth.sessionHash,Date.now());
+        if(!local||JSON.parse(local.user).id!==flow.reauth.owner||context.owner!==flow.reauth.owner||context.sessionHash!==flow.reauth.sessionHash||(store.db.prepare('SELECT account FROM identities WHERE id=?').get(hash(`apple-${claims.sub}`))?.account||`apple-${claims.sub}`)!==flow.reauth.owner)throw new ProfileLinkError('local_session_changed');
+      }
       const result = await provider(`${issuer}/auth/token`, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({ client_id: audience, client_secret: clientSecret(), code: body.code, grant_type: 'authorization_code' }).toString() });
       const checked = await identity(result.id_token, flow.nonce);
       requireValue(checked.sub === claims.sub && typeof result.refresh_token === 'string', 'Apple did not finish sign-in.', 401);
+      if(flow.reauth){const local=store.db.prepare('SELECT user FROM sessions WHERE id=? AND expires>?').get(flow.reauth.sessionHash,Date.now());if(!local||JSON.parse(local.user).id!==flow.reauth.owner)throw new ProfileLinkError('local_session_changed')}
       const owner = store.identity(`apple-${claims.sub}`);
       const prior = store.db.prepare('SELECT body FROM apple_tokens WHERE owner=?').get(owner);
       const previous = prior ? unseal(prior.body) : null;

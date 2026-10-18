@@ -37,7 +37,7 @@ const random = () => btoa(String.fromCharCode(...crypto.getRandomValues(new Uint
 async function authPost(path: string, data: object) {
   const r = await request(`/api/auth/native/${path}`, { method: 'POST', body: JSON.stringify(data) })
   const result = await r.json()
-  if (!r.ok) throw new Error(result.error || 'Sign-in could not finish. Please try again.')
+  if (!r.ok) throw Object.assign(new Error(result.error || 'Sign-in could not finish. Please try again.'),{code:result.code,action:result.action})
   return result
 }
 let completing: Promise<boolean> | undefined
@@ -50,7 +50,9 @@ export function completeSignIn(): Promise<boolean> {
     if (typeof stored !== 'string') return false
     const data = JSON.parse(stored)
     if (data.expires < Date.now()) { await cancelSignIn(); throw new Error('Sign-in expired. Please try again.') }
-    const result = await authPost('complete', { flow: data.flow, verifier: data.verifier })
+    let result
+    try {result = await authPost('complete', { flow: data.flow, verifier: data.verifier })}
+    catch(e){if(data.link&&(e as {code?:string}).code)await SecureStorage.remove(flowKey,false);throw e}
     if (result.pending) return false
     if (generation !== authGeneration) return false
     await saveToken(result.token)
@@ -60,7 +62,7 @@ export function completeSignIn(): Promise<boolean> {
     return true
   })().finally(() => { completing = undefined })
 }
-export async function cancelSignIn() { authGeneration++; if (native) { await SecureStorage.remove(flowKey, false); await Browser.close().catch(() => {}) } }
+export async function cancelSignIn() { cancelSharedSignIn(); authGeneration++; if (native) { await SecureStorage.remove(flowKey, false); await Browser.close().catch(() => {}) } }
 export async function signIn() {
   if (!native) { window.location.assign('/api/auth/github'); return }
   authGeneration++
@@ -73,17 +75,44 @@ export async function signIn() {
   await SecureStorage.set(flowKey, JSON.stringify({ ...flow, verifier, expires: Date.now() + 600_000 }), false, false, KeychainAccess.whenUnlockedThisDeviceOnly)
   await Browser.open({ url: flow.url, toolbarColor: '#244f45' })
 }
-export async function sharedSignIn(mode:'login'|'link'='login') {
-  authGeneration++
-  const verifier=random(),digest=new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(verifier)))
-  const challenge=btoa(String.fromCharCode(...digest)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')
-  const response=await request('/api/auth/lazyingart/start',{method:'POST',body:JSON.stringify({mode,...(native?{challenge}:{})})})
-  const flow=await response.json();if(!response.ok)throw new Error(flow.error||'Could not start sign-in.')
-  const url=new URL(flow.url),expected=native?serviceOrigin:location.origin
-  if(url.origin!==expected||url.pathname!=='/api/auth/lazyingart')throw new Error('Invalid sign-in address.')
-  if(!native){location.assign(url.href);return}
-  await SecureStorage.set(flowKey,JSON.stringify({...flow,verifier,expires:Date.now()+600_000}),false,false,KeychainAccess.whenUnlockedThisDeviceOnly)
-  await Browser.open({url:url.href,toolbarColor:'#244f45'})
+let stopShared: (()=>void)|undefined
+export function cancelSharedSignIn(){stopShared?.()}
+export async function sharedSignIn(mode:'login'|'link'|'reauthenticate'='login') {
+  cancelSharedSignIn()
+  const generation=++authGeneration
+  // Linking stays in a popup so the reader, unsent draft and current session survive.
+  const popup=!native&&mode!=='login'?window.open('about:blank','onlyideas-link','popup,width=520,height=700'):null
+  if(popup)popup.opener=null
+  if(!native&&mode!=='login'&&!popup)throw new Error('Allow the sign-in popup, then try connecting again.')
+  const controller=new AbortController();let pending:{flow:string;verifier:string}|undefined,finished=false
+  const cancel=()=>{controller.abort();popup?.close()}
+  stopShared=cancel
+  const parse=async(response:Response)=>{const value=await response.json();if(!response.ok)throw Object.assign(new Error(value.error||'Account connection did not finish. Return to the app and try again.'),{code:value.code,action:value.action});return value}
+  try {
+    const verifier=random(),digest=new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(verifier)))
+    const challenge=btoa(String.fromCharCode(...digest)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')
+    const flow=await parse(await request(mode==='reauthenticate'?'/api/auth/reauth/start':'/api/auth/lazyingart/start',{method:'POST',body:JSON.stringify({mode,...(native||mode!=='login'?{challenge}:{})}),signal:controller.signal}))
+    pending={flow:flow.flow,verifier}
+    if(controller.signal.aborted||generation!==authGeneration)throw new DOMException('Cancelled','AbortError')
+    const url=new URL(flow.url),expected=native?serviceOrigin:location.origin
+    if(url.origin!==expected||url.pathname!==(mode==='reauthenticate'?'/api/auth/github':'/api/auth/lazyingart'))throw new Error('Invalid sign-in address.')
+    if(!native&&mode==='login'){finished=true;location.assign(url.href);return}
+    if(native){
+      await SecureStorage.set(flowKey,JSON.stringify({...flow,verifier,link:mode!=='login',expires:Date.now()+600_000}),false,false,KeychainAccess.whenUnlockedThisDeviceOnly)
+      await Browser.open({url:url.href,toolbarColor:'#244f45'});finished=true;return
+    }
+    if(popup)popup.location.href=url.href
+    const deadline=Date.now()+600_000
+    while(Date.now()<deadline&&!controller.signal.aborted&&generation===authGeneration){
+      const result=await parse(await request('/api/auth/lazyingart/complete',{method:'POST',body:JSON.stringify(pending),signal:controller.signal}))
+      if(result.linked){finished=true;window.dispatchEvent(new Event('lazyingart:connection-changed'));return}
+      await new Promise<void>(resolve=>{const done=()=>{clearTimeout(timer);controller.signal.removeEventListener('abort',done);resolve()},timer=setTimeout(done,1500);controller.signal.addEventListener('abort',done,{once:true})})
+    }
+    throw new DOMException('Cancelled','AbortError')
+  } finally {
+    if(!finished&&mode!=='login'&&pending)void request('/api/auth/lazyingart/cancel',{method:'POST',body:JSON.stringify(pending)}).catch(()=>{})
+    popup?.close();if(stopShared===cancel)stopShared=undefined
+  }
 }
 export async function openExternal(url: string) {
   if (!/^https?:\/\//i.test(url)) return

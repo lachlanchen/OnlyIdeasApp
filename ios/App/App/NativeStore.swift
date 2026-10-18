@@ -56,6 +56,7 @@ struct PaperSection: Codable, Identifiable {
 }
 struct PaperAsset: Codable { var path: String }
 struct ReadingAccount: Codable {
+  var provider: String? = nil
   var id: String
   var name: String
   var login: String
@@ -149,7 +150,7 @@ final class ReadingStore: NSObject, ObservableObject,
 {
   @Published var papers: [ResearchPaper] = []
   @Published var account: ReadingAccount? {
-    didSet { if oldValue?.id != account?.id { agentDraft = ""; draftReferences=[]; draftQuote=nil; recommendationSetup=nil; researchInterests="" } }
+    didSet { if oldValue?.id != account?.id { sharedConnectionNotice=nil; agentDraft = ""; draftReferences=[]; draftQuote=nil; recommendationSetup=nil; researchInterests="" } }
   }
   // Owned by the scene store so layout/language reconstruction retains unsent work.
   @Published var agentDraft = ""
@@ -174,6 +175,7 @@ final class ReadingStore: NSObject, ObservableObject,
   @Published var showSignIn = false
   @Published var sharedLoginEnabled = false
   @Published var sharedLinked = false
+  @Published var sharedConnectionNotice: String?
   @Published var showReport = false
   @Published var sharedImports = true
   @Published var credits:ReadingCredits?
@@ -193,7 +195,7 @@ final class ReadingStore: NSObject, ObservableObject,
   func resolveMatch(_ allowed:Bool){let pending=matchDecision;matchDecision=nil;matchPrompt=nil;pending?.resume(returning:allowed)}
   private var creditDecision:CheckedContinuation<Bool,Never>?
   var reportContext = ""
-  private var appleFlow: (id: String, verifier: String)?
+  private var appleFlow: (id: String, verifier: String, originalToken: String?)?
   private var appleController: ASAuthorizationController?
   @AppStorage("onlyideas.native.font") var readingSize: Double = 18
   private var warming: Task<Void, Never>?
@@ -449,12 +451,14 @@ final class ReadingStore: NSObject, ObservableObject,
   func signInWithApple() async {
     guard !signingIn else { return }
     signingIn = true
+    let originalToken = token
     do {
       let verifier = Data((0..<32).map { _ in UInt8.random(in: 0...255) }).base64URLEncoded
       let challenge = Data(SHA256.hash(data: Data(verifier.utf8))).base64URLEncoded
       let result = try await json("/api/auth/apple/start", method: "POST", body: ["challenge": challenge])
       guard let flow = result["flow"] as? String, let nonce = result["nonce"] as? String else { throw failure(T("Could not start Apple sign-in.")) }
-      appleFlow = (flow, verifier)
+      guard token == originalToken else {signingIn=false;return}
+      appleFlow = (flow, verifier, originalToken)
       let request = ASAuthorizationAppleIDProvider().createRequest()
       request.requestedScopes = [.fullName]
       request.nonce = nonce
@@ -480,6 +484,8 @@ final class ReadingStore: NSObject, ObservableObject,
         let name = credential.fullName.map { PersonNameComponentsFormatter().string(from: $0) } ?? ""
         let result = try await json("/api/auth/apple/complete", method: "POST", body: ["flow": flow.id, "verifier": flow.verifier, "identityToken": identity, "code": code, "name": name])
         guard let token = result["token"] as? String else { throw failure(T("Could not save sign-in.")) }
+        if let owner=account?.id {guard let user=result["user"] as? [String:Any],user["id"] as? String == owner else {throw failure(T("Return to the app account you want to keep, then connect again. No accounts were combined."))}}
+        guard self.token == flow.originalToken else {return}
         try saveToken(token)
         UserDefaults.standard.set(credential.user, forKey: "onlyideas.apple.user")
         showSignIn = false
@@ -498,6 +504,7 @@ final class ReadingStore: NSObject, ObservableObject,
     showSignIn = false
     guard !signingIn else { return }
     signingIn = true
+    if shared {sharedConnectionNotice=nil}
     let startID = UUID(), originalToken = token
     githubStartID = startID
     do {
@@ -521,7 +528,7 @@ final class ReadingStore: NSObject, ObservableObject,
         self.signingIn = false
         let session = self.authentication; self.authentication = nil
         session?.cancel()
-        if let error, !(error is CancellationError) { self.error = T(error.localizedDescription) }
+        if let error, !(error is CancellationError) { if shared {self.sharedConnectionNotice=error.localizedDescription}; self.error = T(error.localizedDescription) }
       })
       authentication = ASWebAuthenticationSession(url: url, callbackURLScheme: "art.onlyideas.app")
       { [weak self] url, error in
@@ -544,6 +551,7 @@ final class ReadingStore: NSObject, ObservableObject,
       guard githubStartID == startID else { return }
       githubRecovery.cancel()
       githubStartID = nil; authentication = nil
+      if shared {sharedConnectionNotice=error.localizedDescription}
       self.error = error.localizedDescription
       signingIn = false
     }

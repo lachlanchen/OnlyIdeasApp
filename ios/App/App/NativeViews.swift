@@ -639,7 +639,10 @@ struct NativeProfile: View {
       }
       Section {Button {plans=true} label: {Label(T("Plans & usage"),systemImage:"sparkles").font(.headline)}.accessibilityIdentifier("plans-entry")}
       if store.account != nil { NativeCreditSection() }
-      if store.account != nil && store.sharedLoginEnabled {Section(T("LazyingArt account")){
+      if store.account != nil && store.sharedLoginEnabled {Section(T("Sign-in methods")){
+        Text(store.account?.provider == "apple" ? "Apple" : store.account?.provider == "lazyingart" ? "LazyingArt" : "GitHub")
+        Text(T("Start from the app account with the data and plan you want to keep. Connecting never combines accounts or transfers a plan.")).font(.footnote)
+        if let notice=store.sharedConnectionNotice {Text(T(notice)).font(.footnote).accessibilityIdentifier("account-link-notice");if notice=="Sign in again with the same app account, then retry connecting. Your data and plan are unchanged." {Button(T("Sign in")){store.showSignIn=true}}}
         Text(T("Connect the same account across LazyingArt apps. Your papers, chats and purchases stay in OnlyIdeas.")).font(.footnote)
         if store.sharedLinked {Text(T("Account connected"));Button(T("Disconnect LazyingArt")){Task{await store.disconnectLazyingArt()}}}
         else {Button(T("Connect LazyingArt")){Task{await store.signInWithLazyingArt(link:true)}}.disabled(store.signingIn)}

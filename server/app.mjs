@@ -1,3 +1,4 @@
+import {linkFailures,linkFailure} from './account-link-errors.mjs';
 import {sharePage} from './share-page.mjs';
 import {confirmPublication} from './confirm-publication.mjs';
 import {createBrowserRetrieval} from './browser-retrieval.mjs';
@@ -163,14 +164,23 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         try{const result=await lacBalance.read(user.id);requireValue(store.session(token)?.id===user.id,'Please sign in again.',401);return response(res,result)}
         catch(e){if(e instanceof AppError)throw e;return response(res,{state:e.code==='points_consent_required'?'consent-required':e.code==='points_link_required'?'link-required':'unavailable'},e instanceof LacReadError&&['points_consent_required','points_link_required'].includes(e.code)?403:503)}
       }
-      if(path==='/api/auth/lazyingart/status'&&method==='GET'){requireUser();return response(res,profile.status?.(user.id)||{enabled:false,linked:false,state:'unavailable'})}
+      if(path==='/api/auth/lazyingart/status'&&method==='GET'){requireUser();return response(res,{...(profile.status?.(user.id)||{enabled:false,linked:false,state:'unavailable'}),reauthentication:user.provider==='apple'?'apple':user.provider==='lazyingart'?'lazyingart':'github'})}
+      if(path==='/api/auth/reauth/start'&&method==='POST'){
+        requireUser();requireValue(!user.provider||user.provider==='github','Use the same sign-in method to return to your account. Apple and GitHub accounts are separate.',400);
+        requireValue(config.github?.clientId&&config.github?.clientSecret,'GitHub sign-in is unavailable.',503);
+        const b=await json(req);return response(res,startNative(store,b.challenge,origin,{owner:user.id,sessionHash:hash(token),web:!native,reauthenticate:true}));
+      }
       if(path==='/api/auth/lazyingart/start'&&method==='POST'){
         requireValue(profile.enabled,'Shared sign-in is not available yet.',503);limit(`shared-login:${req.socket.remoteAddress}`,10);
         const body=await json(req);requireValue(body.mode==='login'||body.mode==='link','Choose sign-in or account linking.');
-        if(body.mode==='link')requireUser();
-        const flow=native?startNative(store,body.challenge,origin).flow:null;
+        if(body.mode==='link'){
+          requireUser();
+          if(!Number.isSafeInteger(user.authenticatedAt)||user.authenticatedAt>Date.now()||user.authenticatedAt<Date.now()-600_000)throw new ProfileLinkError('local_reauthentication_required');
+        }
+        const linkContext=user?{owner:user.id,sessionHash:hash(token),web:!native,...(body.mode==='login'?{reauthenticate:true}:{})}:null;
+        const flow=native||linkContext?startNative(store,body.challenge,origin,linkContext).flow:null;
         const ticket=randomBytes(32).toString('base64url');
-        const context={flow,...(body.mode==='link'?{owner:user.id,sessionHash:hash(token),authenticatedAt:user.authenticatedAt}:{} )};
+        const context={flow,...(body.mode==='link'?{owner:user.id,sessionHash:hash(token),authenticatedAt:user.authenticatedAt}:user?{loginOwner:user.id,loginSessionHash:hash(token)}:{} )};
         store.db.prepare('INSERT INTO oauth VALUES(?,?,?)').run('profile-ticket:'+hash(ticket),JSON.stringify(context),Date.now()+600_000);
         return response(res,{flow,url:origin+'/api/auth/lazyingart?ticket='+ticket});
       }
@@ -185,10 +195,31 @@ export function createApp(store, config, { worker = true, provider = providerJSO
       }
       if(path==='/api/auth/lazyingart/callback'&&method==='GET'){
         requireValue(profile.enabled,'Shared sign-in is not available yet.',503);
-        const result=await profile.complete({callbackUrl:url.href,binding:cookies[`${cookieName}-profile`]});
+        let result;
+        try{result=await profile.complete({callbackUrl:url.href,binding:cookies[`${cookieName}-profile`]})}
+        catch(e){
+          if(e instanceof ProfileLinkError&&e.linkFlow&&linkFailures[e.code]){
+            const row=store.db.prepare('SELECT body FROM oauth WHERE id=? AND expires>?').get('native:'+hash(e.linkFlow),Date.now());
+            if(row){
+              const flow=JSON.parse(row.body);
+              store.db.prepare('UPDATE oauth SET body=? WHERE id=?').run(JSON.stringify({...flow,linkError:e.code}),'native:'+hash(e.linkFlow));
+              res.setHeader('Set-Cookie',cookie(`${cookieName}-profile`,'',0));
+              res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Content-Security-Policy':"default-src 'none'; frame-ancestors 'none'; base-uri 'none'"});
+              return res.end('<!doctype html><meta name="viewport" content="width=device-width"><title>OnlyIdeas account connection</title><h1>Account not connected</h1><p>'+linkFailure(e.code).message+'</p><p>Return to OnlyIdeas to continue.</p>');
+            }
+          }
+          throw e;
+        }
         res.setHeader('Set-Cookie',cookie(`${cookieName}-profile`,'',0));
         if(result.flow){finishNative(store,result.flow,result.user);res.writeHead(200,{'Content-Type':'text/html; charset=utf-8'});return res.end(`<!doctype html><html lang="en"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Signed in · OnlyIdeas</title><body><h1>Account connected</h1><p>Return to OnlyIdeas to keep reading.</p><a href="art.onlyideas.app://oauth/complete?flow=${result.flow}">Open OnlyIdeas</a></body></html>`)}
         res.setHeader('Set-Cookie',[cookie(cookieName,store.createSession(result.user),90*86400),cookie(`${cookieName}-profile`,'',0)]);res.writeHead(303,{Location:'/'});return res.end();
+      }
+      if(['/api/auth/lazyingart/complete','/api/auth/lazyingart/cancel'].includes(path)&&method==='POST'){
+        requireUser();const b=await json(req),flow=nativeFlow(store,b.flow);
+        requireValue(flow.linkContext&&flow.linkContext.owner===user.id&&flow.linkContext.sessionHash===hash(token),'Connection belongs to a different app sign-in.',403);
+        requireValue(typeof b.verifier==='string'&&/^[A-Za-z0-9_-]{43}$/.test(b.verifier)&&Buffer.from(hash(b.verifier),'hex').toString('base64url')===flow.challenge,'Sign-in proof did not match.',403);
+        if(path.endsWith('/cancel')){store.db.prepare('DELETE FROM oauth WHERE id=?').run('native:'+hash(b.flow));return response(res,{cancelled:true})}
+        return response(res,redeemNative(store,b.flow,b.verifier,{owner:user.id,sessionHash:hash(token),linkOnly:true}));
       }
       if(path==='/api/auth/lazyingart/disconnect'&&method==='POST'){
         requireUser();rewardSource.hold(user.id);profile.disconnect?.(user.id);const signedOut=user.provider==='lazyingart';
@@ -265,21 +296,21 @@ export function createApp(store, config, { worker = true, provider = providerJSO
       if (path === '/api/health' && method === 'GET') return response(res, { service: 'onlyideas', version: '1.0.1', ok: true });
       if (path === '/api/auth/apple/start' && method === 'POST') {
         requireValue(native, 'Open sign-in from the app.', 403); limit(`apple:${req.socket.remoteAddress}`, 20);
-        return response(res, apple.start((await json(req)).challenge));
+        return response(res, apple.start((await json(req)).challenge,user?{owner:user.id,sessionHash:hash(token)}:null));
       }
       if (path === '/api/auth/apple/complete' && method === 'POST') {
         requireValue(native, 'Open sign-in from the app.', 403); limit(`apple:${req.socket.remoteAddress}`, 20);
-        return response(res, await apple.complete(await json(req)));
+        return response(res, await apple.complete(await json(req),{owner:user?.id,sessionHash:token?hash(token):null}));
       }
       if (path === '/api/auth/native/start' && method === 'POST') {
         requireValue(native, 'Open sign-in from the app.', 403);
         requireValue(config.github?.clientId && config.github?.clientSecret, 'GitHub sign-in is unavailable.', 503);
         limit(`login:${req.socket.remoteAddress}`, 20);
-        return response(res, startNative(store, (await json(req)).challenge, origin));
+        return response(res, startNative(store, (await json(req)).challenge, origin,user?{owner:user.id,sessionHash:hash(token),reauthenticate:true}:null));
       }
       if (path === '/api/auth/native/complete' && method === 'POST') {
         requireValue(native, 'Open sign-in from the app.', 403);
-        const b = await json(req); return response(res, redeemNative(store, b.flow, b.verifier));
+        const b = await json(req); return response(res, redeemNative(store, b.flow, b.verifier,{owner:user?.id,sessionHash:token?hash(token):null}));
       }
       if (path === '/api/session' && method === 'GET') return response(res, { user, development: !!config.development, capabilities: { login: !!config.github?.clientId, apple: apple.enabled, lazyingart:profile.enabled, lacPoints:lacBalance.enabled, pdf: !!config.mathpix?.appKey, assistant: !!config.model?.url, publishing: !!(config.github?.contentToken || config.github?.checkout), publicationReview:isReviewer(store,config,user) }, languages, maxPages: config.maxPages || 30 });
       if (path === '/api/auth/local' && method === 'POST') {
@@ -347,7 +378,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
           finishNative(store, data.flow, u);
           res.setHeader('Set-Cookie', cookie(`${cookieName}-oauth`, '', 0));
           res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-          return res.end(`<!doctype html><html lang="en"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Signed in · OnlyIdeas</title><body style="font:20px system-ui;background:#f6f4ed;color:#244f45;padding:10vh 8vw"><h1>Welcome back.</h1><p>You’re signed in. Return to OnlyIdeas to keep reading.</p><a style="color:inherit" href="art.onlyideas.app://oauth/complete?flow=${data.flow}">Open OnlyIdeas</a></body></html>`);
+          return res.end(`<!doctype html><html lang="en"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Signed in · OnlyIdeas</title><body style="font:20px system-ui;background:#f6f4ed;color:#244f45;padding:10vh 8vw"><h1>Return to OnlyIdeas</h1><p>Check the connection result in the app.</p><a style="color:inherit" href="art.onlyideas.app://oauth/complete?flow=${data.flow}">Open OnlyIdeas</a></body></html>`);
         }
         // No GitHub token is retained: this app's session does not inherit an 8-hour token lifetime.
         res.setHeader('Set-Cookie', [cookie(cookieName, store.createSession(u), 90 * 86400), cookie(`${cookieName}-oauth`, '', 0)]);
@@ -502,7 +533,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         res.writeHead(200, { 'Content-Type': mime[extname(filename)] || 'application/octet-stream', 'Cache-Control': path.startsWith('/assets/') ? 'public, max-age=31536000, immutable' : 'no-cache' }); return res.end(method === 'HEAD' ? undefined : bytes);
       }
       throw new AppError('Not found.', 404);
-    } catch (e) { if (!res.headersSent) response(res, { error: e instanceof ProfileLinkError ? (e.code==='local_reauthentication_required'?'Sign in again to connect your LazyingArt account.':'Account connection did not finish. Return to OnlyIdeas and try again.') : e instanceof AppError ? e.message : 'Something went wrong. Please try again.' }, e instanceof ProfileLinkError?400:e instanceof AppError ? e.status : 500); else res.end(); }
+    } catch (e) { if (!res.headersSent) response(res, { error: e instanceof ProfileLinkError ? linkFailure(e.code).message : e instanceof AppError ? e.message : 'Something went wrong. Please try again.', ...(e instanceof ProfileLinkError?{code:linkFailures[e.code]?e.code:'connection_unavailable',action:linkFailure(e.code).action}:{}) }, e instanceof ProfileLinkError?(linkFailures[e.code]?.status||400):e instanceof AppError ? e.status : 500); else res.end(); }
   });
   server.requestTimeout = 60_000; server.headersTimeout = 15_000;
   server.on('close', () => {stopWorker();billing.stop();if(agentTimer)clearInterval(agentTimer);if(revokeTimer)clearInterval(revokeTimer);});

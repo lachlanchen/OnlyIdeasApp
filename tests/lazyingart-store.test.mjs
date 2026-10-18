@@ -174,3 +174,63 @@ test('points configuration alone cannot advertise or expose an unqualified SDK c
  const app=createApp(s.store,{origin:new URL(B.redirectUri).origin,lazyingart:config,lacPoints:{enabled:true}},{worker:false,profileOptions:s.options});await new Promise(r=>app.listen(0,'127.0.0.1',r));t.after(()=>new Promise(r=>{app.close(r);app.closeAllConnections()}));const base=`http://127.0.0.1:${app.address().port}`,headers={Cookie:'__Host-onlyideas='+token};
  assert.equal((await(await fetch(base+'/api/session',{headers})).json()).capabilities.lacPoints,false);assert.equal((await fetch(base+'/api/lac/balance',{headers})).status,503);
 });
+
+async function linkingHttp(t,s,user){
+ const {createApp}=await import('../server/app.mjs'),origin=new URL(B.redirectUri).origin;
+ const app=createApp(s.store,{origin,lazyingart:config},{worker:false,profileOptions:s.options});await new Promise(r=>app.listen(0,'127.0.0.1',r));t.after(()=>new Promise(r=>{app.close(r);app.closeAllConnections()}));
+ const base=`http://127.0.0.1:${app.address().port}`,token=s.store.createSession(user),headers={Origin:origin,'Content-Type':'application/json',Cookie:'__Host-onlyideas='+token};
+ const post=(path,body,extra={})=>fetch(base+path,{method:'POST',headers:{...headers,...extra},body:JSON.stringify(body)});
+ const start=async()=>{const verifier='v'.repeat(43),challenge=Buffer.from(hash(verifier),'hex').toString('base64url');const response=await post('/api/auth/lazyingart/start',{mode:'link',challenge});assert.equal(response.status,200);const flow=await response.json();const u=new URL(flow.url),browser=await fetch(base+u.pathname+u.search,{redirect:'manual'});assert.equal(browser.status,303);const cookie=browser.headers.get('set-cookie').split(';')[0],auth=new URL(browser.headers.get('location'));return{flow:flow.flow,verifier,cookie,callback:'/api/auth/lazyingart/callback?'+new URLSearchParams({iss:B.issuer,code:'c'.repeat(43),state:auth.searchParams.get('state')})}};
+ return{base,token,headers,post,start,callback:f=>fetch(base+f.callback,{headers:{Cookie:f.cookie},redirect:'manual'})};
+}
+test('a real callback collision returns an actionable result only to its bound app session',async t=>{
+ const s=fixture(t),first={id:'main-one',authenticatedAt:s.time},token=s.store.createSession(first);
+ await s.finish({owner:first.id,sessionHash:hash(token),authenticatedAt:s.time});
+ const other={id:'main-two',name:'Keep me',authenticatedAt:s.time},h=await linkingHttp(t,s,other),flow=await h.start();
+ assert.equal((await h.callback(flow)).status,200);
+ const wrong=await h.post('/api/auth/lazyingart/complete',{flow:flow.flow,verifier:'z'.repeat(43)});assert.equal(wrong.status,403);
+ const result=await h.post('/api/auth/lazyingart/complete',{flow:flow.flow,verifier:flow.verifier});assert.equal(result.status,409);const value=await result.json();assert.equal(value.code,'account_already_linked');assert.equal(value.action,'choose_account');assert.equal(value.token,undefined);assert.ok(!value.error.includes('main-one'));
+ assert.equal(s.store.session(h.token).id,other.id);assert.equal(s.store.db.prepare('SELECT owner FROM profile_links').get().owner,first.id);
+ assert.equal((await h.post('/api/auth/lazyingart/cancel',{flow:flow.flow,verifier:flow.verifier})).status,200);
+});
+test('PWA link completes without replacing its cookie and cancel prevents a late callback mapping',async t=>{
+ const s=fixture(t),user={id:'keep-reader',authenticatedAt:s.time},h=await linkingHttp(t,s,user),a=await h.start();
+ assert.equal((await h.post('/api/auth/lazyingart/cancel',{flow:a.flow,verifier:a.verifier})).status,200);
+ assert.equal((await h.callback(a)).status,403);assert.equal(s.store.db.prepare('SELECT count(*) n FROM profile_links').get().n,0);assert.equal(s.store.session(h.token).id,user.id);
+ const b=await h.start();assert.equal((await h.callback(b)).status,200);const response=await h.post('/api/auth/lazyingart/complete',{flow:b.flow,verifier:b.verifier});assert.equal(response.status,200);assert.deepEqual(await response.json(),{linked:true});assert.ok(!response.headers.get('set-cookie')?.includes('profile'));
+ assert.equal(s.store.session(h.token).id,user.id);assert.equal(s.store.db.prepare('SELECT count(*) n FROM sessions').get().n,1);
+});
+test('reauth and existing different-subject refusal preserve account and purchased ledger',async t=>{
+ const s=fixture(t),user={id:'keep-reader',authenticatedAt:s.time},h=await linkingHttp(t,s,user);
+ s.store.db.prepare('INSERT INTO credit_ledger VALUES(?,?,?,?,?,?)').run('paid',user.id,45,'subscription',null,s.time);
+ const first=await h.start();await h.callback(first);s.subject='la_'+'2'.repeat(32);const second=await h.start();await h.callback(second);
+ const response=await h.post('/api/auth/lazyingart/complete',{flow:second.flow,verifier:second.verifier});assert.equal(response.status,409);assert.equal((await response.json()).code,'different_account_already_linked');
+ assert.equal(s.store.db.prepare('SELECT subject FROM profile_links').get().subject,subject);assert.equal(s.store.db.prepare('SELECT sum(delta) n FROM credit_ledger WHERE owner=?').get(user.id).n,45);
+ const record=JSON.parse(s.store.db.prepare('SELECT user FROM sessions WHERE id=?').get(hash(h.token)).user);record.authenticatedAt=Date.now()-601000;s.store.db.prepare('UPDATE sessions SET user=? WHERE id=?').run(JSON.stringify(record),hash(h.token));
+ const stale=await h.post('/api/auth/lazyingart/start',{mode:'link',challenge:'c'.repeat(43)});assert.equal(stale.status,403);assert.equal((await stale.json()).action,'reauthenticate');assert.equal(s.store.session(h.token).id,user.id);
+});
+
+test('same-account reauthentication preserves its session; a different identity is refused',async t=>{
+ const s=fixture(t),{startNative,finishNative,redeemNative}=await import('../server/native-auth.mjs');
+ const user={id:'github-42',name:'Main',authenticatedAt:s.time-700000},token=s.store.createSession(user),context={owner:user.id,sessionHash:hash(token),reauthenticate:true};
+ const verifier='v'.repeat(43),challenge=Buffer.from(hash(verifier),'hex').toString('base64url');
+ const wrong=startNative(s.store,challenge,'https://agent.onlyideas.art',context);finishNative(s.store,wrong.flow,{id:'github-99',authenticatedAt:s.time});
+ assert.throws(()=>redeemNative(s.store,wrong.flow,verifier,{...context,linkOnly:true}),{code:'local_session_changed'});assert.equal(s.store.session(token).id,user.id);
+ const good=startNative(s.store,challenge,'https://agent.onlyideas.art',context);finishNative(s.store,good.flow,{...user,authenticatedAt:s.time});
+ assert.deepEqual(redeemNative(s.store,good.flow,verifier,{...context,linkOnly:true}),{linked:true});assert.equal(s.store.session(token).authenticatedAt,s.time);assert.equal(s.store.db.prepare('SELECT count(*) n FROM sessions').get().n,1);
+});
+
+test('authenticated central sign-in refuses another account and keeps the original mapping',async t=>{
+ const s=fixture(t),{startNative}=await import('../server/native-auth.mjs');
+ const user=(await s.finish()).user,token=s.store.createSession(user),verifier='v'.repeat(43);
+ const {flow}=startNative(s.store,Buffer.from(hash(verifier),'hex').toString('base64url'),'https://agent.onlyideas.art',{owner:user.id,sessionHash:hash(token),reauthenticate:true});
+ const context={flow,loginOwner:user.id,loginSessionHash:hash(token)};
+ s.subject='la_'+'2'.repeat(32);
+ await assert.rejects(s.finish(context),{code:'local_session_changed'});
+ assert.equal(s.store.db.prepare('SELECT count(*) n FROM profile_links').get().n,1);
+ assert.equal(s.store.session(token).id,user.id);
+ s.subject=subject;
+ assert.equal((await s.finish(context)).user.id,user.id);
+ s.store.db.prepare('DELETE FROM sessions WHERE id=?').run(hash(token));
+ await assert.rejects(s.start(context),{code:'local_session_changed'});
+});
