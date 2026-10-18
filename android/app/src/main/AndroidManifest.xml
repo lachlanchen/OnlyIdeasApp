@@ -28,6 +28,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="art.onlyideas.app" android:host="oauth" android:path="/complete" />
             </intent-filter>
+            <intent-filter><action android:name="android.intent.action.VIEW"/><category android:name="android.intent.category.DEFAULT"/><category android:name="android.intent.category.BROWSABLE"/><data android:scheme="art.onlyideas.app" android:host="paper"/><data android:scheme="art.onlyideas.app" android:host="research"/></intent-filter>
         </activity>
 
         <receiver android:name=".ReadingReminder" android:exported="false"><intent-filter><action android:name="android.intent.action.BOOT_COMPLETED"/><action android:name="android.intent.action.TIMEZONE_CHANGED"/></intent-filter></receiver>

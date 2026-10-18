@@ -1,3 +1,4 @@
+import {sharePage} from './share-page.mjs';
 import {confirmPublication} from './confirm-publication.mjs';
 import {createBrowserRetrieval} from './browser-retrieval.mjs';
 import {conditionalJSON,conditionalResponse} from './conditional-response.mjs';
@@ -96,6 +97,17 @@ export function createApp(store, config, { worker = true, provider = providerJSO
     try {
       const url = new URL(req.url, origin), path = url.pathname, method = req.method;
       requireValue(!/%2f|%5c|%00|(?:^|\/)\.\.(?:\/|$)/i.test(req.url.split('?')[0]), 'Invalid path.');
+      const shared = path.match(/^\/share\/(paper|research)\/([a-zA-Z0-9-]{1,120})$/);
+      if(shared && ['GET','HEAD'].includes(method)) {
+        limit('share:'+req.socket.remoteAddress,90);
+        const ref=shared[1]==='research'?'r-'+shared[2]:shared[2];
+        // Always anonymous: an owner's cookie must never expose private metadata.
+        const {card}=social.resolve(ref,null);
+        requireValue(card.visibility!=='private','Paper not found.',404);
+        const link='https://agent.onlyideas.art/share/'+shared[1]+'/'+shared[2];
+        const preview={app:'OnlyIdeas',title:card.title,description:[card.authors,card.journal,card.year].filter(Boolean).join(' · ')||'Read and discuss this research paper.',url:link,web:'https://agent.onlyideas.art/?'+shared[1]+'='+encodeURIComponent(shared[2]),native:'art.onlyideas.app://'+shared[1]+'/'+encodeURIComponent(shared[2]),image:'https://agent.onlyideas.art/apple-touch-icon.png',appleID:'6816392935',androidID:'art.onlyideas.app'};
+        res.writeHead(200,{'Content-Type':'text/html; charset=utf-8'});return res.end(method==='HEAD'?undefined:sharePage(preview));
+      }
       if(await rewardSource.route(req,res))return;
       if(path.startsWith('/api/worker/retrieval/')) {
         requireValue(retrieval.authorized(req),'Retrieval worker authorization required.',401);
@@ -191,6 +203,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
       }
       const attached=path.match(/^\/api\/attachments\/([a-f0-9-]{36})$/);
       if(attached&&method==='GET'){requireUser();return response(res,{attachment:attachment(store,attached[1],user.id)});}
+      if(path==='/api/paper-mentions' && method==='GET'){requireUser();limit(`mentions:${user.id}`,120);const q=(url.searchParams.get('q')||'').slice(0,120).toLocaleLowerCase();return response(res,{papers:libraryPapers(store,user).filter(p=>[p.title,p.authors].join(' ').toLocaleLowerCase().includes(q)).slice(0,20).map(({id,title,authors})=>({id,title,authors}))});}
       if (path === '/api/chats' || path.startsWith('/api/chats/')) {
         limit(`chat:${user?.id || req.socket.remoteAddress}`, 60);
         const result = await chats.client(path, method, user, method === 'POST' ? await json(req) : {}, enqueue);

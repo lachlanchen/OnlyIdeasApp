@@ -1,3 +1,4 @@
+import LinkPresentation
 import SwiftUI
 import UserNotifications
 import StoreKit
@@ -65,6 +66,8 @@ struct NativeReadingApp: View {
     }
     #endif
   }
+  @State private var sharedPaper:ResearchPaper?
+  private func openReadingLink(_ url:URL){guard ReadingLink.accepts(url) else{return};ReadingLink.pending=nil;let id=String(url.path.dropFirst());if url.host=="paper"{sharedPaper=ResearchPaper(id:id,title:"OnlyIdeas")}else if let web=URL(string:"https://agent.onlyideas.art/?research="+id){UIApplication.shared.open(web)}}
   var body: some View {
     navigation.id(store.language).environment(\.locale,Locale(identifier:UILanguage.current)).environment(\.layoutDirection,UILanguage.current == "ar" ? .rightToLeft : .leftToRight).environmentObject(store).tint(accent).preferredColorScheme(
       store.appearance == "system" ? nil : store.appearance == "dark" ? .dark : .light
@@ -74,9 +77,10 @@ struct NativeReadingApp: View {
     .onReceive(store.$requestedPlanID) { value in
       if value != nil {tab=2;if store.account==nil {store.showSignIn=true}}
     }
-    .task { await store.refresh() }
+    .sheet(item:$sharedPaper){paper in NavigationView{NativePaper(paper:paper).toolbar{Button(T("Done")){sharedPaper=nil}}}.environmentObject(store)}
+    .task { await store.refresh();if let link=ReadingLink.pending{openReadingLink(link)} }
     .onReceive(NotificationCenter.default.publisher(for: Notification.Name("OnlyIdeas.SignInReturn"))) { event in
-      if let url = event.object as? URL { store.handleSignInURL(url) }
+      if let url = event.object as? URL { if ReadingLink.accepts(url){openReadingLink(url)}else{store.handleSignInURL(url)} }
     }
     .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
       Task { await store.resumeSignIn() }
@@ -243,6 +247,7 @@ struct NativeLibrary: View {
       }
       .sheet(isPresented: $requests) { NativeRequests() }
       .sheet(isPresented: $options) { NativeSharingOptions() }
+
   }
 }
 struct PaperRow: View {
@@ -278,6 +283,7 @@ struct NativeAgent: View {
   @State private var followingLatest = true
   @State private var awayFromLatest = false
   @State private var draggingMessages = false
+  @State private var paperMention=false
   var body: some View {
     VStack(spacing: 0) {
       ScrollViewReader { proxy in
@@ -370,6 +376,12 @@ struct NativeAgent: View {
     }
     .sheet(isPresented: $requests) { NativeRequests() }
     .sheet(isPresented: $options) { NativeSharingOptions() }
+    .sheet(isPresented:$paperMention){NativePaperMentionPicker { paper in
+      if store.draftReferences.count<3 && !store.draftReferences.contains(where:{$0.id==paper.id}) {store.draftReferences.append(paper)}
+      if store.agentDraft.hasSuffix("@") {store.agentDraft.removeLast()};paperMention=false
+    }}
+    .onChange(of:store.agentDraft){text in if text.hasSuffix("@") && store.account != nil && !store.busy {paperMention=true}}
+
     #if targetEnvironment(macCatalyst)
     .sheet(isPresented:$attachPicker) {
       NativeAgentFilePicker { urls in
@@ -424,9 +436,12 @@ struct NativeAgent: View {
       ForEach(store.draftAttachments) { file in
         HStack { Image(systemName:"doc.fill").foregroundColor(accent); Text(file.name).font(.footnote).lineLimit(1);Spacer();Button { store.draftAttachments.removeAll{$0.id==file.id} } label:{ Image(systemName:"xmark.circle.fill") }.accessibilityLabel(T("Remove attachment")) }.padding(.horizontal,16)
       }
+      if let quote=store.draftQuote {HStack(alignment:.top){VStack(alignment:.leading,spacing:3){Text(T("Replying to")+" "+T(quote.role=="user" ? "You":"OnlyIdeas")).font(.caption.weight(.semibold));Text(quote.text).font(.caption).lineLimit(2)};Spacer();Button{store.draftQuote=nil}label:{Image(systemName:"xmark.circle.fill")}.accessibilityLabel(T("Remove quote"))}.padding(10).background(accent.opacity(0.08)).cornerRadius(12)}
+      ForEach(store.draftReferences){paper in HStack{Image(systemName:"at");Text(paper.title).font(.caption).lineLimit(2);Spacer();Button{store.draftReferences.removeAll{$0.id==paper.id}}label:{Image(systemName:"xmark.circle.fill")}.accessibilityLabel(T("Remove paper"))}.padding(8).background(accent.opacity(0.08)).cornerRadius(12)}
       if store.attachmentBusy { ProgressView(T("Uploading attachment…")) }
       HStack(alignment: .bottom, spacing: 8) {
         Menu {
+          Button(T("Mention a paper")){if store.account==nil {Task{await store.signIn()}}else{paperMention=true}}
           Button(T("Choose files")) { if store.account==nil {Task {await store.signIn()}} else {attachPicker=true} }
           Button(T("Choose photo")) { if store.account==nil {Task {await store.signIn()}} else {photoPicker=true} }
         } label:{Image(systemName:"paperclip").font(.title2).frame(width:40,height:40)}.fixedSize().frame(width:44,height:44).accessibilityLabel(T("Attach files")).disabled(store.attachmentBusy||store.draftAttachments.count>=3)
@@ -501,6 +516,7 @@ struct AgentBubble: View {
         } label: {Image(systemName: copied ? "checkmark" : "doc.on.doc").frame(width: 32, height: 32)}
           .buttonStyle(.plain).foregroundColor(.secondary).accessibilityLabel(T("Copy message"))
           .accessibilityIdentifier("chat-copy-\(message.id)")
+        Button {store.draftQuote=MessageQuote(id:message.id,role:message.role,text:String(message.text.prefix(1600)))} label:{Image(systemName:"quote.bubble").frame(width:32,height:32)}.buttonStyle(.plain).accessibilityLabel(T("Quote message"))
         if !isUser {
           Menu {
             Button(T("Report AI response")) {store.reportContext = "Agent message \(message.id) in conversation \(store.conversationID ?? "")";store.showReport = true}
@@ -508,6 +524,8 @@ struct AgentBubble: View {
             .fixedSize().accessibilityLabel(T("Report AI response"))
         }
       }
+      if let quote=message.quote {VStack(alignment:.leading,spacing:4){Text(T(quote.role=="user" ? "You":"OnlyIdeas")).font(.caption.weight(.semibold));Text(quote.text).font(.caption).lineLimit(4)}.padding(10).frame(maxWidth:.infinity,alignment:.leading).background(accent.opacity(0.08)).cornerRadius(10)}
+      ForEach(message.references ?? []){paper in NavigationLink(destination:NativePaper(paper:ResearchPaper(id:paper.id,title:paper.title))){Label(paper.title,systemImage:"at").font(.caption).lineLimit(2)}.padding(7).background(accent.opacity(0.08)).cornerRadius(10)}
       NativeMessageText(text: displayedText, identifier: "chat-text-\(message.id)")
       ForEach(message.attachments ?? []) { file in
         HStack { Image(systemName:"doc.fill").foregroundColor(accent);VStack(alignment:.leading){Text(file.name).font(.subheadline);Text(file.state=="ready" ? T("Ready") : file.state=="failed" ? T("Could not prepare file") : T("Preparing your attachments")).font(.caption).foregroundColor(.secondary)};Spacer()
@@ -886,6 +904,8 @@ struct NativePaper: View {
   @State private var discussion = false
   @State private var paragraph = ""
   @State private var shareURL: URL?
+  @State private var readingShareURL:URL?
+  @State private var readingSharing=false
   @State private var sharing = false
   @State private var readingTools = false
   @State private var languages = false
@@ -932,6 +952,7 @@ struct NativePaper: View {
           Image(systemName: "textformat.size")
         }.accessibilityLabel(T("Increase reading text size"))
         Menu {
+          Button(T("Share")) {Task{do{let result=try await store.json("/api/items/"+paper.id);guard let value=result["shareUrl"] as? String,let url=URL(string:value) else{store.error=T("Private papers can only be opened by their owner.");return};readingShareURL=url;readingSharing=true}catch{store.error=error.localizedDescription}}}
           Button(T(store.isDownloaded(paper.id) ? "Unpin offline copy" : "Keep offline")) {
             if let document = document {
               do { try store.toggleDownload(document) } catch {
@@ -1003,6 +1024,7 @@ struct NativePaper: View {
       NativeDiscussion(paper: document?.paper ?? paper, quote: quote, paragraphId:paragraph)
     }
     .sheet(isPresented: $sharing) { if let shareURL = shareURL { NativeShare(items: [shareURL]) } }
+    .sheet(isPresented:$readingSharing){if let url=readingShareURL {NativeReadingShare(title:document?.paper.title ?? paper.title,url:url)}}
     .alert("Apple Watch", isPresented: Binding(get: { watchNotice != nil }, set: { if !$0 { watchNotice = nil } })) {
       Button(T("OK")) { watchNotice = nil }
     } message: { Text(T(watchNotice ?? "")) }
@@ -1653,7 +1675,7 @@ struct NativePaperActions:View {
   HStack(spacing:4){action(saved ? "Saved":"Save",saved ? "star.fill":"star"){Task{await toggle("saved",!saved)}};action("Like",liked ? "heart.fill":"heart"){Task{await toggle("liked",!liked)}};action("Comment","bubble.right"){discussion=true};action("Share","square.and.arrow.up"){if shareURL != nil {sharing=true}else{store.error=T("Private papers can only be opened by their owner.")}}}.font(.caption).buttonStyle(.plain).disabled(busy)
    .task(id:reference+(store.account?.id ?? "")){await load()}
    .sheet(isPresented:$discussion,onDismiss:{Task{await load()}}){NativeDiscussion(paper:ResearchPaper(id:reference,title:title,visibility:isPrivate ? "private":"public"),quote:"",itemReference:reference)}
-   .sheet(isPresented:$sharing){if let url=shareURL {NativeShare(items:[title,url])}}
+   .sheet(isPresented:$sharing){if let url=shareURL {NativeReadingShare(title:title,url:url)}}
  }
  func action(_ name:String,_ image:String,run:@escaping()->Void)->some View {Button(action:run){VStack(spacing:3){Image(systemName:image);Text(T(name)+(name=="Like" && likes>0 ? " \(likes)":name=="Comment" && comments>0 ? " \(comments)":"")).lineLimit(1).minimumScaleFactor(0.8)}.frame(maxWidth:.infinity,minHeight:44)}.accessibilityLabel(T(name))}
  func apply(_ r:[String:Any]){saved=r["saved"]as?Bool ?? false;liked=r["liked"]as?Bool ?? false;likes=r["likes"]as?Int ?? 0;comments=r["commentCount"]as?Int ?? 0;shareURL=(r["shareUrl"]as?String).flatMap(URL.init(string:));isPrivate=r["private"]as?Bool ?? false}
@@ -1932,4 +1954,30 @@ private struct NativeComposerInput: UIViewRepresentable {
       if abs(parent.height - next) > 0.5 { parent.height = next }
     }
   }
+}
+
+struct NativePaperMentionPicker:View {
+ @EnvironmentObject var store:ReadingStore
+ @Environment(\.dismiss) var dismiss
+ var select:(PaperReference)->Void
+ @State private var query=""
+ @State private var rows:[PaperReference]=[]
+ @State private var error=""
+ var body:some View {NavigationView{List{if !error.isEmpty {Text(error)};ForEach(rows){p in Button{select(p)}label:{VStack(alignment:.leading,spacing:4){Label(p.title,systemImage:"at");Text(p.authors ?? "").font(.caption).foregroundColor(.secondary)}}}}.searchable(text:$query,prompt:T("Search your reading library")).navigationTitle(T("Mention a paper")).toolbar{Button(T("Done")){dismiss()}}.task(id:(store.account?.id ?? "")+":"+query){let owner=store.account?.id;rows=[];do{try await Task.sleep(nanoseconds:200_000_000);let r=try await store.json("/api/paper-mentions?q="+(query.addingPercentEncoding(withAllowedCharacters:.alphanumerics) ?? ""));guard !Task.isCancelled,store.account?.id==owner else{return};rows=try JSONDecoder().decode([PaperReference].self,from:JSONSerialization.data(withJSONObject:r["papers"] ?? []));error=""}catch{if !Task.isCancelled{self.error=error.localizedDescription}}}}.navigationViewStyle(.stack)}
+}
+final class ReadingShareItem:NSObject,UIActivityItemSource {
+ let title:String;let url:URL
+ init(title:String,url:URL){self.title=title;self.url=url}
+ func activityViewControllerPlaceholderItem(_ c:UIActivityViewController)->Any{url}
+ func activityViewController(_ c:UIActivityViewController,itemForActivityType type:UIActivity.ActivityType?)->Any?{title+"\n"+url.absoluteString}
+ func activityViewController(_ c:UIActivityViewController,subjectForActivityType type:UIActivity.ActivityType?)->String{title}
+ func activityViewControllerLinkMetadata(_ c:UIActivityViewController)->LPLinkMetadata?{let m=LPLinkMetadata();m.title=title;m.originalURL=url;m.url=url;if let icon=UIImage(named:"ChatIcon"){m.iconProvider=NSItemProvider(object:icon)};return m}
+}
+struct NativeReadingShare:View {
+ let title:String;let url:URL
+ @Environment(\.dismiss) var dismiss
+ @State private var system=false
+ @State private var notice=""
+ func copy(_ prefix:String=""){UIPasteboard.general.string=(prefix.isEmpty ? "":T(prefix)+"\n")+title+"\n"+url.absoluteString;notice=T("Copied")}
+ var body:some View {NavigationView{List{HStack(spacing:12){Image("ChatIcon").resizable().frame(width:48,height:48).cornerRadius(12);VStack(alignment:.leading){Text("OnlyIdeas").font(.caption).foregroundColor(.secondary);Text(title).font(.headline).lineLimit(3)}};Button{system=true}label:{Label(T("Share via…"),systemImage:"square.and.arrow.up")};Button{system=true}label:{Label(T("WeChat · choose in share sheet"),systemImage:"message")};Button{copy();notice=T("Copied. Paste into EchoMind to choose who to send it to.")}label:{Label(T("Copy for EchoMind"),systemImage:"bubble.left.and.bubble.right")};Button{copy("Save this to my reading list:");notice=T("Copied. Paste into AiMemo and review before sending.")}label:{Label(T("AiMemo · save to read later"),systemImage:"bookmark")};Button{copy("Help me explore research ideas from:");notice=T("Copied. Paste into AiMemo and review before sending.")}label:{Label(T("AiMemo · explore ideas"),systemImage:"lightbulb")};Button{copy()}label:{Label(T("Copy link"),systemImage:"doc.on.doc")};if !notice.isEmpty{Text(notice).font(.footnote).foregroundColor(.secondary)}}.navigationTitle(T("Share")).toolbar{Button(T("Done")){dismiss()}}}.navigationViewStyle(.stack).sheet(isPresented:$system){NativeShare(items:[ReadingShareItem(title:title,url:url)])}}
 }

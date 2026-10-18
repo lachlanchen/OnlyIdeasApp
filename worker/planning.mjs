@@ -5,7 +5,7 @@ export function observedCards(task){
  const latest=[...(task.messages||[])].reverse().find(m=>m.papers?.length)?.papers||[];
  const actions=[...(task.messages||[])].reverse().find(m=>m.actions?.some(a=>a.paperId))?.actions||[];
  const recent=actions.flatMap(a=>(task.library||[]).filter(p=>p.paperId===a.paperId));
- const seen=new Set();return [...latest,...recent,...task.library||[]].filter(p=>{const key=p.paperId||p.source||p.id;if(seen.has(key))return false;seen.add(key);return true;});
+ const seen=new Set();return [...(task.references||[]),...latest,...recent,...task.library||[]].filter(p=>{const key=p.paperId||p.source||p.id;if(seen.has(key))return false;seen.add(key);return true;});
 }
 export function readingIntent(text){
  const kinds=[];
@@ -66,6 +66,7 @@ export function targetCard(task,cards=observedCards(task)){
  const doi=doiIn(text);
  const exact=cards.find(p=>doi&&doiIn(p.doi||p.source)===doi||[p.id,p.paperId,p.source,p.pdfUrl].filter(Boolean).some(v=>text.includes(v)));if(exact)return exact;
  if(doi||/https:\/\/|\b\d{4}\.\d{4,5}\b/.test(text))return null;
+ if(task.references?.length===1)return cards.find(p=>p.paperId===task.references[0].paperId)||null;
  const title=literalResearchQuery(text),exactTitle=title?cards.filter(p=>researchTerms(p.title).join(' ')===title):[];
  if(exactTitle.length===1)return exactTitle[0];
  const ranked=cards.map(p=>({p,score:title?literalTitleScore(p,title):researchScore(p,text)})).sort((a,b)=>b.score-a.score);

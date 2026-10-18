@@ -72,6 +72,9 @@ public class MainActivity extends AppCompatActivity {
   private LinearLayout readerLanguages;
   private boolean translationPending=false;
   private int readingGeneration=0;
+  private final ArrayList<JSONObject> draftReferences=new ArrayList<>();
+  private JSONObject draftQuote;
+  private boolean mentionOpen=false;
   private JSONArray papers = new JSONArray(),
       chats = new JSONArray(),
       chatMessages = new JSONArray(),
@@ -127,6 +130,7 @@ public class MainActivity extends AppCompatActivity {
     buildRoot();
     showLibrary();
     refresh();
+    handleReadingLink(getIntent().getData());
     if(getIntent().getBooleanExtra("onlyideas.daily",false)){spaceTab="daily";showSpace();}
   }
 
@@ -185,6 +189,7 @@ public class MainActivity extends AppCompatActivity {
   protected void onNewIntent(Intent intent) {
     super.onNewIntent(intent);
     setIntent(intent);
+    if(handleReadingLink(intent.getData()))return;
     if(intent.getBooleanExtra("onlyideas.daily",false)){spaceTab="daily";showSpace();return;}
     if (intent.getData() != null
         && intent.getData().toString().startsWith("art.onlyideas.app://oauth/complete"))
@@ -911,7 +916,7 @@ public class MainActivity extends AppCompatActivity {
             t("New chat"),
             false,
             () -> {
-              chatId = "";rememberChat();agentDraft="";if(composer!=null)composer.setText("");agentScrollY=0;
+              chatId = "";rememberChat();draftReferences.clear();draftQuote=null;agentDraft="";if(composer!=null)composer.setText("");agentScrollY=0;
               chatMessages = new JSONArray();
               agentStatus = "";
               showAgent();
@@ -961,6 +966,8 @@ public class MainActivity extends AppCompatActivity {
             | InputType.TYPE_TEXT_FLAG_MULTI_LINE
             | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
     composer.setBackgroundColor(Color.TRANSPARENT);
+    Button mentionButton=button("@",false,this::choosePaperMention);mentionButton.setContentDescription(t("Mention a paper"));compose.addView(mentionButton,new LinearLayout.LayoutParams(dp(36),dp(44)));
+    composer.addTextChangedListener(new android.text.TextWatcher(){public void beforeTextChanged(CharSequence v,int start,int count,int after){}public void onTextChanged(CharSequence v,int start,int before,int count){agentDraft=v.toString();if(v.toString().endsWith("@")&&!mentionOpen&&!busy&&account!=null)choosePaperMention();}public void afterTextChanged(android.text.Editable e){}});
     compose.addView(composer, new LinearLayout.LayoutParams(0, -2, 1));
     sendButton = button("↑", true, () -> send(composer.getText().toString()));
     sendButton.setTextSize(26);
@@ -975,6 +982,9 @@ public class MainActivity extends AppCompatActivity {
 
   void renderDraftAttachments() {
     if(attachmentTray==null)return;attachmentTray.removeAllViews();
+    if(draftQuote!=null){LinearLayout row=row();TextView q=text(t("Replying to")+" "+t(draftQuote.optString("role").equals("user")?"You":"OnlyIdeas")+"\n"+draftQuote.optString("text"),13,false);q.setMaxLines(3);row.addView(q,new LinearLayout.LayoutParams(0,-2,1));Button remove=button("×",false,()->{draftQuote=null;renderDraftAttachments();});remove.setContentDescription(t("Remove quote"));row.addView(remove);attachmentTray.addView(row);}
+    for(JSONObject p:new ArrayList<>(draftReferences)){LinearLayout row=row();TextView q=text("@ "+p.optString("title"),13,false);q.setMaxLines(2);row.addView(q,new LinearLayout.LayoutParams(0,-2,1));Button remove=button("×",false,()->{draftReferences.remove(p);renderDraftAttachments();});remove.setContentDescription(t("Remove paper"));row.addView(remove);attachmentTray.addView(row);}
+
     for(JSONObject file:new ArrayList<>(draftAttachments)) {LinearLayout row=row();TextView name=text(file.optString("name"),14,false);row.addView(name,new LinearLayout.LayoutParams(0,-2,1));row.addView(button("×",false,()->{draftAttachments.remove(file);renderDraftAttachments();}));attachmentTray.addView(row);}
   }
 
@@ -1014,7 +1024,11 @@ public class MainActivity extends AppCompatActivity {
         toast(t("Copied"));
       });copy.setTextSize(13);copy.setMinWidth(0);copy.setMinimumWidth(0);copy.setPadding(dp(6),0,dp(6),0);
       copy.setContentDescription(t("Copy message"));author.addView(copy,new LinearLayout.LayoutParams(-2,dp(36)));
+      Button reply=button("↩",false,()->{try{draftQuote=new JSONObject().put("id",m.getString("id")).put("role",m.getString("role")).put("text",m.optString("text").substring(0,Math.min(1600,m.optString("text").length())));renderDraftAttachments();composer.requestFocus();}catch(Exception e){toast(e.getMessage());}});reply.setContentDescription(t("Quote message"));author.addView(reply,new LinearLayout.LayoutParams(dp(36),dp(36)));
       bubble.addView(author);
+      JSONObject quoted=m.optJSONObject("quote");if(quoted!=null){TextView q=text(t(quoted.optString("role").equals("user")?"You":"OnlyIdeas")+"\n"+quoted.optString("text"),13,false);q.setMaxLines(4);q.setPadding(dp(8),dp(8),dp(8),dp(8));q.setBackground(rounded(soft,10));bubble.addView(q);}
+      JSONArray mentions=m.optJSONArray("references");if(mentions!=null)for(int j=0;j<mentions.length();j++){JSONObject p=mentions.optJSONObject(j);bubble.addView(button("@ "+p.optString("title"),false,()->openPaper(p)));}
+
       gap(bubble, 8);
       TextView body = text(user ? m.optString("text") : t(m.optString("text")), 17, false);
       body.setTextIsSelectable(true);
@@ -1106,6 +1120,7 @@ public class MainActivity extends AppCompatActivity {
     if ((text.trim().isEmpty() && draftAttachments.isEmpty()) || busy || !agentStatus.isEmpty()) return;
     busy = true;
     sendButton.setEnabled(false);
+    final ArrayList<JSONObject> sentReferences=new ArrayList<>(draftReferences);final JSONObject sentQuote=draftQuote;final String requestChat=chatId;
     String old = chatId;final String session=api.token(),savedChat=getPreferences(MODE_PRIVATE).getString(chatPreference(),"");
     job(
         () -> {
@@ -1119,13 +1134,14 @@ public class MainActivity extends AppCompatActivity {
                 api.jsonBound("/api/chats", "POST", new JSONObject(),session)
                     .getJSONObject("chat")
                     .getString("id");
-          api.jsonBound("/api/chats/" + id + "/messages", "POST", new JSONObject().put("text",text).put("attachments",new JSONArray(draftAttachments.stream().map(f->f.optString("id")).collect(java.util.stream.Collectors.toList()))).put("language",language()).put("agentActions",true).put("sharing",shareUpload?"shared":"private"),session);
+          api.jsonBound("/api/chats/" + id + "/messages", "POST", new JSONObject().put("text",text).put("paperIds",new JSONArray(sentReferences.stream().map(p->p.optString("id")).collect(java.util.stream.Collectors.toList()))).put("quoteId",sentQuote==null?"":sentQuote.optString("id")).put("attachments",new JSONArray(draftAttachments.stream().map(f->f.optString("id")).collect(java.util.stream.Collectors.toList()))).put("language",language()).put("agentActions",true).put("sharing",shareUpload?"shared":"private"),session);
           return id;
         },
         id -> {
           busy = false;
-          chatId = id;rememberChat();followAgent=true;agentDraft="";
-          composer.setText("");draftAttachments.clear();renderDraftAttachments();
+          if(!java.util.Objects.equals(session,api.token())||!chatId.equals(requestChat))return;
+          chatId = id;rememberChat();followAgent=true;if(agentDraft.equals(text)){agentDraft="";if(composer!=null)composer.setText("");}
+          draftReferences.removeAll(sentReferences);if(draftQuote==sentQuote)draftQuote=null;draftAttachments.clear();renderDraftAttachments();
           agentStatus = "Waiting for the paper agent";
           loadChat(true);
         });
@@ -1185,6 +1201,20 @@ public class MainActivity extends AppCompatActivity {
   void rememberChat(){if(account!=null)getPreferences(MODE_PRIVATE).edit().putString(chatPreference(),chatId.isEmpty()?"new":chatId).apply();}
   void resumeChat(){if(account==null||!chatId.isEmpty())return;String saved=getPreferences(MODE_PRIVATE).getString(chatPreference(),"");if(saved.equals("new"))return;int epoch=authEpoch;job(()->api.json("/api/chats","GET",null),r->{if(epoch!=authEpoch||!chatId.isEmpty()||!page.equals("agent"))return;JSONArray rows=r.optJSONArray("chats");if(rows==null||rows.length()==0)return;String found=rows.optJSONObject(0).optString("id");for(int i=0;i<rows.length();i++)if(rows.optJSONObject(i).optString("id").equals(saved))found=saved;chatId=found;rememberChat();loadChat(true);},false);}
 
+  boolean handleReadingLink(Uri uri){if(uri==null||!"art.onlyideas.app".equals(uri.getScheme())||uri.getQuery()!=null||uri.getFragment()!=null||uri.getPathSegments().size()!=1)return false;String kind=uri.getHost(),id=uri.getLastPathSegment();if(!("paper".equals(kind)||"research".equals(kind))||id==null||!id.matches("[A-Za-z0-9-]{1,120}"))return false;if("paper".equals(kind)){job(()->api.json("/api/papers/"+id,"GET",null),r->{JSONObject p=r.optJSONObject("paper");if(p!=null)openPaper(p);});}else startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse("https://agent.onlyideas.art/?research="+Uri.encode(id))));return true;}
+
+  void choosePaperMention(){
+    if(account==null){signIn();return;}if(mentionOpen||busy)return;if(draftReferences.size()>=3){toast(t("Choose up to three papers."));return;}
+    mentionOpen=true;int epoch=authEpoch;String conversation=chatId;LinearLayout box=column();box.setPadding(dp(16),dp(8),dp(16),dp(8));EditText query=new EditText(this);query.setHint(t("Search your reading library"));box.addView(query);LinearLayout rows=column();ScrollView scroll=new ScrollView(this);scroll.addView(rows);box.addView(scroll,new LinearLayout.LayoutParams(-1,dp(280)));
+    AlertDialog dialog=new AlertDialog.Builder(this).setTitle(t("Mention a paper")).setView(box).setNegativeButton(t("Cancel"),null).create();dialog.setOnDismissListener(d->mentionOpen=false);
+    Runnable[] search=new Runnable[1];search[0]=()->{String requested=query.getText().toString();job(()->api.json("/api/paper-mentions?q="+Uri.encode(requested),"GET",null),r->{if(!dialog.isShowing()||epoch!=authEpoch||!conversation.equals(chatId)||!requested.equals(query.getText().toString()))return;rows.removeAllViews();JSONArray items=r.optJSONArray("papers");if(items!=null)for(int i=0;i<items.length();i++){JSONObject p=items.optJSONObject(i);rows.addView(button(p.optString("title"),false,()->{if(epoch!=authEpoch||!conversation.equals(chatId))return;if(draftReferences.stream().noneMatch(x->x.optString("id").equals(p.optString("id"))))draftReferences.add(p);if(composer!=null&&composer.getText().toString().endsWith("@")){String value=composer.getText().toString();composer.setText(value.substring(0,value.length()-1));}renderDraftAttachments();dialog.dismiss();}));}},false);};
+    query.addTextChangedListener(new android.text.TextWatcher(){public void beforeTextChanged(CharSequence s,int a,int c,int f){}public void onTextChanged(CharSequence s,int a,int b,int c){handler.removeCallbacks(search[0]);handler.postDelayed(search[0],220);}public void afterTextChanged(android.text.Editable e){}});dialog.show();search[0].run();
+  }
+  void showReadingShare(String title,String url){
+    String text=title+"\n"+url;String[] choices={t("Share via…"),t("WeChat"),t("Copy for EchoMind"),t("AiMemo · save to read later"),t("AiMemo · explore ideas"),t("Copy link")};
+    new AlertDialog.Builder(this).setTitle(title).setItems(choices,(dialog,index)->{if(index<=1){Intent send=new Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_SUBJECT,title).putExtra(Intent.EXTRA_TITLE,title).putExtra(Intent.EXTRA_TEXT,text);if(index==1){send.setPackage("com.tencent.mm");try{startActivity(send);return;}catch(android.content.ActivityNotFoundException e){send.setPackage(null);}}startActivity(Intent.createChooser(send,t("Share")));}else{String body=(index==3?t("Save this to my reading list:")+"\n":index==4?t("Help me explore research ideas from:")+"\n":"")+text;((android.content.ClipboardManager)getSystemService(CLIPBOARD_SERVICE)).setPrimaryClip(android.content.ClipData.newPlainText(title,body));toast(t(index==2?"Copied. Paste into EchoMind to choose who to send it to.":index==3||index==4?"Copied. Paste into AiMemo and review before sending.":"Copied"));}}).setNegativeButton(t("Cancel"),null).show();
+  }
+
   void showHistory() {
     if (account == null) {
       signIn();
@@ -1206,7 +1236,7 @@ public class MainActivity extends AppCompatActivity {
               .setItems(
                   titles,
                   (d, n) -> {
-                    chatId = chats.optJSONObject(n).optString("id");rememberChat();agentScrollY=0;followAgent=true;
+                    draftQuote=null;draftReferences.clear();chatId = chats.optJSONObject(n).optString("id");rememberChat();agentScrollY=0;followAgent=true;
                     lastMessages = "";
                     chatMessages = new JSONArray();
                     agentStatus = "";
@@ -1442,6 +1472,7 @@ public class MainActivity extends AppCompatActivity {
   }
 
   void clearPrivateDownloads() {
+    draftReferences.clear();draftQuote=null;agentDraft="";
     draftAttachments.clear();
     if (cacheWarmup != null) cacheWarmup.cancel(true);
     getPreferences(MODE_PRIVATE).edit().remove("library").remove("libraryOwner").apply();
@@ -1750,7 +1781,8 @@ public class MainActivity extends AppCompatActivity {
               "Export Markdown",
               "Discuss selection",
               "Notes, guides & translation",
-              "Read in another language"
+              "Read in another language",
+              "Share"
             }),
             (d, n) -> {
               if (n < 2) {
@@ -1766,7 +1798,7 @@ public class MainActivity extends AppCompatActivity {
               } else if (n == 2) toggleDownload();
               else if (n == 3) sharePaper();
               else if (n == 4) discussion();
-              else if(n==5)readingTools(); else languagePicker();
+              else if(n==5)readingTools(); else if(n==6)languagePicker(); else {JSONObject p=document.optJSONObject("paper");if(p!=null)job(()->api.json("/api/items/"+p.optString("id"),"GET",null),r->{String url=r.optString("shareUrl");if(url.isEmpty()||url.equals("null")){toast(t("Private papers can only be opened by their owner."));return;}showReadingShare(p.optString("title"),url);});}
             })
         .setNegativeButton(t("Done"), null)
         .show();
@@ -2286,7 +2318,7 @@ public class MainActivity extends AppCompatActivity {
     Map<String,EditText> inputs=new LinkedHashMap<>();for(String key:List.of("from","to","journal")){caption(c,t(key.equals("from")?"From year":key.equals("to")?"To year":"Journal"));EditText edit=new EditText(this);edit.setSingleLine(true);edit.setText(draft.getOrDefault(key,""));if(!key.equals("journal"))edit.setInputType(InputType.TYPE_CLASS_NUMBER);c.addView(edit);inputs.put(key,edit);}Spinner order=new Spinner(this);order.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,new String[]{t("Relevance"),t("Newest first")}));order.setSelection("latest".equals(draft.get("sort"))?1:0);caption(c,t("Sort"));c.addView(order);
     new AlertDialog.Builder(this).setTitle(t("Filters")).setView(scroll).setPositiveButton(t("Apply"),(d,w)->{researchOptions.clear();researchOptions.putAll(draft);for(String key:inputs.keySet())researchOptions.put(key,inputs.get(key).getText().toString());researchOptions.put("sort",order.getSelectedItemPosition()==1?"latest":"relevance");researchReset();}).setNeutralButton(t("Clear filters"),(d,w)->{researchOptions.clear();researchReset();}).setNegativeButton(t("Cancel"),null).show();
   }
-  void socialActions(LinearLayout parent,String ref,String title){LinearLayout row=row();parent.addView(row);JSONObject[] state={new JSONObject()};Runnable[] render=new Runnable[1];render[0]=()->{row.removeAllViews();for(String action:List.of("saved","liked","comments","share")){String label=action.equals("saved")?(state[0].optBoolean("saved")?"★ "+t("Saved"):"☆ "+t("Save")):action.equals("liked")?(state[0].optBoolean("liked")?"♥ ":"♡ ")+t("Like"):t(action.equals("comments")?"Comment":"Share");Button b=button(label,false,()->{if(action.equals("comments")){itemDiscussion(ref,title,state[0].optBoolean("private"));return;}if(action.equals("share")){String url=state[0].optString("shareUrl");if(url.isEmpty()||url.equals("null")){toast(t("Private papers can only be opened by their owner."));return;}Intent send=new Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT,title+"\n"+url);startActivity(Intent.createChooser(send,t("Share")));return;}if(account==null){signIn();return;}job(()->api.json("/api/items/"+ref,"PUT",new JSONObject().put(action,!state[0].optBoolean(action))),r->{state[0]=r;render[0].run();});});b.setTextSize(11);b.setPadding(0,0,0,0);row.addView(b,new LinearLayout.LayoutParams(0,dp(44),1));}};render[0].run();job(()->api.json("/api/items/"+ref,"GET",null),r->{state[0]=r;render[0].run();},false);}
+  void socialActions(LinearLayout parent,String ref,String title){LinearLayout row=row();parent.addView(row);JSONObject[] state={new JSONObject()};Runnable[] render=new Runnable[1];render[0]=()->{row.removeAllViews();for(String action:List.of("saved","liked","comments","share")){String label=action.equals("saved")?(state[0].optBoolean("saved")?"★ "+t("Saved"):"☆ "+t("Save")):action.equals("liked")?(state[0].optBoolean("liked")?"♥ ":"♡ ")+t("Like"):t(action.equals("comments")?"Comment":"Share");Button b=button(label,false,()->{if(action.equals("comments")){itemDiscussion(ref,title,state[0].optBoolean("private"));return;}if(action.equals("share")){String url=state[0].optString("shareUrl");if(url.isEmpty()||url.equals("null")){toast(t("Private papers can only be opened by their owner."));return;}showReadingShare(title,url);return;}if(account==null){signIn();return;}job(()->api.json("/api/items/"+ref,"PUT",new JSONObject().put(action,!state[0].optBoolean(action))),r->{state[0]=r;render[0].run();});});b.setTextSize(11);b.setPadding(0,0,0,0);row.addView(b,new LinearLayout.LayoutParams(0,dp(44),1));}};render[0].run();job(()->api.json("/api/items/"+ref,"GET",null),r->{state[0]=r;render[0].run();},false);}
   void itemDiscussion(String ref,String paperTitle,boolean privatePaper){LinearLayout c=column();c.setPadding(dp(18),dp(8),dp(18),dp(16));c.setFocusableInTouchMode(true);caption(c,paperTitle);LinearLayout thread=column();c.addView(thread);CheckBox terms=new CheckBox(this);terms.setText(t("I accept the Community Terms"));if(!privatePaper){c.addView(terms);c.addView(button(t("Read Community Terms"),false,()->startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse("https://lachlan.lazying.art/OnlyIdeasApp/terms.html")))));}EditText draft=new EditText(this);draft.setHint(t("Your comment"));draft.setMinLines(3);draft.setGravity(Gravity.TOP);draft.setInputType(InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_FLAG_MULTI_LINE);c.addView(draft);ScrollView scroll=new ScrollView(this);scroll.addView(c);AlertDialog dialog=new AlertDialog.Builder(this).setTitle(t("Paper discussion")).setView(scroll).setNegativeButton(t("Done"),null).create();Runnable[] load=new Runnable[1];load[0]=()->job(()->api.json("/api/items/"+ref+"/comments","GET",null),r->{thread.removeAllViews();JSONArray comments=r.optJSONArray("comments");if(comments!=null)for(int i=0;i<comments.length();i++){JSONObject comment=comments.optJSONObject(i);title(thread,comment.optString("author"),15);caption(thread,comment.optString("text"));if(comment.optBoolean("pending"))caption(thread,t("Waiting for community review"));if(comment.optBoolean("canDelete"))thread.addView(button(t("Delete"),false,()->job(()->api.json("/api/comments/"+comment.optString("id"),"DELETE",null),v->load[0].run())));else{thread.addView(button(t("Report"),false,()->{if(account==null){signIn();return;}EditText reason=new EditText(this);new AlertDialog.Builder(this).setTitle(t("What should we review?")).setView(reason).setPositiveButton(t("Send report"),(d,w)->job(()->api.json("/api/comments/"+comment.optString("id")+"/report","POST",new JSONObject().put("reason",reason.getText().toString())),v->toast(t("Report sent.")))).show();}));thread.addView(button(t("Block reader"),false,()->{if(account==null){signIn();return;}job(()->api.json("/api/comments/"+comment.optString("id")+"/block","POST",new JSONObject()),v->load[0].run());}));}}scroll.post(()->scroll.fullScroll(View.FOCUS_DOWN));});c.addView(button(t("Post thought"),true,()->{if(account==null){signIn();return;}if(!privatePaper&&!terms.isChecked()){toast(t("I accept the Community Terms"));return;}job(()->api.json("/api/items/"+ref+"/comments","POST",new JSONObject().put("id",UUID.randomUUID().toString()).put("text",draft.getText().toString()).put("acceptTerms",terms.isChecked())),r->{draft.setText("");load[0].run();});}));dialog.setOnShowListener(v->{c.requestFocus();dialog.getWindow().setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);load[0].run();});dialog.show();}
 
   private String spaceTab="saved";

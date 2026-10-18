@@ -9,6 +9,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = scene as? UIWindowScene else { return }
+        if let url=connectionOptions.urlContexts.first?.url,ReadingLink.accepts(url){ReadingLink.pending=url}
         #if targetEnvironment(macCatalyst)
         UITabBar.appearance().isHidden = true
         windowScene.sizeRestrictions?.minimumSize = CGSize(width: 820, height: 600)
@@ -38,6 +39,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
         for context in URLContexts {
+            if ReadingLink.accepts(context.url){ReadingLink.pending=context.url}
             NotificationCenter.default.post(name: Notification.Name("OnlyIdeas.SignInReturn"), object: context.url)
         }
         #if !targetEnvironment(macCatalyst)

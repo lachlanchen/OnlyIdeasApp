@@ -491,3 +491,9 @@ path. Preserve direct model interpretation and the app's library/index/download
 pipeline as the normal route; neither Codex nor AgInTi replaces it. Research
 helpers run only when that route needs additional public sources or the user
 explicitly requests agent-assisted research.
+
+## Reading shares and quoted context · 2026-10-18
+
+The owner requests title-rich book/paper sharing to WeChat and EchoMind, and AiMemo read-later or research-idea drafts. Public share pages contain canonical metadata, a browser reader, an explicit app link and store choices. Sharing never publishes a private document or sends a message automatically. EchoMind owns its recipient/draft/card receiver and AiMemo owns its memo/agent draft receiver; qualify accepted ingress before enabling direct handoff. The OS share sheet and clearly labeled copy fallback remain usable independently.
+
+The chat composer supports up to three paper mentions and a quote from either side of the current conversation. Server-resolved IDs establish access; existing transcripts are reused. Quotes and papers are reference data, not instructions to execute. Draft context is removable, retained after a failed send, and cleared on account/conversation change. These changes accumulate in internal build36, without replacing public reviews.

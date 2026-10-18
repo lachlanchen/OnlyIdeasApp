@@ -1,3 +1,4 @@
+import {resolveChatReferences} from './chat-references.mjs';
 import {sharingConsent} from './sharing-consent.mjs';
 import {compactChatHistory} from './chat-context.mjs';
 import {libraryCards} from './library-search.mjs';
@@ -49,10 +50,11 @@ export function createChats(store, config, agentActions) {
         requireValue(typeof body.text === 'string' && body.text.length <= 4000, 'Write a message of up to 4,000 characters.');
         const ids=body.attachments||[];requireValue(Array.isArray(ids)&&ids.length<=3&&ids.every(a=>typeof a==='string'),'Attach up to three files.');
         for(const id of ids)attachment(store,id,user.id);requireValue(body.text.trim()||ids.length,'Write a message or attach a file.');
+        const context=resolveChatReferences(store,user.id,id,body);
         const text=body.text.trim()||'Help me understand these files.';
-        const taskId = queue(id,user,{ kind:'chat', text, attachments:ids, language:Object.hasOwn(languages,body.language)?body.language:'en',agentActions:body.agentActions===true,sharing:body.sharing==='private'?'private':'shared' }); add(id,'user',{text,attachmentIds:ids});
+        const taskId = queue(id,user,{ kind:'chat', text, paperIds:context.references.map(p=>p.id),quoteId:context.quote?.id,attachments:ids, language:Object.hasOwn(languages,body.language)?body.language:'en',agentActions:body.agentActions===true,sharing:body.sharing==='private'?'private':'shared' }); const messageId=add(id,'user',{text,attachmentIds:ids,references:context.references.map(({id,title})=>({id,title})),...(context.quote?{quote:context.quote}:{})});
         if (chat.title === 'New conversation') db.prepare('UPDATE chats SET title=? WHERE id=?').run(text.slice(0,70),id);
-        return { taskId, queued:true };
+        return { taskId, messageId, queued:true };
       }
       if (action === 'import' && method === 'POST') {
         const card = messages(id).flatMap(m=>m.papers || []).find(p=>p.id === body.paperId);
@@ -76,6 +78,7 @@ export function createChats(store, config, agentActions) {
       const rows=db.prepare("SELECT * FROM chat_tasks WHERE (state='queued' OR (state='running' AND json_extract(body,'$.leaseUntil')<?)) AND owner NOT IN (SELECT id FROM suspensions) AND owner NOT IN (SELECT id FROM deleted_accounts) ORDER BY created LIMIT 100").all(Date.now());
       for(const row of rows) {
         const data=JSON.parse(row.body), files=(data.attachments||[]).map(id=>attachment(store,id,row.owner));
+        let context;try{context=resolveChatReferences(store,row.owner,row.chat,data)}catch{add(row.chat,'assistant',{text:'A selected paper or quoted message is no longer available. Remove it and send again.'},row.id);db.prepare("UPDATE chat_tasks SET state='completed' WHERE id=?").run(row.id);continue;}
         if(files.some(a=>a.state==='failed')) {add(row.chat,'assistant',{text:'An attachment could not be prepared. Open Your requests to retry, then send your message again.'},row.id);db.prepare("UPDATE chat_tasks SET state='completed' WHERE id=?").run(row.id);continue;}
         if(files.some(a=>a.state!=='ready')) {data.status='Preparing your attachments';db.prepare('UPDATE chat_tasks SET body=? WHERE id=?').run(JSON.stringify(data),row.id);continue;}
         const body={...data,lease:randomUUID(),leaseUntil:Date.now()+180_000,status:files.length?'Reading your attachments':'Looking for papers'};
@@ -83,7 +86,7 @@ export function createChats(store, config, agentActions) {
         const history=messages(row.chat).slice(-16), ids=[...new Set(history.flatMap(m=>(m.attachments||[]).filter(a=>a.state==='ready').map(a=>a.id)))].slice(-6);
         let budget=60_000;
         const documents=ids.map(id=>{const a=attachment(store,id,row.owner),p=store.paper(a.paperId);if(!canReusePaper(store,p,row.owner))return null;const text=p.mmd.slice(0,Math.min(20_000,budget));budget-=text.length;return {name:a.name,text,truncated:text.length<p.mmd.length};}).filter(Boolean);
-        db.exec('COMMIT');return {task:{id:row.id,lease:body.lease,text:body.text,language:body.language,sharing:body.sharing,agentActions:body.agentActions===true,hasNewAttachments:files.length>0,documents,library:libraryCards(store,{id:row.owner}),messages:compactChatHistory(history)}};
+        db.exec('COMMIT');return {task:{id:row.id,lease:body.lease,text:body.text,...context,language:body.language,sharing:body.sharing,agentActions:body.agentActions===true,hasNewAttachments:files.length>0,documents,library:libraryCards(store,{id:row.owner}),messages:compactChatHistory(history)}};
       }
       db.exec('COMMIT');return {task:null};
       } catch(e){db.exec('ROLLBACK');throw e;}

@@ -81,6 +81,8 @@ struct AgentAttachment: Codable, Identifiable, Equatable {
   var state:String
   var paperId:String?
 }
+struct PaperReference: Codable, Identifiable, Equatable {var id:String;var title:String;var authors:String?}
+struct MessageQuote: Codable, Identifiable, Equatable {var id:String;var role:String;var text:String}
 struct AgentMessage: Codable, Identifiable, Equatable {
   var id: String
   var role: String
@@ -88,6 +90,8 @@ struct AgentMessage: Codable, Identifiable, Equatable {
   var attachments:[AgentAttachment]?
   var papers: [FoundPaper]?
   var jobId: String?
+  var references:[PaperReference]?
+  var quote:MessageQuote?
   var actions:[AgentAction]?
 }
 struct AgentAction:Codable,Identifiable,Equatable {var id:String;var kind:String;var state:String;var message:String;var title:String?;var jobId:String?;var paperId:String?;var artifactId:String?;var canUpload:Bool?;var sharing:String?}
@@ -145,10 +149,12 @@ final class ReadingStore: NSObject, ObservableObject,
 {
   @Published var papers: [ResearchPaper] = []
   @Published var account: ReadingAccount? {
-    didSet { if oldValue?.id != account?.id { agentDraft = "" } }
+    didSet { if oldValue?.id != account?.id { agentDraft = ""; draftReferences=[]; draftQuote=nil } }
   }
   // Owned by the scene store so layout/language reconstruction retains unsent work.
   @Published var agentDraft = ""
+  @Published var draftReferences:[PaperReference] = []
+  @Published var draftQuote:MessageQuote?
   @Published var conversations: [Conversation] = []
   @Published var messages: [AgentMessage] = []
   @Published var jobs: [ReadingJob] = []
@@ -842,12 +848,14 @@ final class ReadingStore: NSObject, ObservableObject,
   }
   func newConversation() {
     agentDraft = ""
+    draftReferences=[];draftQuote=nil
     draftAttachments = []
     conversationID = nil
     messages = []
     agentStatus = ""
   }
   func selectConversation(_ chat: Conversation) async {
+    draftQuote=nil;draftReferences=[]
     conversationID = chat.id
     await loadConversation(chat.id)
   }
@@ -861,6 +869,7 @@ final class ReadingStore: NSObject, ObservableObject,
     else { return false }
     busy = true
     let identity = token
+    let selectedReferences=draftReferences, selectedQuote=draftQuote
     defer { busy = false }
     do {
       await resumeConversation()
@@ -871,9 +880,10 @@ final class ReadingStore: NSObject, ObservableObject,
         conversationID = (r["chat"] as? [String: Any])?["id"] as? String
       }
       guard let id = conversationID else { throw failure(T("Could not start the conversation.")) }
-      _ = try await json("/api/chats/\(id)/messages", method: "POST", body: ["text": text, "attachments":draftAttachments.map(\.id), "language":UILanguage.current,"agentActions":true,"sharing":sharedImports ? "shared":"private"])
+      _ = try await json("/api/chats/\(id)/messages", method: "POST", body: ["text": text, "paperIds":selectedReferences.map(\.id),"quoteId":selectedQuote?.id ?? "", "attachments":draftAttachments.map(\.id), "language":UILanguage.current,"agentActions":true,"sharing":sharedImports ? "shared":"private"])
       guard identity == token, conversationID == id else { return false }
       draftAttachments = []
+      draftReferences.removeAll { p in selectedReferences.contains(where:{$0.id==p.id}) };if draftQuote?.id==selectedQuote?.id {draftQuote=nil}
       await loadConversation(id)
       await loadConversations()
       return true
@@ -1071,3 +1081,6 @@ struct TranslationPiece:Codable,Identifiable {var id:String;var text:String}
 struct TranslationParagraph:Codable,Identifiable {var id:String;var text:String;var sentences:[TranslationPiece]}
 
 struct PaperProvenance:Codable {var licenseUrl:String?;var changes:String?}
+
+// Cold-launch intent is consumed by the scene after the native view subscribes.
+@MainActor enum ReadingLink {static var pending:URL?;static func accepts(_ url:URL)->Bool{url.scheme=="art.onlyideas.app" && ["paper","research"].contains(url.host ?? "") && url.query==nil && url.fragment==nil && url.path.range(of:"^/[A-Za-z0-9-]{1,120}$",options:.regularExpression) != nil}}

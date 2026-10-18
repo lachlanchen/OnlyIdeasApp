@@ -24,7 +24,7 @@ export function createPaperSocial(store,discovery) {
  function state(ref,user){const {key,card,...rest}=resolve(ref,user);const own=user?db.prepare('SELECT saved,liked FROM paper_reactions WHERE item=? AND owner=?').get(key,user.id):null;
  const likes=db.prepare('SELECT owner FROM paper_reactions WHERE item=? AND liked=1').all(key).filter(r=>store.active(r.owner)&&!store.blocked(user?.id,r.owner)).length;
  const comments=visibleComments(store,key,user);
- return {ref,...rest,saved:!!own?.saved,liked:!!own?.liked,likes,commentCount:comments.length,shareUrl:card.visibility==='private'?null:`https://agent.onlyideas.art/?${ref.startsWith('r-')?'research':'paper'}=${encodeURIComponent(ref.startsWith('r-')?ref.slice(2):ref)}`};
+ return {ref,...rest,saved:!!own?.saved,liked:!!own?.liked,likes,commentCount:comments.length,shareUrl:card.visibility==='private'?null:`https://agent.onlyideas.art/share/${ref.startsWith('r-')?'research':'paper'}/${encodeURIComponent(ref.startsWith('r-')?ref.slice(2):ref)}`};
  }
  return {check,state,resolve,
   saved(user,kind='saved'){const column=kind==='liked'?'liked':'saved';return db.prepare(`SELECT ref FROM paper_reactions WHERE owner=? AND ${column}=1 ORDER BY updated DESC LIMIT 500`).all(user.id).flatMap(({ref})=>{try{return [{ref,...resolve(ref,user).card}]}catch{return []}})},
