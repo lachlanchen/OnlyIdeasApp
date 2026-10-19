@@ -35,7 +35,8 @@ including Arabic RTL. Draft preservation and no horizontal overflow passed.
 Synthetic account/provider transport was used; these are QA captures, not store
 screenshots or evidence of live issuer/provider qualification.
 
-The central account-management destination remains unqualified and absent.
+The central account-management contract is now delivered below; its standalone
+entry is not yet implemented in the app.
 Legacy Apple/GitHub buttons retain their existing local identity mapping; no
 email-based aliasing or claim of live bidirectional provider parity is made.
 This checkpoint changes source only. Releases, provider activation, plans, paid
@@ -51,5 +52,35 @@ latter now asks the reader to reconnect the original LazyingArt account, matchin
 the structured recovery action and translated UI.
 
 AiMemo's deployed and native-test evidence does not qualify this app's runtime.
-Central management destinations and direct-provider convergence remain separate
-qualification requirements.
+Direct-provider convergence remains a separate qualification requirement.
+
+## Delivered central management contract
+
+EchoMind's October 19 issuer receipt supplies the exact entrance:
+`https://chat.lazying.art/account#sign-in-methods`, labelled **Manage LazyingArt
+account**. The issuer reports live web release `132d6ef9`, source `0043b6ea` and
+verified-TLS health/discovery at 00:45:28 UTC. This closes the missing contract
+dependency; it is peer evidence, not an OnlyIdeas callback or native test.
+
+- Open management in the system authentication browser on native, with a warning
+  to check the central account shown. It may differ from the app's linked account.
+- Management uses first-party browser forms. Do not construct provider/password
+  POSTs, scrape HTML as proof, or adopt an app session from visiting the page.
+- Standalone success and cancellation return to `/account`; there is no app
+  management API, arbitrary return URL or automatic native completion callback.
+- Central `identity_link_conflict` (409) refuses and preserves both accounts.
+  It is distinct from OnlyIdeas' structured local collision errors.
+- Password changes revoke central access. Independent local sessions require
+  reconciliation; they do not disappear merely because the browser signs out.
+
+OnlyIdeas Connect remains the separately bound `onlyideas-server` /
+`onlyideas-service` flow with
+`https://agent.onlyideas.art/api/auth/lazyingart/callback`. Preserve the initiating
+local ID, session, draft and disconnect reservation. Central provider linking
+does not alias legacy Apple/GitHub identities; Apple native and web subjects
+remain distinct.
+
+Live app capability, callback acceptance, revocation reconciliation and native
+provider round-trips remain app-owned qualification work. Native completion may
+still issue a same-owner replacement token; it is not AiMemo's token-free link
+receipt. This documentation receipt activates nothing.
