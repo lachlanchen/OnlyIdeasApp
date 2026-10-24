@@ -1,0 +1,36 @@
+{
+  "source": "24aa45f0ccdd6355b87201115c250d9bb99a21ae",
+  "date": "2026-10-24",
+  "uploaded_to_stores": false,
+  "assets": [
+    {
+      "file": "preferences-390.png",
+      "platform": "web-phone",
+      "sha256": "d0ea418cb560fdeb0b50cf8697947ebd35513c919077bec86cb8050b024f763a",
+      "state": "captured and visually reviewed; draft for a future listing",
+      "synthetic_account": true
+    },
+    {
+      "file": "preferences-1280.png",
+      "platform": "web-desktop",
+      "sha256": "e946bf8b2c104d264868f8f3a72d5b580bb5a72a924fa57015ec6d5a7de09a15",
+      "state": "captured and visually reviewed; draft for a future listing",
+      "synthetic_account": true
+    },
+    {
+      "file": "agent-preferences-390.png",
+      "platform": "web-agent",
+      "sha256": "5b9fe9ea6b10b542680938197fe1178fbe30aa06e8ee234b14a86840d0fd8393",
+      "state": "captured and visually reviewed; draft for a future listing",
+      "synthetic_account": true
+    },
+    {
+      "file": "android-research-controls.png",
+      "platform": "android-emulator",
+      "sha256": "b5039e90f88f4ee4e0964bbe29e081dd5608f7ceab6819b74ab51c726b44dcce",
+      "state": "captured and visually reviewed; draft for a future listing",
+      "synthetic_account": true
+    }
+  ],
+  "apple_capture": "pending native qualification"
+}

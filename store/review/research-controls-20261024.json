@@ -1,0 +1,55 @@
+{
+  "app": "OnlyIdeas",
+  "feature": "Topic, journal and interest controls with account-scoped agent editing",
+  "source_commit": "24aa45f0ccdd6355b87201115c250d9bb99a21ae",
+  "date": "2026-10-24",
+  "backend": {
+    "state": "deployed",
+    "release": "research-controls-facf8505c18e7e44",
+    "overlay_sha256": "facf8505c18e7e4448a18f6aac7fc0d66152930ceadafaf50586748598bb921f",
+    "worker_sha256": "3ec9bb0ec155921737981f6a2c98a7a2227f0ce331ed0cc89ebb24d2d29d9430",
+    "exact_existing_app_boundaries_preserved": true,
+    "configuration_unchanged": true,
+    "database_backup_retained": true,
+    "logical_tables_unchanged": 52
+  },
+  "web": {
+    "state": "deployed",
+    "url": "https://agent.onlyideas.art",
+    "index_sha256": "b582277079ce991bab5aba87eabf0814e2936ef6fe8a5a2f4c822575094ec0f9",
+    "topics": 10,
+    "journals": 13
+  },
+  "tests": {
+    "automated": 342,
+    "exact_runtime_baseline": 47,
+    "browser_checks": 9,
+    "android_emulator_cases": 2,
+    "android_case_names": [
+      "ResearchControlsTest.selectTopicsJournalsAndRestoreSavedChoices",
+      "InterestPromptTest.promptAndEditorPreserveResearchDraft"
+    ],
+    "real_model": "Two synthetic English/Chinese DeepSeek Flash requests returned correct selection IDs; no live preference writes.",
+    "existing_public_papers_read": 3,
+    "existing_figures_read": 6
+  },
+  "native": {
+    "android": "Controls implemented; isolated QA APK compiled and two emulator UI cases passed. No new store binary uploaded.",
+    "ios_macos": "Controls implemented in shared native source; compile/runtime and TestFlight delivery pending a separately admitted shared Mac slot.",
+    "watch": "No Watch source changes."
+  },
+  "preservation": {
+    "build39_review_candidates_unchanged": true,
+    "accounts_billing_rewards_unchanged": true,
+    "shared_ingress_unchanged": true,
+    "peer_devices_preserved": true,
+    "owned_emulator_and_fixture_stopped": true
+  },
+  "screenshots": "store/screenshots/research-controls-20261024/manifest.json",
+  "limitations": [
+    "Only the allowlisted reading preferences can be edited through this tool.",
+    "Explicit named commands work without a model; conversational edits require the existing model worker.",
+    "Exact journal choices are the supported catalog; All journals permits broader coverage.",
+    "Native settings controls are not yet distributed in a replacement store build."
+  ]
+}
