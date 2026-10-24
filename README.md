@@ -52,9 +52,13 @@ OnlyIdeas app credits are non-transferable and have no cash value.
 
 ## Current release · 24 October 2026
 
-**1.0.8 (34)** is public on iOS/Watch, Mac and Google Play.
-**Android 1.0.9 (38)** is available to internal testers and submitted for Google
-Play review. Apple 1.0.9 is being qualified.
+**1.0.8 (34)** is public on iOS/Watch and Mac; **1.0.9 (38)** is public on Google Play.
+**Android 1.0.9 (39)** is available to internal testers and in Google Play review.
+**iOS/Watch and Mac 1.0.9 (39)** are available in TestFlight and waiting for Apple
+review. Approved updates are configured to publish automatically.
+
+Recommendations reopen from a bounded local cache. Refresh for newer papers at
+the top, or scroll down to load more; a failed refresh keeps the visible cards.
 
 The update adds saved-paper mentions with **@**, quoted messages, editable
 research interests and public reading links. Copy a reading or research draft
@@ -62,8 +66,8 @@ for EchoMind or AiMemo, then send it yourself. Unsent questions and selected
 references remain in place when the screen changes size. The Android Agent
 toolbar also fits narrow screens more clearly.
 
-[Current verification](store/review/cumulative-38-20261024.json) ·
-[Current screenshots](store/screenshots/1.0.9-38/README.md) ·
+[Current verification](store/review/cumulative-39-20261024.json) ·
+[Current screenshots](store/screenshots/1.0.9-39/README.md) ·
 [Previous submission](docs/latest-review-20261017.md)
 
 ## Platforms

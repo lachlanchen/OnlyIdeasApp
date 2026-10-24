@@ -2,11 +2,18 @@
 
 [![LazyingArt banner](https://github.com/lachlanchen/lachlanchen/raw/main/figs/banner.png)](https://github.com/lachlanchen/lachlanchen/blob/main/figs/banner.png)
 
-# OnlyIdeasApp
+# OnlyIdeas
 
 *Đọc sâu. Cùng suy nghĩ.*
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
+
+<!-- release39 -->
+## Bản cập nhật hiện tại · 24 tháng 10 năm 2026
+
+Phiên bản 1.0.9 (39) có trên TestFlight cho iOS/Watch và Mac, cùng kênh thử nghiệm nội bộ Google Play; đã gửi Apple và Google xét duyệt. Khi mở lại ứng dụng, các đề xuất đã lưu hiện ra ngay. Làm mới để xem bài mới ở đầu danh sách hoặc cuộn xuống để tải thêm. Bộ nhớ đệm có giới hạn; nếu làm mới thất bại, các thẻ đang xem vẫn được giữ lại.
+
+[1.0.9 (39)](../docs/release39-20261024.md) · [TestFlight / Google Play](../store/review/cumulative-39-20261024.json)
 
 ## Phát hành chính thức · 2026-10-14
 

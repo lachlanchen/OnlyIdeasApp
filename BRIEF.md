@@ -8,7 +8,8 @@ another page. Refresh keeps visible papers until a successful response arrives.
 Persist only one account-scoped first page, at most 60 cards and 512 KB, expiring
 at seven days. Older pages loaded during browsing do not accumulate on disk.
 Preserve downloaded papers and personal libraries independently of this cache.
-This additive feature is staged separately from the frozen build 38 delivery.
+This feature is accumulated in build 39, which supersedes the unrun build 38
+delivery candidate.
 
 ## Cumulative release qualification · 2026-10-24
 

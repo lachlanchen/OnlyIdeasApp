@@ -2,11 +2,18 @@
 
 [![LazyingArt banner](https://github.com/lachlanchen/lachlanchen/raw/main/figs/banner.png)](https://github.com/lachlanchen/lachlanchen/blob/main/figs/banner.png)
 
-# OnlyIdeasApp
+# OnlyIdeas
 
 *認真閱讀，一起思考。*
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
+
+<!-- release39 -->
+## 目前更新 · 2026年10月24日
+
+1.0.9（39）已提供 iOS/Watch、Mac TestFlight 與 Google Play 內部測試，並已提交 Apple 與 Google 審核。重新開啟應用程式即可看到儲存的推薦；在頂部重新整理查看新論文，向下捲動載入更多。快取設有數量、容量與有效期限，重新整理失敗也會保留目前的卡片。
+
+[1.0.9 (39)](../docs/release39-20261024.md) · [TestFlight / Google Play](../store/review/cumulative-39-20261024.json)
 
 ## 正式發布 · 2026-10-14
 

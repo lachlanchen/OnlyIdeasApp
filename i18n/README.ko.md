@@ -2,11 +2,18 @@
 
 [![LazyingArt banner](https://github.com/lachlanchen/lachlanchen/raw/main/figs/banner.png)](https://github.com/lachlanchen/lachlanchen/blob/main/figs/banner.png)
 
-# OnlyIdeasApp
+# OnlyIdeas
 
 *깊이 읽고, 함께 생각하세요.*
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
+
+<!-- release39 -->
+## 최신 업데이트 · 2026년 10월 24일
+
+1.0.9 (39)는 iOS/Watch 및 Mac용 TestFlight와 Google Play 내부 테스트에서 사용할 수 있으며, Apple과 Google에 심사를 제출했습니다. 앱을 열면 저장된 추천이 표시됩니다. 새로 고치면 최신 논문이 위에 나타나고, 아래로 스크롤하면 더 불러옵니다. 캐시에는 용량과 보관 기간 제한이 있으며, 새로 고침이 실패해도 기존 카드는 유지됩니다.
+
+[1.0.9 (39)](../docs/release39-20261024.md) · [TestFlight / Google Play](../store/review/cumulative-39-20261024.json)
 
 ## 정식 배포 · 2026-10-14
 

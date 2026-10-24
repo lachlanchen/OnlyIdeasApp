@@ -1,0 +1,159 @@
+{
+  "version": "1.0.9",
+  "build": 39,
+  "source": "2d90b6bf70a51e9d62e708b51596a478074bcebf",
+  "productionSource": "005d428633428feece8530ccd5a31dea4e7c4c34",
+  "date": "2026-10-24",
+  "tests": {
+    "webBackend": 330,
+    "browserCurrentFeature": 12,
+    "browserPriorCumulative": 25,
+    "androidNative": 6,
+    "javaCache": 8,
+    "deployedBaselineDiscovery": 21,
+    "deliveryHelpers": 79,
+    "deliveryUIGate": 3,
+    "fixtureHTTP": 5,
+    "iosNative": 3,
+    "iosCacheSession": "anonymous synthetic fixture; no authenticated restoration claim",
+    "androidLint": true,
+    "rendererAndProductionBuild": true,
+    "livePublicPapers": 3
+  },
+  "android": {
+    "internal": "available to existing internal testers",
+    "production": "In review; Google quick checks completed",
+    "rolloutPercent": 100,
+    "territories": 178,
+    "aabSha256": "d929bc70a35fb2e6f219acc9fc1264a5afdbf65cb7d0d7c25f0ce14a32347c06",
+    "apkSha256": "49180ac14678691148519109c2cd91cf8e4d1e2fd566effd9afa24aa3d62dae2",
+    "descriptionUpdated": true,
+    "phoneScreenshots": 8
+  },
+  "apple": {
+    "nativeTests": "Three passed, zero failures/skips",
+    "delivery": "Both validated uploads accepted; both VALID and available to existing TestFlight internal testers",
+    "screenshots": {
+      "iphone": 6,
+      "ipad": 3,
+      "watch": 2,
+      "mac": 3,
+      "newInterestsCapture": true
+    },
+    "platforms": {
+      "IOS": {
+        "buildId": "b2ab0c6f-3335-4301-8257-c8619ad77875",
+        "versionId": "0c1d2121-823a-4f9a-b30c-6f883319cc54",
+        "reviewId": "b143a390-834e-41ad-9d15-e1d66f2ac932",
+        "reviewState": "WAITING_FOR_REVIEW",
+        "versionState": "WAITING_FOR_REVIEW",
+        "submittedAt": "2026-10-24T04:17:19.992Z",
+        "releaseType": "AFTER_APPROVAL"
+      },
+      "MAC_OS": {
+        "buildId": "f7072293-f987-40f6-9142-ef41df3f4331",
+        "versionId": "bb9f79aa-752a-4053-88c6-c37030612fc3",
+        "reviewId": "c8cbf30f-20ca-4973-81f4-385e49611d12",
+        "reviewState": "WAITING_FOR_REVIEW",
+        "versionState": "WAITING_FOR_REVIEW",
+        "submittedAt": "2026-10-24T04:17:36.486Z",
+        "releaseType": "AFTER_APPROVAL"
+      }
+    },
+    "artifacts": [
+      {
+        "platform": "ios",
+        "source": "2d90b6bf70a51e9d62e708b51596a478074bcebf",
+        "version": "1.0.9",
+        "build": "39",
+        "sha256": "f330e3452cd0e8565d410f9513aed5d0b70cca4a064f219b4502e88c1d5e36d1",
+        "bytes": 14380351,
+        "archive": {
+          "bundle": "art.onlyideas.app",
+          "resources": 31,
+          "signer": "Q8M2S2FY77",
+          "watch": {
+            "CFBundleIdentifier": "art.onlyideas.app.watchkitapp",
+            "CFBundleShortVersionString": "1.0.9",
+            "CFBundleVersion": "39",
+            "WKCompanionAppBundleIdentifier": "art.onlyideas.app"
+          }
+        },
+        "exported": {
+          "bundle": "art.onlyideas.app",
+          "resources": 31,
+          "signer": "Q8M2S2FY77",
+          "watch": {
+            "CFBundleIdentifier": "art.onlyideas.app.watchkitapp",
+            "CFBundleShortVersionString": "1.0.9",
+            "CFBundleVersion": "39",
+            "WKCompanionAppBundleIdentifier": "art.onlyideas.app"
+          }
+        }
+      },
+      {
+        "platform": "macos",
+        "source": "2d90b6bf70a51e9d62e708b51596a478074bcebf",
+        "version": "1.0.9",
+        "build": "39",
+        "sha256": "9eae2b47fa6c37848d7c2005bce6d552e6ebd0de62079e47b1f936881ecf6383",
+        "bytes": 13327064,
+        "archive": {
+          "bundle": "art.onlyideas.app",
+          "resources": 31,
+          "signer": "Q8M2S2FY77",
+          "machO": {
+            "arm64": "15.0",
+            "x86_64": "15.0"
+          }
+        },
+        "exported": {
+          "bundle": "art.onlyideas.app",
+          "resources": 31,
+          "signer": "Q8M2S2FY77",
+          "machO": {
+            "arm64": "15.0",
+            "x86_64": "15.0"
+          }
+        }
+      }
+    ],
+    "cleanup": {
+      "guardReleased": true,
+      "signingRestored": true,
+      "ownedChildrenAbsent": true,
+      "fixtureAbsent": true,
+      "simulatorStatesPreserved": true
+    }
+  },
+  "web": {
+    "url": "https://agent.onlyideas.art/",
+    "release": "recommendations39-926b1c93778ef1eb",
+    "overlaySha256": "926b1c93778ef1eb187ecb14f3f38819a32dfcd9397ad6eb32262ba94c032c09",
+    "health": 200,
+    "publicIndexHashVerified": true,
+    "publicPaperReadbacks": 3,
+    "existingDataAndConfigPreserved": true
+  },
+  "cache": {
+    "maxCards": 60,
+    "maxBytes": 512000,
+    "expiresDays": 7,
+    "freshMinutes": 5,
+    "olderPagesMemoryOnly": true,
+    "accountScoped": true,
+    "clearedOnSignOut": true
+  },
+  "activation": {
+    "subscriptions": false,
+    "sharedIdentity": false,
+    "sharedRewards": false,
+    "newDataImports": false
+  },
+  "limitations": [
+    "No new physical Apple device, Monterey runtime or real billing lifecycle test in this round.",
+    "Native tests use disposable fixtures; live paper reading was independently verified read-only.",
+    "Store submission is not approval or public release."
+  ],
+  "verifiedAt": "2026-10-24T04:18:19.152477+00:00"
+}

@@ -1,0 +1,23 @@
+{
+  "build": "1.0.9 (39)",
+  "source": "005d428633428feece8530ccd5a31dea4e7c4c34",
+  "images": [
+    {
+      "file": "android-recommendations.png",
+      "sha256": "8bed84e4b865ebf217ec525e055cfc88d5e9563e372db3dfc97c0e8af44d8ad0",
+      "width": 1080,
+      "height": 1920,
+      "capture": "Android API34 native QA application, same source UI; loopback read-only replay of three actual anonymous public library metadata records; no invented papers or personal account",
+      "reviewed": true
+    },
+    {
+      "file": "iphone-interests-editor.png",
+      "sha256": "4ce14739bc9beb39a5105369b976311f047936b718e7b289cfd55a4ffcb3d61b",
+      "width": 1320,
+      "height": 2868,
+      "source": "2d90b6bf70a51e9d62e708b51596a478074bcebf",
+      "capture": "Native iPhone simulator XCTest attachment, build39 source; synthetic history/climate reading preferences; original capture without UI edits",
+      "reviewed": true
+    }
+  ]
+}

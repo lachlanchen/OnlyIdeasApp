@@ -2,11 +2,18 @@
 
 [![LazyingArt banner](https://github.com/lachlanchen/lachlanchen/raw/main/figs/banner.png)](https://github.com/lachlanchen/lachlanchen/blob/main/figs/banner.png)
 
-# OnlyIdeasApp
+# OnlyIdeas
 
 *Читайте вдумчиво. Размышляйте вместе.*
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
+
+<!-- release39 -->
+## Текущее обновление · 24 октября 2026 года
+
+Версия 1.0.9 (39) доступна в TestFlight для iOS/Watch и Mac, а также во внутреннем тестировании Google Play; отправлена на проверку Apple и Google. При повторном открытии появляются сохранённые рекомендации. Обновите список для новых статей сверху или прокрутите вниз, чтобы загрузить ещё. Кэш ограничен по объёму и сроку хранения; при ошибке обновления видимые карточки сохраняются.
+
+[1.0.9 (39)](../docs/release39-20261024.md) · [TestFlight / Google Play](../store/review/cumulative-39-20261024.json)
 
 ## Публикация · 2026-10-14
 

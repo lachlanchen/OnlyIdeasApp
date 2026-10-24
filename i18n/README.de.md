@@ -2,11 +2,18 @@
 
 [![LazyingArt banner](https://github.com/lachlanchen/lachlanchen/raw/main/figs/banner.png)](https://github.com/lachlanchen/lachlanchen/blob/main/figs/banner.png)
 
-# OnlyIdeasApp
+# OnlyIdeas
 
 *Gründlich lesen. Gemeinsam denken.*
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
+
+<!-- release39 -->
+## Aktuelles Update · 24. Oktober 2026
+
+Version 1.0.9 (39) ist in TestFlight für iOS/Watch und Mac sowie im internen Google-Play-Test verfügbar und wurde bei Apple und Google zur Prüfung eingereicht. Gespeicherte Empfehlungen erscheinen beim erneuten Öffnen. Aktualisieren zeigt neue Artikel oben; beim Scrollen nach unten werden weitere geladen. Der Cache ist begrenzt und behält die sichtbaren Karten bei, wenn die Aktualisierung fehlschlägt.
+
+[1.0.9 (39)](../docs/release39-20261024.md) · [TestFlight / Google Play](../store/review/cumulative-39-20261024.json)
 
 ## Öffentliche Veröffentlichung · 2026-10-14
 

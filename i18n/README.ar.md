@@ -2,11 +2,18 @@
 
 [![LazyingArt banner](https://github.com/lachlanchen/lachlanchen/raw/main/figs/banner.png)](https://github.com/lachlanchen/lachlanchen/blob/main/figs/banner.png)
 
-# OnlyIdeasApp
+# OnlyIdeas
 
 *اقرأ بعمق. وفكّر مع الآخرين.*
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
+
+<!-- release39 -->
+## التحديث الحالي · 24 أكتوبر 2026
+
+الإصدار 1.0.9 (39) متاح للاختبار في TestFlight لنظامي iOS/Watch وMac، وفي الاختبار الداخلي على Google Play. أُرسل إلى مراجعة Apple وGoogle. تُفتح الاقتراحات المحفوظة فور العودة؛ حدّث القائمة لعرض الأبحاث الأحدث في الأعلى، أو مرّر لأسفل لتحميل المزيد. ذاكرة التخزين المؤقت محدودة، وتبقى البطاقات ظاهرة إذا فشل التحديث.
+
+[1.0.9 (39)](../docs/release39-20261024.md) · [TestFlight / Google Play](../store/review/cumulative-39-20261024.json)
 
 ## الإصدار العام · 2026-10-14
 
