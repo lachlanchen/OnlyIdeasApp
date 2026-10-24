@@ -1,5 +1,17 @@
 # OnlyIdeas · product contract
 
+## Default research shelf · 2026-10-24
+
+The default recommendation feed now starts with English-language research in
+imaging, optics and biomedicine from exact selected journal identities: Nature,
+Science, Cell, PNAS, Optica and relevant Nature/Science/Light journals. Balance
+subjects and journals, exclude all-capital metadata, corrections and retractions,
+and keep original scientific title capitalization. Prefer accessible full text;
+never imply that journal prestige grants download or redistribution permission.
+This editorial default does not overwrite saved interests or restrict explicit
+search. It uses the existing bounded cache and refresh contract. Apply through
+the backend without replacing build 39 or restarting its store reviews.
+
 ## Cached recommendations · 2026-10-24
 
 Opening Research for you restores the most recent recommendation page immediately.

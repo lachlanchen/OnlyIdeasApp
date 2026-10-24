@@ -17,6 +17,10 @@ alongside your reading notes and conversations.
 
 ## Find and read
 
+Start with English-language imaging, optics and biomedical research from Nature,
+Science, Cell, PNAS, Optica and related journals. Save your own interests to change
+the recommendations, or search any topic directly.
+
 - Search by title, DOI, author or topic. Saved public papers open from the library;
   new requests look for an accessible source.
 - Read supported PDFs and article pages as flowing text, with equations, figures
