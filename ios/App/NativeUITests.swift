@@ -9,6 +9,60 @@ final class NativeUITests: XCTestCase {
     app.launchEnvironment["ONLYIDEAS_QA_TOKEN"] = "synthetic-interests37-token"
     return app
   }
+  private func feedControl(_ value: [String:Any]? = nil) throws -> [String:Any] {
+    let done = expectation(description:"Synthetic feed control")
+    var output: [String:Any] = [:]
+    var issue: Error?
+    var request = URLRequest(url:URL(string:"http://127.0.0.1:18649/__qa/feed")!)
+    request.timeoutInterval=5
+    if let value {
+      request.httpMethod="POST";request.httpBody=try JSONSerialization.data(withJSONObject:value)
+      request.setValue("Bearer synthetic-interests37-token",forHTTPHeaderField:"Authorization")
+    }
+    URLSession.shared.dataTask(with:request){data,_,error in
+      defer{done.fulfill()};issue=error
+      if let data {output=(try? JSONSerialization.jsonObject(with:data)) as? [String:Any] ?? [:]}
+    }.resume()
+    wait(for:[done],timeout:7)
+    if let issue {throw issue};return output
+  }
+  func testRecommendationCacheReopenRefreshAndPagination() throws {
+    continueAfterFailure=false
+    _ = try feedControl(["reset":true])
+    let app=interestFixtureApp();app.launch()
+    defer {app.terminate()}
+    let first=app.buttons["Recommendation cache paper 1"]
+    XCTAssertTrue(first.waitForExistence(timeout:25))
+    // Both server and app account have settled before testing persisted reopening.
+    app.tabBars.buttons["Agent"].tap()
+    XCTAssertTrue(app.buttons.matching(NSPredicate(format:"label IN %@",["What would you like to follow?","Reading interests"])).firstMatch.waitForExistence(timeout:15))
+    app.tabBars.buttons["Library"].tap()
+    XCTAssertTrue(first.waitForExistence(timeout:10));shot("Cache39-first-page")
+    let second=app.buttons["Recommendation cache paper 9"]
+    for _ in 0..<16 {if second.isHittable {break};app.swipeUp()}
+    XCTAssertTrue(second.exists)
+    let before=(try feedControl()["requests"] as? [[String:Any]] ?? []).filter{($0["page"] as? Int)==1}.count
+    _ = try feedControl(["offline":true]);app.terminate();app.launch()
+    XCTAssertTrue(first.waitForExistence(timeout:20))
+    let after=(try feedControl()["requests"] as? [[String:Any]] ?? []).filter{($0["page"] as? Int)==1}.count
+    XCTAssertEqual(before,after,"Reopening a fresh first page must not refetch it")
+    _ = try feedControl(["offline":false,"revision":2])
+    let refresh=app.buttons["Refresh"].firstMatch
+    XCTAssertTrue(refresh.isHittable);refresh.tap()
+    XCTAssertTrue(app.buttons["Recommendation cache paper 101"].waitForExistence(timeout:15))
+    XCTAssertFalse(first.exists);shot("Cache39-refreshed")
+    _ = try feedControl(["offline":true]);refresh.tap()
+    let retry=app.buttons["Try again"]
+    for _ in 0..<16 {if retry.isHittable {break};app.swipeUp()}
+    XCTAssertTrue(retry.exists)
+    let newest=app.buttons["Recommendation cache paper 101"]
+    for _ in 0..<16 {if newest.isHittable {break};app.swipeDown()}
+    XCTAssertTrue(newest.isHittable)
+    let requests=try feedControl()["requests"] as? [[String:Any]] ?? []
+    XCTAssertTrue(requests.contains{($0["page"] as? Int)==2})
+    XCTAssertTrue(requests.contains{($0["refresh"] as? String)=="1"})
+    _ = try feedControl(["offline":false])
+  }
   func testInterestPromptPreservesDraft() {
     continueAfterFailure=false
     let app = interestFixtureApp()
