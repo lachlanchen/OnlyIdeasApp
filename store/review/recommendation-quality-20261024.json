@@ -1,0 +1,82 @@
+{
+  "app": "OnlyIdeas",
+  "scope": "Default research recommendations; backend only",
+  "source_commit": "ec340e760f381e8f46f01998fd072a5fcfb6ef89",
+  "deployed_at": "2026-10-24T06:02:56.368373+00:00",
+  "verified_at": "2026-10-24T06:03:48.564Z",
+  "endpoint": "https://agent.onlyideas.art/api/discovery",
+  "recommendation_policy": "english-imaging-optics-biomedicine-v1",
+  "release": "recommendation-quality39-04c4268682e57d06",
+  "overlay_sha256": "04c4268682e57d06952fee54606f6a4cb6d57d8c0adb58fa5f9e984f398f852e",
+  "changed_runtime_files": [
+    "server/discovery.mjs",
+    "server/recommendations.mjs",
+    "server/research-indexes.mjs"
+  ],
+  "tests": {
+    "automated_passed": 337,
+    "runtime_baseline_passed": 28,
+    "chromium_checks_passed": 10,
+    "chromium_widths": [
+      320,
+      390,
+      1280
+    ],
+    "renderer_typecheck_build": "passed"
+  },
+  "live_pages": [
+    {
+      "page": 1,
+      "papers": 12,
+      "journals": {
+        "Nature Communications": 3,
+        "Science": 1,
+        "Nature Photonics": 1,
+        "Nature Methods": 1,
+        "Science Advances": 2,
+        "Optica": 1,
+        "Proceedings of the National Academy of Sciences": 2,
+        "Light Science & Applications": 1
+      },
+      "unavailable": []
+    },
+    {
+      "page": 2,
+      "papers": 12,
+      "journals": {
+        "Nature Biomedical Engineering": 2,
+        "Proceedings of the National Academy of Sciences": 3,
+        "Nature Communications": 3,
+        "Nature Biotechnology": 1,
+        "Science Advances": 2,
+        "Science": 1
+      },
+      "unavailable": []
+    }
+  ],
+  "cross_page_duplicate_dois": 0,
+  "cached_request_observed_ms": 17,
+  "tls_verified": true,
+  "existing_reader_checks": {
+    "public_papers": 3,
+    "figures": 6,
+    "all_reading_accessible": true,
+    "all_figures_http_200": true
+  },
+  "preservation": {
+    "consistent_backup_retained": true,
+    "previous_release_retained": true,
+    "logical_tables_unchanged": 52,
+    "excluded_volatile_column": "browser_worker_status.seen",
+    "protected_configuration_unchanged": true,
+    "native_binaries_changed": false,
+    "store_review_candidates_changed": false,
+    "billing_or_identity_changed": false
+  },
+  "client_action": "Refresh the home feed once to replace locally saved recommendations.",
+  "limits": [
+    "Journal selection applies to the default shelf; saved interests and explicit searches remain available.",
+    "Language and open-access status come from indexed metadata; retrieval still checks the source and permissions.",
+    "Observed cached latency is not a performance guarantee."
+  ]
+}

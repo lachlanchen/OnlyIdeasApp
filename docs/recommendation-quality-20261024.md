@@ -38,3 +38,23 @@ change does not require a replacement binary or a store-review restart.
 OpenAlex source identities were verified by ISSN. Its language attribute describes
 metadata language; the feed also checks title quality. See the
 [OpenAlex work attributes](https://help.openalex.org/data/works/attributes/).
+
+## Live verification
+
+The three-file backend update was deployed on 24 October 2026 from source
+`ec340e760f381e8f46f01998fd072a5fcfb6ef89`. Verified HTTPS responses at
+06:03 UTC contained 12 papers on each of two pages, spanning eight and six
+journals respectively, with no duplicate DOI between pages. Both responses
+reported the new recommendation policy and no unavailable provider. A repeated
+cached request took 17 milliseconds in this check; this is an observation, not a
+latency guarantee.
+
+Three existing public papers, their reading responses and six figures remained
+accessible after deployment. A consistent database backup and the previous
+release were retained. Logical table comparisons passed, excluding only the
+worker's volatile heartbeat timestamp; protected configuration was unchanged.
+
+Existing iOS, Android, macOS and web clients receive the updated feed through the
+same API. Refresh the home feed once to replace locally saved recommendations.
+This backend update did not change the build 39 binaries or their submitted
+store-review candidates.
