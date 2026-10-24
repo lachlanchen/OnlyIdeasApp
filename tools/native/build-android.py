@@ -8,4 +8,4 @@ if config.stat().st_mode & 0o077:
 settings = json.loads(config.read_text())
 env = os.environ.copy()
 env.update(ONLYIDEAS_KEYSTORE=settings['keystore'], ONLYIDEAS_STORE_PASSWORD=settings['password'])
-subprocess.run(['./gradlew','--no-daemon','--max-workers=2',':app:lintRelease',':app:assembleRelease',':app:bundleRelease',':app:assembleDebug'], cwd=root/'android', env=env, check=True)
+subprocess.run(['./gradlew','--no-daemon','--max-workers=1',':app:lintRelease',':app:assembleRelease',':app:bundleRelease',':app:assembleDebug'], cwd=root/'android', env=env, check=True)

@@ -1,5 +1,14 @@
 # OnlyIdeas · product contract
 
+## Cumulative release qualification · 2026-10-24
+
+The owner requests testing, corrections and formal Apple/Google submission of the
+latest updates. Prepare 1.0.9 (38) with paper mentions, quoted messages, sharing,
+editable research interests and account-preserving linking recovery. Qualify
+native builds and current screenshots before submission. Existing optional shared
+identity and reward gates remain in effect; this release does not enable them or
+change subscriptions, prices or stored content.
+
 ## Personal recommendations and foreground rewards · 2026-10-18
 
 New readers start with research across disciplines. Agent asks which topics they
