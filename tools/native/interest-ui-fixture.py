@@ -13,7 +13,7 @@ import time
 state = {"state": "pending", "interests": ""}
 chat = {"id": "interests37-conversation", "title": "Reading interests", "updated": 0}
 messages = []
-feed = {"enabled": False, "revision": 1, "offline": False, "requests": []}
+feed = {"enabled": False, "revision": 1, "offline": False, "anonymous": False, "requests": []}
 
 def paper(number):
     return {"id": "cache39-" + str(number), "title": "Recommendation cache paper " + str(number), "authors": "A. Researcher", "source": "https://example.org/paper/" + str(number), "year": "2026", "journal": "Research methods", "summary": "A synthetic paper for testing saved recommendations and page navigation.", "paperId": "cache39-" + str(number)}
@@ -36,7 +36,7 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/__qa/feed":
             return self.reply(feed)
         if path == "/api/session":
-            return self.reply({"user": {"id": "interests37-reader", "name": "Reading tester", "login": "reading-tester"}, "capabilities": {}})
+            return self.reply({"user": None if feed["anonymous"] else {"id": "interests37-reader", "name": "Reading tester", "login": "reading-tester"}, "capabilities": {}})
         if path == "/api/chats":
             return self.reply({"chats": [chat] if messages else [], "recommendations": state})
         if path == "/api/chats/" + chat["id"]:
@@ -71,8 +71,8 @@ class Handler(BaseHTTPRequestHandler):
         value = json.loads(self.rfile.read(size) or b"{}")
         if self.path == "/__qa/feed":
             if value.get("reset"):
-                feed.update(enabled=True, revision=1, offline=False, requests=[])
-            for key in ("revision", "offline"):
+                feed.update(enabled=True, revision=1, offline=False, anonymous=False, requests=[])
+            for key in ("revision", "offline", "anonymous"):
                 if key in value:
                     feed[key] = value[key]
             return self.reply(feed)

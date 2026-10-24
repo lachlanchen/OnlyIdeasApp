@@ -28,16 +28,19 @@ final class NativeUITests: XCTestCase {
   }
   func testRecommendationCacheReopenRefreshAndPagination() throws {
     continueAfterFailure=false
-    _ = try feedControl(["reset":true])
+    _ = try feedControl(["reset":true,"anonymous":true])
     let app=interestFixtureApp();app.launch()
-    defer {app.terminate()}
+    defer {app.terminate();_ = try? feedControl(["anonymous":false,"offline":false])}
+    // QA deliberately skips the real keychain. Use a stable public session so
+    // relaunch tests cache persistence without introducing an artificial login.
+    let initialRefresh=app.buttons["Refresh"].firstMatch
+    XCTAssertTrue(initialRefresh.waitForExistence(timeout:25))
+    let enabled=XCTNSPredicateExpectation(predicate:NSPredicate(format:"enabled == true"),object:initialRefresh)
+    XCTAssertEqual(XCTWaiter.wait(for:[enabled],timeout:15),.completed)
+    initialRefresh.tap()
     let first=app.buttons["Recommendation cache paper 1"]
     XCTAssertTrue(first.waitForExistence(timeout:25))
-    // Both server and app account have settled before testing persisted reopening.
-    app.tabBars.buttons["Agent"].tap()
-    XCTAssertTrue(app.buttons.matching(NSPredicate(format:"label IN %@",["What would you like to follow?","Reading interests"])).firstMatch.waitForExistence(timeout:15))
-    app.tabBars.buttons["Library"].tap()
-    XCTAssertTrue(first.waitForExistence(timeout:10));shot("Cache39-first-page")
+    shot("Cache39-first-page")
     let second=app.buttons["Recommendation cache paper 9"]
     for _ in 0..<16 {if second.isHittable {break};app.swipeUp()}
     XCTAssertTrue(second.exists)
