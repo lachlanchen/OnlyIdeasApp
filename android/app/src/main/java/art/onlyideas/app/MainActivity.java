@@ -916,19 +916,27 @@ public class MainActivity extends AppCompatActivity {
     actions.addView(history, new LinearLayout.LayoutParams(0, dp(48), 1));
     View space = new View(this);
     actions.addView(space, new LinearLayout.LayoutParams(dp(10), 1));
-    actions.addView(
-        button(
-            t("New chat"),
+    Button newChat = button(
+            "+",
             false,
             () -> {
               chatId = "";rememberChat();draftReferences.clear();draftQuote=null;agentDraft="";if(composer!=null)composer.setText("");agentScrollY=0;
               chatMessages = new JSONArray();
               agentStatus = "";
               showAgent();
-            }),
-        new LinearLayout.LayoutParams(0, dp(48), 1));
-    actions.addView(sharingButton());
+            });
+    newChat.setContentDescription(t("New chat"));
+    actions.addView(newChat, new LinearLayout.LayoutParams(dp(44), dp(48)));
+    Button sharing = sharingButton();
+    LinearLayout.LayoutParams sharingSize = new LinearLayout.LayoutParams(0, dp(48), 1);
+    sharingSize.setMargins(dp(6), 0, dp(6), 0);
+    actions.addView(sharing, sharingSize);
     Button interests=button("◎",false,this::editInterests);interests.setContentDescription(t("Reading interests"));actions.addView(interests,new LinearLayout.LayoutParams(dp(44),dp(48)));
+    for (Button action : new Button[]{history, newChat, sharing, interests}) {
+      action.setMinWidth(0); action.setMinimumWidth(0);
+      action.setSingleLine(true); action.setEllipsize(android.text.TextUtils.TruncateAt.END);
+      action.setPadding(dp(8), dp(7), dp(8), dp(7));
+    }
     content.addView(actions);
     chatScroll = new ScrollView(this);
     chatScroll.setFillViewport(true);
