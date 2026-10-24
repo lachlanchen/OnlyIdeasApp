@@ -8,7 +8,7 @@
     "browserSharing": 16,
     "browserInterests": 9,
     "androidNative": 5,
-    "deliveryHelpers": 75,
+    "deliveryHelpers": 79,
     "androidLint": true,
     "nativeReaderResourcesVerified": 31,
     "livePublicPapers": 3,
@@ -29,10 +29,19 @@
     "macos": "1.0.9 metadata draft; build38 not uploaded",
     "blocker": "",
     "nativeBuild38Tested": false,
-    "nativeBuildState": "Delivery-monitor timeout before tests; cleanup verified; corrected helper awaiting fresh slot",
+    "nativeBuildState": "Two delivery-monitor timeouts before tests; both cleanups independently verified; kernel-name monitor awaiting fresh slot",
     "attempts": [
       {
         "version": "v2",
+        "outcome": "monitor process-inspection timeout during compilation",
+        "nativeTestsRun": 0,
+        "archives": 0,
+        "uploads": 0,
+        "cleanupVerified": true,
+        "signingUntouched": true
+      },
+      {
+        "version": "v3",
         "outcome": "monitor process-inspection timeout during compilation",
         "nativeTestsRun": 0,
         "archives": 0,
