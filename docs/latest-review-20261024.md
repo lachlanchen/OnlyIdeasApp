@@ -39,7 +39,9 @@ Optional shared-account entry points remain capability-gated.
 - Signed Android APK/AAB identity and all 31 expected reader resources verified.
   Google reports no newly unsupported devices.
 - Anonymous live checks opened three real public papers, figures and Chinese
-  reading responses. An exact-title search placed the already-saved metasurface
+  reading responses. The metasurface paper has all 543 Chinese translation
+  pieces cached; the other two correctly return original text until translated.
+  An exact-title search placed the already-saved metasurface
   imaging paper first, preserving its library reference without a new import.
 - 79 delivery-helper regressions passed. These test delivery supervision and
   failure handling; they are separate from app and native-runtime tests.

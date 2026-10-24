@@ -12,7 +12,15 @@
     "androidLint": true,
     "nativeReaderResourcesVerified": 31,
     "livePublicPapers": 3,
-    "exactTitleLibraryReuse": true
+    "exactTitleLibraryReuse": true,
+    "cachedChineseTranslation": {
+      "paper": "Metasurface-Encoded Single-Pixel Hyperspectral Imaging",
+      "pieces": 543,
+      "total": 543,
+      "complete": true,
+      "readOnly": true
+    },
+    "otherTwoPapers": "Original-text fallback verified; no cached Chinese translation for those revisions"
   },
   "android": {
     "internal": "available to existing internal testers",
