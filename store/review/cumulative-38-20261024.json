@@ -8,7 +8,7 @@
     "browserSharing": 16,
     "browserInterests": 9,
     "androidNative": 5,
-    "deliveryHelpers": 73,
+    "deliveryHelpers": 75,
     "androidLint": true,
     "nativeReaderResourcesVerified": 31,
     "livePublicPapers": 3,
@@ -16,7 +16,7 @@
   },
   "android": {
     "internal": "available to existing internal testers",
-    "production": "submitted; Google quick checks running",
+    "production": "In review; Google quick checks completed",
     "rolloutPercent": 100,
     "newlyUnsupportedDevices": 0,
     "aabSha256": "e93294a4e8cdf71dc7bc838055d5581ade2883b4a12d07b38aaf28bb25c1db67",
@@ -27,8 +27,20 @@
   "apple": {
     "ios": "1.0.9 metadata draft; build38 not uploaded",
     "macos": "1.0.9 metadata draft; build38 not uploaded",
-    "blocker": "Shared KVM predecessor guard retained pending exact-owner recovery",
-    "nativeBuild38Tested": false
+    "blocker": "",
+    "nativeBuild38Tested": false,
+    "nativeBuildState": "Delivery-monitor timeout before tests; cleanup verified; corrected helper awaiting fresh slot",
+    "attempts": [
+      {
+        "version": "v2",
+        "outcome": "monitor process-inspection timeout during compilation",
+        "nativeTestsRun": 0,
+        "archives": 0,
+        "uploads": 0,
+        "cleanupVerified": true,
+        "signingUntouched": true
+      }
+    ]
   },
   "activation": {
     "subscriptions": false,

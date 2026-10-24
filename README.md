@@ -2,83 +2,93 @@
 
 [![LazyingArt banner](https://github.com/lachlanchen/lachlanchen/raw/main/figs/banner.png)](https://github.com/lachlanchen/lachlanchen/blob/main/figs/banner.png)
 
-# OnlyIdeasApp
+# OnlyIdeas
 
-*Read deeply. Think together.*
+Find research papers, read them in flowing text, and discuss the passages that
+raise questions. OnlyIdeas keeps the source, figures, equations and translations
+alongside your reading notes and conversations.
 
-[OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
-
-## Current release · 2026-10-24
-
-OnlyIdeas 1.0.8 (34) is public on iOS/Watch, Mac and Google Play.
-The next Android update, **1.0.9 (38)**, is available to internal testers and
-submitted for Google Play review. Apple 1.0.9 is being qualified.
-
-The update adds saved-paper mentions with **@**, quoted messages, editable
-research interests and public reading links. Copy reading or research drafts
-for EchoMind and AiMemo, and keep an unsent question when the screen changes
-size. The Android Agent toolbar now fits narrow screens more clearly.
-
-[Current verification](store/review/cumulative-38-20261024.json) ·
-[Previous release](docs/latest-review-20261017.md)
-
-## Public distribution · 2026-10-14
-
-iOS/Watch 1.0.7 (32) is public. Google Play 1.0.7 (32) is public. Mac 1.0.7 (32) is now public too.
-
-[Release verification](docs/distribution-20261014.md)
-
-## Public distribution · 10 October 2026
-
-OnlyIdeas 1.0.6 (27) is public on iOS/Watch and Google Play. Google rollout is 100%. Mac 1.0.6 (28) remains in Apple review and will release automatically after approval; the public Mac version is 1.0.5 (26). The approved rounded icon is included in the mobile releases.
-
-[Distribution verification](docs/distribution-20261010.md)
-
-## Public release and next update · 6 October 2026
-
-Apple approved and automatically released iOS/Watch 1.0.2 (21); Mac 1.0.4 (24) is also public. All 175 configured Apple storefronts are available, with a US download price of $0.99. The latest iOS/Watch and Mac 1.0.5 (26), including the approved flowing icon and sign-in recovery, have been submitted for review with automatic release after approval. Google Play is public; build 25 was verified in production on 3 October. Web and PWA store links are enabled for all three platforms. All 174 tests and renderer/build checks passed. General subscription purchases remain disabled.
-
-[App Store](https://apps.apple.com/app/onlyideas/id6816392935?platform=iphone) · [Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?platform=mac) · [Google Play](https://play.google.com/store/apps/details?id=art.onlyideas.app) · [2026-10-06](docs/distribution-20261006.json) · [Apple 26](docs/apple-review-26-20261006.json)
-
-## Overview
-
-OnlyIdeas is a shared reading room for research papers. Import a PDF or an open-access PDF link, preserve equations and figures with Mathpix, and discuss passages inside the reader. New imports default to Shared, with an Only me option. Publication follows source permission and community review; notes and agent conversations stay private.
-
-A configurable economical model creates reading guides and translations on request. Generated text stays separate from the original. GitHub stores only explicitly published, rights-cleared paper bundles. The app has its own GitHub login and a persistent session.
+[Open the reading room](https://agent.onlyideas.art) ·
+[App Store](https://apps.apple.com/app/onlyideas/id6816392935?platform=iphone) ·
+[Mac App Store](https://apps.apple.com/app/onlyideas/id6816392935?platform=mac) ·
+[Google Play](https://play.google.com/store/apps/details?id=art.onlyideas.app)
 
 ![OnlyIdeas reading room](evidence/library-desktop.png)
 
-<!-- watchsearch24 -->
-**Watch and search · TestFlight 1.0.4 (24)**
+## Find and read
 
-Send public-paper excerpts to Watch as Original, Translation or Interlaced text using the paired iPhone. Downloaded translations are reused. macOS 12+ passed online and offline reader tests on all four owner Macs. Exact DOI/arXiv searches reuse known transcripts; slow indexes have a deadline, and denied downloads retain source/upload recovery.
+- Search by title, DOI, author or topic. Saved public papers open from the library;
+  new requests look for an accessible source.
+- Read supported PDFs and article pages as flowing text, with equations, figures
+  and tables. Import authorized PDF, image, Word, Markdown or text files.
+- Request a translation of a whole paper or a smaller passage. Read the original,
+  translation or interlaced languages in one reader.
+- Reuse existing public transcripts and compatible cached translations. A failed
+  automatic download keeps its source link and an option to attach your own PDF.
+- Save papers, adjust text and appearance, and keep processed papers offline.
+  The paired iPhone can send public excerpts to Apple Watch in original,
+  translated or interlaced form.
 
-[24](docs/watch-search-24.md)
+Source quality affects conversion. The original link remains available for
+checking; generated translations and reading guides are labeled and can contain
+errors.
 
-<!-- plans21 -->
-1.0.2 (21): Profile now always shows Plans & usage, even before sign-in or when checkout is unavailable. View all three approved plans and quotas on iOS, Android, Mac and PWA. Paid activation still requires sandbox purchase qualification.
+## Questions and discussion
 
-[Build 21](docs/release-candidate-21.md)
+Ask the research assistant to find a paper, prepare it for reading or explain a
+passage. Return to saved conversations, attach files and follow an import's
+progress. Discuss a paper or a selected passage with other readers, and keep
+personal notes in your account.
 
-<!-- reader20 -->
-1.0.2 (20): Read the original, translation, or interlaced passages in one reader, with cached languages, equations, figures and source comments. Native Mac supports Apple silicon and Intel. Default interests include Shaohua Ma’s organoid work. Monthly plans and a seven-day trial are prepared; purchases remain gated on sandbox qualification.
+Public papers and their reusable reading material are shared. Chats, personal
+notes, interests and private uploads remain account-scoped. To publish an upload,
+select a suitable license and confirm permission; administrator review follows.
+Unconfirmed sharing requests wait for review. Readers can report content and
+block other readers.
 
-[1.0.2 (20)](docs/release-candidate-20.md)
+Browse public papers without signing in. Importing, assistant requests and
+comments require an account. Processing has usage limits, shown in the app.
+OnlyIdeas app credits are non-transferable and have no cash value.
 
-<!-- agent19 -->
-1.0.2 (19): Ask the agent to find, download, transcribe, summarize, translate or save a paper. Approximate titles and DOIs work across research indexes, with a bounded public-source fallback and PDF identity checks. Saved results reopen from chat. Recommendations follow your research interests; change them in Your space. Android Back returns to the conversation.
+## Current release · 24 October 2026
 
-[1.0.2 (19)](docs/release-candidate-19.md)
+**1.0.8 (34)** is public on iOS/Watch, Mac and Google Play.
+**Android 1.0.9 (38)** is available to internal testers and submitted for Google
+Play review. Apple 1.0.9 is being qualified.
 
-<!-- recovery17 -->
-Version 1.0.2 (17) adds separate Saved and Liked collections, activity, an inbox and reading preferences. Recover blocked downloads by uploading your PDF directly from a paper card or failed request. Translate a whole paper, paragraph or sentence; saved pieces are reused and equations and figures stay intact. Shared remains the default: verified supported open licenses can publish automatically, while other papers show pending review. Native daily reminders are optional; activity alerts currently refresh inside the app.
+The update adds saved-paper mentions with **@**, quoted messages, editable
+research interests and public reading links. Copy a reading or research draft
+for EchoMind or AiMemo, then send it yourself. Unsent questions and selected
+references remain in place when the screen changes size. The Android Agent
+toolbar also fits narrow screens more clearly.
 
-[1.0.2 (17)](docs/paper-recovery-and-translation.md)
+[Current verification](store/review/cumulative-38-20261024.json) ·
+[Current screenshots](store/screenshots/1.0.9-38/README.md) ·
+[Previous submission](docs/latest-review-20261017.md)
 
+## Platforms
 
-## Quick start
+OnlyIdeas has native iPhone/iPad, Android and Mac interfaces, a paired Apple
+Watch reader, and a web/PWA reading room. Mac builds support Intel and Apple
+silicon. The app has system, light and dark themes and 11 interface languages.
 
-Read the operations guide before connecting provider credentials. Keep configuration outside Git, in a protected file.
+General subscription purchases and optional shared LazyingArt account/reward
+integration remain disabled pending their separate qualification. An account in
+another app does not automatically share its plan, balance or private data.
+
+## Development
+
+This repository contains the app and service code. Published, rights-cleared
+paper bundles live in [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers).
+Paper payloads and private account data do not belong in this source repository.
+
+The reader preserves canonical MMD/TeX and source figures. Translations and
+reading guides are separate, revision-keyed artifacts. The worker deduplicates
+jobs and enforces page, byte and daily limits. Native navigation surrounds the
+shared document renderer.
+
+Read the operations guide before connecting providers. Keep credentials outside
+Git in protected configuration files. Node 22 or newer is required.
 
 ```bash
 npm ci
@@ -88,29 +98,9 @@ npm run server
 npm run dev
 ```
 
-[BRIEF.md](BRIEF.md) · [docs/architecture.md](docs/architecture.md) · [docs/operations.md](docs/operations.md)
-
-## Design
-
-App code, content and private account data have separate homes. MMD preserves TeX; derived section data is generated when needed. The worker deduplicates jobs and enforces page, byte and daily limits.
-
-## Status
-
-Native 1.0.0 (10) adds a vivid teal–blue–violet interface, system/light/dark themes and 11 app languages, selected from your device by default. The agent accepts private PDF, Word, image and text attachments. Discuss a paragraph or keep selecting a passage. Fetch a paper translation in any supported language: simultaneous readers share the same revision-specific job and completed result. Equations and figures remain intact, and the accepted icon and local paper cache are retained. See the release note for verified testing and current store status.
-
-The public reading room now includes two real papers: OpenAlex (CC0-1.0) and Measuring holographic entanglement entropy on a quantum simulator (CC-BY-4.0), alongside the clearly labeled original sample. Four original figures are retained. Both papers were imported through the real conversion workflow and checked in a phone-width reader without signing in.
-
-In development: database reading credits with atomic reservations, refunds and duplicate-safe rewards for approved public papers. Profile shows the balance and history; sharing options move above the agent conversation and private imports ask for cost confirmation. The new controls support all 11 languages. Credit charging and monthly purchases are not enabled in production yet.
-
-Staged next: native monthly plans with store prices, purchase restoration, verified renewals and refunds. Reader, Researcher and Studio include 200/1,200/2,600 monthly credits and 40/80/160 daily agent messages. Purchases remain disabled pending store and device qualification.
-
-Version 1.0.2 (13) adds a native Mac app (macOS 13+, Intel and Apple silicon) with sidebar navigation and keyboard shortcuts, plus an Apple Watch companion (watchOS 11+). On iPhone, explicitly send a public paper excerpt from Reading options; the latest three remain readable offline with adjustable text. Full equations and figures stay on iPhone and Mac. Private papers, chats and account credentials never transfer to Watch. See the release record for review status. Subscription activation remains limited to operator testing.
-
-[macOS · Apple Watch](docs/apple-platforms.md) · [1.0.2 (15)](docs/release-candidate-15.md)
-
-[Reading credits](docs/reading-credits.md)
-
-[1.0.0 (10)](docs/release-candidate-10.md) · [0.3](docs/native-0.3.md) · [docs/native.md](docs/native.md)
+[Product contract](BRIEF.md) · [Architecture](docs/architecture.md) ·
+[Operations](docs/operations.md) · [Native apps](docs/native.md) ·
+[Mac and Watch](docs/apple-platforms.md)
 
 ## Support
 
@@ -130,5 +120,3 @@ Cite this repository when using it in research. GitHub reads CITATION.cff to off
   url = {https://github.com/lachlanchen/OnlyIdeasApp}
 }
 ```
-
-**2026-09-30 · OnlyIdeas** — The approved flowing icon is live on the web and included in **1.0.4 (23)**, available in TestFlight (iPhone/iPad, Watch companion and Mac) and Google Play internal testing. The new Google production build and store icon are staged. Existing Apple and Google production reviews remain unchanged pending the owner’s replacement decision. Papers, translations and database records were preserved.
