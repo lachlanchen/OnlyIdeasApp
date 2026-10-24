@@ -1638,13 +1638,15 @@ struct ResearchDiscovery: View {
   @State private var selected:ResearchPaper?
   @State private var showPaper=false
   @State private var importing=""
+  @State private var failedPage=1
+  var cacheable:Bool {!saved && query.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty && source=="all" && discipline.isEmpty && subdiscipline.isEmpty && from.isEmpty && to.isEmpty && journal.isEmpty}
   var parameters:[String:String] { ["source":source,"discipline":discipline,"subdiscipline":subdiscipline,"from":from,"to":to,"journal":journal,"sort":query.isEmpty ? "latest":sort,"q":query] }
   var signature:String { parameters.sorted{$0.key<$1.key}.map{$0.key+"="+$0.value}.joined(separator:"&") + String(saved) + (store.account?.id ?? "visitor") }
   var fields:[ResearchDiscipline] {taxonomy[source == "arxiv" ? "arxiv":"openalex"] ?? []}
   var children:[ResearchCategory] {fields.first{$0.id==discipline}?.children ?? []}
   var body:some View {
-    VStack(alignment:.leading,spacing:12) {
-      HStack {Text(T(query.isEmpty ? "Research for you":"Search research")).font(.title2.bold());Spacer();Button {filters.toggle()}label:{Image(systemName:"slider.horizontal.3").frame(width:44,height:44)}.accessibilityLabel(T("Filters"));Button {if store.account==nil {Task{await store.signIn()}}else{saved.toggle()}} label:{Image(systemName:saved ? "star.fill":"star").frame(width:44,height:44)}.accessibilityLabel(T("Saved"))}
+    LazyVStack(alignment:.leading,spacing:12) {
+      HStack {Text(T(query.isEmpty ? "Research for you":"Search research")).font(.title2.bold());Spacer();Button {Task{await reset(refresh:true)}}label:{Image(systemName:"arrow.clockwise").frame(width:44,height:44)}.disabled(busy).accessibilityLabel(T("Refresh"));Button {filters.toggle()}label:{Image(systemName:"slider.horizontal.3").frame(width:44,height:44)}.accessibilityLabel(T("Filters"));Button {if store.account==nil {Task{await store.signIn()}}else{saved.toggle()}} label:{Image(systemName:saved ? "star.fill":"star").frame(width:44,height:44)}.accessibilityLabel(T("Saved"))}
       if filters {filterControls}
       Text(T("Tap a paper to fetch and convert it. Existing papers open immediately. Shared imports enter publication review.")).font(.caption).foregroundColor(.secondary)
       ForEach(hits) { hit in
@@ -1660,13 +1662,13 @@ struct ResearchDiscovery: View {
           NativePaperActions(reference:hit.ref ?? "r-"+hit.id,title:hit.title)
         }.padding(14).background(Color(.secondarySystemGroupedBackground)).cornerRadius(14)
       }
-      if !notice.isEmpty {Text(T(notice)).font(.subheadline).foregroundColor(.secondary);Button(T("Try again")){Task{await reset()}}}
+      if !notice.isEmpty {Text(T(notice)).font(.subheadline).foregroundColor(.secondary);Button(T("Try again")){Task{if failedPage==1{await reset(refresh:true)}else{await load(failedPage,generation)}}}}
       if busy {ProgressView(T("Finding research…")).padding(.vertical,8)}
-      if let next=nextPage {Button(T("Load more")){Task{await load(next,generation)}}.disabled(busy).onAppear{if !busy&&notice.isEmpty {Task{await load(next,generation)}}}}
+      if let next=nextPage {Button(T("Load more")){Task{await load(next,generation)}}.disabled(busy).id(next).onAppear{if !busy&&notice.isEmpty {Task{await load(next,generation)}}}}
       if !busy&&hits.isEmpty&&notice.isEmpty {Text(T("No papers found. Try broader keywords or fewer filters.")).font(.subheadline).foregroundColor(.secondary)}
     }.task {if taxonomy.isEmpty {do{taxonomy=try store.decoded([String:[ResearchDiscipline]].self,await store.json("/api/discovery/taxonomy"))}catch{}}}
       .task(id:signature){await reset()}
-      .onReceive(NotificationCenter.default.publisher(for:Notification.Name("OnlyIdeas.RefreshLibrary"))){_ in Task{await reset()}}
+      .onReceive(NotificationCenter.default.publisher(for:Notification.Name("OnlyIdeas.RefreshLibrary"))){_ in Task{await reset(refresh:true)}}
       .background(NavigationLink(destination:NativePaper(paper:selected ?? ResearchPaper(id:"",title:"")),isActive:$showPaper){EmptyView()}.hidden())
   }
   var filterControls:some View {
@@ -1680,15 +1682,31 @@ struct ResearchDiscovery: View {
       Button(T("Clear filters")){source="all";discipline="";subdiscipline="";from="";to="";journal=""}
     }.font(.subheadline).padding(10).background(Color(.secondarySystemGroupedBackground)).cornerRadius(12)
   }
-  func reset() async {let id=UUID();generation=id;busy=false;nextPage=nil;notice="";hits=[];if !query.isEmpty {try? await Task.sleep(nanoseconds:450_000_000)};guard !Task.isCancelled,generation==id else{return};await load(1,id)}
-  func load(_ page:Int,_ id:UUID) async {
-    guard !busy,generation==id else{return};busy=true
+  func reset(refresh:Bool=false) async {
+    let id=UUID();generation=id;busy=false;notice=""
+    if !refresh {
+      let cached=cacheable ? store.cachedRecommendations():nil
+      hits=cached?.papers ?? [];nextPage=cached?.nextPage
+      if let cached,Date().timeIntervalSince1970-cached.at<RecommendationSnapshot.fresh{return}
+    }
+    if !query.isEmpty {try? await Task.sleep(nanoseconds:450_000_000)}
+    guard !Task.isCancelled,generation==id else{return};await load(1,id,refresh:refresh)
+  }
+  func load(_ page:Int,_ id:UUID,refresh:Bool=false) async {
+    guard !busy,generation==id else{return};busy=true;notice="";failedPage=page
+    let expected=signature
     defer{if generation==id {busy=false}}
-    do {var params=parameters;params["page"]=String(page);var u=URLComponents();u.queryItems=params.map{URLQueryItem(name:$0.key,value:$0.value)}
-      let r=try await store.json(saved ? "/api/saved":"/api/discovery?"+(u.percentEncodedQuery ?? ""));guard generation==id,!Task.isCancelled else{return}
-      let incoming=try store.decoded([DiscoveryPaper].self,r["papers"] ?? []);if page==1 {hits=incoming}else{hits+=incoming.filter{p in !hits.contains{$0.id==p.id}}};nextPage=r["nextPage"] as? Int
+    do {var params=parameters;params["page"]=String(page);if refresh {params["refresh"]="1"};var u=URLComponents();u.queryItems=params.map{URLQueryItem(name:$0.key,value:$0.value)}
+      let r=try await store.json(saved ? "/api/saved":"/api/discovery?"+(u.percentEncodedQuery ?? ""));guard generation==id,signature==expected,!Task.isCancelled else{return}
+      let incoming=try store.decoded([DiscoveryPaper].self,r["papers"] ?? [])
+      let degraded=(r["stale"] as? Bool==true) || !((r["unavailable"] as? [String]) ?? []).isEmpty
+      if !incoming.isEmpty || !degraded {
+        if page==1 {hits=[]};var seen=Set(hits.map(\.id));hits+=incoming.filter{seen.insert($0.id).inserted}
+        nextPage=(r["nextPage"] as? Int).flatMap{(2...100).contains($0) ? $0:nil}
+      }
+      if page==1 && cacheable && (r["stale"] as? Bool) != true && (!incoming.isEmpty || !degraded) {store.cacheRecommendations(hits,nextPage:nextPage)}
       if let missing=r["unavailable"]as?[String],!missing.isEmpty {notice="Some research indexes are temporarily unavailable."}else if r["stale"]as?Bool==true {notice="Showing cached research results."}
-    }catch{if generation==id && !Task.isCancelled {notice=error.localizedDescription}}
+    }catch{if generation==id && signature==expected && !Task.isCancelled {notice=error.localizedDescription}}
   }
   func choose(_ hit:DiscoveryPaper) async {
     if let id=hit.paperId ?? (hit.ref?.hasPrefix("r-")==false ? hit.ref:nil){selected=ResearchPaper(id:id,title:hit.title);showPaper=true;return}
@@ -1838,7 +1856,7 @@ struct NativeReadingPreferences:View {
   if !notice.isEmpty {Text(T(notice))}
   Button(T("Save preferences")){Task{await save()}}.disabled(!ready)
  }.navigationTitle(T("Interests & notifications")).toolbar{Button(T("Done")){dismiss()}}.task{do{let r=try await store.json("/api/preferences");prefs=try store.decoded(ReadingPreferences.self,r["preferences"] ?? [:]);let tax=try await store.json("/api/discovery/taxonomy");fields=try store.decoded([ResearchDiscipline].self,tax["openalex"] ?? []);let parts=prefs.dailyTime.split(separator:":").compactMap{Int($0)};if parts.count==2{time=Calendar.current.date(bySettingHour:parts[0],minute:parts[1],second:0,of:Date()) ?? Date()};ready=true}catch{notice=error.localizedDescription}}}
- func save()async{do{let c=Calendar.current.dateComponents([.hour,.minute],from:time);prefs.dailyTime=String(format:"%02d:%02d",c.hour ?? 9,c.minute ?? 0);prefs.timezone=TimeZone.current.identifier;let body=try JSONSerialization.jsonObject(with:JSONEncoder().encode(prefs));_ = try await store.json("/api/preferences",method:"PUT",body:body);let enabled=await ReadingReminder.configure(prefs);notice=prefs.dailyEnabled && !enabled ? "Preferences saved. Enable notifications in system settings for reminders.":"Preferences saved"}catch{notice=error.localizedDescription}}
+ func save()async{do{let c=Calendar.current.dateComponents([.hour,.minute],from:time);prefs.dailyTime=String(format:"%02d:%02d",c.hour ?? 9,c.minute ?? 0);prefs.timezone=TimeZone.current.identifier;let body=try JSONSerialization.jsonObject(with:JSONEncoder().encode(prefs));_ = try await store.json("/api/preferences",method:"PUT",body:body);store.clearRecommendations();NotificationCenter.default.post(name:Notification.Name("OnlyIdeas.RefreshLibrary"),object:nil);let enabled=await ReadingReminder.configure(prefs);notice=prefs.dailyEnabled && !enabled ? "Preferences saved. Enable notifications in system settings for reminders.":"Preferences saved"}catch{notice=error.localizedDescription}}
 }
 
 struct NativePDFRecovery:View {

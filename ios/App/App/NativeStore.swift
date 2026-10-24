@@ -35,6 +35,11 @@ struct DiscoveryPaper:Codable,Identifiable {
  var failedJobId:String?;var fetchUnavailable:String?;var summary:String?;var pdfUrl:String?;var paperId:String?;var year:String?;var journal:String?;var doi:String?;var discipline:String?;var subdiscipline:String?;var index:String?;var ref:String?
  var metadata:String {[discipline,subdiscipline,year,journal].compactMap{$0}.filter{!$0.isEmpty}.joined(separator:" · ")}
 }
+// A replaceable first page; older pagination never grows the on-disk cache.
+struct RecommendationSnapshot:Codable {
+ var version:Int=1;var scope:String;var at:Double;var papers:[DiscoveryPaper];var nextPage:Int?
+ static let fresh:Double=300, maxAge:Double=7*86400
+}
 func researchMatches(_ query:String,_ text:String)->Bool {
  let words=text.folding(options:[.diacriticInsensitive,.caseInsensitive],locale:.current).components(separatedBy:CharacterSet.alphanumerics.inverted).filter{!$0.isEmpty}
  return query.folding(options:[.diacriticInsensitive,.caseInsensitive],locale:.current).split(separator:" ").allSatisfy{term in
@@ -283,6 +288,23 @@ final class ReadingStore: NSObject, ObservableObject,
   deinit {purchaseUpdates?.cancel();purchaseIntents?.cancel()}
   private var scope: String { account?.id ?? "public" }
   private var libraryURL: URL { folder.appendingPathComponent("library-" + Data(SHA256.hash(data: Data(scope.utf8))).map { String(format: "%02x", $0) }.joined() + ".index") }
+  private var recommendationURL:URL {folder.appendingPathComponent("recommendations.cache")}
+  private var recommendationScope:String {origin+"|"+scope}
+  func cachedRecommendations()->RecommendationSnapshot? {
+    guard let size=try? recommendationURL.resourceValues(forKeys:[.fileSizeKey]).fileSize,size<=512_000,
+      let bytes=try? Data(contentsOf:recommendationURL),let snapshot=try? JSONDecoder().decode(RecommendationSnapshot.self,from:bytes),
+      snapshot.version==1,snapshot.papers.count<=60,snapshot.at.isFinite,snapshot.at<=Date().timeIntervalSince1970,
+      Date().timeIntervalSince1970-snapshot.at<=RecommendationSnapshot.maxAge else {clearRecommendations();return nil}
+    guard snapshot.scope==recommendationScope else{return nil}
+    return snapshot
+  }
+  func cacheRecommendations(_ papers:[DiscoveryPaper],nextPage:Int?) {
+    guard papers.count<=60 else{return}
+    let snapshot=RecommendationSnapshot(scope:recommendationScope,at:Date().timeIntervalSince1970,papers:papers,nextPage:nextPage)
+    guard let bytes=try? JSONEncoder().encode(snapshot),bytes.count<=512_000 else{return}
+    try? bytes.write(to:recommendationURL,options:[.atomic,.completeFileProtection])
+  }
+  func clearRecommendations(){try? FileManager.default.removeItem(at:recommendationURL)}
   private func restoreLibrary() {
     if let data = try? Data(contentsOf: libraryURL), let saved = try? JSONDecoder().decode([ResearchPaper].self, from: data) { papers = saved }
     else { papers = downloads().map(\.paper) }
@@ -319,6 +341,7 @@ final class ReadingStore: NSObject, ObservableObject,
       SecItemDelete(q as CFDictionary)
     }
     warming?.cancel()
+    if value==nil && token != nil {clearRecommendations()}
     token = value
   }
   func clearExports() {
@@ -875,6 +898,8 @@ final class ReadingStore: NSObject, ObservableObject,
       if let id=selectedChat {body["chatId"]=id}
       let r=try await json("/api/chats/interests",method:"POST",body:body)
       guard identity==token else {return false}
+      clearRecommendations()
+      NotificationCenter.default.post(name:Notification.Name("OnlyIdeas.RefreshLibrary"),object:nil)
       if let value=r["recommendations"] as? [String:Any] {recommendationSetup=value["state"] as? String;researchInterests=value["interests"] as? String ?? ""}
       if conversationID==selectedChat, let c=r["chat"] as? [String:Any],let id=c["id"] as? String {conversationID=id;await loadConversation(id)}
       await loadConversations()

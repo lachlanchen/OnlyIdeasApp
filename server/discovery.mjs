@@ -20,14 +20,15 @@ export function createDiscovery(store,{search=searchIndexes}={}) {
    const topics=interestTopics(store,user),page=Number(raw.page||1);requireValue(Number.isInteger(page)&&page>=1&&page<=100,'Refine the search to see more papers.');
    if(topics.length){
     const selected=topics.slice((page-1)%Math.ceil(topics.length/2)*2,((page-1)%Math.ceil(topics.length/2)+1)*2),indexPage=Math.floor((page-1)/Math.ceil(topics.length/2))+1;
-    const results=await Promise.allSettled(selected.map(q=>this.find({q,source:'all',sort:'relevance',page:indexPage,from:String(new Date().getUTCFullYear()-3)},user)));
+    const results=await Promise.allSettled(selected.map(q=>this.find({q,source:'all',sort:'latest',refresh:raw.refresh,page:indexPage,from:String(new Date().getUTCFullYear()-3)},user)));
     const groups=results.map((r,i)=>r.status==='fulfilled'?r.value.papers.filter(p=>researchScore(p,selected[i])>=4):[]),papers=[],seen=new Set();
     for(let i=0;i<12;i++)for(const group of groups){const p=group[i];if(!p)continue;const id=p.doi?.toLowerCase()||p.source||p.id;if(!seen.has(id)){seen.add(id);papers.push(p)}}
+    papers.sort((a,b)=>String(b.publicationDate||b.year||'').localeCompare(String(a.publicationDate||a.year||'')));
     return {papers:papers.slice(0,12),focused:true,interests:topics,nextPage:page<12?page+1:null,unavailable:[...new Set(results.flatMap(r=>r.status==='fulfilled'?r.value.unavailable||[]:['research']))],stale:results.some(r=>r.status==='fulfilled'&&r.value.stale)};
    }
   }
   const o=searchOptions(raw),key=hash(JSON.stringify(['discovery-v6',o])),row=db.prepare('SELECT * FROM discovery_pages WHERE key=?').get(key);
-  const ttl=o.q?600_000:3600_000;let data;
+  const ttl=raw.refresh==='1'?60_000:o.q?600_000:3600_000;let data;
   if(row&&Date.now()-row.updated<ttl)data=JSON.parse(row.body);
   else {
    requireValue(pending.has(key)||pending.size<4,'Research search is busy. Try again shortly.',429);

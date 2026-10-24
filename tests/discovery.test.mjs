@@ -90,3 +90,25 @@ test('unknown exact identifiers return no match rather than a misleading provide
  const result=await searchIndexes({q},async()=>{const e=Error('HTTP 404');e.upstreamStatus=404;throw e});assert.deepEqual(result.papers,[]);assert.deepEqual(result.unavailable,[]);
  }
 });
+
+test('explicit top refresh revalidates older cached pages, coalesces readers and throttles repeated taps',async()=>{
+ const f=fixture();let calls=0;const d=createDiscovery(f.store,{search:async()=>{calls++;await new Promise(r=>setTimeout(r,10));return {papers:[{...card,title:'Edition '+calls}],nextPage:2}}});
+ try{
+  await d.find({feed:'all'});f.store.db.prepare('UPDATE discovery_pages SET updated=?').run(Date.now()-61_000);
+  assert.equal((await d.find({feed:'all'})).papers[0].title,'Edition 1');assert.equal(calls,1);
+  const refreshed=await Promise.all([d.find({feed:'all',refresh:'1'}),d.find({feed:'all',refresh:'1'})]);
+  assert.equal(calls,2);assert.equal(refreshed[0].papers[0].title,'Edition 2');assert.equal(refreshed[1].papers[0].title,'Edition 2');
+  await d.find({feed:'all',refresh:'1'});assert.equal(calls,2);
+ }finally{f.close()}
+});
+test('personal recommendations request newest research and order the first page by date',async()=>{
+ const f=fixture(),calls=[];f.store.db.prepare('INSERT INTO reading_preferences VALUES(?,?)').run('reader',JSON.stringify({interests:'quantum, imaging'}));
+ const d=createDiscovery(f.store,{search:async o=>{calls.push(o);return {papers:[{...card,id:o.q+'-older',title:o.q+' research',source:'https://example.org/'+o.q+'old',publicationDate:'2025-01-01'},{...card,id:o.q+'-newer',title:o.q+' study',source:'https://example.org/'+o.q+'new',publicationDate:'2026-10-24'}],nextPage:2}}});
+ try{const r=await d.find({}, {id:'reader'});assert.equal(calls.length,2);assert.ok(calls.every(o=>o.sort==='latest'));assert.equal(r.papers.length,4);assert.equal(r.papers[0].publicationDate,'2026-10-24');assert.equal(r.papers[1].publicationDate,'2026-10-24');assert.equal(r.nextPage,2)}finally{f.close()}
+});
+test('failed refresh retains the last known page and never refreshes its age',async()=>{
+ const f=fixture();let fail=false;const d=createDiscovery(f.store,{search:async()=>{if(fail)throw Error('Unavailable');return {papers:[card],nextPage:2}}});try{
+  await d.find({feed:'all'});const at=Date.now()-61_000;f.store.db.prepare('UPDATE discovery_pages SET updated=?').run(at);fail=true;
+  const r=await d.find({feed:'all',refresh:'1'});assert.equal(r.stale,true);assert.equal(r.papers[0].id,card.id);assert.equal(r.nextPage,2);assert.equal(f.store.db.prepare('SELECT updated FROM discovery_pages').get().updated,at);
+ }finally{f.close()}
+});

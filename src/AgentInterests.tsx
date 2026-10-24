@@ -1,3 +1,4 @@
+import {clearRecommendations} from './recommendation-cache'
 import {useEffect,useRef,useState} from 'react'
 import {post} from './api'
 import {t} from './i18n'
@@ -10,7 +11,7 @@ export function AgentInterests({value,chatId,updated,saved}:{value:Recommendatio
  async function submit(skip=false){
   setBusy(true);setError('')
   if(attempt.current.text!==text||!attempt.current.id)attempt.current={text,id:crypto.randomUUID()}
-  try{const r=await post<{recommendations:Recommendations;chat?:{id:string}}>('/chats/interests',skip?{skip:true}:{text,chatId,requestId:attempt.current.id});if(!live.current)return;updated(r.recommendations);window.dispatchEvent(new Event('onlyideas:refresh-library'));setOpen(false);if(r.chat)saved(r.chat.id)}
+  try{const r=await post<{recommendations:Recommendations;chat?:{id:string}}>('/chats/interests',skip?{skip:true}:{text,chatId,requestId:attempt.current.id});if(!live.current)return;clearRecommendations();updated(r.recommendations);window.dispatchEvent(new Event('onlyideas:refresh-library'));setOpen(false);if(r.chat)saved(r.chat.id)}
   catch(e){if(live.current)setError((e as Error).message)}finally{if(live.current)setBusy(false)}
  }
  return <section className="agent-interests">

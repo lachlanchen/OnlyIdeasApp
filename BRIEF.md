@@ -1,5 +1,15 @@
 # OnlyIdeas · product contract
 
+## Cached recommendations · 2026-10-24
+
+Opening Research for you restores the most recent recommendation page immediately.
+Pull down or use Refresh at the top for newer research; reaching the bottom loads
+another page. Refresh keeps visible papers until a successful response arrives.
+Persist only one account-scoped first page, at most 60 cards and 512 KB, expiring
+at seven days. Older pages loaded during browsing do not accumulate on disk.
+Preserve downloaded papers and personal libraries independently of this cache.
+This additive feature is staged separately from the frozen build 38 delivery.
+
 ## Cumulative release qualification · 2026-10-24
 
 The owner requests testing, corrections and formal Apple/Google submission of the

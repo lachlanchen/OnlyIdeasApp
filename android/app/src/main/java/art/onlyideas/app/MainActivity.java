@@ -315,7 +315,7 @@ public class MainActivity extends AppCompatActivity {
   LinearLayout scrollContent() {
     ScrollView s = new ScrollView(this);
     s.setFillViewport(true);
-    final float[] startY={0};final boolean[] atTop={false};s.setOnTouchListener((v,e)->{if(e.getAction()==android.view.MotionEvent.ACTION_DOWN){startY[0]=e.getY();atTop[0]=s.getScrollY()==0;}else if(e.getAction()==android.view.MotionEvent.ACTION_MOVE&&e.getY()-startY[0]>dp(24)){hideKeyboard();}else if(e.getAction()==android.view.MotionEvent.ACTION_UP&&atTop[0]&&e.getY()-startY[0]>dp(110)&&page.equals("library")){refresh();}return false;});
+    final float[] startY={0};final boolean[] atTop={false};s.setOnTouchListener((v,e)->{if(e.getAction()==android.view.MotionEvent.ACTION_DOWN){startY[0]=e.getY();atTop[0]=s.getScrollY()==0;}else if(e.getAction()==android.view.MotionEvent.ACTION_MOVE&&e.getY()-startY[0]>dp(24)){hideKeyboard();}else if(e.getAction()==android.view.MotionEvent.ACTION_UP&&atTop[0]&&e.getY()-startY[0]>dp(110)&&page.equals("library")){researchRefreshRequested=true;refresh();}return false;});
     LinearLayout c = column();
     c.setPadding(dp(14), dp(12), dp(14), dp(20));
     s.addView(c);
@@ -577,7 +577,7 @@ public class MainActivity extends AppCompatActivity {
             sharedLoginEnabled=session.optJSONObject("capabilities")!=null&&session.optJSONObject("capabilities").optBoolean("lazyingart");
             sharedLinked=r.optJSONObject("sharedAccount")!=null&&r.optJSONObject("sharedAccount").optBoolean("linked");
             JSONObject next = session.optJSONObject("user");
-            if (!Objects.equals(account == null ? null : account.optString("id"), next == null ? null : next.optString("id"))) {authEpoch++;sharedConnectionNotice="";}
+            if (!Objects.equals(account == null ? null : account.optString("id"), next == null ? null : next.optString("id"))) {authEpoch++;sharedConnectionNotice="";recommendationFile().delete();}
             account = next;
             if (account == null && api.token() != null) {
               try {
@@ -1027,7 +1027,7 @@ public class MainActivity extends AppCompatActivity {
     final int epoch=authEpoch;final String session=api.token(),selectedChat=chatId;
     job(()->api.jsonBound("/api/chats/interests","POST",new JSONObject().put("text",text).put("skip",skip).put("requestId",requestID).put("chatId",selectedChat),session),r->{
       if(epoch!=authEpoch||!Objects.equals(session,api.token())){if(dialog!=null)dialog.dismiss();return;}
-      recommendations=r.optJSONObject("recommendations");recommendationsEpoch=epoch;
+      recommendations=r.optJSONObject("recommendations");recommendationsEpoch=epoch;recommendationFile().delete();
       if(chatId.equals(selectedChat)&&r.optJSONObject("chat")!=null){chatId=r.optJSONObject("chat").optString("id");rememberChat();chatMessages=r.optJSONArray("messages");lastMessages="";}
       if(dialog!=null)dialog.dismiss();if(page.equals("agent"))renderMessages();
     });
@@ -1416,7 +1416,7 @@ public class MainActivity extends AppCompatActivity {
           return true;
         },
         r -> {
-          authEpoch++;
+          authEpoch++;recommendationFile().delete();
           account = null;
           if(billing!=null){billing.close();billing=null;}billingCatalog=null;billingProducts=List.of();purchaseNotice="";
           chatId = "";
@@ -2357,7 +2357,7 @@ public class MainActivity extends AppCompatActivity {
   private TextView researchNotice;
   private Button researchMore;
   private int researchGeneration=0,researchPage=0;
-  private boolean researchLoading=false,researchSaved=false,browseResearch=true;
+  private boolean researchLoading=false,researchSaved=false,browseResearch=true,researchAutoLoad=true,researchRefreshRequested=false,researchRetryRefresh=false;
   private String researchQuery="";
   private Runnable researchDebounce;
   private final Set<String> researchIDs=new HashSet<>();
@@ -2367,18 +2367,60 @@ public class MainActivity extends AppCompatActivity {
     String[] words=normalized.split("[^\\p{L}\\p{N}]+");
     for(String q:java.text.Normalizer.normalize(query.toLowerCase(Locale.ROOT),java.text.Normalizer.Form.NFKD).replaceAll("\\p{M}","").split("\\s+")){if(q.isEmpty())continue;boolean found=false;for(String w:words){if(w.contains(q)){found=true;break;}if(q.length()<5||Math.abs(q.length()-w.length())>1)continue;int i=0,j=0,n=0;while(i<q.length()&&j<w.length()){if(q.charAt(i)==w.charAt(j)){i++;j++;}else{n++;if(n>1)break;if(q.length()>=w.length())i++;if(w.length()>=q.length())j++;}}if(n+q.length()-i+w.length()-j<=1){found=true;break;}}if(!found)return false;}return true;
   }
+  File recommendationFile(){return new File(getCacheDir(),"recommendations-v1.json");}
+  String recommendationScope(){return NativeSession.ORIGIN+"|"+(account==null?"visitor":account.optString("id"));}
+  boolean recommendationFeed(){if(researchSaved||!researchQuery.trim().isEmpty()||!researchOptions.getOrDefault("source","all").equals("all"))return false;for(String k:List.of("discipline","subdiscipline","from","to","journal"))if(!researchOptions.getOrDefault(k,"").isEmpty())return false;return true;}
   void researchSetup(LinearLayout c) {
-    LinearLayout top=row();TextView label=text(t("Research for you"),20,true);top.addView(label,new LinearLayout.LayoutParams(0,-2,1));top.addView(button(t("Filters"),false,this::researchFilters));top.addView(button(t(researchSaved?"Research for you":"Saved"),false,()->{if(account==null){signIn();return;}researchSaved=!researchSaved;showLibrary();}));c.addView(top);
+    LinearLayout top=row();TextView label=text(t("Research for you"),20,true);top.addView(label,new LinearLayout.LayoutParams(0,-2,1));Button newest=button("↻",false,()->researchReset(true));newest.setContentDescription(t("Refresh"));top.addView(newest,new LinearLayout.LayoutParams(dp(44),dp(44)));Button filters=button("☷",false,this::researchFilters);filters.setContentDescription(t("Filters"));top.addView(filters,new LinearLayout.LayoutParams(dp(44),dp(44)));Button saved=button(researchSaved?"★":"☆",false,()->{if(account==null){signIn();return;}researchSaved=!researchSaved;showLibrary();});saved.setContentDescription(t(researchSaved?"Research for you":"Saved"));top.addView(saved,new LinearLayout.LayoutParams(dp(44),dp(44)));c.addView(top);
     caption(c,t("Tap a paper to fetch and convert it. Existing papers open immediately. Shared imports enter publication review."));gap(c,10);
     researchList=column();c.addView(researchList);researchNotice=text("",14,false);researchNotice.setTextColor(muted);c.addView(researchNotice);
-    researchMore=button(t("Load more"),false,()->researchLoad(researchPage,researchGeneration));c.addView(researchMore);researchMore.setVisibility(View.GONE);
+    researchMore=button(t("Load more"),false,()->researchLoad(researchPage,researchGeneration,researchRetryRefresh));c.addView(researchMore);researchMore.setVisibility(View.GONE);
     if(researchTaxonomy.length()==0)job(()->api.json("/api/discovery/taxonomy","GET",null),r->researchTaxonomy=r,false);
-    if(c.getParent() instanceof LinearLayout && ((LinearLayout)c.getParent()).getParent() instanceof ScrollView){ScrollView scroll=(ScrollView)((LinearLayout)c.getParent()).getParent();scroll.setOnScrollChangeListener((View v,int x,int y,int ox,int oy)->{android.graphics.Rect rect=new android.graphics.Rect();if(researchMore.getVisibility()==View.VISIBLE&&researchMore.getGlobalVisibleRect(rect)&&!researchLoading)researchLoad(researchPage,researchGeneration);});}
-    researchReset();
+    if(c.getParent() instanceof LinearLayout && ((LinearLayout)c.getParent()).getParent() instanceof ScrollView){ScrollView scroll=(ScrollView)((LinearLayout)c.getParent()).getParent();scroll.setOnScrollChangeListener((View v,int x,int y,int ox,int oy)->{android.graphics.Rect rect=new android.graphics.Rect();if(researchMore.getVisibility()==View.VISIBLE&&researchMore.getGlobalVisibleRect(rect)&&!researchLoading&&researchAutoLoad)researchLoad(researchPage,researchGeneration);});}
+    researchReset(researchRefreshRequested);researchRefreshRequested=false;
   }
-  void researchReset(){researchGeneration++;researchLoading=false;researchPage=0;researchIDs.clear();if(researchList==null)return;researchList.removeAllViews();researchNotice.setText("");researchMore.setVisibility(View.GONE);if(researchDebounce!=null)handler.removeCallbacks(researchDebounce);int g=researchGeneration;researchDebounce=()->researchLoad(1,g);handler.postDelayed(researchDebounce,researchQuery.isEmpty()?0:450);}
-  void researchLoad(int p,int g){if(p<1||g!=researchGeneration||researchLoading||!page.equals("library"))return;researchLoading=true;researchNotice.setText(t("Finding research…"));researchMore.setEnabled(false);int epoch=authEpoch;Map<String,String> params=new LinkedHashMap<>(researchOptions);params.put("q",researchQuery);params.put("page",String.valueOf(p));boolean saved=researchSaved;
-    io.execute(()->{try{android.net.Uri.Builder uri=new android.net.Uri.Builder().path(saved?"/api/saved":"/api/discovery");for(Map.Entry<String,String> e:params.entrySet())uri.appendQueryParameter(e.getKey(),e.getValue());JSONObject result=api.json(uri.build().toString(),"GET",null);handler.post(()->{if(g!=researchGeneration||epoch!=authEpoch||!page.equals("library"))return;researchLoading=false;researchNotice.setText(result.optBoolean("stale")?t("Showing cached research results."):result.optJSONArray("unavailable")!=null&&result.optJSONArray("unavailable").length()>0?t("Some research indexes are temporarily unavailable."):"");JSONArray hits=result.optJSONArray("papers");if(hits!=null)for(int i=0;i<hits.length();i++){JSONObject hit=hits.optJSONObject(i);if(hit!=null&&researchIDs.add(hit.optString("id")))researchCard(hit);}researchPage=result.optInt("nextPage",0);researchMore.setEnabled(true);researchMore.setVisibility(researchPage>0?View.VISIBLE:View.GONE);if(researchIDs.isEmpty()&&researchNotice.getText().length()==0)researchNotice.setText(t("No papers found. Try broader keywords or fewer filters."));});}catch(Exception error){handler.post(()->{if(g!=researchGeneration||epoch!=authEpoch||!page.equals("library"))return;researchLoading=false;researchNotice.setText(error.getMessage());researchPage=p;researchMore.setText(t("Try again"));researchMore.setEnabled(true);researchMore.setVisibility(View.VISIBLE);});}});
+  void researchReset(){researchReset(false);}
+  void researchReset(boolean refreshHead){
+    researchGeneration++;researchLoading=false;researchAutoLoad=true;
+    if(researchList==null)return;researchNotice.setText("");
+    if(researchDebounce!=null)handler.removeCallbacks(researchDebounce);
+    JSONObject cached=recommendationFeed()?RecommendationCache.read(recommendationFile(),recommendationScope(),System.currentTimeMillis()):null;
+    if(!refreshHead||researchList.getChildCount()==0){
+      researchPage=0;researchIDs.clear();researchList.removeAllViews();
+      if(cached!=null){researchAppend(cached.optJSONArray("papers"));researchPage=RecommendationCache.next(cached);}
+    }
+    researchMore.setText(t("Load more"));researchMore.setEnabled(true);researchMore.setVisibility(researchPage>0?View.VISIBLE:View.GONE);
+    if(!refreshHead&&cached!=null&&System.currentTimeMillis()-cached.optLong("at")<RecommendationCache.FRESH_MS)return;
+    int g=researchGeneration;researchDebounce=()->researchLoad(1,g,refreshHead);handler.postDelayed(researchDebounce,researchQuery.isEmpty()?0:450);
+  }
+  void researchAppend(JSONArray hits){if(hits!=null)for(int i=0;i<hits.length();i++){JSONObject hit=hits.optJSONObject(i);if(hit!=null&&researchIDs.add(hit.optString("id")))researchCard(hit);}}
+  void researchLoad(int p,int g){researchLoad(p,g,false);}
+  void researchLoad(int p,int g,boolean refreshHead){
+    if(p<1||p>100||g!=researchGeneration||researchLoading||!page.equals("library"))return;
+    researchLoading=true;researchRetryRefresh=refreshHead;researchNotice.setText(t("Finding research…"));researchMore.setEnabled(false);
+    int epoch=authEpoch;String cacheScope=recommendationScope();boolean cacheable=recommendationFeed(),saved=researchSaved;
+    Map<String,String> params=new LinkedHashMap<>(researchOptions);params.put("q",researchQuery);params.put("page",String.valueOf(p));if(refreshHead)params.put("refresh","1");
+    io.execute(()->{try{
+      android.net.Uri.Builder uri=new android.net.Uri.Builder().path(saved?"/api/saved":"/api/discovery");for(Map.Entry<String,String> e:params.entrySet())uri.appendQueryParameter(e.getKey(),e.getValue());JSONObject result=api.json(uri.build().toString(),"GET",null);
+      handler.post(()->{
+        if(g!=researchGeneration||epoch!=authEpoch||!page.equals("library"))return;
+        researchLoading=false;researchRetryRefresh=false;
+        boolean degraded=result.optBoolean("stale")||(result.optJSONArray("unavailable")!=null&&result.optJSONArray("unavailable").length()>0);
+        researchAutoLoad=!degraded;
+        researchNotice.setText(result.optBoolean("stale")?t("Showing cached research results."):degraded?t("Some research indexes are temporarily unavailable."):"");
+        JSONArray hits=result.optJSONArray("papers");
+        if(hits!=null&&(hits.length()>0||!degraded)){
+          if(p==1){researchIDs.clear();researchList.removeAllViews();}
+          researchAppend(hits);researchPage=RecommendationCache.next(result);
+        }
+        if(p==1&&cacheable&&!result.optBoolean("stale")&&hits!=null&&(hits.length()>0||!degraded))RecommendationCache.save(recommendationFile(),cacheScope,hits,researchPage,System.currentTimeMillis());
+        researchMore.setText(t("Load more"));researchMore.setEnabled(true);researchMore.setVisibility(researchPage>0?View.VISIBLE:View.GONE);
+        if(researchIDs.isEmpty()&&researchNotice.getText().length()==0)researchNotice.setText(t("No papers found. Try broader keywords or fewer filters."));
+      });
+    }catch(Exception error){handler.post(()->{
+      if(g!=researchGeneration||epoch!=authEpoch||!page.equals("library"))return;
+      researchLoading=false;researchAutoLoad=false;researchNotice.setText(error.getMessage());researchPage=p;researchMore.setText(t("Try again"));researchMore.setEnabled(true);researchMore.setVisibility(View.VISIBLE);
+    });}});
   }
   void researchCard(JSONObject p){LinearLayout card=card();caption(card,researchMetadata(p));TextView heading=text(p.optString("title"),18,true);heading.setPadding(0,dp(8),0,dp(8));heading.setOnClickListener(v->researchChoose(p));card.addView(heading);caption(card,p.optString("authors"));if(!p.optString("summary").isEmpty()){TextView summary=text(p.optString("summary"),15,false);summary.setMaxLines(3);summary.setEllipsize(android.text.TextUtils.TruncateAt.END);card.addView(summary);}if(!p.optString("doi").isEmpty())caption(card,"DOI "+p.optString("doi"));LinearLayout actions=row();actions.addView(button(t(p.has("paperId")?"Open paper":"Fetch & read"),false,()->researchChoose(p)),new LinearLayout.LayoutParams(0,-2,1));actions.addView(button(t("Source"),false,()->{String source=p.optString("source");if(source.startsWith("https://"))startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse(source)));}));card.addView(actions);if(!p.has("paperId"))card.addView(button(t("Upload my PDF"),false,()->recoverPDF(p.optString("id"),"",true)));socialActions(card,p.optString("ref","r-"+p.optString("id")),p.optString("title"));addCard(researchList,card);}
   void researchChoose(JSONObject p){String id=p.optString("paperId");if(id.isEmpty()&&p.has("ref")&&!p.optString("ref").startsWith("r-"))id=p.optString("ref");if(!id.isEmpty()){try{openPaper(new JSONObject().put("id",id).put("title",p.optString("title")));}catch(Exception ignored){}return;}if(account==null){signIn();return;}job(()->api.json("/api/discovery/import","POST",new JSONObject().put("id",p.optString("id")).put("sharing","shared")),r->{if(!r.optString("paperId").isEmpty()){try{openPaper(new JSONObject().put("id",r.optString("paperId")).put("title",p.optString("title")));}catch(Exception ignored){}}else loadJobs(true);});}
@@ -2422,7 +2464,7 @@ public class MainActivity extends AppCompatActivity {
       String[] at=prefs.optString("dailyTime","09:00").split(":");int[] time={Integer.parseInt(at[0]),Integer.parseInt(at[1])};Button choose=button(t("Daily time")+" · "+prefs.optString("dailyTime"),false,()->{});choose.setOnClickListener(v->new android.app.TimePickerDialog(this,(view,h,m)->{time[0]=h;time[1]=m;choose.setText(t("Daily time")+" · "+String.format(Locale.ROOT,"%02d:%02d",h,m));},time[0],time[1],true).show());c.addView(choose);caption(c,java.util.TimeZone.getDefault().getID());caption(c,t("Open For you for papers matching your interests. Reminders do not download or convert papers."));
       ScrollView scroll=new ScrollView(this);scroll.addView(c);AlertDialog dialog=new AlertDialog.Builder(this).setTitle(t("Interests & notifications")).setView(scroll).setNegativeButton(t("Cancel"),null).create();
       c.addView(button(t("Save preferences"),true,()->job(()->api.json("/api/preferences","PUT",new JSONObject().put("interests",interests.getText().toString()).put("discipline",ids.get(field.getSelectedItemPosition())).put("language",langCodes[lang.getSelectedItemPosition()]).put("dailyEnabled",daily.isChecked()).put("dailyTime",String.format(Locale.ROOT,"%02d:%02d",time[0],time[1])).put("timezone",java.util.TimeZone.getDefault().getID()).put("commentAlerts",comments.isChecked()).put("likeAlerts",likes.isChecked())),v->{
-        ReadingReminder.configure(this,daily.isChecked(),time[0],time[1],t("Your daily reading time"),t("Open For you to explore research matching your interests."));if(daily.isChecked()&&android.os.Build.VERSION.SDK_INT>=33&&checkSelfPermission("android.permission.POST_NOTIFICATIONS")!=android.content.pm.PackageManager.PERMISSION_GRANTED)requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"},91);toast(t("Preferences saved"));dialog.dismiss();if(page.equals("space"))showSpace();})));dialog.show();
+        recommendationFile().delete();ReadingReminder.configure(this,daily.isChecked(),time[0],time[1],t("Your daily reading time"),t("Open For you to explore research matching your interests."));if(daily.isChecked()&&android.os.Build.VERSION.SDK_INT>=33&&checkSelfPermission("android.permission.POST_NOTIFICATIONS")!=android.content.pm.PackageManager.PERMISSION_GRANTED)requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"},91);toast(t("Preferences saved"));dialog.dismiss();if(page.equals("space"))showSpace();})));dialog.show();
     });
   }
 
