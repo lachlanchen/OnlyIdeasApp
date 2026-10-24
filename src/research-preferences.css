@@ -1,0 +1,22 @@
+.research-preferences {width:min(38rem,calc(100vw - 24px));max-height:min(90dvh,850px);padding:0;border:1px solid var(--line);border-radius:22px;background:var(--surface);color:var(--ink);box-sizing:border-box;overflow:hidden;}
+.research-preferences[open] {display:flex;flex-direction:column;}
+.research-preferences::backdrop {background:rgba(18,27,35,.5);}
+.research-preferences header,.research-preferences footer {display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;flex-shrink:0;}
+.research-preferences header {border-bottom:1px solid var(--line);}
+.research-preferences h2 {margin:4px 0 0;font-size:1.35rem;}
+.research-preferences header button {min-width:44px;min-height:44px;font-size:1.4rem;}
+.research-preferences-body {overflow:auto;padding:16px 20px;overscroll-behavior:contain;}
+.research-preferences fieldset {padding:0;border:0;margin:0 0 22px;min-width:0;}
+.research-preferences legend {font-weight:700;margin-bottom:10px;}
+.preference-chips {display:flex;flex-wrap:wrap;gap:8px;}
+.preference-chips button {font:inherit;line-height:1.35;padding:9px 12px;border:1px solid var(--line);border-radius:18px;background:transparent;color:inherit;text-align:start;max-width:100%;overflow-wrap:anywhere;}
+.preference-chips button[aria-pressed=true] {background:color-mix(in srgb,var(--accent,#3769c8) 14%,var(--surface));border-color:var(--accent,#3769c8);font-weight:600;}
+.research-preferences label {display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
+.research-preferences .check-label {flex-direction:row;align-items:center;}
+.research-preferences input:not([type=checkbox]),.research-preferences select {width:100%;box-sizing:border-box;min-width:0;font:inherit;padding:11px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);}
+.research-preferences details {border-top:1px solid var(--line);padding-top:14px;}
+.research-preferences summary {cursor:pointer;margin-bottom:14px;font-weight:600;}
+.research-preferences footer {border-top:1px solid var(--line);justify-content:flex-end;padding-bottom:max(16px,env(safe-area-inset-bottom));}
+.feed-personalize {display:flex;gap:8px;align-items:center;margin:10px 0;}
+.feed-personalize button {font:inherit;border:1px solid var(--line);padding:7px 13px;border-radius:20px;background:var(--surface);color:var(--ink);}
+@media(max-width:420px){.research-preferences header,.research-preferences footer,.research-preferences-body{padding-left:14px;padding-right:14px;}.preference-chips{gap:6px;}.preference-chips button{font-size:.93rem;}}

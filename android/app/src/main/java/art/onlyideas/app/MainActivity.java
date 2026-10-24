@@ -56,6 +56,8 @@ public class MainActivity extends AppCompatActivity {
   private ScrollView chatScroll;
   private EditText composer;
   private String agentDraft="";
+  private String preferenceRevision="";
+  private int preferenceRevisionEpoch=-1;
   private JSONObject recommendations;
   private int recommendationsEpoch=-1;
   private int agentScrollY=0;
@@ -1015,7 +1017,7 @@ public class MainActivity extends AppCompatActivity {
     input.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(120)});
     LinearLayout form=column();form.setPadding(dp(20),dp(8),dp(20),dp(8));caption(form,t("Tell me a few topics you enjoy. I can use them for your daily papers."));form.addView(input);
     final String[] attempt={"", ""};
-    AlertDialog dialog=new AlertDialog.Builder(this).setTitle(t("Reading interests")).setView(form).setNegativeButton(t("Cancel"),null).setPositiveButton(t("Save interests"),null).create();
+    AlertDialog dialog=new AlertDialog.Builder(this).setTitle(t("Reading interests")).setView(form).setNeutralButton(t("Topics & journals"),(d,w)->showReadingPreferences()).setNegativeButton(t("Cancel"),null).setPositiveButton(t("Save interests"),null).create();
     dialog.setOnShowListener(d->dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v->{
       if(epoch!=authEpoch){dialog.dismiss();return;}
       String text=input.getText().toString().trim();if(text.isEmpty()){input.setError(t("Tell me a few topics you enjoy."));return;}
@@ -1023,6 +1025,7 @@ public class MainActivity extends AppCompatActivity {
       saveInterests(text,false,attempt[1],dialog);
     }));dialog.show();
   }
+
   void saveInterests(String text,boolean skip,String requestID,AlertDialog dialog) {
     final int epoch=authEpoch;final String session=api.token(),selectedChat=chatId;
     job(()->api.jsonBound("/api/chats/interests","POST",new JSONObject().put("text",text).put("skip",skip).put("requestId",requestID).put("chatId",selectedChat),session),r->{
@@ -1210,6 +1213,7 @@ public class MainActivity extends AppCompatActivity {
   void loadChat(boolean scroll) {
     if (chatId.isEmpty() || refreshingChat) return;
     String id = chatId;
+    final int expectedEpoch=authEpoch;
     refreshingChat = true;
     io.execute(
         () -> {
@@ -1218,7 +1222,8 @@ public class MainActivity extends AppCompatActivity {
             handler.post(
                 () -> {
                   refreshingChat = false;
-                  if (!chatId.equals(id) || !page.equals("agent")) return;
+                  if (expectedEpoch!=authEpoch || !chatId.equals(id) || !page.equals("agent")) return;
+                  String revision=r.optString("preferencesRevision");if(!revision.isEmpty()&&(preferenceRevisionEpoch!=authEpoch||!preferenceRevision.equals(revision))){recommendationFile().delete();loadInterests();preferenceRevision=revision;preferenceRevisionEpoch=authEpoch;syncReadingReminder();}
                   JSONArray pending = r.optJSONArray("pending");
                   boolean online =
                       r.optJSONObject("agent") != null
@@ -2372,6 +2377,7 @@ public class MainActivity extends AppCompatActivity {
   boolean recommendationFeed(){if(researchSaved||!researchQuery.trim().isEmpty()||!researchOptions.getOrDefault("source","all").equals("all"))return false;for(String k:List.of("discipline","subdiscipline","from","to","journal"))if(!researchOptions.getOrDefault(k,"").isEmpty())return false;return true;}
   void researchSetup(LinearLayout c) {
     LinearLayout top=row();TextView label=text(t("Research for you"),20,true);top.addView(label,new LinearLayout.LayoutParams(0,-2,1));Button newest=button("↻",false,()->researchReset(true));newest.setContentDescription(t("Refresh"));top.addView(newest,new LinearLayout.LayoutParams(dp(44),dp(44)));Button filters=button("☷",false,this::researchFilters);filters.setContentDescription(t("Filters"));top.addView(filters,new LinearLayout.LayoutParams(dp(44),dp(44)));Button saved=button(researchSaved?"★":"☆",false,()->{if(account==null){signIn();return;}researchSaved=!researchSaved;showLibrary();});saved.setContentDescription(t(researchSaved?"Research for you":"Saved"));top.addView(saved,new LinearLayout.LayoutParams(dp(44),dp(44)));c.addView(top);
+    c.addView(button(t("Tune your feed"),false,this::showReadingPreferences));
     caption(c,t("Tap a paper to fetch and convert it. Existing papers open immediately. Shared imports enter publication review."));gap(c,10);
     researchList=column();c.addView(researchList);researchNotice=text("",14,false);researchNotice.setTextColor(muted);c.addView(researchNotice);
     researchMore=button(t("Load more"),false,()->researchLoad(researchPage,researchGeneration,researchRetryRefresh));c.addView(researchMore);researchMore.setVisibility(View.GONE);
@@ -2453,18 +2459,31 @@ public class MainActivity extends AppCompatActivity {
       if((list==null||list.length()==0)&&(events==null||events.length()==0))caption(results,t(spaceTab.equals("inbox")?"No new notifications":spaceTab.equals("activity")?"Your reading activity will appear here.":"No papers here yet."));
     });
   }
+  void syncReadingReminder(){final int epoch=authEpoch;job(()->api.json("/api/preferences","GET",null),r->{if(epoch!=authEpoch)return;JSONObject p=r.optJSONObject("preferences");if(p==null)return;String[] at=p.optString("dailyTime","09:00").split(":");if(at.length!=2)return;ReadingReminder.configure(this,p.optBoolean("dailyEnabled"),Integer.parseInt(at[0]),Integer.parseInt(at[1]),t("Your daily reading time"),t("Open For you to explore research matching your interests."));},false);}
+  ArrayList<String> preferenceIDs(JSONArray values){ArrayList<String> out=new ArrayList<>();if(values!=null)for(int i=0;i<values.length();i++)out.add(values.optString(i));return out;}
+  void refreshPreferenceLabels(View v){if(v.getTag() instanceof Runnable)((Runnable)v.getTag()).run();if(v instanceof android.view.ViewGroup){android.view.ViewGroup group=(android.view.ViewGroup)v;for(int i=0;i<group.getChildCount();i++)refreshPreferenceLabels(group.getChildAt(i));}}
+  void preferenceChoices(LinearLayout parent,String title,JSONArray options,ArrayList<String> selected){
+    if(options==null)return;String[] names=new String[options.length()],ids=new String[options.length()];for(int i=0;i<options.length();i++){JSONObject o=options.optJSONObject(i);ids[i]=o.optString("id");names[i]=t(o.optString("name").equals("Proceedings of the National Academy of Sciences")?"PNAS":o.optString("name"));}
+    Button choose=button(title,false,()->{});choose.setSingleLine(false);choose.setMaxLines(3);Runnable label=()->{ArrayList<String> chosen=new ArrayList<>();for(int i=0;i<ids.length;i++)if(selected.contains(ids[i]))chosen.add(names[i]);choose.setText(title+" · "+String.join(", ",chosen));};choose.setTag(label);label.run();choose.setOnClickListener(v->{boolean[] checked=new boolean[ids.length];for(int i=0;i<ids.length;i++)checked[i]=selected.contains(ids[i]);new AlertDialog.Builder(this).setTitle(title).setMultiChoiceItems(names,checked,(d,index,on)->checked[index]=on).setNegativeButton(t("Cancel"),null).setPositiveButton(t("Done"),(d,w)->{selected.clear();for(int i=0;i<ids.length;i++)if(checked[i])selected.add(ids[i]);label.run();}).show();});parent.addView(choose);
+  }
   void showReadingPreferences(){
-    if(account==null){signIn();return;}job(()->{JSONObject r=api.json("/api/preferences","GET",null);r.put("taxonomy",api.json("/api/discovery/taxonomy","GET",null));return r;},r->{
-      JSONObject prefs=r.optJSONObject("preferences");if(prefs==null)return;LinearLayout c=column();c.setPadding(dp(18),dp(12),dp(18),dp(12));
-      caption(c,t("Topics you enjoy"));EditText interests=new EditText(this);interests.setText(prefs.optString("interests"));interests.setHint(t("For example: quantum physics"));interests.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(120)});c.addView(interests);
-      JSONArray fields=r.optJSONObject("taxonomy").optJSONArray("openalex");ArrayList<String> names=new ArrayList<>(),ids=new ArrayList<>();names.add(t("All disciplines"));ids.add("");if(fields!=null)for(int i=0;i<fields.length();i++){names.add(fields.optJSONObject(i).optString("name"));ids.add(fields.optJSONObject(i).optString("id"));}
-      caption(c,t("Primary discipline"));Spinner field=new Spinner(this);field.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,names));field.setSelection(Math.max(0,ids.indexOf(prefs.optString("discipline"))));c.addView(field);
+    final int expectedEpoch=authEpoch;
+    if(account==null){signIn();return;}job(()->{JSONObject r=api.json("/api/preferences","GET",null);r.put("choices",api.json("/api/preferences/options","GET",null));return r;},r->{
+      if(expectedEpoch!=authEpoch)return;JSONObject prefs=r.optJSONObject("preferences");if(prefs==null)return;LinearLayout c=column();c.setPadding(dp(18),dp(12),dp(18),dp(12));
+      JSONObject choices=r.optJSONObject("choices");
+      ArrayList<String> topics=preferenceIDs(prefs.optJSONArray("topics")),journals=preferenceIDs(prefs.optJSONArray("journals"));
+      preferenceChoices(c,t("Topics"),choices.optJSONArray("topics"),topics);
+      android.widget.CheckBox allJournals=new android.widget.CheckBox(this);allJournals.setText(t("All journals"));allJournals.setChecked(prefs.optString("journalScope").equals("all"));c.addView(allJournals);
+      LinearLayout journalRow=column();c.addView(journalRow);preferenceChoices(journalRow,t("Journals"),choices.optJSONArray("journals"),journals);journalRow.setVisibility(allJournals.isChecked()?View.GONE:View.VISIBLE);allJournals.setOnCheckedChangeListener((v,on)->journalRow.setVisibility(on?View.GONE:View.VISIBLE));
+      caption(c,t("Topics you enjoy"));EditText interests=new EditText(this);interests.setContentDescription(t("Your interests"));interests.setText(prefs.optString("interests"));interests.setHint(t("For example: quantum physics"));interests.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(120)});c.addView(interests);
       String[] langCodes={"en","zh-Hans","zh-Hant","ja","ko","ar","es","fr","de","ru","vi"};String[] langNames={"English","简体中文","繁體中文","日本語","한국어","العربية","Español","Français","Deutsch","Русский","Tiếng Việt"};caption(c,t("Preferred reading language"));Spinner lang=new Spinner(this);lang.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,langNames));lang.setSelection(Math.max(0,java.util.Arrays.asList(langCodes).indexOf(prefs.optString("language"))));c.addView(lang);
       android.widget.CheckBox daily=new android.widget.CheckBox(this),comments=new android.widget.CheckBox(this),likes=new android.widget.CheckBox(this);daily.setText(t("Daily reading reminder"));daily.setChecked(prefs.optBoolean("dailyEnabled"));comments.setText(t("Comment notifications"));comments.setChecked(prefs.optBoolean("commentAlerts",true));likes.setText(t("Like notifications"));likes.setChecked(prefs.optBoolean("likeAlerts",true));c.addView(comments);c.addView(likes);caption(c,t("Activity appears in your inbox when you open the app."));c.addView(daily);
       String[] at=prefs.optString("dailyTime","09:00").split(":");int[] time={Integer.parseInt(at[0]),Integer.parseInt(at[1])};Button choose=button(t("Daily time")+" · "+prefs.optString("dailyTime"),false,()->{});choose.setOnClickListener(v->new android.app.TimePickerDialog(this,(view,h,m)->{time[0]=h;time[1]=m;choose.setText(t("Daily time")+" · "+String.format(Locale.ROOT,"%02d:%02d",h,m));},time[0],time[1],true).show());c.addView(choose);caption(c,java.util.TimeZone.getDefault().getID());caption(c,t("Open For you for papers matching your interests. Reminders do not download or convert papers."));
+      caption(c,t("You can also ask Agent to change these choices."));
+      c.addView(button(t("Restore recommended defaults"),false,()->{JSONObject d=choices.optJSONObject("defaults");topics.clear();topics.addAll(preferenceIDs(d.optJSONArray("topics")));journals.clear();journals.addAll(preferenceIDs(d.optJSONArray("journals")));interests.setText("");allJournals.setChecked(false);refreshPreferenceLabels(c);}));
       ScrollView scroll=new ScrollView(this);scroll.addView(c);AlertDialog dialog=new AlertDialog.Builder(this).setTitle(t("Interests & notifications")).setView(scroll).setNegativeButton(t("Cancel"),null).create();
-      c.addView(button(t("Save preferences"),true,()->job(()->api.json("/api/preferences","PUT",new JSONObject().put("interests",interests.getText().toString()).put("discipline",ids.get(field.getSelectedItemPosition())).put("language",langCodes[lang.getSelectedItemPosition()]).put("dailyEnabled",daily.isChecked()).put("dailyTime",String.format(Locale.ROOT,"%02d:%02d",time[0],time[1])).put("timezone",java.util.TimeZone.getDefault().getID()).put("commentAlerts",comments.isChecked()).put("likeAlerts",likes.isChecked())),v->{
-        recommendationFile().delete();ReadingReminder.configure(this,daily.isChecked(),time[0],time[1],t("Your daily reading time"),t("Open For you to explore research matching your interests."));if(daily.isChecked()&&android.os.Build.VERSION.SDK_INT>=33&&checkSelfPermission("android.permission.POST_NOTIFICATIONS")!=android.content.pm.PackageManager.PERMISSION_GRANTED)requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"},91);toast(t("Preferences saved"));dialog.dismiss();if(page.equals("space"))showSpace();})));dialog.show();
+      c.addView(button(t("Save preferences"),true,()->job(()->api.json("/api/preferences","PUT",new JSONObject().put("revision",prefs.optString("revision")).put("topics",new JSONArray(topics)).put("journals",new JSONArray(journals)).put("journalScope",allJournals.isChecked()?"all":"selected").put("interests",interests.getText().toString()).put("discipline","").put("language",langCodes[lang.getSelectedItemPosition()]).put("dailyEnabled",daily.isChecked()).put("dailyTime",String.format(Locale.ROOT,"%02d:%02d",time[0],time[1])).put("timezone",java.util.TimeZone.getDefault().getID()).put("commentAlerts",comments.isChecked()).put("likeAlerts",likes.isChecked())),v->{
+        if(expectedEpoch!=authEpoch)return;recommendationFile().delete();loadInterests();ReadingReminder.configure(this,daily.isChecked(),time[0],time[1],t("Your daily reading time"),t("Open For you to explore research matching your interests."));if(daily.isChecked()&&android.os.Build.VERSION.SDK_INT>=33&&checkSelfPermission("android.permission.POST_NOTIFICATIONS")!=android.content.pm.PackageManager.PERMISSION_GRANTED)requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"},91);toast(t("Preferences saved"));dialog.dismiss();if(page.equals("space"))showSpace();else if(page.equals("library"))showLibrary();})));dialog.show();
     });
   }
 

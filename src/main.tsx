@@ -1,3 +1,4 @@
+import './research-preferences.css'
 import {clearRecommendations} from './recommendation-cache'
 import {ReadingShare} from './ReadingShare'
 import {observeForegroundUse} from './activity'

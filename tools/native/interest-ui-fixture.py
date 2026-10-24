@@ -10,6 +10,9 @@ import json
 import os
 import time
 
+preferences = {"topics":["imaging","optics","biomedicine"],"journals":["S137773608","S4210197940","S127827428"],"journalScope":"selected","interests":"","discipline":"","language":"en","dailyEnabled":False,"dailyTime":"09:00","timezone":"UTC","commentAlerts":True,"likeAlerts":True,"revision":"fixture-1"}
+options = {"topics":[{"id":i,"name":n} for i,n in [("imaging","Imaging"),("optics","Optics"),("biomedicine","Biomedicine"),("microscopy","Microscopy"),("organoids","Organoids")]],"journals":[{"id":i,"name":n} for i,n in [("S137773608","Nature"),("S4210197940","Optica"),("S127827428","Nature Methods")]],"defaults":{k:preferences[k] for k in ["topics","journals","journalScope","interests"]}}
+
 state = {"state": "pending", "interests": ""}
 chat = {"id": "interests37-conversation", "title": "Reading interests", "updated": 0}
 messages = []
@@ -35,6 +38,10 @@ class Handler(BaseHTTPRequestHandler):
         path = self.path.split("?")[0]
         if path == "/__qa/feed":
             return self.reply(feed)
+        if path == "/api/preferences":
+            return self.reply({"preferences": preferences})
+        if path == "/api/preferences/options":
+            return self.reply(options)
         if path == "/api/session":
             return self.reply({"user": None if feed["anonymous"] else {"id": "interests37-reader", "name": "Reading tester", "login": "reading-tester"}, "capabilities": {}})
         if path == "/api/chats":
@@ -61,6 +68,19 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/health":
             return self.reply({"ok": True, "synthetic": True, "pid": os.getpid()})
         return self.reply({})
+
+    def do_PUT(self):
+        if self.path != "/api/preferences" or self.headers.get("Authorization") != "Bearer synthetic-interests37-token":
+            return self.reply({"error":"Fixture only"},403)
+        size = int(self.headers.get("Content-Length",0))
+        if not 0 <= size <= 4096:
+            return self.reply({"error":"Too large"},413)
+        value=json.loads(self.rfile.read(size) or b"{}")
+        if value.get("revision") != preferences["revision"]:
+            return self.reply({"error":"Preferences changed elsewhere"},409)
+        preferences.update(value)
+        preferences["revision"]="fixture-"+str(time.time_ns())
+        return self.reply({"preferences":preferences})
 
     def do_POST(self):
         if self.headers.get("Authorization") != "Bearer synthetic-interests37-token":

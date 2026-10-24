@@ -19,7 +19,9 @@ alongside your reading notes and conversations.
 
 Start with English-language imaging, optics and biomedical research from Nature,
 Science, Cell, PNAS, Optica and related journals. Save your own interests to change
-the recommendations, or search any topic directly.
+the recommendations, or search any topic directly. In the updated editor, choose
+topics and journals together, or ask Agent to add, remove or reset your choices.
+See [research feed controls](docs/research-controls-20261024.md) for examples.
 
 - Search by title, DOI, author or topic. Saved public papers open from the library;
   new requests look for an accessible source.

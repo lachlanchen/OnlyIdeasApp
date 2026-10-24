@@ -1,3 +1,6 @@
+import {readPreferences,savePreferences} from './reading-preferences.mjs';
+import {localPreferenceCommand,preferenceIntent,validatedPreferencePatch,preferenceSummary} from './preference-commands.mjs';
+import {recommendationOptions} from './recommendation-options.mjs';
 import {resolveChatReferences} from './chat-references.mjs';
 import {createResearchPreferences} from './research-preferences.mjs';
 import {sharingConsent} from './sharing-consent.mjs';
@@ -66,16 +69,27 @@ export function createChats(store, config, agentActions) {
         const id = randomUUID(), title = 'New conversation'; db.prepare('INSERT INTO chats VALUES(?,?,?,?)').run(id,user.id,title,Date.now()); return { chat: {id,title}, messages: [] };
       }
       const chat = owned(id, user);
-      if (!action && method === 'GET') {agentActions.tick();return { chat, messages: messages(id), pending: db.prepare("SELECT id,state,body FROM chat_tasks WHERE chat=? AND state IN ('queued','running')").all(id).map(t=>({id:t.id,state:t.state,status:JSON.parse(t.body).status || 'Waiting for the paper agent'})), agent: this.status() };}
+      if (!action && method === 'GET') {agentActions.tick();return { chat, messages: messages(id), preferencesRevision:readPreferences(store,user).revision, pending: db.prepare("SELECT id,state,body FROM chat_tasks WHERE chat=? AND state IN ('queued','running')").all(id).map(t=>({id:t.id,state:t.state,status:JSON.parse(t.body).status || 'Waiting for the paper agent'})), agent: this.status() };}
       if (!action && method === 'DELETE') { db.exec('BEGIN'); try { agentActions.remove(id);for (const table of ['chat_messages','chat_tasks']) db.prepare(`DELETE FROM ${table} WHERE chat=?`).run(id); db.prepare('DELETE FROM chats WHERE id=?').run(id); db.exec('COMMIT'); } catch(e) {db.exec('ROLLBACK');throw e;} return { ok:true }; }
       if (action === 'messages' && method === 'POST') {
-        requireValue(config.agentWorkerToken, 'The paper agent is not connected yet.', 503);
         requireValue(typeof body.text === 'string' && body.text.length <= 4000, 'Write a message of up to 4,000 characters.');
         const ids=body.attachments||[];requireValue(Array.isArray(ids)&&ids.length<=3&&ids.every(a=>typeof a==='string'),'Attach up to three files.');
         for(const id of ids)attachment(store,id,user.id);requireValue(body.text.trim()||ids.length,'Write a message or attach a file.');
         const context=resolveChatReferences(store,user.id,id,body);
         const text=body.text.trim()||'Help me understand these files.';
-        const taskId = queue(id,user,{ kind:'chat', text, paperIds:context.references.map(p=>p.id),quoteId:context.quote?.id,attachments:ids, language:Object.hasOwn(languages,body.language)?body.language:'en',agentActions:body.agentActions===true,sharing:body.sharing==='private'?'private':'shared' }); const messageId=add(id,'user',{text,attachmentIds:ids,references:context.references.map(({id,title})=>({id,title})),...(context.quote?{quote:context.quote}:{})});
+        const command=!ids.length&&!context.references.length&&!context.quote?localPreferenceCommand(text,readPreferences(store,user)):null;
+        if(command&&!command.plan){
+          db.exec('BEGIN IMMEDIATE');
+          try {
+            const prefs=command.show?readPreferences(store,user):savePreferences(store,user,validatedPreferencePatch(command.patch));
+            const messageId=add(id,'user',{text,kind:'preferences'});
+            add(id,'assistant',{text:preferenceSummary(prefs,command.show?'Your reading preferences':'Reading preferences updated',command.show?null:Object.keys(command.patch)),kind:'preferences'});
+            if(chat.title==='New conversation')db.prepare('UPDATE chats SET title=? WHERE id=?').run(text.slice(0,70),id);
+            db.exec('COMMIT');return {messageId,queued:false,preferencesRevision:prefs.revision};
+          }catch(error){db.exec('ROLLBACK');throw error}
+        }
+        requireValue(config.agentWorkerToken, 'The paper agent is not connected yet.', 503);
+        const taskId = queue(id,user,{ kind:'chat', text, ...(command?{preferenceRequest:true,preferenceRevision:readPreferences(store,user).revision}:{}), paperIds:context.references.map(p=>p.id),quoteId:context.quote?.id,attachments:ids, language:Object.hasOwn(languages,body.language)?body.language:'en',agentActions:body.agentActions===true,sharing:body.sharing==='private'?'private':'shared' }); const messageId=add(id,'user',{text,attachmentIds:ids,references:context.references.map(({id,title})=>({id,title})),...(context.quote?{quote:context.quote}:{})});
         if (chat.title === 'New conversation') db.prepare('UPDATE chats SET title=? WHERE id=?').run(text.slice(0,70),id);
         return { taskId, messageId, queued:true };
       }
@@ -109,7 +123,7 @@ export function createChats(store, config, agentActions) {
         const history=messages(row.chat).filter(m=>m.kind!=='preferences').slice(-16), ids=[...new Set(history.flatMap(m=>(m.attachments||[]).filter(a=>a.state==='ready').map(a=>a.id)))].slice(-6);
         let budget=60_000;
         const documents=ids.map(id=>{const a=attachment(store,id,row.owner),p=store.paper(a.paperId);if(!canReusePaper(store,p,row.owner))return null;const text=p.mmd.slice(0,Math.min(20_000,budget));budget-=text.length;return {name:a.name,text,truncated:text.length<p.mmd.length};}).filter(Boolean);
-        db.exec('COMMIT');return {task:{id:row.id,lease:body.lease,text:body.text,...context,language:body.language,sharing:body.sharing,agentActions:body.agentActions===true,hasNewAttachments:files.length>0,documents,library:libraryCards(store,{id:row.owner}),messages:compactChatHistory(history)}};
+        db.exec('COMMIT');return {task:{id:row.id,lease:body.lease,text:body.text,...context,...(body.preferenceRequest?{preferenceRequest:true,preferences:readPreferences(store,{id:row.owner}),preferenceOptions:recommendationOptions}:{}),language:body.language,sharing:body.sharing,agentActions:body.agentActions===true,hasNewAttachments:files.length>0,documents,library:libraryCards(store,{id:row.owner}),messages:compactChatHistory(history)}};
       }
       db.exec('COMMIT');return {task:null};
       } catch(e){db.exec('ROLLBACK');throw e;}
@@ -122,6 +136,20 @@ export function createChats(store, config, agentActions) {
       if(body.status && !body.result) { data.status=String(body.status).slice(0,160);data.leaseUntil=Date.now()+180_000;db.prepare('UPDATE chat_tasks SET body=? WHERE id=?').run(JSON.stringify(data),row.id);return {ok:true}; }
       const result=body.result;requireValue(result && typeof result.text==='string' && result.text.length<=16000,'Invalid response.');
       store.requireActive(row.owner);
+      if(data.preferenceRequest){
+        let text='No preferences were changed. Open Reading interests to edit your choices.';
+        db.exec('BEGIN IMMEDIATE');
+        try {
+          if(result.preferencePatch){
+            requireValue(preferenceIntent(data.text)==='edit','No preferences were changed.');
+            const prefs=savePreferences(store,{id:row.owner},{...validatedPreferencePatch(result.preferencePatch),revision:data.preferenceRevision});
+            text=preferenceSummary(prefs,'Reading preferences updated',Object.keys(result.preferencePatch));
+          }else if(result.preferenceQuestion)text=String(result.preferenceQuestion).slice(0,600);
+          add(row.chat,'assistant',{text,kind:'preferences'},row.id);
+          db.prepare("UPDATE chat_tasks SET state='completed' WHERE id=?").run(row.id);db.exec('COMMIT');
+        }catch(error){db.exec('ROLLBACK');add(row.chat,'assistant',{text:error.message,kind:'preferences'},row.id);db.prepare("UPDATE chat_tasks SET state='completed' WHERE id=?").run(row.id)}
+        return {ok:true};
+      }
       const papers=(result.papers || []).slice(0,8).map(p=>{
         if(p.paperId){const paper=store.paper(p.paperId);requireValue(canReusePaper(store,paper,row.owner),'Paper not found.',404);return {...paperMetadata(paper),id:hash('paper:'+paper.id).slice(0,24),paperId:paper.id,title:paper.title,authors:paper.authors||'',summary:'',source:paper.source||'',pdfUrl:''};}
         const source=new URL(p.source||p.pdfUrl),pdf=p.pdfUrl?new URL(p.pdfUrl):null;

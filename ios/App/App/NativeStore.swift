@@ -155,7 +155,7 @@ final class ReadingStore: NSObject, ObservableObject,
 {
   @Published var papers: [ResearchPaper] = []
   @Published var account: ReadingAccount? {
-    didSet { if oldValue?.id != account?.id { sharedConnectionNotice=nil; agentDraft = ""; draftReferences=[]; draftQuote=nil; recommendationSetup=nil; researchInterests="" } }
+    didSet { if oldValue?.id != account?.id { sharedConnectionNotice=nil; agentDraft = ""; draftReferences=[]; draftQuote=nil; recommendationSetup=nil; researchInterests="";preferencesRevision=nil } }
   }
   // Owned by the scene store so layout/language reconstruction retains unsent work.
   @Published var agentDraft = ""
@@ -169,6 +169,7 @@ final class ReadingStore: NSObject, ObservableObject,
   }
   @Published var agentStatus = ""
   @Published var recommendationSetup:String?
+  private var preferencesRevision:String?
   @Published var researchInterests=""
   @Published var inboxUnread = 0
   @Published var error: String?
@@ -870,6 +871,14 @@ final class ReadingStore: NSObject, ObservableObject,
     do {
       let r = try await json("/api/chats/\(id)")
       guard conversationID == id, identity == token else { return }
+      if let revision=r["preferencesRevision"]as?String {
+        if preferencesRevision != revision {
+          clearRecommendations();NotificationCenter.default.post(name:Notification.Name("OnlyIdeas.RefreshLibrary"),object:nil)
+          if let response=try? await json("/api/preferences"),identity==token,let prefs=try? decoded(ReadingPreferences.self,response["preferences"] ?? [:]) {_ = await ReadingReminder.configure(prefs)}
+        }
+        guard conversationID==id,identity==token else{return}
+        preferencesRevision=revision
+      }
       let received = try decoded([AgentMessage].self, r["messages"] ?? [])
       if messages != received { messages = received }
       let pending = (r["pending"] as? [[String: Any]])?.first

@@ -295,7 +295,8 @@ struct NativeAgent: View {
               VStack(alignment:.leading,spacing:8) {
                 Button(T(store.recommendationSetup=="pending" ? "What would you like to follow?":"Reading interests")){interestEditor=true}
                 if store.recommendationSetup=="pending" {
-                  Text(T("Tell me a few topics you enjoy. I can use them for your daily papers.")).font(.subheadline).foregroundColor(.secondary)
+                  NavigationLink(T("Topics & journals")){NativeReadingPreferences()}
+        Text(T("Tell me a few topics you enjoy. I can use them for your daily papers.")).font(.subheadline).foregroundColor(.secondary)
                   Button(T("Not now")){Task{_ = await store.saveResearchInterests("",requestID:UUID().uuidString.lowercased(),skip:true)}}.font(.subheadline)
                 }
               }.padding(12).frame(maxWidth:.infinity,alignment:.leading).background(Color(.secondarySystemGroupedBackground)).cornerRadius(14)
@@ -1627,6 +1628,7 @@ struct ResearchDiscovery: View {
   @State private var to=""
   @State private var journal=""
   @State private var sort="latest"
+  @State private var preferencesOpen=false
   @State private var filters=false
   @State private var saved=false
   @State private var busy=false
@@ -1647,6 +1649,7 @@ struct ResearchDiscovery: View {
   var body:some View {
     LazyVStack(alignment:.leading,spacing:12) {
       HStack {Text(T(query.isEmpty ? "Research for you":"Search research")).font(.title2.bold());Spacer();Button {Task{await reset(refresh:true)}}label:{Image(systemName:"arrow.clockwise").frame(width:44,height:44)}.disabled(busy).accessibilityLabel(T("Refresh"));Button {filters.toggle()}label:{Image(systemName:"slider.horizontal.3").frame(width:44,height:44)}.accessibilityLabel(T("Filters"));Button {if store.account==nil {Task{await store.signIn()}}else{saved.toggle()}} label:{Image(systemName:saved ? "star.fill":"star").frame(width:44,height:44)}.accessibilityLabel(T("Saved"))}
+      if query.isEmpty {Button {if store.account==nil {Task{await store.signIn()}}else{preferencesOpen=true}}label:{Label(T("Tune your feed"),systemImage:"slider.horizontal.3")}.font(.subheadline)}
       if filters {filterControls}
       Text(T("Tap a paper to fetch and convert it. Existing papers open immediately. Shared imports enter publication review.")).font(.caption).foregroundColor(.secondary)
       ForEach(hits) { hit in
@@ -1666,7 +1669,7 @@ struct ResearchDiscovery: View {
       if busy {ProgressView(T("Finding research…")).padding(.vertical,8)}
       if let next=nextPage {Button(T("Load more")){Task{await load(next,generation)}}.disabled(busy).id(next).onAppear{if !busy&&notice.isEmpty {Task{await load(next,generation)}}}}
       if !busy&&hits.isEmpty&&notice.isEmpty {Text(T("No papers found. Try broader keywords or fewer filters.")).font(.subheadline).foregroundColor(.secondary)}
-    }.task {if taxonomy.isEmpty {do{taxonomy=try store.decoded([String:[ResearchDiscipline]].self,await store.json("/api/discovery/taxonomy"))}catch{}}}
+    }.sheet(isPresented:$preferencesOpen){NavigationView{NativeReadingPreferences()}.environmentObject(store)}.task {if taxonomy.isEmpty {do{taxonomy=try store.decoded([String:[ResearchDiscipline]].self,await store.json("/api/discovery/taxonomy"))}catch{}}}
       .task(id:signature){await reset()}
       .onReceive(NotificationCenter.default.publisher(for:Notification.Name("OnlyIdeas.RefreshLibrary"))){_ in Task{await reset(refresh:true)}}
       .background(NavigationLink(destination:NativePaper(paper:selected ?? ResearchPaper(id:"",title:"")),isActive:$showPaper){EmptyView()}.hidden())
@@ -1744,7 +1747,9 @@ struct SpaceEvent:Decodable,Identifiable {
  var actor:String?;var read:Bool?;var active:Bool?;var message:String?;var state:String?;var paperId:String?
  var label:String {kind=="comment" ? "New comment":kind=="like" ? "New like":kind=="fetch" ? "Paper request":kind=="saved" ? (active==true ? "Saved":"Removed from Saved"):(active==true ? "Liked":"Removed from Liked")}
 }
+struct PreferenceOption:Decodable,Identifiable {var id:String;var name:String}
 struct ReadingPreferences:Codable {
+ var topics:[String]?;var journals:[String]?;var journalScope:String?;var revision:String?
  var interests="";var discipline="";var language="en";var dailyEnabled=false;var dailyTime="09:00";var timezone="UTC";var commentAlerts=true;var likeAlerts=true
 }
 struct NativeReadingSpace:View {
@@ -1845,18 +1850,49 @@ struct NativeReadingPreferences:View {
  @EnvironmentObject var store:ReadingStore
  @Environment(\.dismiss) var dismiss
  @State private var prefs=ReadingPreferences()
- @State private var fields:[ResearchDiscipline]=[]
+ @State private var topics:[PreferenceOption]=[]
+ @State private var journals:[PreferenceOption]=[]
+ @State private var defaults:[String:Any]=[:]
  @State private var time=Date()
  @State private var notice=""
  @State private var ready=false
+ @State private var saving=false
+ @State private var owner:String?
+ var valid:Bool {!(prefs.topics ?? []).isEmpty || !prefs.interests.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty}
  var body:some View {Form {
-  Section(T("Interests")){TextField(T("Topics you enjoy"),text:$prefs.interests);Picker(T("Primary discipline"),selection:$prefs.discipline){Text(T("All disciplines")).tag("");ForEach(fields){Text($0.name).tag($0.id)}};Picker(T("Preferred reading language"),selection:$prefs.language){ForEach(UILanguage.choices,id:\.0){code,name in Text(name).tag(code)}}}
-  Section(T("Inbox")){Toggle(T("Comment notifications"),isOn:$prefs.commentAlerts);Toggle(T("Like notifications"),isOn:$prefs.likeAlerts);Text(T("Activity appears in your inbox when you open the app.")).font(.footnote).foregroundColor(.secondary)}
-  Section(T("Daily reading reminder")){Toggle(T("Daily reading reminder"),isOn:$prefs.dailyEnabled);DatePicker(T("Daily time"),selection:$time,displayedComponents:.hourAndMinute);Text(TimeZone.current.identifier).font(.caption).foregroundColor(.secondary);Text(T("Open For you for papers matching your interests. Reminders do not download or convert papers.")).font(.footnote).foregroundColor(.secondary)}
-  if !notice.isEmpty {Text(T(notice))}
-  Button(T("Save preferences")){Task{await save()}}.disabled(!ready)
- }.navigationTitle(T("Interests & notifications")).toolbar{Button(T("Done")){dismiss()}}.task{do{let r=try await store.json("/api/preferences");prefs=try store.decoded(ReadingPreferences.self,r["preferences"] ?? [:]);let tax=try await store.json("/api/discovery/taxonomy");fields=try store.decoded([ResearchDiscipline].self,tax["openalex"] ?? []);let parts=prefs.dailyTime.split(separator:":").compactMap{Int($0)};if parts.count==2{time=Calendar.current.date(bySettingHour:parts[0],minute:parts[1],second:0,of:Date()) ?? Date()};ready=true}catch{notice=error.localizedDescription}}}
- func save()async{do{let c=Calendar.current.dateComponents([.hour,.minute],from:time);prefs.dailyTime=String(format:"%02d:%02d",c.hour ?? 9,c.minute ?? 0);prefs.timezone=TimeZone.current.identifier;let body=try JSONSerialization.jsonObject(with:JSONEncoder().encode(prefs));_ = try await store.json("/api/preferences",method:"PUT",body:body);store.clearRecommendations();NotificationCenter.default.post(name:Notification.Name("OnlyIdeas.RefreshLibrary"),object:nil);let enabled=await ReadingReminder.configure(prefs);notice=prefs.dailyEnabled && !enabled ? "Preferences saved. Enable notifications in system settings for reminders.":"Preferences saved"}catch{notice=error.localizedDescription}}
+  Section(T("Topics")){chips(topics,selected:prefs.topics ?? []){id in prefs.topics=toggle(prefs.topics ?? [],id)}}
+  Section(T("Your interests")){TextField(T("Add keywords, separated by commas"),text:$prefs.interests)}
+  Section(T("Journals")){
+   Toggle(T("All journals"),isOn:Binding(get:{prefs.journalScope=="all"},set:{prefs.journalScope=$0 ? "all":"selected"}))
+   if prefs.journalScope != "all" {chips(journals,selected:prefs.journals ?? []){id in prefs.journals=toggle(prefs.journals ?? [],id)}}
+  }
+  Section {DisclosureGroup(T("Language & notifications")){
+   Picker(T("Preferred reading language"),selection:$prefs.language){ForEach(UILanguage.choices,id:\.0){code,name in Text(name).tag(code)}}
+   Toggle(T("Comment notifications"),isOn:$prefs.commentAlerts)
+   Toggle(T("Like notifications"),isOn:$prefs.likeAlerts)
+   Toggle(T("Daily reading reminder"),isOn:$prefs.dailyEnabled)
+   if prefs.dailyEnabled {DatePicker(T("Daily time"),selection:$time,displayedComponents:.hourAndMinute);Text(TimeZone.current.identifier).font(.caption).foregroundColor(.secondary)}
+  }}
+  Section {Text(T("You can also ask Agent to change these choices.")).font(.footnote).foregroundColor(.secondary)
+   Button(T("Restore recommended defaults")){prefs.topics=defaults["topics"]as?[String];prefs.journals=defaults["journals"]as?[String];prefs.journalScope="selected";prefs.interests="";prefs.discipline=""}
+  }
+  if !notice.isEmpty {Text(T(notice));Button(T("Reload settings")){Task{await load()}}}
+  Button(T(saving ? "Saving…":"Save preferences")){Task{await save()}}.disabled(!ready||saving||!valid||(prefs.journalScope != "all" && (prefs.journals ?? []).isEmpty))
+ }.navigationTitle(T("Tune your feed")).toolbar{Button(T("Done")){dismiss()}}.task{await load()}.onChange(of:store.account?.id){_ in dismiss()}}
+ func toggle(_ ids:[String],_ id:String)->[String]{ids.contains(id) ? ids.filter{$0 != id}:ids+[id]}
+ func chips(_ options:[PreferenceOption],selected:[String],choose:@escaping(String)->Void)->some View {
+  LazyVGrid(columns:[GridItem(.adaptive(minimum:140),spacing:8)],alignment:.leading,spacing:8){ForEach(options){option in
+   Button{choose(option.id)}label:{HStack(alignment:.top,spacing:6){Image(systemName:selected.contains(option.id) ? "checkmark.circle.fill":"circle");Text(option.name=="Proceedings of the National Academy of Sciences" ? "PNAS":T(option.name)).multilineTextAlignment(.leading);Spacer(minLength:0)}.font(.subheadline).padding(10).frame(maxWidth:.infinity,alignment:.leading).background(selected.contains(option.id) ? accent.opacity(0.13):Color.secondary.opacity(0.06)).cornerRadius(12)}.buttonStyle(.plain).accessibilityAddTraits(selected.contains(option.id) ? .isSelected:[])
+  }}
+ }
+ func load()async{let expected=store.account?.id;owner=expected;ready=false;notice="";do{
+  let r=try await store.json("/api/preferences"),o=try await store.json("/api/preferences/options");guard store.account?.id==expected,!Task.isCancelled else{return}
+  prefs=try store.decoded(ReadingPreferences.self,r["preferences"] ?? [:]);topics=try store.decoded([PreferenceOption].self,o["topics"] ?? []);journals=try store.decoded([PreferenceOption].self,o["journals"] ?? []);defaults=o["defaults"]as?[String:Any] ?? [:]
+  let parts=prefs.dailyTime.split(separator:":").compactMap{Int($0)};if parts.count==2{time=Calendar.current.date(bySettingHour:parts[0],minute:parts[1],second:0,of:Date()) ?? Date()};ready=true
+ }catch{if store.account?.id==expected{notice=error.localizedDescription}}}
+ func save()async{guard store.account?.id==owner,ready,!saving else{return};saving=true;defer{saving=false};do{
+  let c=Calendar.current.dateComponents([.hour,.minute],from:time);prefs.dailyTime=String(format:"%02d:%02d",c.hour ?? 9,c.minute ?? 0);prefs.timezone=TimeZone.current.identifier;let body=try JSONSerialization.jsonObject(with:JSONEncoder().encode(prefs));let r=try await store.json("/api/preferences",method:"PUT",body:body);guard store.account?.id==owner else{return};prefs=try store.decoded(ReadingPreferences.self,r["preferences"] ?? [:]);store.clearRecommendations();NotificationCenter.default.post(name:Notification.Name("OnlyIdeas.RefreshLibrary"),object:nil);let enabled=await ReadingReminder.configure(prefs);notice=prefs.dailyEnabled && !enabled ? "Preferences saved. Enable notifications in system settings for reminders.":"Preferences saved"
+ }catch{if store.account?.id==owner{notice=error.localizedDescription}}}
 }
 
 struct NativePDFRecovery:View {

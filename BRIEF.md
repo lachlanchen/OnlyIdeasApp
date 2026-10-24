@@ -1,5 +1,15 @@
 # OnlyIdeas · product contract
 
+## Editable research feed · 2026-10-24
+
+Readers can select topics and exact journals, add custom interests, choose all
+journals, and restore the editorial defaults. The homepage, daily papers and
+Agent use the same account-scoped preferences. Agent can show, add, remove,
+replace or reset these choices and edit existing reading-language/reminder/alert
+settings. Explicit searches must not silently alter preferences. A stale editor
+or model plan must not overwrite a newer change; private content cannot authorize
+an edit. Preserve existing accounts, subscriptions and build 39 review candidates.
+
 ## Default research shelf · 2026-10-24
 
 The default recommendation feed now starts with English-language research in

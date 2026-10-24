@@ -1,3 +1,4 @@
+import {readPreferences} from './reading-preferences.mjs';
 import {libraryCards,matchLibrary,matchesFilters} from './library-search.mjs';
 import { searchIndexes, searchOptions, taxonomy } from './research-indexes.mjs';
 import { hash,requireValue } from './domain.mjs';
@@ -39,7 +40,8 @@ export function createDiscovery(store,{search=searchIndexes,recommend=queryRecom
  async find(raw,user){
   if(!String(raw.q||'').trim()&&(!raw.source||raw.source==='all')&&!raw.discipline&&!raw.subdiscipline&&!raw.journal&&!raw.from&&!raw.to&&raw.feed!=='all'){
    const topics=interestTopics(store,user),page=Number(raw.page||1);requireValue(Number.isInteger(page)&&page>=1&&page<=100,'Refine the search to see more papers.');
-   if(topics.length){
+   const prefs=user?readPreferences(store,user):null;
+   if(topics.length&&!prefs?.recommendationsVersion){
     const selected=topics.slice((page-1)%Math.ceil(topics.length/2)*2,((page-1)%Math.ceil(topics.length/2)+1)*2),indexPage=Math.floor((page-1)/Math.ceil(topics.length/2))+1;
     const results=await Promise.allSettled(selected.map(q=>this.find({q,source:'all',sort:'latest',refresh:raw.refresh,page:indexPage,from:String(new Date().getUTCFullYear()-3)},user)));
     const groups=results.map((r,i)=>r.status==='fulfilled'?r.value.papers.filter(p=>researchScore(p,selected[i])>=4):[]),papers=[],seen=new Set();
@@ -49,8 +51,9 @@ export function createDiscovery(store,{search=searchIndexes,recommend=queryRecom
    }
    // An editorial default is separate from a reader's saved interests and from
    // unrestricted explicit search. Never fall back to the old global firehose.
-   const key=hash(JSON.stringify([recommendationPolicy,page]));
-   const data=await pageData(key,raw.refresh,3600_000,()=>recommend({page}));
+   const selection=prefs?.recommendationsVersion?{topics:prefs.topics,journals:prefs.journals,journalScope:prefs.journalScope,interests:prefs.interests}:null;
+   const key=hash(JSON.stringify([recommendationPolicy,selection,page]));
+   const data=await pageData(key,raw.refresh,3600_000,()=>recommend({page,...(selection?{selection}:{})}));
    return {...data,papers:data.papers.map(p=>identify(p,user))};
   }
   const o=searchOptions(raw),key=hash(JSON.stringify(['discovery-v6',o]));

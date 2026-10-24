@@ -1,3 +1,4 @@
+import {recommendationOptions} from './recommendation-options.mjs';
 import {linkFailures,linkFailure} from './account-link-errors.mjs';
 import {sharePage} from './share-page.mjs';
 import {confirmPublication} from './confirm-publication.mjs';
@@ -265,6 +266,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         throw new AppError('Not found.',404);
       }
       if (['/api/saved','/api/liked'].includes(path) && method === 'GET') { requireUser();return response(res,{papers:social.saved(user,path==='/api/liked'?'liked':'saved')}); }
+      if(path==='/api/preferences/options'&&method==='GET')return response(res,recommendationOptions);
       if(path==='/api/preferences'){requireUser();if(method==='GET')return response(res,{preferences:space.preferences(user)});if(method==='PUT')return response(res,{preferences:space.savePreferences(user,await json(req))});}
       if(path==='/api/activity'&&method==='GET'){requireUser();return response(res,space.history(user));}
       if(path==='/api/inbox'){requireUser();if(method==='GET')return response(res,space.inbox(user));if(method==='PUT')return response(res,space.markRead(user,await json(req)));}

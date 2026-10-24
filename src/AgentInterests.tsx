@@ -1,3 +1,4 @@
+import {ResearchPreferences} from './ResearchPreferences'
 import {clearRecommendations} from './recommendation-cache'
 import {useEffect,useRef,useState} from 'react'
 import {post} from './api'
@@ -6,6 +7,7 @@ import {t} from './i18n'
 export type Recommendations={state:'pending'|'chosen'|'skipped';interests:string}
 export function AgentInterests({value,chatId,updated,saved}:{value:Recommendations;chatId:string;updated:(v:Recommendations)=>void;saved:(id:string)=>void}) {
  const [open,setOpen]=useState(value.state==='pending'),[text,setText]=useState(value.interests),[busy,setBusy]=useState(false),[error,setError]=useState('')
+ const [editor,setEditor]=useState(false)
  const live=useRef(true),attempt=useRef({text:'',id:''})
  useEffect(()=>{live.current=true;return()=>{live.current=false}},[])
  async function submit(skip=false){
@@ -15,6 +17,8 @@ export function AgentInterests({value,chatId,updated,saved}:{value:Recommendatio
   catch(e){if(live.current)setError((e as Error).message)}finally{if(live.current)setBusy(false)}
  }
  return <section className="agent-interests">
+  {editor&&<ResearchPreferences close={()=>setEditor(false)}/>}
+  <button type="button" className="text-button" onClick={()=>setEditor(true)}>{t('Topics & journals')}</button>
   <button type="button" className="text-button" aria-expanded={open} onClick={()=>{setText(value.interests);setOpen(!open)}}>{t(open?'What would you like to follow?':'Reading interests')}</button>
   {open&&<form onSubmit={e=>{e.preventDefault();void submit()}}>
    <p>{t('Tell me a few topics you enjoy. I can use them for your daily papers.')}</p>
