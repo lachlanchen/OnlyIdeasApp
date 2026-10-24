@@ -1,0 +1,32 @@
+{
+  "version": "1.0.9",
+  "build": 38,
+  "source": "05a03f96007df5443ba2e089c0e214e11dd75e1b",
+  "screenshots": [
+    {
+      "file": "android-chat.png",
+      "sha256": "0a5ab50972d112731b9511f80dc89bfac475097923e0a286d9e1c66690955bd0",
+      "source": "Android38 native UI; isolated synthetic account/conversation",
+      "reviewed": true,
+      "storeState": "Google uploaded/processed; submitted for review 2026-10-24"
+    },
+    {
+      "file": "android-interests.png",
+      "sha256": "3de573b31921beecf01caf5d10687eb1194c2c096b73192c4b657cc86272dd8e",
+      "source": "Android38 native UI; isolated synthetic account/conversation",
+      "reviewed": true,
+      "storeState": "Google uploaded/processed; submitted for review 2026-10-24"
+    }
+  ],
+  "googlePhoneOrder": [
+    "1.0.7-29/android/02-library.png",
+    "1.0.7-29/android/05-equations.png",
+    "1.0.7-29/android/01-discovery.png",
+    "1.0.7-29/android/04-reader.png",
+    "1.0.7-29/android/06-interlaced.png",
+    "1.0.9-36/android-reader-sharing.png",
+    "1.0.9-38/android-interests.png",
+    "1.0.9-38/android-chat.png"
+  ],
+  "publicListingVerified": false
+}

@@ -8,13 +8,19 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
-## Update in review · 2026-10-17
+## Current release · 2026-10-24
 
-OnlyIdeas 1.0.8 (34) is submitted for iOS/Watch, Mac and Google Play review.
-It adds clearer chat, native text selection and Copy, and a more reliable
-app-credit balance panel. Version 1.0.7 (32) remains public during review.
+OnlyIdeas 1.0.8 (34) is public on iOS/Watch, Mac and Google Play.
+The next Android update, **1.0.9 (38)**, is available to internal testers and
+submitted for Google Play review. Apple 1.0.9 is being qualified.
 
-[Submission and verification](docs/latest-review-20261017.md)
+The update adds saved-paper mentions with **@**, quoted messages, editable
+research interests and public reading links. Copy reading or research drafts
+for EchoMind and AiMemo, and keep an unsent question when the screen changes
+size. The Android Agent toolbar now fits narrow screens more clearly.
+
+[Current verification](store/review/cumulative-38-20261024.json) ·
+[Previous release](docs/latest-review-20261017.md)
 
 ## Public distribution · 2026-10-14
 

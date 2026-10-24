@@ -1,0 +1,43 @@
+{
+  "version": "1.0.9",
+  "build": 38,
+  "source": "05a03f96007df5443ba2e089c0e214e11dd75e1b",
+  "date": "2026-10-24",
+  "tests": {
+    "automated": 318,
+    "browserSharing": 16,
+    "browserInterests": 9,
+    "androidNative": 5,
+    "deliveryHelpers": 73,
+    "androidLint": true,
+    "nativeReaderResourcesVerified": 31,
+    "livePublicPapers": 3,
+    "exactTitleLibraryReuse": true
+  },
+  "android": {
+    "internal": "available to existing internal testers",
+    "production": "submitted; Google quick checks running",
+    "rolloutPercent": 100,
+    "newlyUnsupportedDevices": 0,
+    "aabSha256": "e93294a4e8cdf71dc7bc838055d5581ade2883b4a12d07b38aaf28bb25c1db67",
+    "apkSha256": "a39091cf2b57e74f556cc392fce59a10ba2aa087e4d33afd2de5487a11ed9246",
+    "listingDescriptionUpdated": true,
+    "phoneScreenshots": 8
+  },
+  "apple": {
+    "ios": "1.0.9 metadata draft; build38 not uploaded",
+    "macos": "1.0.9 metadata draft; build38 not uploaded",
+    "blocker": "Shared KVM predecessor guard retained pending exact-owner recovery",
+    "nativeBuild38Tested": false
+  },
+  "activation": {
+    "subscriptions": false,
+    "sharedIdentity": false,
+    "sharedRewards": false,
+    "newDataImports": false
+  },
+  "limitations": [
+    "No new physical Apple device, Monterey runtime or real billing lifecycle test in this round.",
+    "Store submission is not approval or public release."
+  ]
+}
