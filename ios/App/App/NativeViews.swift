@@ -2012,8 +2012,8 @@ private struct NativeComposerInput: UIViewRepresentable {
   @Binding var text: String
   @Binding var height: CGFloat
   func makeCoordinator() -> Coordinator { Coordinator(self) }
-  func makeUIView(context: Context) -> UITextView {
-    let view = UITextView()
+  func makeUIView(context: Context) -> ComposerTextView {
+    let view = ComposerTextView()
     view.backgroundColor = .clear
     view.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
     view.font = .preferredFont(forTextStyle: .body)
@@ -2022,14 +2022,39 @@ private struct NativeComposerInput: UIViewRepresentable {
     view.textContainer.lineFragmentPadding = 4
     view.isScrollEnabled = false
     view.delegate = context.coordinator
+    view.measure = { [weak coordinator = context.coordinator] view in coordinator?.resize(view) }
     view.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
     view.accessibilityLabel = T("Message the paper agent")
     return view
   }
-  func updateUIView(_ view: UITextView, context: Context) {
+  func updateUIView(_ view: ComposerTextView, context: Context) {
     context.coordinator.parent = self
     if view.text != text { view.text = text }
     DispatchQueue.main.async { context.coordinator.resize(view) }
+  }
+  final class ComposerTextView: UITextView {
+    var measure: ((UITextView) -> Void)?
+    private var measuredWidth: CGFloat = 0
+    override func layoutSubviews() {
+      super.layoutSubviews()
+      guard bounds.width > 0, abs(bounds.width - measuredWidth) > 0.5 else { return }
+      measuredWidth = bounds.width
+      // A fold changes the UIKit view's width without changing its SwiftUI
+      // binding. Measure after layout without replacing the editor or selection.
+      DispatchQueue.main.async { [weak self] in
+        guard let self else { return }
+        self.measure?(self)
+      }
+    }
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+      super.traitCollectionDidChange(previousTraitCollection)
+      if previousTraitCollection?.preferredContentSizeCategory != traitCollection.preferredContentSizeCategory {
+        DispatchQueue.main.async { [weak self] in
+          guard let self else { return }
+          self.measure?(self)
+        }
+      }
+    }
   }
   final class Coordinator: NSObject, UITextViewDelegate {
     var parent: NativeComposerInput

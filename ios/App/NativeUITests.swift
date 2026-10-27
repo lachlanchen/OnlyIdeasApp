@@ -104,10 +104,11 @@ final class NativeUITests: XCTestCase {
     XCTAssertTrue(interests.waitForExistence(timeout: 15))
     let editor = app.textViews["Message the paper agent"]
     XCTAssertTrue(editor.waitForExistence(timeout: 10))
-    let draft = "Keep this research question while the reading window changes."
+    let draft = "Keep this research question while the reading window changes. Compare the original paper with its translation and retain this unfinished thought when the display becomes narrow."
     editor.tap(); editor.typeText(draft)
     let done = app.buttons["Done"].firstMatch
     if done.exists { done.tap() }
+    let portraitHeight = editor.frame.height
     for orientation in [UIDeviceOrientation.landscapeLeft, .portrait, .landscapeRight, .portrait] {
       XCUIDevice.shared.orientation = orientation
       XCTAssertTrue(editor.waitForExistence(timeout: 10))
@@ -117,6 +118,15 @@ final class NativeUITests: XCTestCase {
       XCTAssertLessThanOrEqual(editor.frame.maxX, app.frame.maxX)
       XCTAssertTrue(app.buttons["Attach files"].isHittable)
       XCTAssertTrue(app.buttons["Send message"].isHittable)
+      XCTAssertLessThanOrEqual(editor.frame.height, 131)
+      if orientation == .portrait {
+        XCTAssertEqual(editor.frame.height, portraitHeight, accuracy: 2)
+      } else {
+        // The same UITextView must remeasure a wrapped draft on width-only
+        // changes; typing a character must not be needed to correct its height.
+        let remeasured = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in editor.frame.height < portraitHeight }, object: nil)
+        XCTAssertEqual(XCTWaiter.wait(for: [remeasured], timeout: 5), .completed)
+      }
     }
     app.tabBars.buttons["Library"].tap(); agent.tap()
     XCTAssertEqual(editor.value as? String, draft)

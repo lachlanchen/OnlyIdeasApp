@@ -1,5 +1,17 @@
 # OnlyIdeas · product contract
 
+## iPhone Duo adaptation · 2026-10-28
+
+The owner renews support for the new foldable iPhone in OnlyIdeas and Bunko.
+Preserve paper position, conversations and unsent drafts through display changes.
+Web conversation anchoring, bounded composer sizing and independent safe-area
+edges are implemented and browser tested. Native composer remeasurement and its
+long-draft XCTest are prepared but await native qualification. Full Duo work
+requires Xcode 27.1 and official fold/reserved-region tests; the compatible Mini
+has 27.0/26.6 and installation approval is pending. Preserve current releases and
+review candidates. See `docs/iphone-duo-20261028.md`; no new test build is delivered
+by this source checkpoint.
+
 ## Editable research feed · 2026-10-24
 
 Readers can select topics and exact journals, add custom interests, choose all
