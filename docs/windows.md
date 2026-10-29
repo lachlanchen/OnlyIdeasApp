@@ -54,3 +54,12 @@ change existing account mappings, subscriptions or rewards.
 
 Implementation references: [WebView2 security](https://learn.microsoft.com/en-us/microsoft-edge/webview2/concepts/security)
 and [runtime distribution](https://learn.microsoft.com/en-us/microsoft-edge/webview2/concepts/distribution).
+
+## Single-file download
+
+The [Windows download](https://lazying.art/downloads/windows/#onlyideas) now includes
+a single EXE with its .NET dependencies. No extraction or installer is needed.
+Run `bash tools/windows/build.sh` with .NET SDK10.0.401 to reproduce it.
+The exact EXE passed on Windows11: a real public research paper, four reader tools,
+contents, search and figure enlargement. The isolated test profile and process
+were removed afterward. System-browser provider sign-in remains unqualified.
