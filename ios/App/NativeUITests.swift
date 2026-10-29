@@ -26,6 +26,45 @@ final class NativeUITests: XCTestCase {
     wait(for:[done],timeout:7)
     if let issue {throw issue};return output
   }
+  func testReaderToolsAndPrivateNotebook() {
+    continueAfterFailure = false
+    let app = interestFixtureApp(); app.launch()
+    defer {app.terminate()}
+    let library = app.tabBars.buttons["Library"]
+    XCTAssertTrue(library.waitForExistence(timeout:30)); library.tap()
+    let reading = app.segmentedControls.buttons["Reading library"]
+    if reading.exists {reading.tap()}
+    let paper = app.buttons.matching(NSPredicate(format:"label CONTAINS %@", "Cellular imaging")).firstMatch
+    XCTAssertTrue(paper.waitForExistence(timeout:20)); paper.tap()
+    let web = app.webViews.firstMatch
+    let contents = web.buttons["Contents"]
+    XCTAssertTrue(contents.waitForExistence(timeout:20)); contents.tap()
+    XCTAssertTrue(web.buttons["Methods"].waitForExistence(timeout:5))
+    web.buttons["Close"].tap()
+    web.buttons["Search"].tap()
+    let search = web.searchFields["Search this paper"]
+    XCTAssertTrue(search.waitForExistence(timeout:5));search.tap();search.typeText("imaging")
+    XCTAssertTrue(web.staticTexts.matching(NSPredicate(format:"label CONTAINS %@"," / ")).firstMatch.waitForExistence(timeout:5))
+    web.buttons["Done"].tap()
+    web.buttons["Notes"].tap()
+    let notes = web.textViews["Private notes"]
+    XCTAssertTrue(notes.waitForExistence(timeout:5));notes.tap();notes.typeText("Private reader40 notebook")
+    for _ in 0..<4 {if web.buttons["Save"].isHittable {break};web.swipeUp()}
+    web.buttons["Save"].tap()
+    XCTAssertTrue(web.staticTexts["Saved privately."].waitForExistence(timeout:10))
+    web.buttons["Close"].tap();web.buttons["Notes"].tap()
+    XCTAssertTrue(notes.waitForExistence(timeout:5))
+    XCTAssertEqual(notes.value as? String,"Private reader40 notebook")
+    web.buttons["Close"].tap()
+    contents.tap();web.buttons["Methods"].tap()
+    let figure=web.buttons["Zoom figure: Cell diagram"]
+    for _ in 0..<4 {if figure.isHittable {break};web.swipeUp()}
+    XCTAssertTrue(figure.isHittable);figure.tap()
+    XCTAssertTrue(web.buttons["Reset"].waitForExistence(timeout:5))
+    web.buttons["+"].tap();shot("Reader40-figure-zoom")
+    web.buttons["Close"].tap()
+    XCTAssertFalse(app.alerts.firstMatch.exists)
+  }
   func testRecommendationCacheReopenRefreshAndPagination() throws {
     continueAfterFailure=false
     _ = try feedControl(["reset":true,"anonymous":true])

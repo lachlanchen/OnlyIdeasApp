@@ -16,6 +16,8 @@ options = {"topics":[{"id":i,"name":n} for i,n in [("imaging","Imaging"),("optic
 state = {"state": "pending", "interests": ""}
 chat = {"id": "interests37-conversation", "title": "Reading interests", "updated": 0}
 messages = []
+notebook = {"text":"", "version":""}
+reader_paper = {"id":"reader40-fixture", "title":"Cellular imaging", "authors":"Reading fixture", "language":"en", "visibility":"public", "revision":"reader40-r1", "mmd":"# Cellular imaging\n\n## Abstract\n\nOptical imaging reveals cellular structure.\n\n## Methods\n\nThe relation $E=mc^2$ remains readable.\n\n![Cell diagram](figures/diagram.svg)\n\n## Results\n\nImaging results can be annotated privately.", "assets":[{"path":"figures/diagram.svg"}]}
 feed = {"enabled": False, "revision": 1, "offline": False, "anonymous": False, "requests": []}
 
 def paper(number):
@@ -49,7 +51,16 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/chats/" + chat["id"]:
             return self.reply({"chat": chat, "messages": messages, "pending": [], "agent": {"online": False}})
         if path == "/api/papers":
-            return self.reply({"papers": []})
+            return self.reply({"papers": [reader_paper]})
+        if path == "/api/papers/reader40-fixture":
+            return self.reply({"paper": reader_paper})
+        if path == "/api/papers/reader40-fixture/annotations":
+            return self.reply({"annotations": []})
+        if path == "/api/papers/reader40-fixture/notes":
+            return self.reply(notebook)
+        if path == "/content/reader40-fixture/figures/diagram.svg":
+            data=b'<svg xmlns="http://www.w3.org/2000/svg" width="400" height="240"><rect width="400" height="240" fill="#e4f4ee"/><circle cx="200" cy="120" r="70" fill="#479688"/><text x="200" y="125" text-anchor="middle" fill="white">Cell</text></svg>'
+            self.send_response(200);self.send_header("Content-Type","image/svg+xml");self.send_header("Content-Length",str(len(data)));self.end_headers();self.wfile.write(data);return
         if path == "/api/jobs":
             return self.reply({"jobs": []})
         if path == "/api/discovery/taxonomy":
@@ -70,12 +81,17 @@ class Handler(BaseHTTPRequestHandler):
         return self.reply({})
 
     def do_PUT(self):
-        if self.path != "/api/preferences" or self.headers.get("Authorization") != "Bearer synthetic-interests37-token":
+        if self.path not in ["/api/preferences", "/api/papers/reader40-fixture/notes"] or self.headers.get("Authorization") != "Bearer synthetic-interests37-token":
             return self.reply({"error":"Fixture only"},403)
         size = int(self.headers.get("Content-Length",0))
         if not 0 <= size <= 4096:
             return self.reply({"error":"Too large"},413)
         value=json.loads(self.rfile.read(size) or b"{}")
+        if self.path.endswith("/notes"):
+            if value.get("version") != notebook["version"]:
+                return self.reply({"error":"Notes changed"},409)
+            notebook.update(text=value.get("text",""),version="notes-"+str(time.time_ns()))
+            return self.reply(notebook)
         if value.get("revision") != preferences["revision"]:
             return self.reply({"error":"Preferences changed elsewhere"},409)
         preferences.update(value)
