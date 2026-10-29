@@ -22,7 +22,7 @@ export const recommendationTopics=[
  {id:'cell-biology',name:'Cell biology',terms:['cellular','cell biology','proteomics','genomics']},
 ];
 export const defaultTopicIDs=['imaging','optics','biomedicine'];
-export const defaultJournalIDs=recommendationJournals.map(([id])=>id);
+export const defaultJournalIDs=recommendationJournals.slice(0,3).map(([id])=>id);
 export const recommendationOptions={topics:recommendationTopics.map(({id,name})=>({id,name})),journals:recommendationJournals.map(([id,name])=>({id,name})),defaults:{topics:defaultTopicIDs,journals:defaultJournalIDs,journalScope:'selected',interests:''}};
 export function recommendationSelection(p={}) {
  return {topics:Array.isArray(p.topics)?p.topics:p.interests?.trim()?[]:defaultTopicIDs,journals:Array.isArray(p.journals)?p.journals:defaultJournalIDs,journalScope:p.journalScope==='all'?'all':'selected',interests:p.interests||''};

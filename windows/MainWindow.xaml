@@ -1,0 +1,19 @@
+<Window x:Class="OnlyIdeas.Windows.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:wv="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf" Title="OnlyIdeas" Width="1120" Height="820" MinWidth="400" MinHeight="480" Background="#FAFAFC">
+ <DockPanel>
+  <Border DockPanel.Dock="Top" Background="#F6F5FB" BorderBrush="#E7E5EE" BorderThickness="0,0,0,1" Padding="10,6">
+   <DockPanel LastChildFill="True">
+    <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+     <Button Content="‹" ToolTip="Back (Alt+Left)" AutomationProperties.Name="Back" Click="Back_Click" Padding="12,4" Margin="0,0,6,0"/>
+     <Button Content="Home" Click="Home_Click" Padding="10,4" Margin="0,0,6,0"/>
+     <Button Content="Refresh" Click="Refresh_Click" Padding="10,4"/>
+    </StackPanel>
+    <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
+     <Button x:Name="SignInButton" Content="Sign in" Click="SignIn_Click" Padding="12,4" Margin="6,0,0,0"/>
+     <Button x:Name="CancelButton" Content="Cancel" Click="Cancel_Click" Padding="10,4" Margin="6,0,0,0" Visibility="Collapsed"/>
+    </StackPanel>
+    <TextBlock x:Name="Status" Text="" VerticalAlignment="Center" Margin="12,0" TextTrimming="CharacterEllipsis" AutomationProperties.LiveSetting="Polite"/>
+   </DockPanel>
+  </Border>
+  <wv:WebView2 x:Name="Reader"/>
+ </DockPanel>
+</Window>

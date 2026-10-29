@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "version": "1.0.10",
+  "build": 40,
+  "verifiedAtUTC": "2026-10-29T16:07:27.753Z",
+  "features": [
+    "private highlights and attached notes",
+    "private per-paper notebook",
+    "table of contents",
+    "in-paper text search",
+    "figure enlargement and zoom",
+    "Nature, Science and Cell default journals"
+  ],
+  "existingPreferencesPreserved": true,
+  "interfaceLanguages": 11,
+  "tests": {
+    "regressionPassed": 358,
+    "regressionFailed": 0,
+    "browserChecksPassed": 15,
+    "androidInstrumentedCasesPassed": 1,
+    "windowsPolicyChecksPassed": 16,
+    "windowsRuntimePassed": true,
+    "windowsRuntimeChecks": [
+      "WPF and WebView2 initialized; verified HTTPS navigation completed",
+      "Actual deployed reader and all four tools loaded",
+      "Contents and in-paper search work in WebView2",
+      "Figure enlargement opened",
+      "Isolated anonymous profile; no account or billing action"
+    ],
+    "rendererTypecheckAndProductionBuild": "passed",
+    "androidReleaseLintAndBuild": "passed",
+    "accountBindingFocusedTestsPassed": 3
+  },
+  "web": {
+    "url": "https://agent.onlyideas.art",
+    "readerToolsLive": true,
+    "health": 200,
+    "nativeAccountBindingCors": 204,
+    "deploymentOverlaySHA256": "50877799a6854503ac44400623bc1c7acfa62ae9afa1371957d9e156d2dbc3c1",
+    "deploymentScope": "Reader tools and journal defaults over the existing deployed backend baseline",
+    "existingStateConfigBillingAndCreditsPreserved": true
+  },
+  "android": {
+    "package": "art.onlyideas.app",
+    "build": 40,
+    "version": "1.0.10",
+    "apkSHA256": "8207f1a0f2b53f452019a55f0e7059776960ae5685838597d6c70b2e0c254f66",
+    "aabSHA256": "33cc41eb9bedcf0e07a045974fdedfce6f6813103810af1041e8d6aad5f5a8f5",
+    "internalStatus": "completed",
+    "existingTestersUnchanged": true,
+    "productionBuild": 39,
+    "productionUnchanged": true
+  },
+  "windows": {
+    "sha256": "d7432f2a3d0d9b5ca4a166560b2b20411115312436d970e42af2ee030c9621c2",
+    "bytes": 70078901,
+    "files": 409,
+    "runtime": "win-x64",
+    "selfContained": true,
+    "signed": false,
+    "windowsRuntimeTested": true,
+    "providerSignInTested": false,
+    "artifact": "OnlyIdeas-1.0.10-windows-x64-preview.zip",
+    "testedOS": "Windows 11 Enterprise 26200",
+    "webView2": "156.0.4314.50"
+  },
+  "apple": {
+    "sourcePrepared": true,
+    "build40Compiled": false,
+    "build40Uploaded": false,
+    "blocker": "New shared-Mac qualification and build slot required; historical admissions are closed.",
+    "currentReviewsUnchanged": true
+  },
+  "screenshots": {
+    "directory": "store/screenshots/1.0.10-40",
+    "capturedAndReviewedLocally": true,
+    "providerAssetsChanged": false
+  },
+  "cleanup": {
+    "androidEmulatorAndFixtureStopped": true,
+    "windowsTaskAndOwnedProcessesAbsent": true,
+    "windowsQaProfilesRemoved": true,
+    "windowsForegroundInputUsed": false
+  }
+}

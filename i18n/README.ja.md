@@ -8,6 +8,12 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
+## 読書ツール · 2026年10月29日
+
+Webリーダーにハイライト、自分用のメモ、目次、論文内検索、図の拡大を追加しました。初期設定の推薦誌は Nature、Science、Cell です。保存済みの雑誌設定は維持されます。Windows x64 デスクトッププレビューは Windows 11 で読書機能のテストを通過しました。実アカウントでのログイン確認は未完了です。
+
+[読書ツールと対応状況](../docs/reader-tools-20261029.md) · [Windows](../docs/windows.md)
+
 <!-- release39 -->
 ## 最新の更新 · 2026年10月24日
 

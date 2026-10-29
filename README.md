@@ -18,7 +18,7 @@ alongside your reading notes and conversations.
 ## Find and read
 
 Start with English-language imaging, optics and biomedical research from Nature,
-Science, Cell, PNAS, Optica and related journals. Save your own interests to change
+Science and Cell. Choose other journals, including PNAS and Optica, or save your interests to change
 the recommendations, or search any topic directly. In the updated editor, choose
 topics and journals together, or ask Agent to add, remove or reset your choices.
 See [research feed controls](docs/research-controls-20261024.md) for examples.
@@ -31,6 +31,9 @@ See [research feed controls](docs/research-controls-20261024.md) for examples.
   translation or interlaced languages in one reader.
 - Reuse existing public transcripts and compatible cached translations. A failed
   automatic download keeps its source link and an option to attach your own PDF.
+- Use Contents to jump between sections and Search to find text within a paper.
+- Highlight passages, attach private notes and keep a private paper notebook.
+  Click a figure to enlarge it, then zoom or scroll to inspect details.
 - Save papers, adjust text and appearance, and keep processed papers offline.
   The paired iPhone can send public excerpts to Apple Watch in original,
   translated or interlaced form.
@@ -56,7 +59,20 @@ Browse public papers without signing in. Importing, assistant requests and
 comments require an account. Processing has usage limits, shown in the app.
 OnlyIdeas app credits are non-transferable and have no cash value.
 
-## Current release · 24 October 2026
+## Reader update · 29 October 2026
+
+The updated web reader includes highlights, private notes, contents, paper search
+and figure zoom. The interface is translated into 11 languages. Android build 40
+contains the same reader tools and is available through the existing Google Play
+internal test track. Apple integration is prepared in source; build
+and TestFlight checks remain pending. See the [reader update](docs/reader-tools-20261029.md).
+
+A [Windows desktop preview](docs/windows.md) is available as a portable x64
+package. It uses a native window and WebView2 to open the reading room. Reading,
+contents, search and figure enlargement passed on Windows 11. It is unsigned;
+real provider sign-in testing remains pending.
+
+## Release checkpoint · 24 October 2026
 
 **1.0.8 (34)** is public on iOS/Watch and Mac; **1.0.9 (38)** is public on Google Play.
 **Android 1.0.9 (39)** is available to internal testers and in Google Play review.

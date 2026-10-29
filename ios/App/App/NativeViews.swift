@@ -975,7 +975,10 @@ struct NativePaper: View {
         }
         NativeDocument(
           document: document, size: store.readingSize * readingScale, dark: scheme == .dark,
-          quote: $quote, reading:reading,mode:readingMode,onParagraph:{q,id in quote=q;paragraph=id;discussion=true},onSelection:{_ in paragraph=""}, onWatchEditions:{editions,language in watchEditions=editions;watchLanguage=language})
+          quote: $quote, reading:reading,mode:readingMode,onParagraph:{q,id in quote=q;paragraph=id;discussion=true},onSelection:{_ in paragraph=""}, onWatchEditions:{editions,language in watchEditions=editions;watchLanguage=language}, readerAccount:store.account?.id ?? "", onReaderRequest:{[accountID=store.account?.id] resource,method,body in
+            guard let accountID,store.account?.id == accountID else {throw store.failure("Sign in to save private notes and highlights.")}
+            return try await store.json("/api/papers/\(document.paper.id)/\(resource)",method:method,body:body)
+          })
       } else {
         ProgressView(T("Opening your paper…")).font(.title3).frame(
           maxWidth: .infinity, maxHeight: .infinity)
@@ -1143,6 +1146,8 @@ struct NativeDocument: UIViewRepresentable {
   var onParagraph:((String,String)->Void)? = nil
   var onSelection:((String)->Void)? = nil
   var onWatchEditions:(([String:String],String)->Void)? = nil
+  var readerAccount:String = ""
+  var onReaderRequest:((String,String,Any?) async throws -> [String:Any])? = nil
   func makeCoordinator() -> Coordinator { Coordinator(self) }
   func makeUIView(context: Context) -> WKWebView {
     let c = WKWebViewConfiguration()
@@ -1180,10 +1185,11 @@ struct NativeDocument: UIViewRepresentable {
     }
     func render(_ webView: WKWebView) {
       guard ready else { return }
-      let identity = parent.document.paper.id + (parent.document.paper.revision ?? "") + (parent.reading.map{"\($0.language):\($0.translated)"} ?? "")
+      let identity = parent.readerAccount + parent.document.paper.id + (parent.document.paper.revision ?? "") + (parent.reading.map{"\($0.language):\($0.translated)"} ?? "")
       if revision != identity {
         var data: [String: Any] = [
           "mmd": parent.document.paper.mmd ?? "", "figures": parent.document.figures,
+          "uiLanguage":UILanguage.current, "revision":parent.document.paper.revision ?? "", "readerTools":parent.onReaderRequest != nil && !parent.readerAccount.isEmpty,
           "attribution":[parent.document.paper.license,parent.document.paper.provenance?.licenseUrl,parent.document.paper.provenance?.changes].compactMap{$0}.filter{$0 != "private"}.joined(separator:" · "),
           "fontSize": parent.size, "dark": parent.dark, "language":parent.document.paper.language ?? "en", "comments":parent.onParagraph != nil, "commentLabel":T("Discuss paragraph"),
         ]
@@ -1207,6 +1213,22 @@ struct NativeDocument: UIViewRepresentable {
     func userContentController(
       _ userContentController: WKUserContentController, didReceive message: WKScriptMessage
     ) {
+      if message.frameInfo.isMainFrame, let data=message.body as? [String:Any],data["action"] as? String == "readerRequest",
+         let id=data["id"] as? String,UUID(uuidString:id) != nil,
+         let resource=data["resource"] as? String,["annotations","notes"].contains(resource),
+         let method=data["method"] as? String,["GET","PUT"].contains(method),
+         let handler=parent.onReaderRequest,let view=message.webView {
+        let identity=revision,account=parent.readerAccount
+        Task { @MainActor in
+          guard identity==revision,account==parent.readerAccount else {return}
+          var result:[String:Any]=[:],failure:String?=nil
+          do {result=try await handler(resource,method,data["body"])} catch {failure=error.localizedDescription}
+          guard identity==revision,account==parent.readerAccount else {return}
+          if let bytes=try? JSONSerialization.data(withJSONObject:[id,result,failure as Any? ?? NSNull()]),let json=String(data:bytes,encoding:.utf8) {
+            view.evaluateJavaScript("window.OnlyIdeasReaderReply && window.OnlyIdeasReaderReply(...\(json))")
+          }
+        }
+      }
       if let data = message.body as? [String: Any], let editions = data["watchEditions"] as? [String:String] {
         parent.onWatchEditions?(editions,data["watchLanguage"] as? String ?? "")
       }

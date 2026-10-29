@@ -1,0 +1,51 @@
+{
+  "version": "1.0.10 (40)",
+  "captured": "2026-10-29",
+  "reviewed": true,
+  "images": [
+    {
+      "file": "android-reader.png",
+      "sha256": "2d236657a3076cf7a9025322f9b2088ce1a25f073e2874fcf1f2afd8fd6a955e",
+      "size": [
+        1080,
+        1920
+      ],
+      "channel": "Android emulator",
+      "syntheticContent": true,
+      "uploaded": false
+    },
+    {
+      "file": "web-figure-phone.png",
+      "sha256": "b6531a5e0de7679f31b0a8f0f1c492facb4acbe2cc119697fa440ce845b8796a",
+      "size": [
+        390,
+        844
+      ],
+      "channel": "Chromium web",
+      "syntheticContent": true,
+      "uploaded": false
+    },
+    {
+      "file": "web-reader-desktop.png",
+      "sha256": "660e54d19cfd2264ce8589902eb35ef8988e365617b1ac0a22e63b64791fbccd",
+      "size": [
+        1280,
+        900
+      ],
+      "channel": "Chromium web",
+      "syntheticContent": true,
+      "uploaded": false
+    },
+    {
+      "file": "web-reader-phone.png",
+      "sha256": "41f66d1e115ddd3889fa13e2054450d5c10b389d0031240387eb22a6a22c1959",
+      "size": [
+        390,
+        900
+      ],
+      "channel": "Chromium web",
+      "syntheticContent": true,
+      "uploaded": false
+    }
+  ]
+}

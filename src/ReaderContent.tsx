@@ -1,3 +1,5 @@
+import {mountReaderTools} from './reader-tools'
+import {api} from './api'
 import { useEffect, useRef, useState } from 'react'
 import { paragraphActions } from './paragraphs'
 import { t,languageNames } from './i18n'
@@ -16,13 +18,14 @@ function loadRenderer() {
     document.head.append(script)
   })
 }
-export function ReaderContent({ paper, reading, mode='original', assetBase, onSelection, onSection, onParagraph }: { paper: Paper; assetBase?:string; reading?:ReadingView; mode?:ReadingMode; onSelection?: (quote: string, section: string) => void; onSection?: (section: string) => void; onParagraph?:(quote:string,id:string)=>void }) {
+export function ReaderContent({ paper, reading, mode='original', assetBase, accountID, onSelection, onSection, onParagraph }: { paper: Paper; accountID?:string; assetBase?:string; reading?:ReadingView; mode?:ReadingMode; onSelection?: (quote: string, section: string) => void; onSection?: (section: string) => void; onParagraph?:(quote:string,id:string)=>void }) {
   const ref = useRef<HTMLDivElement>(null)
   const currentMode = useRef(mode)
   currentMode.current = mode
   const [error, setError] = useState('')
   useEffect(() => {
     let active = true
+    let stopTools:(()=>void)|undefined
     const objectURLs: string[] = []
     setError('')
     loadRenderer().then(async () => {
@@ -75,9 +78,10 @@ export function ReaderContent({ paper, reading, mode='original', assetBase, onSe
       if (firstHeading?.textContent?.trim().toLowerCase() === paper.title.trim().toLowerCase()) firstHeading.remove()
       ref.current.replaceChildren(wrapper)
       ref.current.dataset.readingMode=currentMode.current
+      stopTools=mountReaderTools(ref.current,{revision:paper.revision,language:paper.language,translate:t,call:accountID&&!assetBase?async(resource,method,body)=>{if(!active)throw Error("Account changed.");return api(`/papers/${paper.id}/${resource}`,{method,headers:{"X-OnlyIdeas-Account":accountID},...(body?{body:JSON.stringify(body)}:{})})}:undefined})
     }).catch(() => { if (active) setError(t("The equation renderer could not load. Reload to try again; the original text is below.")) })
-    return () => { active = false; objectURLs.forEach(url => URL.revokeObjectURL(url)) }
-  }, [paper,reading,assetBase])
+    return () => { active = false; stopTools?.(); objectURLs.forEach(url => URL.revokeObjectURL(url)) }
+  }, [paper,reading,assetBase,accountID])
   useEffect(()=>{if(ref.current)readingMode(ref.current,mode)},[mode])
   function select() {
     const selection = window.getSelection(), text = selection?.toString().trim() || ''

@@ -8,6 +8,12 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
+## Công cụ đọc · 29 tháng 10 năm 2026
+
+Trình đọc web bổ sung tô sáng, ghi chú riêng tư, mục lục, tìm kiếm trong bài và phóng to hình. Đề xuất mặc định bắt đầu với Nature, Science và Cell; các lựa chọn tạp chí đã lưu được giữ nguyên. Bản xem trước Windows x64 đã vượt qua kiểm tra đọc trên Windows 11. Đăng nhập bằng tài khoản thực vẫn chưa được xác minh.
+
+[Công cụ đọc và trạng thái nền tảng](../docs/reader-tools-20261029.md) · [Windows](../docs/windows.md)
+
 <!-- release39 -->
 ## Bản cập nhật hiện tại · 24 tháng 10 năm 2026
 

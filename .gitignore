@@ -22,3 +22,8 @@ __pycache__/
 *.pyc
 
 .generated/
+
+windows/bin/
+windows/obj/
+tools/windows/policy-tests/bin/
+tools/windows/policy-tests/obj/

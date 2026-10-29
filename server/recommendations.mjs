@@ -12,7 +12,7 @@ const lanes = [
  {name:'Optics',terms:['optical','optics','photonic','photonics','metasurface','laser'],match:/\b(optical|optics|photonic\w*|metasurface\w*|laser\w*)\b/i},
  {name:'Biomedicine',terms:['biomedical','organoid','cellular','cancer','neural','neuron','therapeutic','tissue','clinical','diagnostic','proteomics'],match:/\b(biomedical|organoid\w*|cellular|cancer\w*|neural|neuron\w*|therapeutic\w*|tissue\w*|clinical|diagnostic\w*|proteomic\w*)\b/i},
 ];
-export const recommendationPolicy='english-imaging-optics-biomedicine-v1';
+export const recommendationPolicy='nature-science-cell-v2';
 
 export function usefulRecommendation(p,now=new Date(),selection=null) {
  const allowed=selection?.journalScope==='all'?null:selection?new Set(selection.journals):journalIDs;
@@ -48,7 +48,7 @@ export async function queryRecommendations({page=1,selection=null}={},download=d
  let expire;const expired=new Promise((_,reject)=>{expire=reject});
  const timer=setTimeout(()=>{const error=Error('Recommendation index deadline');controller.abort(error);expire(error)},timeout);
  try {
-  const choices=selection?recommendationSelection(selection):null;
+  const choices=recommendationSelection(selection||{});
   const chosenLanes=choices?recommendationLanes(choices):lanes;
   const results=await Promise.allSettled(chosenLanes.map(async lane=>{
    const filters=[...(choices?.journalScope==='all'?[]:['primary_location.source.id:'+(choices?.journals||Array.from(journalIDs)).join('|')]),'language:en','type:article|review','is_oa:true','is_retracted:false',

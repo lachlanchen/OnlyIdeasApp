@@ -1,5 +1,20 @@
 # OnlyIdeas · product contract
 
+## Reader tools and Windows · 2026-10-29
+
+The owner requests highlights, private notes, paper contents/search, figure zoom
+and a Windows edition. Keep annotations private to the authenticated local
+account, independent of public paper reuse and discussion. Preserve equations,
+figures, translations and passage anchors; conflicting edits must not overwrite
+newer notes. Use Nature, Science and Cell as new/default journal selections;
+retain explicitly saved choices and unrestricted search.
+
+Use one shared renderer toolset across web, Android and iOS/Mac. Prepare native
+1.0.10 (40) independently from existing reviews. Windows starts as a per-user WPF
+and WebView2 desktop preview using the existing service and system-browser PKCE
+sign-in. Keep provider credentials outside the client. A cross-compiled executable
+is not a Windows runtime/sign-in pass or a Microsoft Store release.
+
 ## Daily usage credits · 2026-10-29
 
 The owner requests a useful daily free allowance. Give each active OnlyIdeas

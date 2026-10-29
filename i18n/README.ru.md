@@ -8,6 +8,12 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
+## Инструменты чтения · 29 октября 2026
+
+В веб-ридере появились выделения, личные заметки, оглавление, поиск по статье и увеличение рисунков. По умолчанию рекомендации начинаются с Nature, Science и Cell; сохранённые журналы не меняются. Предварительная версия для Windows x64 прошла проверки чтения в Windows 11. Вход с реальным аккаунтом ещё не проверен.
+
+[Инструменты и состояние платформ](../docs/reader-tools-20261029.md) · [Windows](../docs/windows.md)
+
 <!-- release39 -->
 ## Текущее обновление · 24 октября 2026 года
 

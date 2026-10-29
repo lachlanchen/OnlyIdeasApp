@@ -1,4 +1,5 @@
 import {recommendationOptions} from './recommendation-options.mjs';
+import {annotations,saveAnnotation} from './annotations.mjs';
 import {linkFailures,linkFailure} from './account-link-errors.mjs';
 import {sharePage} from './share-page.mjs';
 import {confirmPublication} from './confirm-publication.mjs';
@@ -142,7 +143,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
         res.setHeader('Vary', 'Origin');
         res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, POST, PUT, DELETE, OPTIONS');
-        res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type, X-OnlyIdeas-Client, X-Request-Id, X-Paper-Title, X-Paper-Language, X-Paper-Sharing, X-Paper-License, X-Paper-Rights, If-None-Match, X-File-Name, X-Credit-Limit, X-Research-Id, X-Recovery-Job-Id, X-Paper-Match-Confirm');
+        res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type, X-OnlyIdeas-Account, X-OnlyIdeas-Client, X-Request-Id, X-Paper-Title, X-Paper-Language, X-Paper-Sharing, X-Paper-License, X-Paper-Rights, If-None-Match, X-File-Name, X-Credit-Limit, X-Research-Id, X-Recovery-Job-Id, X-Paper-Match-Confirm');
       }
       if (method === 'OPTIONS') { requireValue(nativeOrigin, 'Origin not allowed.', 403); res.writeHead(204); return res.end(); }
       const native = nativeOrigin && req.headers['x-onlyideas-client'] === 'native';
@@ -449,9 +450,14 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         return response(res, { job }, 202);
       }
       if (path === '/api/jobs' && method === 'GET') { requireUser(); return response(res, { jobs: store.jobs(user.id).filter(j=>{const p=j.paperId?store.paper(j.paperId):null;return j.owner===user.id||(p&&store.active(p.owner)&&!store.blocked(user.id,p.owner)&&(p.owner===user.id||p.visibility==='public'));}).map(safeJob) }); }
-      const matchPaper = path.match(/^\/api\/papers\/([\w-]+)(?:\/(comments|notes|assist|publish|artifacts|export|segments|reading))?$/);
+      const matchPaper = path.match(/^\/api\/papers\/([\w-]+)(?:\/(comments|notes|annotations|assist|publish|artifacts|export|segments|reading))?$/);
       if (matchPaper) {
         const p = paperFor(matchPaper[1]), action = matchPaper[2];
+        if(action==='annotations') {
+          requireUser(); requireValue(!req.headers['x-onlyideas-account']||req.headers['x-onlyideas-account']===user.id,'Account changed. Reopen the paper to continue.',409); res.setHeader('Cache-Control','private, no-store');
+          if(method==='GET')return response(res,{annotations:annotations(store,user.id,p.id)});
+          if(method==='PUT')return response(res,{annotation:saveAnnotation(store,user.id,p,await json(req))});
+        }
         if(action==='reading'&&method==='GET')return conditionalJSON(req,res,readingView(store,p,user,url.searchParams.get('language')||'en'));
         if (!action && method === 'GET') return conditionalJSON(req,res, { paper: { ...p, isOwner: p.owner === user?.id, owner: undefined, ...(p.owner===user?.id?{review:paperReviewStatus(store,p)}:{}) } });
         if(action==='segments'&&method==='GET')return response(res,{segments:paperSegments(p.mmd,p.language).filter(s=>s.display.length>=30&&s.translatable).map(s=>({...s,text:s.display,sentences:s.sentences.filter(x=>x.display).map(x=>({...x,text:x.display}))}))});
@@ -470,9 +476,10 @@ export function createApp(store, config, { worker = true, provider = providerJSO
           store.db.prepare('INSERT INTO comments VALUES(?,?,?,?,?)').run(c.id, p.id, user.id, JSON.stringify(c), Date.now());recordActivity(store,user.id,'comment',p.id,{},'comment:'+c.id); return response(res, { ok: true }, 201);
         }
         if (action === 'notes') {
-          requireUser();
-          if (method === 'GET') { const note = store.db.prepare('SELECT body FROM notes WHERE owner=? AND paper=?').get(user.id, p.id); return response(res, { text: note?.body || '' }); }
-          if (method === 'PUT') { const b = await json(req); requireValue(typeof b.text === 'string' && b.text.length <= 50_000, 'Keep notes under 50,000 characters.'); store.db.prepare('INSERT OR REPLACE INTO notes VALUES(?,?,?)').run(user.id, p.id, b.text); return response(res, { ok: true }); }
+          requireUser(); requireValue(!req.headers['x-onlyideas-account']||req.headers['x-onlyideas-account']===user.id,'Account changed. Reopen the paper to continue.',409);
+          res.setHeader('Cache-Control','private, no-store');
+          if (method === 'GET') { const note = store.db.prepare('SELECT body FROM notes WHERE owner=? AND paper=?').get(user.id, p.id); return response(res, { text: note?.body || '',version:hash(note?.body||'') }); }
+          if (method === 'PUT') { const b = await json(req); requireValue(typeof b.text === 'string' && b.text.length <= 50_000, 'Keep notes under 50,000 characters.'); const old=store.db.prepare('SELECT body FROM notes WHERE owner=? AND paper=?').get(user.id,p.id); requireValue(b.version===undefined||b.version===hash(old?.body||'')||b.text===old?.body,'Your notebook changed on another device. Reopen it before saving.',409); store.db.prepare('INSERT OR REPLACE INTO notes VALUES(?,?,?)').run(user.id, p.id, b.text); return response(res, { ok: true,version:hash(b.text) }); }
         }
         if (action === 'assist' && method === 'POST') {
           requireUser(); requireValue(config.model?.url, 'The reading assistant is not connected yet.', 503); const b = await json(req);

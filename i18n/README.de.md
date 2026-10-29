@@ -8,6 +8,12 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
+## Lesewerkzeuge · 29. Oktober 2026
+
+Der Webreader bietet Markierungen, private Notizen, ein Inhaltsverzeichnis, die Suche im Artikel und vergrößerbare Abbildungen. Standardmäßig beginnen Empfehlungen mit Nature, Science und Cell; gespeicherte Zeitschriften bleiben erhalten. Die Windows-x64-Vorschau hat die Lesetests unter Windows 11 bestanden. Die Anmeldung mit einem echten Konto ist noch nicht geprüft.
+
+[Lesewerkzeuge und Plattformstatus](../docs/reader-tools-20261029.md) · [Windows](../docs/windows.md)
+
 <!-- release39 -->
 ## Aktuelles Update · 24. Oktober 2026
 

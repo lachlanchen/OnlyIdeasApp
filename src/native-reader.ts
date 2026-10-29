@@ -1,21 +1,26 @@
+import readerLabels from './reader-labels.json'
+import {mountReaderTools} from './reader-tools'
 import { preserveReadingViewport } from './reading-viewport'
 import { watchEditions } from './watch-prose'
 import { paragraphActions } from './paragraphs'
 import {cleanDocument,pairReading,readingMode,type ReadingView,type ReadingMode} from './parallel-reader'
 import './native-reader.css'
 const rendererUrl = './native-math.js'
-type DocumentData = { reading?:ReadingView; mode?:ReadingMode; labels?:{source:string;translation:string;partial:string}; attribution?:string; mmd: string; figures?: Record<string,string>; fontSize?: number; dark?: boolean; comments?:boolean; commentLabel?:string; language?:string }
-const host = window as unknown as { markdownToHTML: (s: string,o: object)=>string; OnlyIdeasRender:(p:DocumentData)=>void; OnlyIdeasStyle:(size:number,dark:boolean)=>void; OnlyIdeasMode:(mode:ReadingMode)=>void; webkit?: {messageHandlers:{onlyideas:{postMessage:(s:object)=>void}}}; NativeReader?:{selection:(s:string)=>void;ready?:()=>void;paragraph?:(quote:string,id:string)=>void} }
+type DocumentData = { revision?:string; uiLanguage?:string; readerTools?:boolean; toolLabels?:Record<string,string>; reading?:ReadingView; mode?:ReadingMode; labels?:{source:string;translation:string;partial:string}; attribution?:string; mmd: string; figures?: Record<string,string>; fontSize?: number; dark?: boolean; comments?:boolean; commentLabel?:string; language?:string }
+const host = window as unknown as { markdownToHTML: (s: string,o: object)=>string; OnlyIdeasReaderReply:(id:string,result:unknown,error?:string)=>void; OnlyIdeasRender:(p:DocumentData)=>void; OnlyIdeasStyle:(size:number,dark:boolean)=>void; OnlyIdeasMode:(mode:ReadingMode)=>void; webkit?: {messageHandlers:{onlyideas:{postMessage:(s:object)=>void}}}; NativeReader?:{request?:(s:string)=>void;selection:(s:string)=>void;ready?:()=>void;paragraph?:(quote:string,id:string)=>void} }
 const root=document.getElementById('paper')!
 host.OnlyIdeasStyle=(size,dark)=>{document.documentElement.style.setProperty('--size',`${Math.max(15,Math.min(72,size))}px`);document.documentElement.dataset.theme=dark?'dark':'light'}
 host.OnlyIdeasMode=mode=>readingMode(root,mode)
+const replies=new Map<string,{resolve:(v:any)=>void;reject:(e:Error)=>void;timer:ReturnType<typeof setTimeout>}>()
+host.OnlyIdeasReaderReply=(id,result,error)=>{const pending=replies.get(id);if(!pending)return;clearTimeout(pending.timer);replies.delete(id);if(error)pending.reject(Error(error));else pending.resolve(result)}
+let stopTools:(()=>void)|undefined
 let stopViewport: (()=>void)|undefined
 let ready=false,pending:DocumentData|undefined
 host.OnlyIdeasRender=p=>{
   if(!ready){pending=p;return}
   host.OnlyIdeasStyle(p.fontSize||18,!!p.dark)
   const render=(text:string)=>host.markdownToHTML(text,{htmlTags:false,lineNumbering:true,width:Math.max(280,root.clientWidth),linkify:false,typographer:false,accessibility:{assistiveMml:true},outMath:{include_svg:true}})
-  stopViewport?.()
+  stopViewport?.();stopTools?.();for(const [id] of replies)host.OnlyIdeasReaderReply(id,null,"Reading view changed. Reopen the tool to continue.")
   root.innerHTML=cleanDocument(render(p.mmd))
   if(p.comments)paragraphActions(root,p.commentLabel||'Discuss paragraph',(quote,paragraphId)=>{host.webkit?.messageHandlers.onlyideas.postMessage({action:'paragraph',quote,paragraphId});host.NativeReader?.paragraph?.(quote,paragraphId)})
   if(p.reading)pairReading(root,p.reading,render,p.labels||{source:p.language||'Original',translation:p.reading.language,partial:'Remaining passages use the original.'})
@@ -25,6 +30,7 @@ host.OnlyIdeasRender=p=>{
   root.dir=p.language==='ar'?'rtl':'ltr'
   if(p.attribution){const credit=document.createElement('footer');credit.className='source-attribution';credit.textContent=p.attribution;root.append(credit)}
   host.webkit?.messageHandlers.onlyideas.postMessage({watchEditions:watchEditions(root),watchLanguage:p.reading?.language||''})
+  stopTools=mountReaderTools(root,{revision:p.revision||'',language:p.language||'en',translate:key=>p.toolLabels?.[key]||(readerLabels as Record<string,Record<string,string>>)[p.uiLanguage||'en']?.[key]||key,call:p.readerTools?(resource,method,body)=>new Promise((resolve,reject)=>{const id=crypto.randomUUID(),timer=setTimeout(()=>{replies.delete(id);reject(Error('Connection interrupted. Please try again.'))},65000);replies.set(id,{resolve,reject,timer});const message={action:'readerRequest',id,resource,method,body};if(host.webkit)host.webkit.messageHandlers.onlyideas.postMessage(message);else host.NativeReader?.request?.(JSON.stringify(message))}):undefined})
   root.dataset.ready='true'
   stopViewport=preserveReadingViewport(document.scrollingElement as HTMLElement,root,':scope > *')
 }

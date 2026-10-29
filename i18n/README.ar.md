@@ -8,6 +8,12 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
+## أدوات القراءة · 29 أكتوبر 2026
+
+يضيف قارئ الويب التمييز والملاحظات الخاصة والمحتويات والبحث داخل الورقة وتكبير الأشكال. تبدأ التوصيات الافتراضية بدوريات Nature وScience وCell مع الحفاظ على اختياراتك المحفوظة. اجتازت معاينة سطح المكتب لنظام Windows x64 اختبارات القراءة على Windows 11. لم يُتحقق بعد من تسجيل الدخول بحساب حقيقي.
+
+[أدوات القراءة وحالة المنصات](../docs/reader-tools-20261029.md) · [Windows](../docs/windows.md)
+
 <!-- release39 -->
 ## التحديث الحالي · 24 أكتوبر 2026
 

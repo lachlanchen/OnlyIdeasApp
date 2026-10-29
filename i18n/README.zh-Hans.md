@@ -8,6 +8,12 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
+## 阅读工具 · 2026年10月29日
+
+网页阅读器新增高亮、私人笔记、目录、文内搜索和图片缩放。默认推荐来自 Nature、Science 和 Cell；已保存的期刊偏好保持不变。Windows x64 桌面预览版已在 Windows 11 上通过阅读器测试；真实账号登录仍待验证。
+
+[阅读工具与平台状态](../docs/reader-tools-20261029.md) · [Windows](../docs/windows.md)
+
 <!-- release39 -->
 ## 当前更新 · 2026年10月24日
 

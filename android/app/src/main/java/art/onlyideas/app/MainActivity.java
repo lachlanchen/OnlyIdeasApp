@@ -1714,6 +1714,7 @@ public class MainActivity extends AppCompatActivity {
     reader.getSettings().setAllowFileAccess(false);
     reader.getSettings().setAllowContentAccess(false);
     reader.getSettings().setBlockNetworkLoads(true);
+    final WebView readerView=reader; final int readerEpoch=authEpoch; final String readerPaper=document.optJSONObject("paper").optString("id"),readerToken=api.token();
     reader.addJavascriptInterface(
         new Object() {
           @JavascriptInterface
@@ -1722,6 +1723,21 @@ public class MainActivity extends AppCompatActivity {
                 () -> {
                   if (reader != null) renderDocument(reader);
                 });
+          }
+
+          @JavascriptInterface
+          public void request(String raw) {
+            if(raw==null||raw.length()>100000)return;
+            handler.post(()->{if(readerEpoch!=authEpoch||reader!=readerView||derived||account==null)return;
+              try {JSONObject message=new JSONObject(raw);String id=message.getString("id"),resource=message.getString("resource"),method=message.getString("method");
+                if(!id.matches("[a-f0-9-]{36}")||!Arrays.asList("notes","annotations").contains(resource)||!Arrays.asList("GET","PUT").contains(method))return;
+                JSONObject body=message.optJSONObject("body");
+                io.execute(()->{JSONObject result=null;String error=null;try{result=api.jsonBound("/api/papers/"+readerPaper+"/"+resource,method,body,readerToken);}catch(Exception e){error=e.getMessage();}
+                  final JSONObject response=result;final String failure=error;
+                  handler.post(()->{if(readerEpoch!=authEpoch||reader!=readerView)return;readerView.evaluateJavascript("window.OnlyIdeasReaderReply&&window.OnlyIdeasReaderReply("+JSONObject.quote(id)+","+(response==null?"null":response.toString())+","+(failure==null?"null":JSONObject.quote(failure))+")",null);});
+                });
+              }catch(Exception ignored){}
+            });
           }
 
           @JavascriptInterface
@@ -1808,6 +1824,7 @@ public class MainActivity extends AppCompatActivity {
           new JSONObject()
               .put("mmd", document.getJSONObject("paper").optString("mmd"))
               .put("figures", document.getJSONObject("figures"))
+              .put("uiLanguage",language()).put("revision",document.optJSONObject("paper").optString("revision")).put("readerTools",!derived&&account!=null)
               .put("attribution",paperAttribution(document.optJSONObject("paper")))
               .put("fontSize", scaledReaderSize()).put("comments",!derived).put("commentLabel",t("Discuss paragraph")).put("language",document.optJSONObject("paper").optString("language","en"))
               .put(

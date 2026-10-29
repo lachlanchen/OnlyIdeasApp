@@ -8,6 +8,12 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
+## 閱讀工具 · 2026年10月29日
+
+網頁閱讀器新增標示、私人筆記、目錄、文內搜尋及圖片縮放。預設推薦來自 Nature、Science 和 Cell；已儲存的期刊偏好保持不變。Windows x64 桌面預覽版已在 Windows 11 上通過閱讀器測試；真實帳號登入仍待驗證。
+
+[閱讀工具與平台狀態](../docs/reader-tools-20261029.md) · [Windows](../docs/windows.md)
+
 <!-- release39 -->
 ## 目前更新 · 2026年10月24日
 

@@ -8,6 +8,12 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
+## Herramientas de lectura · 29 de octubre de 2026
+
+El lector web añade resaltados, notas privadas, índice, búsqueda en el artículo y ampliación de figuras. Las recomendaciones predeterminadas parten de Nature, Science y Cell; se conservan las revistas elegidas. La versión preliminar para Windows x64 superó las pruebas de lectura en Windows 11. Aún falta validar el inicio de sesión con una cuenta real.
+
+[Herramientas y estado de las plataformas](../docs/reader-tools-20261029.md) · [Windows](../docs/windows.md)
+
 <!-- release39 -->
 ## Actualización actual · 24 de octubre de 2026
 

@@ -20,7 +20,7 @@ export async function deleteAccount(store, user) {
     db.prepare("DELETE FROM sessions WHERE json_extract(user,'$.id')=?").run(user.id);
     db.prepare("DELETE FROM oauth WHERE json_extract(body,'$.user.id')=?").run(user.id);
     db.prepare('DELETE FROM chat_messages WHERE chat IN (SELECT id FROM chats WHERE owner=?)').run(user.id);
-    for (const table of ['agent_runs','chat_tasks', 'chats', 'comments', 'notes', 'artifacts', 'reports', 'terms', 'jobs', 'attachments', 'job_subscriptions', 'paper_reactions','reading_preferences','reading_activity','inbox_reads','reading_digests','import_recoveries','translation_pieces']) {
+    for (const table of ['agent_runs','chat_tasks', 'chats', 'comments', 'notes', 'reader_annotations', 'artifacts', 'reports', 'terms', 'jobs', 'attachments', 'job_subscriptions', 'paper_reactions','reading_preferences','reading_activity','inbox_reads','reading_digests','import_recoveries','translation_pieces']) {
       if (db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?").get(table)) db.prepare(`DELETE FROM ${table} WHERE owner=?`).run(user.id);
     }
     for (const paper of papers) {
@@ -30,6 +30,7 @@ export async function deleteAccount(store, user) {
       db.prepare('DELETE FROM artifact_requests WHERE paper=?').run(paper.id);
       db.prepare('DELETE FROM comments WHERE paper=?').run(paper.id);
       db.prepare('DELETE FROM notes WHERE paper=?').run(paper.id);
+      db.prepare('DELETE FROM reader_annotations WHERE paper=?').run(paper.id);
       db.prepare("DELETE FROM artifacts WHERE json_extract(body,'$.paperId')=?").run(paper.id);
     }
     db.prepare('DELETE FROM papers WHERE owner=?').run(user.id);

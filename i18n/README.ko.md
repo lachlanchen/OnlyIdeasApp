@@ -8,6 +8,12 @@
 
 [OnlyIdeas](https://agent.onlyideas.art) · [GitHub Sponsors](https://github.com/sponsors/lachlanchen) · [OnlyIdeas-papers](https://github.com/lachlanchen/OnlyIdeas-papers)
 
+## 읽기 도구 · 2026년 10월 29일
+
+웹 리더에 강조 표시, 비공개 메모, 목차, 논문 내 검색 및 그림 확대가 추가되었습니다. 기본 추천 저널은 Nature, Science, Cell이며 저장된 저널 설정은 유지됩니다. Windows x64 데스크톱 미리 보기 버전은 Windows 11에서 읽기 기능 테스트를 통과했습니다. 실제 계정 로그인은 아직 검증하지 않았습니다.
+
+[읽기 도구 및 플랫폼 현황](../docs/reader-tools-20261029.md) · [Windows](../docs/windows.md)
+
 <!-- release39 -->
 ## 최신 업데이트 · 2026년 10월 24일
 
