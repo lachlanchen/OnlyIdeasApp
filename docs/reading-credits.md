@@ -55,6 +55,16 @@ Daily ledger entries use `daily_bonus`; their public history kind is the readabl
 and the shared translation catalog cover all 11 languages. Shared recognition
 points, paid credit lineage, subscription quotas and rollout lists are unchanged.
 
+Enabled on 29 October 2026. The API and web update are deployed; installed iOS,
+Mac and Android apps receive the daily grant through their existing endpoints.
+No native update is required to earn or use it. The source gate passed 350 tests,
+renderer checks and the production build; 12 focused credit/UI tests and eight
+browser checks cover the final change. The deployed API was checked with web and
+native session formats: one 100-credit daily grant, unchanged spending eligibility
+and no second grant on repeat requests. Public HTTPS page/translation bytes match
+the qualified build. Existing database tables were preserved through the additive
+schema change; temporary test records were removed.
+
 Existing service quotas still bound conversion and agent usage. Confirmed, licensed Shared papers can become readable before administrator
 review; rewards still require approval and successful publication. Rejected papers earn
 nothing; there is no surprise private-import charge. Repeated unsuitable sharing
