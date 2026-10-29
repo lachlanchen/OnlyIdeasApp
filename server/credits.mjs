@@ -1,7 +1,8 @@
 import { hash, requireValue } from './domain.mjs';
 
 // Ordinary, non-transferable database credits. All amounts are integers.
-export const creditPolicy = Object.freeze({ version: 1, welcome: 30, privatePage: 1, privateFile: 1, publication: 10, rewardPerDay: 50 });
+export const creditPolicy = Object.freeze({ version: 1, welcome: 30, dailyBonus: 100, privatePage: 1, privateFile: 1, publication: 10, rewardPerDay: 50 });
+const DAY = 86400_000;
 let transactionID = 0;
 export function initCredits(store) {
   store.db.exec(`
@@ -10,6 +11,7 @@ export function initCredits(store) {
     CREATE TABLE IF NOT EXISTS credit_ledger(id TEXT PRIMARY KEY, owner TEXT NOT NULL, delta INTEGER NOT NULL, kind TEXT NOT NULL, operation TEXT, created INTEGER NOT NULL);
     CREATE INDEX IF NOT EXISTS credit_owner ON credit_ledger(owner,created);
     CREATE TABLE IF NOT EXISTS credit_welcome(identity TEXT PRIMARY KEY);
+    CREATE TABLE IF NOT EXISTS credit_daily_days(identity TEXT NOT NULL, day INTEGER NOT NULL, PRIMARY KEY(identity,day));
     CREATE TABLE IF NOT EXISTS credit_holds(id TEXT PRIMARY KEY, owner TEXT NOT NULL, amount INTEGER NOT NULL, state TEXT NOT NULL, spent INTEGER NOT NULL DEFAULT 0);
     CREATE TABLE IF NOT EXISTS credit_candidates(paper TEXT PRIMARY KEY, owner TEXT NOT NULL, digest TEXT);
     CREATE TABLE IF NOT EXISTS credit_rewards(id TEXT PRIMARY KEY, owner_hash TEXT NOT NULL, amount INTEGER NOT NULL, created INTEGER NOT NULL);
@@ -32,9 +34,9 @@ export function creditTransaction(store, fn) {
     throw error;
   }
 }
-const entry = (store, id, owner, delta, kind, operation = null) => {
+const entry = (store, id, owner, delta, kind, operation = null, created = Date.now()) => {
   requireValue(Number.isSafeInteger(delta), 'Invalid credit amount.');
-  store.db.prepare('INSERT INTO credit_ledger VALUES(?,?,?,?,?,?)').run(id, owner, delta, kind, operation, Date.now());
+  store.db.prepare('INSERT INTO credit_ledger VALUES(?,?,?,?,?,?)').run(id, owner, delta, kind, operation, created);
 };
 const balance = (store, owner) => store.db.prepare('SELECT coalesce(sum(delta),0) AS balance FROM credit_ledger WHERE owner=?').get(owner).balance;
 function welcome(store, owner) {
@@ -49,20 +51,46 @@ export const creditsEnabled=(config,owner)=>config.credits?.enabled===true && (!
 // Earning can be opened independently of private-import charges and paid quotas.
 // Never remove the spending rollout allowlist merely to repair a zero balance.
 export const creditEarningEnabled=(config,owner)=>config.credits?.earningEnabled===true || creditsEnabled(config,owner);
+const dailyEnabled = (config, owner) => !!owner && config.credits?.dailyBonusEnabled === true && creditEarningEnabled(config, owner);
+
+// Authenticated app activity earns one grant on the server's UTC day. The local
+// account stays primary across devices and linked sign-in methods. Hashed provider
+// aliases prevent deletion/re-registration from claiming that same day twice.
+export function grantDailyCredits(store, owner, config, now = Date.now()) {
+  if (!dailyEnabled(config, owner)) return 0;
+  requireValue(Number.isSafeInteger(now) && now >= 0, 'Invalid credit date.');
+  const day = Math.floor(now / DAY) * DAY;
+  return creditTransaction(store, () => {
+    store.requireActive(owner);
+    const identities = [...new Set([hash(owner), ...store.db.prepare('SELECT id FROM identities WHERE account=?').all(owner).map(row => row.id)])];
+    const lookup = store.db.prepare('SELECT 1 FROM credit_daily_days WHERE identity=? AND day=?');
+    const claimed = identities.some(identity => lookup.get(identity, day));
+    const remember = store.db.prepare('INSERT OR IGNORE INTO credit_daily_days VALUES(?,?)');
+    for (const identity of identities) remember.run(identity, day);
+    if (claimed) return 0;
+    entry(store, `daily:${hash(owner)}:${day}`, owner, creditPolicy.dailyBonus, 'daily_bonus', null, now);
+    return creditPolicy.dailyBonus;
+  });
+}
 export function creditSummary(store, owner, config) {
   const enabled = creditsEnabled(config,owner);
   const earningEnabled = creditEarningEnabled(config,owner);
   return creditTransaction(store, () => {
     if (earningEnabled && owner) welcome(store, owner);
+    const now = Date.now();
+    grantDailyCredits(store, owner, config, now);
     const held = owner ? store.db.prepare("SELECT coalesce(sum(amount),0) AS n FROM credit_holds WHERE owner=? AND state='held'").get(owner).n : 0;
-    return { enabled, earningEnabled, policy: creditPolicy, maxPDF: config.maxPages || 30, balance: owner ? balance(store, owner) : 0, held,
-      history: owner ? store.db.prepare('SELECT delta,kind,created FROM credit_ledger WHERE owner=? ORDER BY created DESC,rowid DESC LIMIT 40').all(owner) : [] };
+    return { enabled, earningEnabled, policy: creditPolicy, daily: { enabled: dailyEnabled(config, owner), amount: creditPolicy.dailyBonus, nextAt: (Math.floor(now / DAY) + 1) * DAY }, maxPDF: config.maxPages || 30, balance: owner ? balance(store, owner) : 0, held,
+      // Installed clients fall back to displaying unknown kinds verbatim. Keep
+      // the new entry readable there while retaining its stable ledger code.
+      history: owner ? store.db.prepare('SELECT delta,kind,created FROM credit_ledger WHERE owner=? ORDER BY created DESC,rowid DESC LIMIT 40').all(owner).map(row => row.kind === 'daily_bonus' ? { ...row, kind: 'Daily credits', code: row.kind } : row) : [] };
   });
 }
 export function reserveImport(store, config, job, limit) {
   if (!['import', 'attachment', 'markdown'].includes(job.kind)) return;
   if (creditEarningEnabled(config,job.owner)) {
     welcome(store, job.owner);
+    grantDailyCredits(store, job.owner, config);
     store.db.prepare('INSERT OR IGNORE INTO credit_candidates VALUES(?,?,?)').run(job.id, job.owner, job.sourceDigest || null);
   }
   if (!creditsEnabled(config,job.owner)) return;
@@ -144,5 +172,5 @@ export function rewardPublication(store, job) {
 }
 export function deleteCredits(store, owner) {
   for (const table of ['credit_ledger', 'credit_holds', 'credit_candidates']) store.db.prepare(`DELETE FROM ${table} WHERE owner=?`).run(owner);
-  // Keep only hashed welcome/reward deduplication, never document text or URLs.
+  // Keep only hashed welcome/daily/reward deduplication, never document text or URLs.
 }

@@ -849,7 +849,9 @@
     "Return to the app account you want to keep, then connect again. No accounts were combined.": "Return to the app account you want to keep, then connect again. No accounts were combined.",
     "Confirm your LazyingArt sign-in again, then retry. Your app account is unchanged.": "Confirm your LazyingArt sign-in again, then retry. Your app account is unchanged.",
     "Connection cancelled. Your app account is unchanged.": "Connection cancelled. Your app account is unchanged.",
-    "Allow the sign-in popup, then try connecting again.": "Allow the sign-in popup, then try connecting again."
+    "Allow the sign-in popup, then try connecting again.": "Allow the sign-in popup, then try connecting again.",
+    "Daily credits": "Daily credits",
+    "Get {count} credits each day you use OnlyIdeas. Unused credits carry over. Resets at 00:00 UTC.": "Get {count} credits each day you use OnlyIdeas. Unused credits carry over. Resets at 00:00 UTC."
   },
   "zh-Hans": {
     "Choose a valid PDF.": "请选择有效的 PDF。",
@@ -1726,7 +1728,9 @@
     "Computational imaging": "计算成像",
     "Event cameras": "事件相机",
     "Hyperspectral imaging": "高光谱成像",
-    "Cell biology": "细胞生物学"
+    "Cell biology": "细胞生物学",
+    "Daily credits": "每日赠送积分",
+    "Get {count} credits each day you use OnlyIdeas. Unused credits carry over. Resets at 00:00 UTC.": "每天使用 OnlyIdeas 可获 {count} 积分，未用完的积分可累积。每天 UTC 00:00 重置。"
   },
   "zh-Hant": {
     ". Public comments are reviewed.": "公開評論會經過審核。",
@@ -2603,7 +2607,9 @@
     "Computational imaging": "計算成像",
     "Event cameras": "事件相機",
     "Hyperspectral imaging": "高光譜成像",
-    "Cell biology": "細胞生物學"
+    "Cell biology": "細胞生物學",
+    "Daily credits": "每日贈送積分",
+    "Get {count} credits each day you use OnlyIdeas. Unused credits carry over. Resets at 00:00 UTC.": "每天使用 OnlyIdeas 可獲 {count} 積分，未用完的積分可累積。每天 UTC 00:00 重設。"
   },
   "ja": {
     ". Public comments are reviewed.": "公開コメントは審査されます。",
@@ -3480,7 +3486,9 @@
     "Computational imaging": "計算イメージング",
     "Event cameras": "イベントカメラ",
     "Hyperspectral imaging": "ハイパースペクトルイメージング",
-    "Cell biology": "細胞生物学"
+    "Cell biology": "細胞生物学",
+    "Daily credits": "毎日のクレジット",
+    "Get {count} credits each day you use OnlyIdeas. Unused credits carry over. Resets at 00:00 UTC.": "OnlyIdeasを利用する日は、毎日{count}クレジットを受け取れます。未使用分は繰り越されます。日付の切り替わりはUTC 00:00です。"
   },
   "ko": {
     ". Public comments are reviewed.": "공개 댓글은 검토됩니다.",
@@ -4357,7 +4365,9 @@
     "Computational imaging": "계산 이미징",
     "Event cameras": "이벤트 카메라",
     "Hyperspectral imaging": "초분광 이미징",
-    "Cell biology": "세포생물학"
+    "Cell biology": "세포생물학",
+    "Daily credits": "일일 크레딧",
+    "Get {count} credits each day you use OnlyIdeas. Unused credits carry over. Resets at 00:00 UTC.": "OnlyIdeas를 사용하는 날마다 {count}크레딧을 받습니다. 남은 크레딧은 이월됩니다. 매일 UTC 00:00에 갱신됩니다."
   },
   "ar": {
     ". Public comments are reviewed.": "التعليقات العامة تخضع للمراجعة.",
@@ -5234,7 +5244,9 @@
     "Computational imaging": "التصوير الحاسوبي",
     "Event cameras": "كاميرات الأحداث",
     "Hyperspectral imaging": "التصوير فائق الطيف",
-    "Cell biology": "علم الأحياء الخلوي"
+    "Cell biology": "علم الأحياء الخلوي",
+    "Daily credits": "الرصيد اليومي",
+    "Get {count} credits each day you use OnlyIdeas. Unused credits carry over. Resets at 00:00 UTC.": "احصل على {count} من الرصيد كل يوم تستخدم فيه OnlyIdeas. يُرحّل الرصيد غير المستخدم. يبدأ يوم جديد عند 00:00 بالتوقيت العالمي UTC."
   },
   "fr": {
     ". Public comments are reviewed.": ". Les commentaires publics sont examinés.",
@@ -6111,7 +6123,9 @@
     "Computational imaging": "Imagerie computationnelle",
     "Event cameras": "Caméras événementielles",
     "Hyperspectral imaging": "Imagerie hyperspectrale",
-    "Cell biology": "Biologie cellulaire"
+    "Cell biology": "Biologie cellulaire",
+    "Daily credits": "Crédits quotidiens",
+    "Get {count} credits each day you use OnlyIdeas. Unused credits carry over. Resets at 00:00 UTC.": "Recevez {count} crédits chaque jour où vous utilisez OnlyIdeas. Les crédits inutilisés sont conservés. Un nouveau jour commence à 00:00 UTC."
   },
   "de": {
     ". Public comments are reviewed.": "Öffentliche Kommentare werden geprüft.",
@@ -6988,7 +7002,9 @@
     "Computational imaging": "Computergestützte Bildgebung",
     "Event cameras": "Ereigniskameras",
     "Hyperspectral imaging": "Hyperspektrale Bildgebung",
-    "Cell biology": "Zellbiologie"
+    "Cell biology": "Zellbiologie",
+    "Daily credits": "Tägliche Credits",
+    "Get {count} credits each day you use OnlyIdeas. Unused credits carry over. Resets at 00:00 UTC.": "Erhalte {count} Credits an jedem Tag, an dem du OnlyIdeas nutzt. Ungenutzte Credits bleiben erhalten. Der neue Tag beginnt um 00:00 UTC."
   },
   "es": {
     ". Public comments are reviewed.": "Los comentarios públicos se revisan.",
@@ -7865,7 +7881,9 @@
     "Computational imaging": "Imagen computacional",
     "Event cameras": "Cámaras de eventos",
     "Hyperspectral imaging": "Imagen hiperespectral",
-    "Cell biology": "Biología celular"
+    "Cell biology": "Biología celular",
+    "Daily credits": "Créditos diarios",
+    "Get {count} credits each day you use OnlyIdeas. Unused credits carry over. Resets at 00:00 UTC.": "Recibe {count} créditos cada día que uses OnlyIdeas. Los créditos sin usar se acumulan. El día se reinicia a las 00:00 UTC."
   },
   "ru": {
     ". Public comments are reviewed.": "Публичные комментарии проходят проверку.",
@@ -8742,7 +8760,9 @@
     "Computational imaging": "Вычислительная визуализация",
     "Event cameras": "Событийные камеры",
     "Hyperspectral imaging": "Гиперспектральная визуализация",
-    "Cell biology": "Клеточная биология"
+    "Cell biology": "Клеточная биология",
+    "Daily credits": "Ежедневные кредиты",
+    "Get {count} credits each day you use OnlyIdeas. Unused credits carry over. Resets at 00:00 UTC.": "Получайте {count} кредитов каждый день использования OnlyIdeas. Неиспользованные кредиты сохраняются. Новый день начинается в 00:00 UTC."
   },
   "vi": {
     ". Public comments are reviewed.": "Bình luận công khai sẽ được kiểm duyệt.",
@@ -9619,6 +9639,8 @@
     "Computational imaging": "Tạo ảnh tính toán",
     "Event cameras": "Camera sự kiện",
     "Hyperspectral imaging": "Tạo ảnh siêu phổ",
-    "Cell biology": "Sinh học tế bào"
+    "Cell biology": "Sinh học tế bào",
+    "Daily credits": "Tín dụng hằng ngày",
+    "Get {count} credits each day you use OnlyIdeas. Unused credits carry over. Resets at 00:00 UTC.": "Nhận {count} tín dụng mỗi ngày bạn dùng OnlyIdeas. Tín dụng chưa dùng được cộng dồn. Ngày mới bắt đầu lúc 00:00 UTC."
   }
 }

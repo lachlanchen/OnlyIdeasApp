@@ -32,7 +32,7 @@ import { attachment, uploadAttachment } from './attachments.mjs';
 import { createBilling } from './billing.mjs';
 import { createAppleAuth } from './apple-auth.mjs';
 import { sourceKey, reusedImport, reusablePaper } from './import-reuse.mjs';
-import { creditTransaction, creditSummary, reserveImport, retryImportCredits, finishImportCredits, seedCreditPublications } from './credits.mjs';
+import { creditTransaction, creditSummary, grantDailyCredits, reserveImport, retryImportCredits, finishImportCredits, seedCreditPublications } from './credits.mjs';
 import {createLacBalance,LacReadError} from './lac-balance.mjs';
 import {createRewardSourceRoutes} from './reward-source-routes.mjs';
 import { createProfileStore } from './lazyingart-store.mjs';
@@ -314,7 +314,10 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         requireValue(native, 'Open sign-in from the app.', 403);
         const b = await json(req); return response(res, redeemNative(store, b.flow, b.verifier,{owner:user?.id,sessionHash:token?hash(token):null}));
       }
-      if (path === '/api/session' && method === 'GET') return response(res, { user, development: !!config.development, capabilities: { login: !!config.github?.clientId, apple: apple.enabled, lazyingart:profile.enabled, lacPoints:lacBalance.enabled, pdf: !!config.mathpix?.appKey, assistant: !!config.model?.url, publishing: !!(config.github?.contentToken || config.github?.checkout), publicationReview:isReviewer(store,config,user) }, languages, maxPages: config.maxPages || 30 });
+      if (path === '/api/session' && method === 'GET') {
+        if (user) grantDailyCredits(store, user.id, config);
+        return response(res, { user, development: !!config.development, capabilities: { login: !!config.github?.clientId, apple: apple.enabled, lazyingart:profile.enabled, lacPoints:lacBalance.enabled, pdf: !!config.mathpix?.appKey, assistant: !!config.model?.url, publishing: !!(config.github?.contentToken || config.github?.checkout), publicationReview:isReviewer(store,config,user) }, languages, maxPages: config.maxPages || 30 });
+      }
       if (path === '/api/auth/local' && method === 'POST') {
         requireValue(config.development && ['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(req.socket.remoteAddress), 'Not available.', 404);
         const local = { id: 'local-reader', name: 'Local reader', login: 'local-reader' };

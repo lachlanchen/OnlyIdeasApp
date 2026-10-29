@@ -1,5 +1,16 @@
 # OnlyIdeas · product contract
 
+## Daily usage credits · 2026-10-29
+
+The owner requests a useful daily free allowance. Give each active OnlyIdeas
+account 100 usage credits on its first authenticated app use each UTC day.
+Unused credits carry over; missed days are not backfilled. Keep the existing
+welcome grant, public-contribution rewards, purchases, import costs and service
+limits. Deduplicate across devices, linked methods and same-day account
+re-registration. Enable this independently with `credits.dailyBonusEnabled`;
+it does not enable shared LAC policies, spending gates or subscription changes.
+Installed clients receive the grant through existing session/balance endpoints.
+
 ## iPhone Duo adaptation · 2026-10-28
 
 The owner renews support for the new foldable iPhone in OnlyIdeas and Bunko.

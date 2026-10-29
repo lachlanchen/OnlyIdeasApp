@@ -26,11 +26,34 @@ This rollout does not create shared points or merge balances. See the
 | Action | Credits |
 | --- | ---: |
 | Welcome, once per provider identity | +30 |
+| First signed-in use each UTC day | +100 |
 | Approved, successfully published unique paper | +10 |
 | Public contribution rewards per UTC day | Up to +50 |
 | Private PDF import | −1 per page |
 | Other private file / Markdown import | −1 per file |
 | Shared imports, reading, chat, shared translations | 0 |
+
+### Daily usage credits
+
+Open OnlyIdeas while signed in to receive 100 usage credits once per UTC day.
+The next day starts at 00:00 UTC. Unused credits carry over; days without use
+do not accumulate grants. The welcome and public-contribution credits remain
+available separately. Fetching, conversion and agent service limits still apply.
+
+`credits.dailyBonusEnabled: true` enables this for accounts eligible to earn.
+The existing session and balance endpoints apply it automatically, so installed
+apps do not require a new build. Private imports also apply any unclaimed grant
+before reserving credits. A transaction records the grant and hashed daily
+identity markers together. Concurrent devices, retry/restart and account
+deletion/re-registration cannot claim the same day twice. Linked sign-in methods
+retain the initiating local account. Markers contain no document or message data.
+Disabling the policy stops new grants and preserves existing balances.
+
+`GET /api/credits` adds `daily.enabled`, `daily.amount` and `daily.nextAt`.
+Daily ledger entries use `daily_bonus`; their public history kind is the readable
+`Daily credits` for installed clients, with `code: daily_bonus` retained. Web copy
+and the shared translation catalog cover all 11 languages. Shared recognition
+points, paid credit lineage, subscription quotas and rollout lists are unchanged.
 
 Existing service quotas still bound conversion and agent usage. Confirmed, licensed Shared papers can become readable before administrator
 review; rewards still require approval and successful publication. Rejected papers earn

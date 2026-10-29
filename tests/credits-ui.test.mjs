@@ -29,3 +29,12 @@ test('resume refreshes balance, offline keeps a labeled prior value, and reconne
  assert.match(w.document.body.textContent,/Last known balance/);assert.equal(w.document.querySelector('.credit-balance strong').textContent,'45');
  finish({...balance,balance:55});await settle();assert.equal(w.document.querySelector('.credit-balance strong').textContent,'55');assert.doesNotMatch(w.document.body.textContent,/Last known balance/);
 });
+test('daily credits and carryover are visible while older responses still render',async t=>{
+ const {w,settle}=await fixture(t);w.api=async()=>({...balance,balance:145,daily:{enabled:true,amount:100,nextAt:86400000},history:[{kind:'Daily credits',delta:100,created:1}]});w.render('reader');await settle();
+ assert.equal(w.document.querySelector('.credit-balance strong').textContent,'145');
+ assert.match(w.document.body.textContent,/credits each day you use OnlyIdeas.*Unused credits carry over.*00:00 UTC/s);
+ assert.match(w.document.querySelector('.credit-history').textContent,/Daily credits.*\+100/s);
+ w.api=async()=>balance;w.render('old-server');await settle();
+ assert.equal(w.document.querySelector('.credit-balance strong').textContent,'45');
+ assert.doesNotMatch(w.document.body.textContent,/credits each day you use OnlyIdeas/);
+});
