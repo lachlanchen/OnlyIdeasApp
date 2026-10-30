@@ -26,6 +26,31 @@ final class NativeUITests: XCTestCase {
     wait(for:[done],timeout:7)
     if let issue {throw issue};return output
   }
+  func testUpdatePromptAndManualCheck() throws {
+    continueAfterFailure=false
+    let app=interestFixtureApp();app.launchArguments.append("--onlyideas-update-qa");app.launch()
+    defer {app.terminate()}
+    let later=app.buttons["Later"].firstMatch
+    XCTAssertTrue(later.waitForExistence(timeout:20))
+    XCTAssertTrue(app.staticTexts["Update available · 9.9.9"].waitForExistence(timeout:5))
+    later.tap()
+    XCTAssertFalse(later.exists)
+    let profile=app.tabBars.buttons["Profile"]
+    XCTAssertTrue(profile.waitForExistence(timeout:10));profile.tap()
+    let check=app.buttons["check-app-updates"]
+    for _ in 0..<8 {if check.isHittable {break};app.swipeUp()}
+    XCTAssertTrue(check.isHittable)
+    let before=(try feedControl()["updateChecks"] as? Int) ?? 0
+    check.tap()
+    var calls=before
+    for _ in 0..<10 {calls=(try feedControl()["updateChecks"] as? Int) ?? 0;if calls>before {break};Thread.sleep(forTimeInterval:0.2)}
+    XCTAssertGreaterThan(calls,before)
+    let store=app.descendants(matching:.any).matching(identifier:"open-app-update").firstMatch
+    XCTAssertTrue(store.waitForExistence(timeout:15))
+    XCTAssertTrue(store.label.contains("9.9.9"))
+    shot("Updates41-profile")
+    XCTAssertFalse(app.alerts.firstMatch.exists)
+  }
   func testReaderToolsAndPrivateNotebook() {
     continueAfterFailure = false
     let app = interestFixtureApp(); app.launch()

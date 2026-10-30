@@ -1162,7 +1162,18 @@ final class PublicAppUpdates: ObservableObject {
   private let platform: String
   private let prefix: String
   private var releaseKey = ""
-  init(feed:String, platform:String, prefix:String) { self.feed=feed;self.platform=platform;self.prefix=prefix }
+  init(feed:String, platform:String, prefix:String) {
+    var endpoint=feed, storage=prefix
+    #if DEBUG
+    if ProcessInfo.processInfo.arguments.contains("--onlyideas-update-qa"),
+       let origin=ProcessInfo.processInfo.environment["ONLYIDEAS_QA_ORIGIN"],
+       let url=URL(string:origin),url.scheme=="http",url.host=="127.0.0.1",url.port==18649 {
+      precondition(Self.compare("1.10","1.9")==1 && Self.compare("1.2","1.2.0")==0 && Self.compare("bad","1")==nil)
+      endpoint=origin+"/updates.json";storage += ".qa."+UUID().uuidString
+    }
+    #endif
+    self.feed=endpoint;self.platform=platform;self.prefix=storage
+  }
   var showPrompt:Bool {version != nil && !snoozed}
   static func compare(_ a:String,_ b:String)->Int? {
     func parts(_ value:String)->[Int]? {let values=value.split(separator:".",omittingEmptySubsequences:false);guard (1...4).contains(values.count),values.allSatisfy({!$0.isEmpty && $0.count<=8 && $0.allSatisfy({$0.isASCII && $0.isNumber})}) else{return nil};return values.compactMap{Int($0)}}

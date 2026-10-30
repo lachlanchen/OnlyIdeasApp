@@ -21,7 +21,7 @@ public partial class MainWindow {
    var bytes=await updateHttp.GetByteArrayAsync("https://agent.onlyideas.art/updates.json",updateLifetime.Token);using var document=JsonDocument.Parse(bytes);var root=document.RootElement;
    if(root.GetProperty("schema").GetInt32()!=1)throw new FormatException();var release=root.GetProperty("windows");
    offeredUpdate=null;offeredKey=null;
-   if(release.ValueKind!=JsonValueKind.Null){var v=release.GetProperty("version").GetString()??throw new FormatException();var b=release.GetProperty("build").GetString()??throw new FormatException();var installed=Assembly.GetExecutingAssembly().GetName().Version?.ToString()??throw new FormatException();if(AppUpdatePolicy.Newer(v,b,installed,"0")){offeredUpdate=v;offeredKey="windows:"+v+":"+b;}}
+   if(release.ValueKind!=JsonValueKind.Null){var v=release.GetProperty("version").GetString()??throw new FormatException();var b=release.GetProperty("build").GetString()??throw new FormatException();var installed=Assembly.GetExecutingAssembly().GetName().Version??throw new FormatException();var installedVersion=$"{installed.Major}.{installed.Minor}.{installed.Build}";if(AppUpdatePolicy.Newer(v,b,installedVersion,Math.Max(0,installed.Revision).ToString())){offeredUpdate=v;offeredKey="windows:"+v+":"+b;}}
    updateCheckedAt=DateTimeOffset.UtcNow;
    if(closed)return;
    if(offeredUpdate!=null){UpdateText.Text="Update available · "+offeredUpdate;UpdateBanner.Visibility=manual||!UpdateSnoozed()?Visibility.Visible:Visibility.Collapsed;}

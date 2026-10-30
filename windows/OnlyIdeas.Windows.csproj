@@ -4,7 +4,7 @@
     <UseWPF>true</UseWPF><EnableWindowsTargeting>true</EnableWindowsTargeting>
     <ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable>
     <AssemblyName>OnlyIdeas</AssemblyName><RootNamespace>OnlyIdeas.Windows</RootNamespace>
-    <Version>1.0.10</Version><Company>LazyingArt LLC</Company><Product>OnlyIdeas</Product>
+    <Version>1.0.10</Version><AssemblyVersion>1.0.10.41</AssemblyVersion><FileVersion>1.0.10.41</FileVersion><Company>LazyingArt LLC</Company><Product>OnlyIdeas</Product>
     <ApplicationIcon>OnlyIdeas.ico</ApplicationIcon><ApplicationManifest>app.manifest</ApplicationManifest>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
   </PropertyGroup>

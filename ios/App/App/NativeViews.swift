@@ -2144,8 +2144,8 @@ struct NativeUpdateControls:View {
   var body:some View {
     VStack(alignment:.leading,spacing:10) {
       Text(T(updates.status)).font(.subheadline).foregroundColor(.secondary)
-      Button(T("Check for updates")){Task{await updates.check(force:true)}}.disabled(updates.checking)
-      if let version=updates.version {Link(T("Open store")+" · "+version,destination:onlyIdeasUpdateURL)}
+      Button(T("Check for updates")){Task{await updates.check(force:true)}}.disabled(updates.checking).accessibilityIdentifier("check-app-updates")
+      if let version=updates.version {Link(T("Open store")+" · "+version,destination:onlyIdeasUpdateURL).accessibilityIdentifier("open-app-update")}
     }
   }
 }

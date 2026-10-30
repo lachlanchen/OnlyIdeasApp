@@ -38,6 +38,9 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         path = self.path.split("?")[0]
+        if path == "/updates.json":
+            feed["updateChecks"]=feed.get("updateChecks",0)+1
+            return self.reply({"schema":1,"ios":{"version":"9.9.9","build":"999"},"macos":{"version":"9.9.9","build":"999"}})
         if path == "/__qa/feed":
             return self.reply(feed)
         if path == "/api/preferences":

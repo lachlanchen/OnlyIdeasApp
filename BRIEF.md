@@ -1,5 +1,9 @@
 # OnlyIdeas · product contract
 
+## Update-prompt internal delivery · 2026-10-31
+
+Build 41 packages the update controls for the existing internal testing groups on Apple and Google. Qualify the actual native app, embedded Watch, signed archives and exported resources, then upload and verify tester availability. Keep existing public release selections. Windows previews retain independent executable build numbers.
+
 ## Update controls · 2026-10-31
 
 Add optional update prompts and manual checks to web/PWA, iOS/iPadOS, Mac, Android, Windows and Watch. Compare public releases numerically, throttle foreground checks and remember dismissal for one day. Web reload is explicit and blocked while reading or using Agent. Native checks open their own store or the Windows download page. Preserve papers, notes, conversations, drafts, accounts and plans. This source round does not upload a native binary or change public release selections. See `docs/app-updates.md`.
