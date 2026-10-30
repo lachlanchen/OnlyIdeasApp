@@ -10,3 +10,18 @@
 "Install OnlyIdeas on your paired Apple Watch first." = "ペアリングしたApple WatchにOnlyIdeasをインストールしてください。";
 "Select a short text passage to send. Equations and figures stay in the full reader." = "送る短い文章を選択してください。数式や図は完全版リーダーで表示します。";
 "Excerpt queued. Open OnlyIdeas on your paired Apple Watch to read it offline." = "抜粋を送信待ちにしました。Apple WatchのOnlyIdeasでオフライン閲覧できます。";
+
+"App updates" = "アプリの更新";
+"Update available" = "更新があります";
+"Check for updates" = "更新を確認";
+"Checking for updates…" = "更新を確認中…";
+"You’re up to date." = "最新の状態です。";
+"Could not check for updates. Try again when online." = "更新を確認できません。オンラインで再度お試しください。";
+"Open store" = "ストアを開く";
+"Later" = "あとで";
+"Installed version" = "現在のバージョン";
+"Update & reload" = "更新して再読み込み";
+"A new version is ready. Update when you have finished reading or writing." = "新しいバージョンがあります。読書や入力を終えてから更新できます。";
+"Return to the library and finish writing before updating." = "ライブラリに戻り、入力を終えてから更新してください。";
+"Could not open the store." = "ストアを開けませんでした。";
+"Update the app from the App Store on your iPhone." = "iPhone の App Store でアプリを更新してください。";

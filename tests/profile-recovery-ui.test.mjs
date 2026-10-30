@@ -20,7 +20,7 @@ test('the actual Profile keeps one account, balance and plan section across resu
  };
  const native=`export const native=false,serviceOrigin='';export const authRevision=async()=>0;export const hasToken=async()=>false;${['saveToken','request','completeSignIn','cancelSignIn','cancelSharedSignIn','signIn','sharedSignIn','openExternal','clearExportCache','exportMarkdown','initNative'].map(n=>`export const ${n}=async()=>{};`).join('')}`;
  const offline=`export const offlineSession=async()=>null;export const downloadedPapers=async()=>[];export const cachedLibrary=async()=>[];${['rememberSession','downloadedPaper','downloadPaper','cacheReading','removeDownload','clearPrivateDownloads','rememberLibrary','reconcileCache','unpinPaper'].map(n=>`export const ${n}=async()=>{};`).join('')}`;
- const result=await build({entryPoints:['src/main.tsx'],bundle:true,write:false,format:'iife',jsx:'automatic',plugins:[{name:'profile-fixture',setup(b){
+ const result=await build({entryPoints:['src/main.tsx'],bundle:true,write:false,format:'iife',jsx:'automatic',define:{__APP_VERSION__:'"1.0.10"',__APP_REVISION__:JSON.stringify('a'.repeat(64))},plugins:[{name:'profile-fixture',setup(b){
   b.onResolve({filter:/^\.\/(api|native|offline)$/},a=>({path:a.path,namespace:'fixture'}));
   b.onResolve({filter:/\.css$|\?url$/},a=>({path:a.path,namespace:'empty'}));
   b.onLoad({filter:/.*/,namespace:'empty'},()=>({contents:'export default "";',loader:'js'}));

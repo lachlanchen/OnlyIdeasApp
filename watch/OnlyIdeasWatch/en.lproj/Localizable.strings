@@ -10,3 +10,18 @@
 "Install OnlyIdeas on your paired Apple Watch first." = "Install OnlyIdeas on your paired Apple Watch first.";
 "Select a short text passage to send. Equations and figures stay in the full reader." = "Select a short text passage to send. Equations and figures stay in the full reader.";
 "Excerpt queued. Open OnlyIdeas on your paired Apple Watch to read it offline." = "Excerpt queued. Open OnlyIdeas on your paired Apple Watch to read it offline.";
+
+"App updates" = "App updates";
+"Update available" = "Update available";
+"Check for updates" = "Check for updates";
+"Checking for updates…" = "Checking for updates…";
+"You’re up to date." = "You’re up to date.";
+"Could not check for updates. Try again when online." = "Could not check for updates. Try again when online.";
+"Open store" = "Open store";
+"Later" = "Later";
+"Installed version" = "Installed version";
+"Update & reload" = "Update & reload";
+"A new version is ready. Update when you have finished reading or writing." = "A new version is ready. Update when you have finished reading or writing.";
+"Return to the library and finish writing before updating." = "Return to the library and finish writing before updating.";
+"Could not open the store." = "Could not open the store.";
+"Update the app from the App Store on your iPhone." = "Update the app from the App Store on your iPhone.";

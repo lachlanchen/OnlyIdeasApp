@@ -53,6 +53,11 @@ public class MainActivity extends AppCompatActivity {
   private LinearLayout creditContainer;
   private String purchaseNotice="";
   private LinearLayout root, header, content, bottom, messages;
+  private LinearLayout updateBanner;
+  private JSONObject updateRelease;
+  private String updateStatus="";
+  private boolean updateChecking=false;
+  private long updateCheckedAt=0;
   private ScrollView chatScroll;
   private EditText composer;
   private String agentDraft="";
@@ -169,6 +174,7 @@ public class MainActivity extends AppCompatActivity {
   @Override
   protected void onResume() {
     super.onResume();
+    checkAppUpdates(false,false);
     if(api!=null&&account!=null){final String session=api.token();io.execute(()->{try{api.jsonBound("/api/lac/activity","POST",object("kind","foreground"),session);}catch(Exception ignored){}});}
     handler.removeCallbacks(poll);
     handler.postDelayed(poll, 2000);
@@ -333,6 +339,7 @@ public class MainActivity extends AppCompatActivity {
     header = row();
     header.setPadding(dp(14), dp(4), dp(10), dp(4));
     root.addView(header);
+    updateBanner=column();root.addView(updateBanner);renderUpdateBanner();
     content = column();
     root.addView(content, new LinearLayout.LayoutParams(-1, 0, 1));
     bottom = row();
@@ -403,6 +410,7 @@ public class MainActivity extends AppCompatActivity {
     }
     quote = ""; paragraphId="";
     page = next;
+    renderUpdateBanner();
     navigateBack.setEnabled(!next.equals("library"));
     content.removeAllViews();
     navigation(
@@ -608,6 +616,37 @@ public class MainActivity extends AppCompatActivity {
         });
   }
 
+  void checkAppUpdates(boolean force,boolean manual) {
+    if(updateChecking||(!force&&System.currentTimeMillis()-updateCheckedAt<21600000L))return;
+    updateChecking=true;updateStatus="Checking for updates…";
+    io.execute(()->{
+      JSONObject release=null;String status;boolean ok=false;
+      java.net.HttpURLConnection connection=null;
+      try {
+        connection=(java.net.HttpURLConnection)new java.net.URL("https://agent.onlyideas.art/updates.json").openConnection();
+        connection.setInstanceFollowRedirects(false);connection.setConnectTimeout(6000);connection.setReadTimeout(6000);connection.setUseCaches(false);connection.setRequestProperty("Cache-Control","no-cache");
+        if(connection.getResponseCode()!=200)throw new IOException("Unavailable");
+        ByteArrayOutputStream bytes=new ByteArrayOutputStream();
+        try(InputStream in=connection.getInputStream()){byte[] buffer=new byte[4096];int n;long deadline=android.os.SystemClock.elapsedRealtime()+12000;while((n=in.read(buffer))!=-1){if(bytes.size()+n>65536||android.os.SystemClock.elapsedRealtime()>deadline)throw new IOException("Invalid response");bytes.write(buffer,0,n);}}
+        JSONObject feed=new JSONObject(bytes.toString("UTF-8"));if(feed.optInt("schema")!=1||!feed.has("android"))throw new IOException("Invalid feed");
+        if(!feed.isNull("android")){JSONObject candidate=feed.getJSONObject("android");Object v=candidate.get("version"),b=candidate.get("build");if(!(v instanceof String)||!(b instanceof String))throw new IOException("Invalid version");if(AppUpdatePolicy.newer((String)v,(String)b,BuildConfig.VERSION_NAME,Integer.toString(BuildConfig.VERSION_CODE)))release=candidate;}
+        ok=true;status=release==null?"You’re up to date.":"Update available";
+      }catch(Exception error){status="Could not check for updates. Try again when online.";}
+      finally{if(connection!=null)connection.disconnect();}
+      JSONObject result=release;String label=status;boolean success=ok;
+      handler.post(()->{if(isDestroyed()||isFinishing())return;updateChecking=false;updateStatus=label;updateCheckedAt=System.currentTimeMillis()-(success?0:20700000L);if(success)updateRelease=result;renderUpdateBanner();if(manual)showUpdateDialog();});
+    });
+  }
+  String updateKey(){return updateRelease==null?"":"android:"+updateRelease.optString("version")+":"+updateRelease.optString("build");}
+  void dismissUpdate(){getPreferences(MODE_PRIVATE).edit().putString("update.release",updateKey()).putLong("update.dismissed",System.currentTimeMillis()).apply();renderUpdateBanner();}
+  void openAppUpdate(){try{startActivity(new Intent(Intent.ACTION_VIEW,android.net.Uri.parse("https://play.google.com/store/apps/details?id=art.onlyideas.app")));}catch(android.content.ActivityNotFoundException error){toast(t("Could not open the store."));}}
+  void showUpdateDialog(){AlertDialog.Builder dialog=new AlertDialog.Builder(this).setTitle(t("App updates")).setMessage(t(updateStatus)+(updateRelease==null?"":" · "+updateRelease.optString("version"))).setNegativeButton(t("Close"),null);if(updateRelease!=null)dialog.setPositiveButton(t("Open store"),(d,w)->openAppUpdate());dialog.show();}
+  void renderUpdateBanner(){
+    if(updateBanner==null)return;updateBanner.removeAllViews();
+    if(updateRelease==null||!(page.equals("library")||page.equals("profile"))||AppUpdatePolicy.snoozed(updateKey(),getPreferences(MODE_PRIVATE).getString("update.release",""),getPreferences(MODE_PRIVATE).getLong("update.dismissed",0),System.currentTimeMillis()))return;
+    LinearLayout card=card();title(card,t("Update available")+" · "+updateRelease.optString("version"),16);LinearLayout actions=row();actions.addView(button(t("Open store"),true,this::openAppUpdate),new LinearLayout.LayoutParams(0,dp(44),1));actions.addView(button(t("Later"),false,this::dismissUpdate),new LinearLayout.LayoutParams(0,dp(44),1));card.addView(actions);updateBanner.addView(card);
+  }
+
   void showLibrary() {
     clear("library");
     LinearLayout c = scrollContent();
@@ -784,6 +823,8 @@ public class MainActivity extends AppCompatActivity {
   void showProfile() {
     clear("profile");
     LinearLayout c = scrollContent();
+    c.addView(button(t("Check for updates"),false,()->checkAppUpdates(true,true)));
+    caption(c,t("Installed version")+": "+BuildConfig.VERSION_NAME+" ("+BuildConfig.VERSION_CODE+")");
     c.addView(button(t("App language"),false,this::chooseLanguage));
     gap(c,10);
     TextView avatar = text(account == null ? "◉" : initial(), 36, true);

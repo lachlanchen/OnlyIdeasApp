@@ -20,6 +20,11 @@ private let ideaGradient = LinearGradient(colors: [Color(red:0.0,green:0.49,blue
 private let accent = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? UIColor(red:0.72,green:0.68,blue:1,alpha:1) : UIColor(red:0.34,green:0.27,blue:0.81,alpha:1) })
 struct NativeReadingApp: View {
   @StateObject private var store = ReadingStore()
+  #if targetEnvironment(macCatalyst)
+  @StateObject private var appUpdates=PublicAppUpdates(feed:"https://agent.onlyideas.art/updates.json",platform:"macos",prefix:"onlyideas.updates")
+  #else
+  @StateObject private var appUpdates=PublicAppUpdates(feed:"https://agent.onlyideas.art/updates.json",platform:"ios",prefix:"onlyideas.updates")
+  #endif
   @State private var tab = 0
   @State private var spaceSection = "saved"
   init() {}
@@ -72,6 +77,9 @@ struct NativeReadingApp: View {
     navigation.id(store.language).environment(\.locale,Locale(identifier:UILanguage.current)).environment(\.layoutDirection,UILanguage.current == "ar" ? .rightToLeft : .leftToRight).environmentObject(store).tint(accent).preferredColorScheme(
       store.appearance == "system" ? nil : store.appearance == "dark" ? .dark : .light
     )
+    .environmentObject(appUpdates)
+    .safeAreaInset(edge:.top) {if appUpdates.showPrompt && tab==0 {NativeUpdateCard().environmentObject(appUpdates)}}
+    .task {await appUpdates.check()}
     .sheet(isPresented: $store.showSignIn) { NativeSignIn().environmentObject(store) }
     .sheet(isPresented: $store.showReport) { ReportContent().environmentObject(store) }
     .onReceive(store.$requestedPlanID) { value in
@@ -83,7 +91,7 @@ struct NativeReadingApp: View {
       if let url = event.object as? URL { if ReadingLink.accepts(url){openReadingLink(url)}else{store.handleSignInURL(url)} }
     }
     .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
-      Task { await store.recordForegroundUse();await store.resumeSignIn() }
+      Task { await appUpdates.check();await store.recordForegroundUse();await store.resumeSignIn() }
     }
     .onChange(of:tab){_ in dismissReadingKeyboard()}
     .onChange(of:store.account?.id){id in if id==nil {ReadingReminder.cancel();store.inboxUnread=0}}
@@ -692,6 +700,7 @@ struct NativeProfile: View {
           systemImage: "lock.doc")
         Label(T("{count} papers cached on this device",["count":String(store.downloads().count)]), systemImage: "arrow.down.circle")
       }
+      Section(T("App updates")) {NativeUpdateControls()}
       Section(T("About")) {
         Text("OnlyIdeas \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "") (\(Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? ""))").font(.headline)
         Text(
@@ -2121,4 +2130,31 @@ struct NativeReadingShare:View {
  @State private var notice=""
  func copy(_ prefix:String=""){UIPasteboard.general.string=(prefix.isEmpty ? "":T(prefix)+"\n")+title+"\n"+url.absoluteString;notice=T("Copied")}
  var body:some View {NavigationView{List{HStack(spacing:12){Image("ChatIcon").resizable().frame(width:48,height:48).cornerRadius(12);VStack(alignment:.leading){Text("OnlyIdeas").font(.caption).foregroundColor(.secondary);Text(title).font(.headline).lineLimit(3)}};Button{system=true}label:{Label(T("Share via…"),systemImage:"square.and.arrow.up")};Button{system=true}label:{Label(T("WeChat · choose in share sheet"),systemImage:"message")};Button{copy();notice=T("Copied. Paste into EchoMind to choose who to send it to.")}label:{Label(T("Copy for EchoMind"),systemImage:"bubble.left.and.bubble.right")};Button{copy("Save this to my reading list:");notice=T("Copied. Paste into AiMemo and review before sending.")}label:{Label(T("AiMemo · save to read later"),systemImage:"bookmark")};Button{copy("Help me explore research ideas from:");notice=T("Copied. Paste into AiMemo and review before sending.")}label:{Label(T("AiMemo · explore ideas"),systemImage:"lightbulb")};Button{copy()}label:{Label(T("Copy link"),systemImage:"doc.on.doc")};if !notice.isEmpty{Text(notice).font(.footnote).foregroundColor(.secondary)}}.navigationTitle(T("Share")).toolbar{Button(T("Done")){dismiss()}}}.navigationViewStyle(.stack).sheet(isPresented:$system){NativeShare(items:[ReadingShareItem(title:title,url:url)])}}
+}
+
+private var onlyIdeasUpdateURL:URL {
+  #if targetEnvironment(macCatalyst)
+  return URL(string:"https://apps.apple.com/app/id6816392935?platform=mac")!
+  #else
+  return URL(string:"https://apps.apple.com/app/id6816392935?platform=iphone")!
+  #endif
+}
+struct NativeUpdateControls:View {
+  @EnvironmentObject var updates:PublicAppUpdates
+  var body:some View {
+    VStack(alignment:.leading,spacing:10) {
+      Text(T(updates.status)).font(.subheadline).foregroundColor(.secondary)
+      Button(T("Check for updates")){Task{await updates.check(force:true)}}.disabled(updates.checking)
+      if let version=updates.version {Link(T("Open store")+" · "+version,destination:onlyIdeasUpdateURL)}
+    }
+  }
+}
+struct NativeUpdateCard:View {
+  @EnvironmentObject var updates:PublicAppUpdates
+  var body:some View {
+    VStack(alignment:.leading,spacing:8) {
+      Text(T("Update available")+" · "+(updates.version ?? "")).font(.headline)
+      HStack {Link(T("Open store"),destination:onlyIdeasUpdateURL);Spacer();Button(T("Later")){updates.dismiss()}}
+    }.padding(12).background(Color(uiColor:.secondarySystemBackground)).cornerRadius(14).padding(.horizontal)
+  }
 }

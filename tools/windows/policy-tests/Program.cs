@@ -10,3 +10,11 @@ var verifier=DesktopPolicy.Proof(RandomNumberGenerator.GetBytes(32));Check(verif
 Check(DesktopPolicy.AuthFlow(new Uri(DesktopPolicy.Origin+"/api/auth/github?flow="+verifier),verifier),"Exact flow");
 Check(!DesktopPolicy.AuthFlow(new Uri(DesktopPolicy.Origin+"/api/auth/github?flow="+verifier+"&next=https://evil.test"),verifier),"No injected callback");
 Console.WriteLine($"{checks} Windows policy checks passed.");
+
+void UpdateCheck(bool ok){if(!ok)throw new Exception("Update policy failed");}
+UpdateCheck(AppUpdatePolicy.Compare("1.10","1.9")>0);UpdateCheck(AppUpdatePolicy.Compare("1.2","1.2.0")==0);
+UpdateCheck(AppUpdatePolicy.Newer("1.1","1","1.0","99"));UpdateCheck(AppUpdatePolicy.Newer("1.1","10","1.1","9"));
+UpdateCheck(!AppUpdatePolicy.Newer("1.0.9","39","1.0.10","40"));UpdateCheck(!AppUpdatePolicy.Newer("1.1","9","1.1","10"));UpdateCheck(!AppUpdatePolicy.Newer("1.1","10","1.1","10"));
+foreach(var invalid in new[]{"bad","1..2","1.2-beta","999999999999"}){try{AppUpdatePolicy.Compare(invalid,"1");throw new Exception("accepted invalid version");}catch(FormatException){}}
+var at=DateTimeOffset.UtcNow;UpdateCheck(AppUpdatePolicy.Snoozed("x","x",at,at.AddSeconds(1)));UpdateCheck(!AppUpdatePolicy.Snoozed("y","x",at,at.AddSeconds(1)));UpdateCheck(!AppUpdatePolicy.Snoozed("x","x",at,at.AddDays(1)));UpdateCheck(!AppUpdatePolicy.Snoozed("x","x",at.AddSeconds(1),at));
+Console.WriteLine("15 Windows update policy checks passed.");

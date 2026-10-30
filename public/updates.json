@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "ios": {
+    "version": "1.0.9",
+    "build": "39"
+  },
+  "macos": {
+    "version": "1.0.9",
+    "build": "39"
+  },
+  "android": {
+    "version": "1.0.7",
+    "build": "32"
+  },
+  "windows": {
+    "version": "1.0.10",
+    "build": "0"
+  }
+}

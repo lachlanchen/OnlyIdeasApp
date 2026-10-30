@@ -1,5 +1,9 @@
 # OnlyIdeas · product contract
 
+## Update controls · 2026-10-31
+
+Add optional update prompts and manual checks to web/PWA, iOS/iPadOS, Mac, Android, Windows and Watch. Compare public releases numerically, throttle foreground checks and remember dismissal for one day. Web reload is explicit and blocked while reading or using Agent. Native checks open their own store or the Windows download page. Preserve papers, notes, conversations, drafts, accounts and plans. This source round does not upload a native binary or change public release selections. See `docs/app-updates.md`.
+
 ## Internal Apple delivery · 2026-10-30
 
 OnlyIdeas 1.0.10 (40) is available in the existing internal TestFlight group on

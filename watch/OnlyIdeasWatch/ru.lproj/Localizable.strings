@@ -10,3 +10,18 @@
 "Install OnlyIdeas on your paired Apple Watch first." = "Сначала установите OnlyIdeas на связанные Apple Watch.";
 "Select a short text passage to send. Equations and figures stay in the full reader." = "Выберите небольшой текстовый отрывок. Формулы и рисунки остаются в полной читалке.";
 "Excerpt queued. Open OnlyIdeas on your paired Apple Watch to read it offline." = "Отрывок поставлен в очередь. Откройте OnlyIdeas на Apple Watch, чтобы читать без сети.";
+
+"App updates" = "Обновления приложения";
+"Update available" = "Доступно обновление";
+"Check for updates" = "Проверить обновления";
+"Checking for updates…" = "Проверка обновлений…";
+"You’re up to date." = "Установлена последняя версия.";
+"Could not check for updates. Try again when online." = "Не удалось проверить обновления. Повторите при подключении к интернету.";
+"Open store" = "Открыть магазин";
+"Later" = "Позже";
+"Installed version" = "Установленная версия";
+"Update & reload" = "Обновить и перезагрузить";
+"A new version is ready. Update when you have finished reading or writing." = "Новая версия готова. Обновите приложение, закончив чтение или ввод текста.";
+"Return to the library and finish writing before updating." = "Вернитесь в библиотеку и закончите ввод перед обновлением.";
+"Could not open the store." = "Не удалось открыть магазин.";
+"Update the app from the App Store on your iPhone." = "Обновите приложение в App Store на iPhone.";

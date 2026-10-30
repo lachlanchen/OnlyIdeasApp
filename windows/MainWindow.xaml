@@ -6,6 +6,7 @@
      <Button Content="‹" ToolTip="Back (Alt+Left)" AutomationProperties.Name="Back" Click="Back_Click" Padding="12,4" Margin="0,0,6,0"/>
      <Button Content="Home" Click="Home_Click" Padding="10,4" Margin="0,0,6,0"/>
      <Button Content="Refresh" Click="Refresh_Click" Padding="10,4"/>
+     <Button x:Name="CheckUpdatesButton" Content="↑" ToolTip="Check for updates" AutomationProperties.Name="Check for updates" Click="CheckUpdates_Click" Padding="10,4" Margin="6,0,0,0"/>
     </StackPanel>
     <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
      <Button x:Name="SignInButton" Content="Sign in" Click="SignIn_Click" Padding="12,4" Margin="6,0,0,0"/>
@@ -13,6 +14,12 @@
     </StackPanel>
     <TextBlock x:Name="Status" Text="" VerticalAlignment="Center" Margin="12,0" TextTrimming="CharacterEllipsis" AutomationProperties.LiveSetting="Polite"/>
    </DockPanel>
+  </Border>
+  <Border x:Name="UpdateBanner" DockPanel.Dock="Top" Visibility="Collapsed" Background="#F2F0FA" Padding="12">
+   <StackPanel>
+    <TextBlock x:Name="UpdateText" FontWeight="SemiBold" TextWrapping="Wrap" Foreground="#29243A" AutomationProperties.LiveSetting="Polite"/>
+    <WrapPanel Margin="0,8,0,0"><Button Content="Open download page" Click="OpenUpdate_Click" Padding="12,6" Margin="0,0,8,0"/><Button Content="Later" Click="LaterUpdate_Click" Padding="12,6"/></WrapPanel>
+   </StackPanel>
   </Border>
   <wv:WebView2 x:Name="Reader"/>
  </DockPanel>

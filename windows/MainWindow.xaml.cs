@@ -16,7 +16,7 @@ public partial class MainWindow : Window {
  readonly string qaID=Guid.NewGuid().ToString("N");
  bool selfTestStarted;
  readonly HttpClient http=new(new HttpClientHandler {AllowAutoRedirect=false,UseCookies=false}) {Timeout=TimeSpan.FromSeconds(30)};
- public MainWindow(){InitializeComponent();if(selfTest){ShowActivated=false;ShowInTaskbar=false;Opacity=0;Left=-16000;Top=-16000;}Loaded+=Initialize;Closed+=(_,_)=>{closed=true;login?.Cancel();Reader.Dispose();http.Dispose();};PreviewKeyDown+=Keys;}
+ public MainWindow(){InitializeComponent();if(!selfTest)SetupUpdates();if(selfTest){ShowActivated=false;ShowInTaskbar=false;Opacity=0;Left=-16000;Top=-16000;}Loaded+=Initialize;Closed+=(_,_)=>{closed=true;login?.Cancel();Reader.Dispose();http.Dispose();};PreviewKeyDown+=Keys;}
  async void Initialize(object sender,RoutedEventArgs e){
   try {
    var profile=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"LazyingArt","OnlyIdeas",selfTest?"QA/"+qaID:"WebView2");

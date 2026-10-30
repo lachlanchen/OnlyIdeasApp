@@ -1149,3 +1149,48 @@ struct PaperProvenance:Codable {var licenseUrl:String?;var changes:String?}
 
 // Cold-launch intent is consumed by the scene after the native view subscribes.
 @MainActor enum ReadingLink {static var pending:URL?;static func accepts(_ url:URL)->Bool{url.scheme=="art.onlyideas.app" && ["paper","research"].contains(url.host ?? "") && url.query==nil && url.fragment==nil && url.path.range(of:"^/[A-Za-z0-9-]{1,120}$",options:.regularExpression) != nil}}
+
+// Public release checks are independent of accounts, papers and purchases.
+@MainActor
+final class PublicAppUpdates: ObservableObject {
+  @Published var version: String?
+  @Published var status = ""
+  @Published private(set) var checking = false
+  @Published private var snoozed = false
+  private var checkedAt = Date.distantPast
+  private let feed: String
+  private let platform: String
+  private let prefix: String
+  private var releaseKey = ""
+  init(feed:String, platform:String, prefix:String) { self.feed=feed;self.platform=platform;self.prefix=prefix }
+  var showPrompt:Bool {version != nil && !snoozed}
+  static func compare(_ a:String,_ b:String)->Int? {
+    func parts(_ value:String)->[Int]? {let values=value.split(separator:".",omittingEmptySubsequences:false);guard (1...4).contains(values.count),values.allSatisfy({!$0.isEmpty && $0.count<=8 && $0.allSatisfy({$0.isASCII && $0.isNumber})}) else{return nil};return values.compactMap{Int($0)}}
+    guard let left=parts(a),let right=parts(b) else{return nil}
+    for i in 0..<max(left.count,right.count) {let x=i<left.count ? left[i] : 0,y=i<right.count ? right[i] : 0;if x != y{return x>y ? 1 : -1}}
+    return 0
+  }
+  func dismiss() {UserDefaults.standard.set(releaseKey,forKey:prefix+".release");UserDefaults.standard.set(Date().timeIntervalSince1970,forKey:prefix+".dismissed");snoozed=true}
+  func check(force:Bool=false) async {
+    guard !checking else{return}
+    let now=Date()
+    guard force || now.timeIntervalSince(checkedAt)>=21600 else {refreshSnooze();return}
+    checking=true;status="Checking for updates…"
+    defer {checking=false}
+    do {
+      let config=URLSessionConfiguration.ephemeral;config.httpCookieStorage=nil;config.httpShouldSetCookies=false;config.timeoutIntervalForRequest=12;config.timeoutIntervalForResource=15
+      let session=URLSession(configuration:config);defer{session.finishTasksAndInvalidate()}
+      let (data,response)=try await session.data(for:URLRequest(url:URL(string:feed)!,cachePolicy:.reloadIgnoringLocalCacheData,timeoutInterval:12))
+      guard let http=response as? HTTPURLResponse,http.statusCode==200,data.count<=65536,let object=try JSONSerialization.jsonObject(with:data) as? [String:Any],object["schema"] as? Int==1 else{throw URLError(.badServerResponse)}
+      guard let entry=object[platform] else{throw URLError(.cannotParseResponse)}
+      if entry is NSNull {version=nil;status="You’re up to date.";checkedAt=now;return}
+      guard let release=entry as? [String:Any],let available=release["version"] as? String,let build=release["build"] as? String,
+        let installed=Bundle.main.object(forInfoDictionaryKey:"CFBundleShortVersionString") as? String,
+        let installedBuild=Bundle.main.object(forInfoDictionaryKey:"CFBundleVersion") as? String,
+        let v=Self.compare(available,installed),let b=Self.compare(build,installedBuild) else{throw URLError(.cannotParseResponse)}
+      version=(v>0 || (v==0 && b>0)) ? available : nil;releaseKey=platform+":"+available+":"+build;refreshSnooze()
+      status=version == nil ? "You’re up to date." : "Update available";checkedAt=now
+    } catch {status="Could not check for updates. Try again when online.";checkedAt=now.addingTimeInterval(-20700)}
+  }
+  private func refreshSnooze(){let at=UserDefaults.standard.double(forKey:prefix+".dismissed"),now=Date().timeIntervalSince1970;snoozed=UserDefaults.standard.string(forKey:prefix+".release")==releaseKey && at>0 && at<=now && now-at<86400}
+}
