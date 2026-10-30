@@ -1225,7 +1225,8 @@ struct NativeDocument: UIViewRepresentable {
           do {result=try await handler(resource,method,data["body"])} catch {failure=error.localizedDescription}
           guard identity==revision,account==parent.readerAccount else {return}
           if let bytes=try? JSONSerialization.data(withJSONObject:[id,result,failure as Any? ?? NSNull()]),let json=String(data:bytes,encoding:.utf8) {
-            view.evaluateJavaScript("window.OnlyIdeasReaderReply && window.OnlyIdeasReaderReply(...\(json))")
+            _ = try? await view.evaluateJavaScript(
+              "window.OnlyIdeasReaderReply && window.OnlyIdeasReaderReply(...\(json))")
           }
         }
       }
@@ -1899,7 +1900,8 @@ struct NativeReadingPreferences:View {
    Button(T("Restore recommended defaults")){prefs.topics=defaults["topics"]as?[String];prefs.journals=defaults["journals"]as?[String];prefs.journalScope="selected";prefs.interests="";prefs.discipline=""}
   }
   if !notice.isEmpty {Text(T(notice));Button(T("Reload settings")){Task{await load()}}}
-  Button(T(saving ? "Saving…":"Save preferences")){Task{await save()}}.disabled(!ready||saving||!valid||(prefs.journalScope != "all" && (prefs.journals ?? []).isEmpty))
+  Button(T(saving ? "Saving…":"Save preferences")){Task{await save()}}
+   .disabled(!ready || saving || !valid || (prefs.journalScope != "all" && (prefs.journals ?? []).isEmpty))
  }.navigationTitle(T("Tune your feed")).toolbar{Button(T("Done")){dismiss()}}.task{await load()}.onChange(of:store.account?.id){_ in dismiss()}}
  func toggle(_ ids:[String],_ id:String)->[String]{ids.contains(id) ? ids.filter{$0 != id}:ids+[id]}
  func chips(_ options:[PreferenceOption],selected:[String],choose:@escaping(String)->Void)->some View {
