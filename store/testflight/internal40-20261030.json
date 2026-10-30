@@ -1,0 +1,94 @@
+{
+  "verifiedAt": "2026-10-30T01:35:17.222089+00:00",
+  "source": "a4d88a8f3fb812c4e28422b8f6aa511b81cdb7ba",
+  "builds": [
+    {
+      "platform": "MAC_OS",
+      "id": "aef83797-1fa8-4fc8-9b6c-5637a2d50c00",
+      "version": "1.0.10",
+      "build": "40",
+      "processing": "VALID",
+      "internal": "IN_BETA_TESTING"
+    },
+    {
+      "platform": "IOS",
+      "id": "81e20fe4-3eba-4ac3-9323-42a1367eeece",
+      "version": "1.0.10",
+      "build": "40",
+      "processing": "VALID",
+      "internal": "IN_BETA_TESTING"
+    }
+  ],
+  "internalGroup": "aa16986d-2d1d-443b-9cf8-99677d3f7a68",
+  "existingTesterCount": 1,
+  "nativeUISelectors": [
+    "NativeUITests/NativeUITests/testAdaptiveComposerPreservesDraft",
+    "NativeUITests/NativeUITests/testInterestPromptPreservesDraft",
+    "NativeUITests/NativeUITests/testReaderToolsAndPrivateNotebook"
+  ],
+  "appTestsPassed": 358,
+  "artifacts": [
+    {
+      "platform": "ios",
+      "source": "a4d88a8f3fb812c4e28422b8f6aa511b81cdb7ba",
+      "version": "1.0.10",
+      "build": "40",
+      "sha256": "80fa3407f14b5c6893612368261c59c45d2cc3657cd43a9c1f17ad704ca60141",
+      "bytes": 14840822,
+      "archive": {
+        "bundle": "art.onlyideas.app",
+        "resources": 31,
+        "signer": "Q8M2S2FY77",
+        "watch": {
+          "CFBundleIdentifier": "art.onlyideas.app.watchkitapp",
+          "CFBundleShortVersionString": "1.0.10",
+          "CFBundleVersion": "40",
+          "WKCompanionAppBundleIdentifier": "art.onlyideas.app"
+        }
+      },
+      "exported": {
+        "bundle": "art.onlyideas.app",
+        "resources": 31,
+        "signer": "Q8M2S2FY77",
+        "watch": {
+          "CFBundleIdentifier": "art.onlyideas.app.watchkitapp",
+          "CFBundleShortVersionString": "1.0.10",
+          "CFBundleVersion": "40",
+          "WKCompanionAppBundleIdentifier": "art.onlyideas.app"
+        }
+      }
+    },
+    {
+      "platform": "macos",
+      "source": "a4d88a8f3fb812c4e28422b8f6aa511b81cdb7ba",
+      "version": "1.0.10",
+      "build": "40",
+      "sha256": "4f2812cb7b63e9f658367bde1cab99cfdd213edc2c3f806706649bdaba3b0323",
+      "bytes": 13845051,
+      "archive": {
+        "bundle": "art.onlyideas.app",
+        "resources": 31,
+        "signer": "Q8M2S2FY77",
+        "machO": {
+          "arm64": "15.0",
+          "x86_64": "15.0"
+        }
+      },
+      "exported": {
+        "bundle": "art.onlyideas.app",
+        "resources": 31,
+        "signer": "Q8M2S2FY77",
+        "machO": {
+          "arm64": "15.0",
+          "x86_64": "15.0"
+        }
+      }
+    }
+  ],
+  "formalStoreSelectionsUnchanged": true,
+  "publicReviewSubmitted": false,
+  "runtimeTestGaps": [
+    "Physical iPhone Duo and official fold poses",
+    "Fresh macOS Monterey runtime in this round"
+  ]
+}

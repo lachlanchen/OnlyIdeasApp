@@ -1,5 +1,17 @@
 # OnlyIdeas · product contract
 
+## Internal Apple delivery · 2026-10-30
+
+OnlyIdeas 1.0.10 (40) is available in the existing internal TestFlight group on
+iOS/iPadOS and macOS; the iOS package includes Watch. Both builds are `VALID`
+and `IN_BETA_TESTING`. This delivers the reader tools, adaptive drafts and feed
+preferences described below. Native testing also corrected search-field focus
+on phones. Existing public store versions retain their selected builds.
+
+The Windows x64 preview is published at
+[LazyingArt downloads](https://lazying.art/downloads/windows/#onlyideas).
+See `docs/internal-build40-20261030.md` for test results and runtime limits.
+
 ## Reader tools and Windows · 2026-10-29
 
 The owner requests highlights, private notes, paper contents/search, figure zoom
