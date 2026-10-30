@@ -47,7 +47,7 @@ export function mountReaderTools(root:HTMLElement,options:{revision:string;langu
  const searchInput=document.createElement('input');searchInput.type='search';searchInput.maxLength=200;searchInput.placeholder=t('Search this paper');searchInput.setAttribute('aria-label',t('Search this paper'))
  const count=document.createElement('span');count.setAttribute('role','status')
  const go=(delta:number)=>{if(hits.length){current=(current+delta+hits.length)%hits.length;hits[current].scrollIntoView({block:'center'});hits.forEach((h,i)=>h.classList.toggle('reader-current',i===current))}count.textContent=hits.length?`${current+1} / ${hits.length}`:t('No matches')}
- button('Search',()=>{search.hidden=!search.hidden;if(!search.hidden)searchInput.focus();else{query='';searchInput.value='';redraw()}})
+ button('Search',()=>{search.hidden=!search.hidden;if(!search.hidden)searchInput.focus({preventScroll:true});else{query='';searchInput.value='';redraw()}})
  search.append(searchInput,count);button('Previous',()=>go(-1),search);button('Next',()=>go(1),search);button('Done',()=>{search.hidden=true;query='';searchInput.value='';redraw()},search)
  on(searchInput,'input',()=>{query=searchInput.value.trim();current=0;redraw();go(0)})
  on(searchInput,'keydown',((e:KeyboardEvent)=>{if(e.key==='Enter'){e.preventDefault();go(e.shiftKey?-1:1)}}) as EventListener)
