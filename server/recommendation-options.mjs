@@ -29,7 +29,7 @@ export function recommendationSelection(p={}) {
 }
 export function recommendationLanes(p={}) {
  const selection=recommendationSelection(p),groups=selection.topics.map(id=>recommendationTopics.find(t=>t.id===id)).filter(Boolean);
- const custom=selection.interests.split(/[,;，；]/).map(s=>s.trim()).filter(Boolean).slice(0,6);
+ const custom=selection.interests.split(/[,;，；]/).map(s=>s.trim()).filter(Boolean).slice(0,8);
  groups.push(...custom.map(name=>({name,terms:[name]})));
  const buckets=Array.from({length:Math.min(3,groups.length)},()=>({name:[],terms:[]}));
  groups.forEach((group,i)=>{buckets[i%buckets.length].name.push(group.name);buckets[i%buckets.length].terms.push(...group.terms)});

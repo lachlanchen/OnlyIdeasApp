@@ -1,0 +1,20 @@
+{
+  "status": "LOCAL_REVIEWED_DRAFT_NOT_UPLOADED",
+  "channel": "actual ResearchPreferences component with synthetic account and journal lookup fixture",
+  "sourceNativeBuild": "none; cumulative source round after41",
+  "privateData": false,
+  "screenshots": [
+    {
+      "file": "320-en.png",
+      "sha256": "74c7cf24aea7008c9eaeed1eae962a670665236972235e72fd142f0727cc9870"
+    },
+    {
+      "file": "390-zh-Hans.png",
+      "sha256": "f4a7acc3b0343768fe0d2d1907df86904b3c953017f3c3b5952b24ebdac505ee"
+    },
+    {
+      "file": "1024-en.png",
+      "sha256": "c034a0c665a32943bfa3142598d60e0a5a3ac42cee4f868203e2e500f236a0b3"
+    }
+  ]
+}

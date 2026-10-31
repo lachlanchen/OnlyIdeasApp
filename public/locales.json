@@ -892,7 +892,11 @@
     "A new version is ready. Update when you have finished reading or writing.": "A new version is ready. Update when you have finished reading or writing.",
     "Return to the library and finish writing before updating.": "Return to the library and finish writing before updating.",
     "Could not open the store.": "Could not open the store.",
-    "Update the app from the App Store on your iPhone.": "Update the app from the App Store on your iPhone."
+    "Update the app from the App Store on your iPhone.": "Update the app from the App Store on your iPhone.",
+    "Add a journal": "Add a journal",
+    "Find journal": "Find journal",
+    "Journal name or ISSN": "Journal name or ISSN",
+    "No verified journal matched. Try its full name or ISSN.": "No verified journal matched. Try its full name or ISSN."
   },
   "zh-Hans": {
     "Choose a valid PDF.": "请选择有效的 PDF。",
@@ -1812,7 +1816,11 @@
     "A new version is ready. Update when you have finished reading or writing.": "新版已准备好，读完或写完后可更新。",
     "Return to the library and finish writing before updating.": "请返回书库并完成编辑后再更新。",
     "Could not open the store.": "无法打开应用商店。",
-    "Update the app from the App Store on your iPhone.": "请在 iPhone 的 App Store 中更新应用。"
+    "Update the app from the App Store on your iPhone.": "请在 iPhone 的 App Store 中更新应用。",
+    "Add a journal": "添加期刊",
+    "Find journal": "查找期刊",
+    "Journal name or ISSN": "期刊名称或 ISSN",
+    "No verified journal matched. Try its full name or ISSN.": "未找到匹配的期刊。请使用完整名称或 ISSN。"
   },
   "zh-Hant": {
     ". Public comments are reviewed.": "公開評論會經過審核。",
@@ -2732,7 +2740,11 @@
     "A new version is ready. Update when you have finished reading or writing.": "新版已準備好，讀完或寫完後可更新。",
     "Return to the library and finish writing before updating.": "請返回書庫並完成編輯後再更新。",
     "Could not open the store.": "無法開啟應用程式商店。",
-    "Update the app from the App Store on your iPhone.": "請在 iPhone 的 App Store 中更新應用程式。"
+    "Update the app from the App Store on your iPhone.": "請在 iPhone 的 App Store 中更新應用程式。",
+    "Add a journal": "新增期刊",
+    "Find journal": "查找期刊",
+    "Journal name or ISSN": "期刊名稱或 ISSN",
+    "No verified journal matched. Try its full name or ISSN.": "未找到相符的期刊。請使用完整名稱或 ISSN。"
   },
   "ja": {
     ". Public comments are reviewed.": "公開コメントは審査されます。",
@@ -3652,7 +3664,11 @@
     "A new version is ready. Update when you have finished reading or writing.": "新しいバージョンがあります。読書や入力を終えてから更新できます。",
     "Return to the library and finish writing before updating.": "ライブラリに戻り、入力を終えてから更新してください。",
     "Could not open the store.": "ストアを開けませんでした。",
-    "Update the app from the App Store on your iPhone.": "iPhone の App Store でアプリを更新してください。"
+    "Update the app from the App Store on your iPhone.": "iPhone の App Store でアプリを更新してください。",
+    "Add a journal": "ジャーナルを追加",
+    "Find journal": "ジャーナルを検索",
+    "Journal name or ISSN": "ジャーナル名または ISSN",
+    "No verified journal matched. Try its full name or ISSN.": "一致するジャーナルが見つかりません。正式名称または ISSN を入力してください。"
   },
   "ko": {
     ". Public comments are reviewed.": "공개 댓글은 검토됩니다.",
@@ -4572,7 +4588,11 @@
     "A new version is ready. Update when you have finished reading or writing.": "새 버전이 준비되었습니다. 읽기나 작성을 마친 후 업데이트하세요.",
     "Return to the library and finish writing before updating.": "라이브러리로 돌아가 작성을 마친 후 업데이트하세요.",
     "Could not open the store.": "스토어를 열 수 없습니다.",
-    "Update the app from the App Store on your iPhone.": "iPhone의 App Store에서 앱을 업데이트하세요."
+    "Update the app from the App Store on your iPhone.": "iPhone의 App Store에서 앱을 업데이트하세요.",
+    "Add a journal": "학술지 추가",
+    "Find journal": "학술지 찾기",
+    "Journal name or ISSN": "학술지 이름 또는 ISSN",
+    "No verified journal matched. Try its full name or ISSN.": "일치하는 학술지를 찾지 못했습니다. 전체 이름이나 ISSN을 입력하세요."
   },
   "ar": {
     ". Public comments are reviewed.": "التعليقات العامة تخضع للمراجعة.",
@@ -5492,7 +5512,11 @@
     "A new version is ready. Update when you have finished reading or writing.": "الإصدار الجديد جاهز. حدّث بعد الانتهاء من القراءة أو الكتابة.",
     "Return to the library and finish writing before updating.": "عُد إلى المكتبة وأنهِ الكتابة قبل التحديث.",
     "Could not open the store.": "تعذر فتح المتجر.",
-    "Update the app from the App Store on your iPhone.": "حدّث التطبيق من App Store على iPhone."
+    "Update the app from the App Store on your iPhone.": "حدّث التطبيق من App Store على iPhone.",
+    "Add a journal": "إضافة مجلة",
+    "Find journal": "البحث عن مجلة",
+    "Journal name or ISSN": "اسم المجلة أو ISSN",
+    "No verified journal matched. Try its full name or ISSN.": "لم نعثر على مجلة مطابقة. جرّب الاسم الكامل أو رقم ISSN."
   },
   "fr": {
     ". Public comments are reviewed.": ". Les commentaires publics sont examinés.",
@@ -6412,7 +6436,11 @@
     "A new version is ready. Update when you have finished reading or writing.": "Une nouvelle version est prête. Mettez à jour après avoir fini de lire ou d’écrire.",
     "Return to the library and finish writing before updating.": "Revenez à la bibliothèque et terminez votre texte avant la mise à jour.",
     "Could not open the store.": "Impossible d’ouvrir la boutique.",
-    "Update the app from the App Store on your iPhone.": "Mettez à jour l’app dans l’App Store de votre iPhone."
+    "Update the app from the App Store on your iPhone.": "Mettez à jour l’app dans l’App Store de votre iPhone.",
+    "Add a journal": "Ajouter une revue",
+    "Find journal": "Rechercher une revue",
+    "Journal name or ISSN": "Nom de la revue ou ISSN",
+    "No verified journal matched. Try its full name or ISSN.": "Aucune revue correspondante. Essayez le nom complet ou le numéro ISSN."
   },
   "de": {
     ". Public comments are reviewed.": "Öffentliche Kommentare werden geprüft.",
@@ -7332,7 +7360,11 @@
     "A new version is ready. Update when you have finished reading or writing.": "Eine neue Version ist bereit. Aktualisiere nach dem Lesen oder Schreiben.",
     "Return to the library and finish writing before updating.": "Kehre zur Bibliothek zurück und beende deinen Text vor dem Update.",
     "Could not open the store.": "Der Store konnte nicht geöffnet werden.",
-    "Update the app from the App Store on your iPhone.": "Aktualisiere die App im App Store auf deinem iPhone."
+    "Update the app from the App Store on your iPhone.": "Aktualisiere die App im App Store auf deinem iPhone.",
+    "Add a journal": "Zeitschrift hinzufügen",
+    "Find journal": "Zeitschrift suchen",
+    "Journal name or ISSN": "Zeitschriftenname oder ISSN",
+    "No verified journal matched. Try its full name or ISSN.": "Keine passende Zeitschrift gefunden. Versuche den vollständigen Namen oder die ISSN."
   },
   "es": {
     ". Public comments are reviewed.": "Los comentarios públicos se revisan.",
@@ -8252,7 +8284,11 @@
     "A new version is ready. Update when you have finished reading or writing.": "Hay una nueva versión. Actualiza cuando termines de leer o escribir.",
     "Return to the library and finish writing before updating.": "Vuelve a la biblioteca y termina de escribir antes de actualizar.",
     "Could not open the store.": "No se pudo abrir la tienda.",
-    "Update the app from the App Store on your iPhone.": "Actualiza la app desde App Store en tu iPhone."
+    "Update the app from the App Store on your iPhone.": "Actualiza la app desde App Store en tu iPhone.",
+    "Add a journal": "Añadir revista",
+    "Find journal": "Buscar revista",
+    "Journal name or ISSN": "Nombre de la revista o ISSN",
+    "No verified journal matched. Try its full name or ISSN.": "No se encontró una revista coincidente. Prueba con el nombre completo o el ISSN."
   },
   "ru": {
     ". Public comments are reviewed.": "Публичные комментарии проходят проверку.",
@@ -9172,7 +9208,11 @@
     "A new version is ready. Update when you have finished reading or writing.": "Новая версия готова. Обновите приложение, закончив чтение или ввод текста.",
     "Return to the library and finish writing before updating.": "Вернитесь в библиотеку и закончите ввод перед обновлением.",
     "Could not open the store.": "Не удалось открыть магазин.",
-    "Update the app from the App Store on your iPhone.": "Обновите приложение в App Store на iPhone."
+    "Update the app from the App Store on your iPhone.": "Обновите приложение в App Store на iPhone.",
+    "Add a journal": "Добавить журнал",
+    "Find journal": "Найти журнал",
+    "Journal name or ISSN": "Название журнала или ISSN",
+    "No verified journal matched. Try its full name or ISSN.": "Совпадений не найдено. Введите полное название или ISSN."
   },
   "vi": {
     ". Public comments are reviewed.": "Bình luận công khai sẽ được kiểm duyệt.",
@@ -10092,6 +10132,10 @@
     "A new version is ready. Update when you have finished reading or writing.": "Phiên bản mới đã sẵn sàng. Hãy cập nhật sau khi đọc hoặc viết xong.",
     "Return to the library and finish writing before updating.": "Quay lại thư viện và viết xong trước khi cập nhật.",
     "Could not open the store.": "Không thể mở cửa hàng.",
-    "Update the app from the App Store on your iPhone.": "Cập nhật ứng dụng từ App Store trên iPhone."
+    "Update the app from the App Store on your iPhone.": "Cập nhật ứng dụng từ App Store trên iPhone.",
+    "Add a journal": "Thêm tạp chí",
+    "Find journal": "Tìm tạp chí",
+    "Journal name or ISSN": "Tên tạp chí hoặc ISSN",
+    "No verified journal matched. Try its full name or ISSN.": "Không tìm thấy tạp chí phù hợp. Hãy thử tên đầy đủ hoặc ISSN."
   }
 }

@@ -1,5 +1,15 @@
 # OnlyIdeas · product contract
 
+## Dynamic journals and interests · 2026-10-31
+
+Use one account-scoped validation gate for settings and chat. Resolve arbitrary
+journal names or ISSNs to canonical source IDs, clarify ambiguous matches, retain
+Nature/Science/Cell defaults, and deduplicate interests. Keep at most 24 selected
+journals and eight custom interests within 120 characters; prune unused custom
+journal metadata. Display only verified, year-tagged publisher impact factors.
+Preserve saved preferences during failed lookups and concurrent edits. See
+`docs/journal-preferences.md`.
+
 ## Update-prompt internal delivery · 2026-10-31
 
 Build 41 packages the update controls for the existing internal testing groups on Apple and Google. Qualify the actual native app, embedded Watch, signed archives and exported resources, then upload and verify tester availability. Keep existing public release selections. Windows previews retain independent executable build numbers.

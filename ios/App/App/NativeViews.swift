@@ -1779,7 +1779,8 @@ struct SpaceEvent:Decodable,Identifiable {
  var actor:String?;var read:Bool?;var active:Bool?;var message:String?;var state:String?;var paperId:String?
  var label:String {kind=="comment" ? "New comment":kind=="like" ? "New like":kind=="fetch" ? "Paper request":kind=="saved" ? (active==true ? "Saved":"Removed from Saved"):(active==true ? "Liked":"Removed from Liked")}
 }
-struct PreferenceOption:Decodable,Identifiable {var id:String;var name:String}
+struct JournalImpactFactor:Decodable {var value:Double;var year:Int;var source:String}
+struct PreferenceOption:Decodable,Identifiable {var id:String;var name:String;var impactFactor:JournalImpactFactor?}
 struct ReadingPreferences:Codable {
  var topics:[String]?;var journals:[String]?;var journalScope:String?;var revision:String?
  var interests="";var discipline="";var language="en";var dailyEnabled=false;var dailyTime="09:00";var timezone="UTC";var commentAlerts=true;var likeAlerts=true
@@ -1915,7 +1916,7 @@ struct NativeReadingPreferences:View {
  func toggle(_ ids:[String],_ id:String)->[String]{ids.contains(id) ? ids.filter{$0 != id}:ids+[id]}
  func chips(_ options:[PreferenceOption],selected:[String],choose:@escaping(String)->Void)->some View {
   LazyVGrid(columns:[GridItem(.adaptive(minimum:140),spacing:8)],alignment:.leading,spacing:8){ForEach(options){option in
-   Button{choose(option.id)}label:{HStack(alignment:.top,spacing:6){Image(systemName:selected.contains(option.id) ? "checkmark.circle.fill":"circle");Text(option.name=="Proceedings of the National Academy of Sciences" ? "PNAS":T(option.name)).multilineTextAlignment(.leading);Spacer(minLength:0)}.font(.subheadline).padding(10).frame(maxWidth:.infinity,alignment:.leading).background(selected.contains(option.id) ? accent.opacity(0.13):Color.secondary.opacity(0.06)).cornerRadius(12)}.buttonStyle(.plain).accessibilityAddTraits(selected.contains(option.id) ? .isSelected:[])
+   Button{choose(option.id)}label:{HStack(alignment:.top,spacing:6){Image(systemName:selected.contains(option.id) ? "checkmark.circle.fill":"circle");VStack(alignment:.leading,spacing:3){Text(option.name=="Proceedings of the National Academy of Sciences" ? "PNAS":T(option.name)).multilineTextAlignment(.leading);if let metric=option.impactFactor {Text("JIF \(metric.value, specifier:"%.1f") · \(String(metric.year))").font(.caption2).foregroundColor(.secondary)}};Spacer(minLength:0)}.font(.subheadline).padding(10).frame(maxWidth:.infinity,alignment:.leading).background(selected.contains(option.id) ? accent.opacity(0.13):Color.secondary.opacity(0.06)).cornerRadius(12)}.buttonStyle(.plain).accessibilityAddTraits(selected.contains(option.id) ? .isSelected:[])
   }}
  }
  func load()async{let expected=store.account?.id;owner=expected;ready=false;notice="";do{

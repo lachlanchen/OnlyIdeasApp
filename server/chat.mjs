@@ -1,6 +1,6 @@
 import {readPreferences,savePreferences} from './reading-preferences.mjs';
-import {localPreferenceCommand,preferenceIntent,validatedPreferencePatch,preferenceSummary} from './preference-commands.mjs';
-import {recommendationOptions} from './recommendation-options.mjs';
+import {localPreferenceCommand,dynamicPreferenceCommand,preferenceIntent,validatedPreferencePatch,preferenceSummary} from './preference-commands.mjs';
+import {createPreferenceGate} from './research-preference-gate.mjs';
 import {resolveChatReferences} from './chat-references.mjs';
 import {createResearchPreferences} from './research-preferences.mjs';
 import {sharingConsent} from './sharing-consent.mjs';
@@ -15,7 +15,7 @@ import { requireValue, hash, languages } from './domain.mjs';
 import { activePlan } from './billing-ledger.mjs';
 import { canReusePaper } from './import-reuse.mjs';
 
-export function createChats(store, config, agentActions) {
+export function createChats(store, config, agentActions,preferences=createPreferenceGate(store)) {
   const db = store.db;
   const interests=createResearchPreferences(store);
   db.exec(`CREATE TABLE IF NOT EXISTS chats(id TEXT PRIMARY KEY, owner TEXT NOT NULL, title TEXT NOT NULL, created INTEGER NOT NULL);
@@ -77,13 +77,16 @@ export function createChats(store, config, agentActions) {
         for(const id of ids)attachment(store,id,user.id);requireValue(body.text.trim()||ids.length,'Write a message or attach a file.');
         const context=resolveChatReferences(store,user.id,id,body);
         const text=body.text.trim()||'Help me understand these files.';
-        const command=!ids.length&&!context.references.length&&!context.quote?localPreferenceCommand(text,readPreferences(store,user)):null;
+        let command=!ids.length&&!context.references.length&&!context.quote?localPreferenceCommand(text,readPreferences(store,user),preferences.options(user)):null;
+        if(command?.plan)command=dynamicPreferenceCommand(text,readPreferences(store,user))||command;
         if(command&&!command.plan){
+          const prepared=command.show?null:await preferences.prepare(user,validatedPreferencePatch(command.patch));
+          owned(id,user);
           db.exec('BEGIN IMMEDIATE');
           try {
-            const prefs=command.show?readPreferences(store,user):savePreferences(store,user,validatedPreferencePatch(command.patch));
+            const prefs=command.show?readPreferences(store,user):savePreferences(store,user,prepared.patch,{resolvedJournals:prepared.resolvedJournals});
             const messageId=add(id,'user',{text,kind:'preferences'});
-            add(id,'assistant',{text:preferenceSummary(prefs,command.show?'Your reading preferences':'Reading preferences updated',command.show?null:Object.keys(command.patch)),kind:'preferences'});
+            add(id,'assistant',{text:preferenceSummary(prefs,command.show?'Your reading preferences':'Reading preferences updated',command.show?null:Object.keys(prepared.patch)),kind:'preferences'});
             if(chat.title==='New conversation')db.prepare('UPDATE chats SET title=? WHERE id=?').run(text.slice(0,70),id);
             db.exec('COMMIT');return {messageId,queued:false,preferencesRevision:prefs.revision};
           }catch(error){db.exec('ROLLBACK');throw error}
@@ -123,13 +126,13 @@ export function createChats(store, config, agentActions) {
         const history=messages(row.chat).filter(m=>m.kind!=='preferences').slice(-16), ids=[...new Set(history.flatMap(m=>(m.attachments||[]).filter(a=>a.state==='ready').map(a=>a.id)))].slice(-6);
         let budget=60_000;
         const documents=ids.map(id=>{const a=attachment(store,id,row.owner),p=store.paper(a.paperId);if(!canReusePaper(store,p,row.owner))return null;const text=p.mmd.slice(0,Math.min(20_000,budget));budget-=text.length;return {name:a.name,text,truncated:text.length<p.mmd.length};}).filter(Boolean);
-        db.exec('COMMIT');return {task:{id:row.id,lease:body.lease,text:body.text,...context,...(body.preferenceRequest?{preferenceRequest:true,preferences:readPreferences(store,{id:row.owner}),preferenceOptions:recommendationOptions}:{}),language:body.language,sharing:body.sharing,agentActions:body.agentActions===true,hasNewAttachments:files.length>0,documents,library:libraryCards(store,{id:row.owner}),messages:compactChatHistory(history)}};
+        db.exec('COMMIT');return {task:{id:row.id,lease:body.lease,text:body.text,...context,...(body.preferenceRequest?{preferenceRequest:true,preferences:readPreferences(store,{id:row.owner}),preferenceOptions:preferences.options({id:row.owner})}:{}),language:body.language,sharing:body.sharing,agentActions:body.agentActions===true,hasNewAttachments:files.length>0,documents,library:libraryCards(store,{id:row.owner}),messages:compactChatHistory(history)}};
       }
       db.exec('COMMIT');return {task:null};
       } catch(e){db.exec('ROLLBACK');throw e;}
     },
     readPaper(body){const row=db.prepare("SELECT * FROM chat_tasks WHERE id=? AND state='running'").get(body.id);requireValue(row&&JSON.parse(row.body).lease===body.lease,'This request is no longer active.',409);store.requireActive(row.owner);const p=store.paper(body.paperId);requireValue(canReusePaper(store,p,row.owner),'Paper not found.',404);return {paper:{id:p.id,title:p.title,source:p.source,text:p.mmd.slice(0,26000),truncated:p.mmd.length>26000}};},
-    finish(body) {
+    async finish(body) {
       lastSeen=Date.now(); const row=db.prepare("SELECT * FROM chat_tasks WHERE id=? AND state='running'").get(body.id);
       requireValue(row && JSON.parse(row.body).lease===body.lease,'This request is no longer active.',409);
       const data=JSON.parse(row.body);
@@ -138,16 +141,21 @@ export function createChats(store, config, agentActions) {
       store.requireActive(row.owner);
       if(data.preferenceRequest){
         let text='No preferences were changed. Open Reading interests to edit your choices.';
-        db.exec('BEGIN IMMEDIATE');
+        let transaction=false;
         try {
           if(result.preferencePatch){
             requireValue(preferenceIntent(data.text)==='edit','No preferences were changed.');
-            const prefs=savePreferences(store,{id:row.owner},{...validatedPreferencePatch(result.preferencePatch),revision:data.preferenceRevision});
+            const prepared=await preferences.prepare({id:row.owner},{...validatedPreferencePatch(result.preferencePatch),revision:data.preferenceRevision});
+            const active=db.prepare("SELECT body FROM chat_tasks WHERE id=? AND state='running'").get(row.id);
+            requireValue(active&&JSON.parse(active.body).lease===body.lease,'This request is no longer active.',409);
+            db.exec('BEGIN IMMEDIATE');
+            transaction=true;
+            const prefs=savePreferences(store,{id:row.owner},prepared.patch,{resolvedJournals:prepared.resolvedJournals});
             text=preferenceSummary(prefs,'Reading preferences updated',Object.keys(result.preferencePatch));
-          }else if(result.preferenceQuestion)text=String(result.preferenceQuestion).slice(0,600);
+          }else {if(result.preferenceQuestion)text=String(result.preferenceQuestion).slice(0,600);db.exec('BEGIN IMMEDIATE');transaction=true}
           add(row.chat,'assistant',{text,kind:'preferences'},row.id);
           db.prepare("UPDATE chat_tasks SET state='completed' WHERE id=?").run(row.id);db.exec('COMMIT');
-        }catch(error){db.exec('ROLLBACK');add(row.chat,'assistant',{text:error.message,kind:'preferences'},row.id);db.prepare("UPDATE chat_tasks SET state='completed' WHERE id=?").run(row.id)}
+        }catch(error){if(transaction)db.exec('ROLLBACK');store.requireActive(row.owner);const active=db.prepare("SELECT body FROM chat_tasks WHERE id=? AND state='running'").get(row.id);if(active&&JSON.parse(active.body).lease===body.lease){add(row.chat,'assistant',{text:error.message,kind:'preferences'},row.id);db.prepare("UPDATE chat_tasks SET state='completed' WHERE id=?").run(row.id)}}
         return {ok:true};
       }
       const papers=(result.papers || []).slice(0,8).map(p=>{

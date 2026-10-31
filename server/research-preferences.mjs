@@ -1,4 +1,5 @@
 import {requireValue} from './domain.mjs';
+import {savePreferences} from './reading-preferences.mjs';
 
 export function interestState(preferences={}) {
   const interests=typeof preferences.interests==='string'?preferences.interests:'';
@@ -20,12 +21,8 @@ export function createResearchPreferences(store) {
         // Dismissing a delayed first-use prompt must not erase chosen interests.
         if(interestState(old).state==='pending')old.interestSetup='skipped';
       } else {
-        requireValue(typeof text==='string'&&text.length<=120,'Use up to 120 characters for your interests.');
-        const clean=text.replace(/[\x00-\x1f]/g,' ').trim();
-        requireValue(clean,'Tell me a few topics you enjoy.');
-        old.interests=clean;old.interestSetup='chosen';
-        // The topics now drive discovery without a stale discipline filter.
-        old.discipline='';
+        requireValue(typeof text==='string'&&text.trim(),'Tell me a few topics you enjoy.');
+        return interestState(savePreferences(store,user,{interests:text,discipline:''}));
       }
       db.prepare('INSERT OR REPLACE INTO reading_preferences VALUES(?,?)').run(user.id,JSON.stringify(old));
       return interestState(old);

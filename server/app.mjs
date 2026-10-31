@@ -1,4 +1,4 @@
-import {recommendationOptions} from './recommendation-options.mjs';
+import {createPreferenceGate} from './research-preference-gate.mjs';
 import {annotations,saveAnnotation} from './annotations.mjs';
 import {linkFailures,linkFailure} from './account-link-errors.mjs';
 import {sharePage} from './share-page.mjs';
@@ -40,7 +40,7 @@ import { createProfileStore } from './lazyingart-store.mjs';
 import { ProfileLinkError, PROFILE_BINDING } from './lazyingart-profile.mjs';
 const uuid = /^[a-f0-9-]{36}$/;
 const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif', '.woff2': 'font/woff2', '.ttf': 'font/ttf', '.json': 'application/json' };
-export function createApp(store, config, { worker = true, provider = providerJSON, billingOptions = {}, discoveryOptions = {}, profileOptions = {}, pointsProvider, rewardSourceOptions = {} } = {}) {
+export function createApp(store, config, { worker = true, provider = providerJSON, billingOptions = {}, discoveryOptions = {}, profileOptions = {}, pointsProvider, rewardSourceOptions = {}, preferenceOptions = {} } = {}) {
   const origin = config.origin || 'http://127.0.0.1:4182';
   const secure = origin.startsWith('https://');
   requireValue(secure || /^http:\/\/(127\.0\.0\.1|localhost):\d+$/.test(origin), 'Only HTTPS or explicit loopback origins are permitted.');
@@ -90,7 +90,8 @@ export function createApp(store, config, { worker = true, provider = providerJSO
     return store.saveJob(job);
   });
   const agentActions=createAgentActions(store,config,{enqueue,social});
-  const chats=createChats(store,config,agentActions);
+  const preferences=createPreferenceGate(store,preferenceOptions);
+  const chats=createChats(store,config,agentActions,preferences);
   const retrieval=createBrowserRetrieval(store,config);
   const agentTimer=worker?setInterval(()=>agentActions.tick(),1500):null;agentTimer?.unref();
   const server = createServer(async (req, res) => {
@@ -128,7 +129,7 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         requireValue(chats.authorized(req), 'Worker authorization required.', 401);
         requireValue(method === 'POST', 'Method not allowed.', 405);
         if (path === '/api/worker/claim') return response(res, chats.claim());
-        if (path === '/api/worker/result') return response(res, chats.finish(await json(req)));
+        if (path === '/api/worker/result') return response(res, await chats.finish(await json(req)));
         if (path === '/api/worker/paper') return response(res,chats.readPaper(await json(req)));
         requireValue(false, 'Not found.', 404);
       }
@@ -267,8 +268,9 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         throw new AppError('Not found.',404);
       }
       if (['/api/saved','/api/liked'].includes(path) && method === 'GET') { requireUser();return response(res,{papers:social.saved(user,path==='/api/liked'?'liked':'saved')}); }
-      if(path==='/api/preferences/options'&&method==='GET')return response(res,recommendationOptions);
-      if(path==='/api/preferences'){requireUser();if(method==='GET')return response(res,{preferences:space.preferences(user)});if(method==='PUT')return response(res,{preferences:space.savePreferences(user,await json(req))});}
+      if(path==='/api/preferences/options'&&method==='GET')return response(res,preferences.options(user));
+      if(path==='/api/preferences/resolve'&&method==='POST'){requireUser();limit(`journal:${user.id}`,20);const body=await json(req);return response(res,{journals:await preferences.resolve(body.query)});}
+      if(path==='/api/preferences'){requireUser();if(method==='GET')return response(res,{preferences:space.preferences(user)});if(method==='PUT'){limit(`preferences:${user.id}`,40);return response(res,{preferences:await preferences.apply(user,await json(req))});}}
       if(path==='/api/activity'&&method==='GET'){requireUser();return response(res,space.history(user));}
       if(path==='/api/inbox'){requireUser();if(method==='GET')return response(res,space.inbox(user));if(method==='PUT')return response(res,space.markRead(user,await json(req)));}
       if(path==='/api/daily'&&method==='GET'){requireUser();return response(res,await space.digest(user));}
