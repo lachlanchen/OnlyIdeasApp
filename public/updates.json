@@ -9,8 +9,8 @@
     "build": "39"
   },
   "android": {
-    "version": "1.0.7",
-    "build": "32"
+    "version": "1.0.9",
+    "build": "39"
   },
   "windows": {
     "version": "1.0.10",
