@@ -1,5 +1,15 @@
 # OnlyIdeas · product contract
 
+## SDK-qualified internal candidate · 2026-11-01
+
+Use the verified shared Xcode 27.1 (27A9275) installation for internal Apple 42.
+Qualify native compilation and the exact conversation-anchor geometry on the
+build host, then inspect actual iOS SDK linkage, embedded Watch, resources,
+signatures and both Mac architectures. New native UI runtime/rotation and Duo
+pose checks remain unrun and must be disclosed; absent Duo runtime alone does
+not block a safe internal candidate. Android 42 is already available internally.
+Keep each app operation separate and preserve the shared host queue.
+
 ## Internal delivery default · 2026-10-31
 
 Complete substantial app updates through validated upload to the existing internal

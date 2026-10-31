@@ -69,3 +69,17 @@ The shared Mini inventory at 12:51 UTC on 31 October found Xcode 27.0 and 26.6,
 without a qualified 27.1-or-later route. Side-by-side 27.1 installation was
 requested from the owner under the shared host's no-install rule. No new
 TestFlight build or store-review change is claimed by this preparation checkpoint.
+
+## Shared SDK ready · 1 November
+
+The shared Mini handback verifies Xcode 27.1/build 27A9275, iPhoneOS SDK 27.1 and
+completed first-launch setup. Internal Apple 42 will select the versioned developer
+directory explicitly. Its native compilation and conversation-anchor geometry
+checks can run without installing or booting a simulator. Existing Android 42
+native rotation and journal controls passed independently.
+
+The new Apple conversation UI runtime test remains unrun. Official Duo outer/inner
+displays, folds, reserved regions and pose transitions remain unqualified. These
+gaps will be included in the internal qualification receipt; no full Duo or new
+Apple delivery is claimed by this source checkpoint. Public release remains a
+separate decision after its required qualification.
