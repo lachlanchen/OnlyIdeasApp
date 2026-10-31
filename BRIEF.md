@@ -624,3 +624,14 @@ Reauthentication must return to the same app account and preserve drafts.
 Central account management is shown only after its exact destination and return
 contract are qualified by EchoMind. Source preparation does not establish live
 native/PWA parity, enable providers or change current releases.
+
+
+### Update-control delivery · 31 October 2026
+
+1.0.10 (41) is available in the existing TestFlight internal group for iOS/Watch
+and Mac and on Google Play internal testing. Four exact native UI cases, signed
+package/resource/Watch/universal gates, installed Android manual checking and
+Windows reader runtime checking passed. The Windows preview and web update
+controls are published. Public native feed entries remain the verified39 store
+releases; no formal review, production track, billing, identity or reward policy
+was changed. Receipt: `store/review/update-prompts41-20261031.json`.

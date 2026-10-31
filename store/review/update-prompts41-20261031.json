@@ -1,0 +1,128 @@
+{
+  "date": "2026-10-31",
+  "source": "efe4cc602cce88959e4aaa6f9b287c0a81f63a96",
+  "version": "1.0.10",
+  "build": 41,
+  "apple": [
+    {
+      "platform": "MAC_OS",
+      "id": "629f2a56-4bf8-4f0a-b056-8aa86475e1d7",
+      "version": "1.0.10",
+      "build": "41",
+      "processing": "VALID",
+      "internal": "IN_BETA_TESTING"
+    },
+    {
+      "platform": "IOS",
+      "id": "33c7d00e-07f4-465f-a8c1-7a72409c82e5",
+      "version": "1.0.10",
+      "build": "41",
+      "processing": "VALID",
+      "internal": "IN_BETA_TESTING"
+    }
+  ],
+  "artifacts": [
+    {
+      "platform": "ios",
+      "source": "efe4cc602cce88959e4aaa6f9b287c0a81f63a96",
+      "version": "1.0.10",
+      "build": "41",
+      "sha256": "37caf309ccff9435e9aeb1880bc24914146f432fb980c10d66a2433db3f714c1",
+      "bytes": 15357206,
+      "archive": {
+        "bundle": "art.onlyideas.app",
+        "resources": 33,
+        "signer": "Q8M2S2FY77",
+        "watch": {
+          "CFBundleIdentifier": "art.onlyideas.app.watchkitapp",
+          "CFBundleShortVersionString": "1.0.10",
+          "CFBundleVersion": "41",
+          "WKCompanionAppBundleIdentifier": "art.onlyideas.app"
+        }
+      },
+      "exported": {
+        "bundle": "art.onlyideas.app",
+        "resources": 33,
+        "signer": "Q8M2S2FY77",
+        "watch": {
+          "CFBundleIdentifier": "art.onlyideas.app.watchkitapp",
+          "CFBundleShortVersionString": "1.0.10",
+          "CFBundleVersion": "41",
+          "WKCompanionAppBundleIdentifier": "art.onlyideas.app"
+        }
+      }
+    },
+    {
+      "platform": "macos",
+      "source": "efe4cc602cce88959e4aaa6f9b287c0a81f63a96",
+      "version": "1.0.10",
+      "build": "41",
+      "sha256": "8ee7970fc4c2323b2555ec72164bbd7ced7b225defe7c7ced5b8634def5fb74f",
+      "bytes": 14299977,
+      "archive": {
+        "bundle": "art.onlyideas.app",
+        "resources": 33,
+        "signer": "Q8M2S2FY77",
+        "machO": {
+          "arm64": "15.0",
+          "x86_64": "15.0"
+        }
+      },
+      "exported": {
+        "bundle": "art.onlyideas.app",
+        "resources": 33,
+        "signer": "Q8M2S2FY77",
+        "machO": {
+          "arm64": "15.0",
+          "x86_64": "15.0"
+        }
+      }
+    }
+  ],
+  "android": {
+    "track": "internal",
+    "state": "AVAILABLE_TO_INTERNAL_TESTERS",
+    "version": "1.0.10",
+    "build": 41,
+    "sha256": "bf477198f5462124f77390ea556ad8a19ee78ac3ab142c2152ea6e0fb8a5b4e2"
+  },
+  "windows": {
+    "channel": "unsigned x64 preview",
+    "url": "https://github.com/lachlanchen/LazyingArtWebsite/releases/download/windows-previews-20261030/OnlyIdeas-1.0.10-41-windows-x64-preview.exe",
+    "bytes": 71660235,
+    "sha256": "7ede0aca6d6683b66c60bb6a16a6e4b0a62c01db77bc550cdd71daf8a3ceafd2"
+  },
+  "qualification": {
+    "syntheticIOSNativeTests": 4,
+    "nativeUpdatePositiveLaterAndManualCheck": true,
+    "signedAndroidInstalledManualCheck": true,
+    "windowsNativeReaderRuntime": true,
+    "windowsUpdatePolicyChecks": 15,
+    "liveWebManualCheck": true,
+    "embeddedWatchVersionAndSignatureVerified": true,
+    "watchRuntimeTested": false,
+    "newMacRuntimeUITested": false,
+    "physicalMontereyOrDuoTested": false
+  },
+  "publicFeed": {
+    "schema": 1,
+    "ios": {
+      "version": "1.0.9",
+      "build": "39"
+    },
+    "macos": {
+      "version": "1.0.9",
+      "build": "39"
+    },
+    "android": {
+      "version": "1.0.9",
+      "build": "39"
+    },
+    "windows": {
+      "version": "1.0.10",
+      "build": "41"
+    }
+  },
+  "formalReviewOrProductionTracksChanged": false,
+  "billingAccountsOrRewardsChanged": false
+}

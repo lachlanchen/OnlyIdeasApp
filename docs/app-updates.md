@@ -55,3 +55,33 @@ iOS/Mac/Watch source controls are prepared; they have not received a new Xcode
 compile or device interaction test in this round. Android and Windows controls
 also need installed-runtime qualification. No native binary, store release,
 public web deployment or billing configuration was changed by this source round.
+
+
+## Internal delivery · 31 October 2026
+
+OnlyIdeas **1.0.10 (41)** is available in the existing TestFlight internal group
+for iOS/Watch and Mac, and on Google Play internal testing. Both Apple builds
+are VALID and IN_BETA_TESTING. Four exact synthetic native cases passed: composer
+draft preservation, interest updates, reader tools/private notes, and the update
+notice with Later and a manual request-count check. The last case uses a
+DEBUG-only loopback feed and never opens the real store.
+
+Signed archives and exported packages passed bundle, version, resource, signer,
+embedded Watch and universal Mac slice gates. Both Apple validations and uploads
+succeeded. This round does not claim a Watch runtime test, a separate Mac UI
+runtime pass, or a physical Monterey/Duo test. The Mac Catalyst minimum-version
+values remain recorded in the artifact receipt.
+
+The installed signed Android app completed its manual check against the live
+public feed. The Windows preview passed its native reader check; the published
+EXE's full SHA-256 matched the qualified file. The deployed web Profile completed
+a fresh manual check and was captured at phone and desktop widths. Test browsers,
+emulators, Windows tasks/profiles and the Apple fixture were cleaned up; the
+shared Mac's device and signing state were restored.
+
+The public feed now uses the verified Apple and Android **1.0.9 (39)** store
+releases and the **1.0.10 (41)** Windows preview. Internal Apple/Google build41
+is not advertised as a public native store release. Current formal review and
+production selections were preserved.
+
+See [the delivery receipt](../store/review/update-prompts41-20261031.json).
