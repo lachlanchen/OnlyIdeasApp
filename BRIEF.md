@@ -1,11 +1,21 @@
 # OnlyIdeas · product contract
 
+## Internal delivery default · 2026-10-31
+
+Complete substantial app updates through validated upload to the existing internal
+test groups by default. No repeat upload confirmation is needed. Keep public
+releases and formal reviews separate. Candidate 42 includes the journal metadata
+and native conversation-position changes. Reuse the one approved EchoMind-owned
+Duo toolchain installation; preserve the shared Mac queue. Android delivery can
+proceed independently of Apple toolchain setup.
+
 ## Renewed iPhone Duo internal delivery · 2026-10-31
 
 The owner requests full Duo qualification and internal test-build delivery for
 OnlyIdeas and Bunko. Preserve existing releases and use iOS 27.1 or later for
 official pose/reserved-region checks. The current Mini inventory found only
-Xcode 27.0/26.6; side-by-side 27.1 installation approval remains outstanding.
+Xcode 27.0/26.6; the single shared side-by-side 27.1 setup now has owner approval
+under the EchoMind operator, with its separate provisioning qualification ongoing.
 Prepare native Agent preservation of the visible answer and relative passage
 during resizing, including an older-answer/draft/no-send regression. The 373
 source tests and synthetic fixture checks pass; the new Swift delta and XCTest

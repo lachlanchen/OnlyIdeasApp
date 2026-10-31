@@ -22,7 +22,9 @@ public class ResearchControlsTest {
    var f=MainActivity.class.getDeclaredField("account");f.setAccessible(true);for(int i=0;i<80&&f.get(activity)==null;i++)Thread.sleep(100);assertNotNull(f.get(activity));
    ins.runOnMainSync(activity::showReadingPreferences);Thread.sleep(600);ins.waitForIdleSync();
    onView(withText(startsWith("Topics ·"))).inRoot(isDialog()).perform(click());onView(withText("Microscopy")).inRoot(isDialog()).perform(click());onView(withText("Done")).inRoot(isDialog()).perform(click());
-   onView(withText(startsWith("Journals ·"))).inRoot(isDialog()).perform(click());onView(withText("Nature")).inRoot(isDialog()).perform(click());onView(withText("Done")).inRoot(isDialog()).perform(click());
+   onView(withText(startsWith("Journals ·"))).inRoot(isDialog()).perform(click());
+   onView(withText("Nature Methods · JIF 28.2 (2025)")).inRoot(isDialog()).check(matches(isDisplayed()));
+   onView(withText("Nature")).inRoot(isDialog()).perform(click());onView(withText("Done")).inRoot(isDialog()).perform(click());
    onView(withContentDescription("Your interests")).inRoot(isDialog()).perform(scrollTo(),replaceText("polarization"),closeSoftKeyboard());
    var image=ins.getUiAutomation().takeScreenshot();try(var out=new java.io.FileOutputStream(new java.io.File(context.getExternalFilesDir(null),"research-controls.png"))){assertTrue(image.compress(android.graphics.Bitmap.CompressFormat.PNG,100,out));}
    onView(withText("Save preferences")).inRoot(isDialog()).perform(scrollTo(),click());Thread.sleep(800);

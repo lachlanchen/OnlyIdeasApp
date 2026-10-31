@@ -4,6 +4,7 @@ Read BRIEF.md first. This standalone project must not modify Bunko, EchoMind,
 OnlyIdeasResearch, or their accounts and runtimes as a side effect.
 
 - Node 22+, React, TypeScript. `npm run check` before publishing.
+- Finish substantial app updates with qualification and upload to the existing internal test groups by default. No repeat upload confirmation is needed. Verify processing and tester availability; keep formal review and public release separate.
 - Keep paper payloads out of this source repository. Public cleared bundles live
   in ../OnlyIdeas-papers. New Shared uploads with explicit license/permission confirmation become public immediately and enter administrator review afterward (owner amendment 2026-10-11). Unconfirmed sharing requests await review. Only me uploads, jobs, sessions, notes and drafts remain private.
 - Preserve canonical MMD, equations, figures, source URL and rights provenance.

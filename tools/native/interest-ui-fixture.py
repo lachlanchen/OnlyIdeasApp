@@ -12,6 +12,9 @@ import time
 
 preferences = {"topics":["imaging","optics","biomedicine"],"journals":["S137773608","S4210197940","S127827428"],"journalScope":"selected","interests":"","discipline":"","language":"en","dailyEnabled":False,"dailyTime":"09:00","timezone":"UTC","commentAlerts":True,"likeAlerts":True,"revision":"fixture-1"}
 options = {"topics":[{"id":i,"name":n} for i,n in [("imaging","Imaging"),("optics","Optics"),("biomedicine","Biomedicine"),("microscopy","Microscopy"),("organoids","Organoids")]],"journals":[{"id":i,"name":n} for i,n in [("S137773608","Nature"),("S4210197940","Optica"),("S127827428","Nature Methods")]],"defaults":{k:preferences[k] for k in ["topics","journals","journalScope","interests"]}}
+# Match the verified publisher metric exposed by the production options endpoint.
+# Nature/Optica intentionally lack a fixture metric to cover optional metadata.
+options["journals"][2]["impactFactor"] = {"value":28.2,"year":2025,"source":"https://www.nature.com/nature-portfolio/about-journals/journal-metrics"}
 
 state = {"state": "pending", "interests": ""}
 chat = {"id": "interests37-conversation", "title": "Reading interests", "updated": 0}
