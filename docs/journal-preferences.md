@@ -50,6 +50,21 @@ Journal selection does not change access or redistribution permissions.
 - Android release Java compilation passed. Native iOS/Mac metric-label changes are
   source changes for the next cumulative native candidate, not a new uploaded build.
 
+### Android internal build 42
+
+OnlyIdeas 1.0.10 (42) is available in the existing Google Play internal track.
+The signed release passed installation over build 41 without clearing app data.
+Native instrumentation verified the dated journal metric, saving/reopening
+preferences, and composer/reader continuity across rotation. Both selected tests
+passed; the owned emulator and loopback fixture were stopped afterward. The
+release signer matches build 41, and Play reports no reduction in supported
+devices. The 373 source checks above remain the previously qualified baseline;
+they were not represented as a new native or Duo test run.
+
+The iOS/Mac 42 candidate includes the conversation-position change and is not yet
+uploaded to TestFlight. Official Duo pose checks remain separate from Android
+rotation tests and depend on the qualified shared Apple toolchain.
+
 The initial full check used the older system Pandoc, which does not support
 `--sandbox`; both affected conversion tests passed with the existing 3.11 binary.
 The initial browser fixture had a global-name collision and omitted the settings

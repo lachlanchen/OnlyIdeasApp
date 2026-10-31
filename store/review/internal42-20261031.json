@@ -1,0 +1,31 @@
+{
+  "app": "OnlyIdeas",
+  "version": "1.0.10",
+  "build": "42",
+  "qualifiedSource": "d80389a444899ceb374d3c0f7b270aebf7d011da",
+  "android": {
+    "track": "internal",
+    "state": "AVAILABLE_TO_INTERNAL_TESTERS",
+    "observedUTC": "2026-10-31T14:58:34.538885+00:00",
+    "releaseUpgradeFrom41Passed": true,
+    "sameReleaseSignerAs41": true,
+    "nativeCases": [
+      "ResearchControlsTest#selectTopicsJournalsAndRestoreSavedChoices",
+      "ChatLayoutTest#rotationPreservesComposerAndReaderInstance"
+    ],
+    "nativeCasesPassed": 2,
+    "ownedRuntimeCleanupVerified": true,
+    "supportedDeviceReduction": 0
+  },
+  "apple": {
+    "candidate": "42",
+    "newSwiftCompiled": false,
+    "duoRuntimeQualified": false,
+    "newTestFlightUpload": false,
+    "currentDeliveredBuild": "41"
+  },
+  "bunkoCurrentDeliveredAppleBuild": "46",
+  "publicReviewOrReleaseChanged": false,
+  "billingIdentityRewardsChanged": false,
+  "verificationScope": "Android release and isolated native instrumentation; no official Duo pose or new Apple binary qualification"
+}
