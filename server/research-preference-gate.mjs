@@ -8,7 +8,7 @@ import {withJournalMetric} from './journal-metrics.mjs';
 const key=value=>value.normalize('NFKC').toLocaleLowerCase('en').replace(/[^\p{L}\p{N}]/gu,'');
 const sourceID=value=>String(value||'').replace(/^https:\/\/openalex\.org\//,'');
 const issn=value=>/^\d{4}-\d{3}[\dX]$/i.test(value);
-const aliases={pnas:'S125754415',光学:'S4210197940',自然:'S137773608',科学:'S3880285',细胞:'S110447773'};
+const aliases={pnas:'S125754415'};
 const curated=recommendationOptions.journals.map(withJournalMetric);
 const canonical=row=>{
  const id=sourceID(row?.id);

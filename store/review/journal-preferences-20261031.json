@@ -1,0 +1,101 @@
+{
+  "schema": "onlyideas.journal-preferences-qualification/v1",
+  "date": "2026-10-31",
+  "status": "LIVE_CHAT_AND_WEB_VERIFIED",
+  "featureBaseCommit": "b31d72da01c76cc19debcf460436d7edc39cf180",
+  "finalGateSha256": "7e09a16ff564c739337fa93ea270bd08b44136af4e5de434cb58772246bd5af6",
+  "defaults": [
+    "Nature",
+    "Science",
+    "Cell"
+  ],
+  "limits": {
+    "selectedJournals": 24,
+    "customInterests": 8,
+    "interestCharacters": 120,
+    "resolverCacheEntries": 128,
+    "resolverCacheHours": 24,
+    "upstreamTimeoutSeconds": 8,
+    "upstreamMaxBytes": 350000
+  },
+  "verifiedPublisherMetricEntries": 7,
+  "missingImpactFactors": "unlisted; no estimates or OpenAlex citation-average substitution",
+  "sourceTests": 373,
+  "runtimeCandidateFocusedTests": 17,
+  "runtimeAliasFocusedTests": 10,
+  "androidJavaCompile": "PASS",
+  "webUI": {
+    "passed": true,
+    "syntheticAccount": true,
+    "provider": "synthetic canonical journal metadata; separate real resolver checks recorded",
+    "checks": [
+      "320px/en: canonical selection deduplicates, metric is dated, Cancel preserves saved choices, no page overflow",
+      "390px/zh-Hans: canonical selection deduplicates, metric is dated, Cancel preserves saved choices, no page overflow",
+      "1024px/en: canonical selection deduplicates, metric is dated, Cancel preserves saved choices, no page overflow",
+      "Save persists one canonical journal through the real preference gate"
+    ]
+  },
+  "public": {
+    "at": "2026-10-31T04:39:55.154Z",
+    "base": "https://agent.onlyideas.art",
+    "checks": [
+      {
+        "path": "/api/health",
+        "status": 200
+      },
+      {
+        "path": "/api/preferences/options",
+        "status": 200
+      },
+      {
+        "path": "/web-release.json",
+        "status": 200
+      },
+      {
+        "path": "/updates.json",
+        "status": 200
+      },
+      {
+        "path": "/",
+        "status": 200
+      }
+    ],
+    "options": {
+      "defaults": {
+        "topics": [
+          "imaging",
+          "optics",
+          "biomedicine"
+        ],
+        "journals": [
+          "S137773608",
+          "S3880285",
+          "S110447773"
+        ],
+        "journalScope": "selected",
+        "interests": ""
+      },
+      "journals": 13,
+      "metrics": 7,
+      "limits": {
+        "journals": 24,
+        "interests": 8,
+        "interestCharacters": 120,
+        "journalQueryCharacters": 160
+      }
+    },
+    "bundle": {
+      "path": "/assets/index-fQw7-vlF.js",
+      "sha256": "dfe8b7849da377b090a3c6a92360e97b40c1ffca3c9acf4350f5474e1896ba36",
+      "matched": true
+    },
+    "anonymousLookup": 401
+  },
+  "nativeBuilds": "Existing41 retained; chat feature uses server; native settings metric labels accumulated in source",
+  "worker": "Preference planner instruction only; original research and model configuration retained",
+  "runtimeOverlay": "Owned journal routes and modules over the actual live baseline; source-only identity/account changes excluded",
+  "storeReviewsChanged": false,
+  "billingIdentityRewardPoliciesChanged": false,
+  "backupsAndRollbackRetained": true,
+  "siblingFilesChanged": false
+}

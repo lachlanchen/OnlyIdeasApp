@@ -49,6 +49,7 @@ test('lookup deduplicates simultaneous requests and bounds its public endpoint a
  const u=new URL(requests[0].url);assert.equal(u.origin,'https://api.openalex.org');assert.equal(u.pathname,'/sources');assert.equal(requests[0].options.timeout,8000);assert.equal(requests[0].options.maxBytes,350000);assert.equal(requests[0].options.redirects,0);
  for(const query of ['https://127.0.0.1/secret','<script>alert(1)</script>',42,' '])await assert.rejects(gate.resolve(query));
  assert.equal(calls,1);
+ const translated=await gate.resolve('光学');assert.equal(translated.some(j=>j.id==='S4210197940'),false);assert.equal(calls,2);
 });
 test('stale edits and account suspension during a lookup cannot overwrite preferences',async t=>{
  let release,entered;const started=new Promise(r=>entered=r),hold=new Promise(r=>release=r);
