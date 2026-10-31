@@ -197,6 +197,39 @@ final class NativeUITests: XCTestCase {
     XCTAssertFalse(app.alerts.firstMatch.exists)
     shot("Interests37-adaptive-draft")
   }
+  func testConversationReadingAnchorAcrossResize() throws {
+    continueAfterFailure=false
+    _ = try feedControl(["chatHistory":32])
+    let app=interestFixtureApp();app.launch()
+    defer {XCUIDevice.shared.orientation = .portrait;app.terminate();_ = try? feedControl(["chatHistory":0])}
+    let agent=app.buttons["Agent"].firstMatch
+    XCTAssertTrue(agent.waitForExistence(timeout:30));agent.tap()
+    let editor=app.textViews["Message the paper agent"]
+    XCTAssertTrue(editor.waitForExistence(timeout:15))
+    let draft="Keep this question while I read an earlier answer."
+    editor.tap();editor.typeText(draft)
+    if app.buttons["Done"].firstMatch.exists {app.buttons["Done"].firstMatch.tap()}
+    let scroller=app.scrollViews.firstMatch
+    let earlier=app.textViews["chat-text-resize-message-18"]
+    for _ in 0..<14 {
+      if earlier.exists && earlier.isHittable {break}
+      scroller.swipeDown()
+    }
+    XCTAssertTrue(earlier.exists && earlier.isHittable,"The fixture must reach an older answer before resizing")
+    XCTAssertTrue(app.buttons["Go to latest message"].waitForExistence(timeout:5))
+    let visible=(0..<32).map{app.textViews["chat-text-resize-message-\($0)"]}.filter{$0.exists && $0.frame.intersects(scroller.frame)}
+    guard let anchor=visible.min(by:{$0.frame.minY<$1.frame.minY}) else {XCTFail("No visible answer to preserve");return}
+    for orientation in [UIDeviceOrientation.landscapeLeft,.portrait,.landscapeRight,.portrait] {
+      XCUIDevice.shared.orientation=orientation
+      let retained=XCTNSPredicateExpectation(predicate:NSPredicate{_,_ in anchor.exists && anchor.frame.intersects(scroller.frame)},object:nil)
+      XCTAssertEqual(XCTWaiter.wait(for:[retained],timeout:6),.completed)
+      XCTAssertEqual(editor.value as? String,draft)
+      XCTAssertTrue(app.buttons["Attach files"].isHittable)
+      XCTAssertTrue(app.buttons["Send message"].isHittable)
+    }
+    XCTAssertEqual((try feedControl())["messagePosts"]as?Int,0)
+    shot("Conversation-resize-reading-anchor")
+  }
   func testChatMessageLayout() {
     continueAfterFailure=false
     let app=XCUIApplication()

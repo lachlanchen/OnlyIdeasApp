@@ -1,5 +1,16 @@
 # OnlyIdeas · product contract
 
+## Renewed iPhone Duo internal delivery · 2026-10-31
+
+The owner requests full Duo qualification and internal test-build delivery for
+OnlyIdeas and Bunko. Preserve existing releases and use iOS 27.1 or later for
+official pose/reserved-region checks. The current Mini inventory found only
+Xcode 27.0/26.6; side-by-side 27.1 installation approval remains outstanding.
+Prepare native Agent preservation of the visible answer and relative passage
+during resizing, including an older-answer/draft/no-send regression. The 373
+source tests and synthetic fixture checks pass; the new Swift delta and XCTest
+are not yet compiled or run. Current TestFlight build 41 remains available.
+
 ## Dynamic journals and interests · 2026-10-31
 
 Use one account-scoped validation gate for settings and chat. Resolve arbitrary

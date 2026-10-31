@@ -293,6 +293,10 @@ struct NativeAgent: View {
   @State private var draggingMessages = false
   @State private var paperMention=false
   @State private var interestEditor=false
+  @State private var messageFrames:[String:CGRect]=[:]
+  @State private var readingAnchor:AgentReadingAnchor?
+  @State private var lastViewport=CGSize.zero
+  @State private var restoringViewport=false
   var body: some View {
     VStack(spacing: 0) {
       ScrollViewReader { proxy in
@@ -312,6 +316,10 @@ struct NativeAgent: View {
             if store.messages.isEmpty { welcome }
             ForEach(store.messages) { message in
               AgentBubble(message: message, requests: $requests, availableWidth: min(900, max(0, viewport.size.width - 28)))
+                .id(message.id)
+                .background(GeometryReader { row in
+                  Color.clear.preference(key:AgentMessageFrames.self,value:[message.id:row.frame(in:.named("agent-scroll"))])
+                })
             }
             if !store.agentStatus.isEmpty {
               HStack(alignment: .top) {
@@ -343,6 +351,32 @@ struct NativeAgent: View {
           proxy.scrollTo("end", anchor: .bottom)
         }
         .onChange(of: store.conversationID) { _ in followingLatest = true }
+        .onAppear {
+          if lastViewport == .zero,viewport.size.width>0,viewport.size.height>0 {lastViewport=viewport.size}
+        }
+        .onPreferenceChange(AgentMessageFrames.self) { frames in
+          messageFrames=frames
+          guard !restoringViewport,!followingLatest,isActive,viewport.size==lastViewport else{return}
+          readingAnchor=AgentReadingAnchor.capture(frames,in:viewport.size)
+        }
+        .onChange(of:viewport.size) { size in
+          guard size.width>0,size.height>0 else {restoringViewport=true;return}
+          let previous=lastViewport
+          lastViewport=size
+          guard previous.width>0,previous.height>0,isActive,!history,!requests else {restoringViewport=false;return}
+          restoringViewport=true
+          // Keep the same message and relative passage, rather than an old
+          // absolute scroll offset after fold, keyboard or Split View reflow.
+          let anchor=readingAnchor
+          DispatchQueue.main.async {
+            guard lastViewport==size else{return}
+            if followingLatest {proxy.scrollTo("end",anchor:.bottom)}
+            else if let anchor,let frame=messageFrames[anchor.id] {
+              proxy.scrollTo(anchor.id,anchor:anchor.alignment(itemHeight:frame.height,viewportHeight:size.height))
+            }
+            restoringViewport=false
+          }
+        }
         }
       }
     }
@@ -2041,6 +2075,25 @@ private struct NativeMessageText: UIViewRepresentable {
 private struct AgentBottomPosition: PreferenceKey {
   static var defaultValue: CGFloat = 0
   static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
+}
+private struct AgentMessageFrames:PreferenceKey {
+  static var defaultValue:[String:CGRect]=[:]
+  static func reduce(value:inout [String:CGRect],nextValue:()->[String:CGRect]){value.merge(nextValue(),uniquingKeysWith:{$1})}
+}
+private struct AgentReadingAnchor {
+  let id:String
+  let fraction:CGFloat
+  static func capture(_ frames:[String:CGRect],in viewport:CGSize)->Self? {
+    guard viewport.width>0,viewport.height>0,
+      let row=frames.filter({$0.value.height>0 && $0.value.maxY>0 && $0.value.minY<viewport.height}).min(by:{$0.value.minY<$1.value.minY}) else{return nil}
+    return Self(id:row.key,fraction:min(1,max(0,-row.value.minY/row.value.height)))
+  }
+  func alignment(itemHeight:CGFloat,viewportHeight:CGFloat)->UnitPoint {
+    // For a long response, align the same fractional passage at the top. A
+    // short response stays fully visible rather than scrolling past its edge.
+    let range=itemHeight-viewportHeight
+    return UnitPoint(x:0.5,y:range>1 ? min(1,max(0,fraction*itemHeight/range)):0)
+  }
 }
 private struct NativeComposerInput: UIViewRepresentable {
   @Binding var text: String

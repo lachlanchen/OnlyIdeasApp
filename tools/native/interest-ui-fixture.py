@@ -109,12 +109,22 @@ class Handler(BaseHTTPRequestHandler):
             return self.reply({"error": "Too large"}, 413)
         value = json.loads(self.rfile.read(size) or b"{}")
         if self.path == "/__qa/feed":
+            if "chatHistory" in value:
+                count = value["chatHistory"]
+                if not isinstance(count, int) or not 0 <= count <= 40:
+                    return self.reply({"error":"Use up to 40 synthetic messages"},400)
+                messages[:] = [{"id":"resize-message-"+str(i), "role":"assistant" if i % 2 else "user", "text":"Reference passage "+str(i)+". "+("Optical imaging connects the saved paper with this unfinished research question. " * 5)} for i in range(count)]
+                state.update(state="chosen",interests="optical imaging")
+                feed["messagePosts"] = 0
             if value.get("reset"):
                 feed.update(enabled=True, revision=1, offline=False, anonymous=False, requests=[])
             for key in ("revision", "offline", "anonymous"):
                 if key in value:
                     feed[key] = value[key]
             return self.reply(feed)
+        if self.path.endswith("/messages"):
+            feed["messagePosts"] = feed.get("messagePosts",0)+1
+            return self.reply({"error":"The resize fixture must never submit a message"},409)
         if self.path == "/api/chats/interests":
             if value.get("skip"):
                 state.update(state="skipped")
