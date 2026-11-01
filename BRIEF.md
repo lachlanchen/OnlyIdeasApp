@@ -1,5 +1,16 @@
 # OnlyIdeas · product contract
 
+## Internal Apple delivery · 2026-11-01
+
+Apple iOS/Watch and universal Mac **1.0.10 (42)** are `VALID` and
+`IN_BETA_TESTING` in the existing internal group. Native compilation, eight
+exact-source conversation-anchor geometry checks, live signing-profile bindings
+and both signed package gates passed with Xcode 27.1 (27A9275). Independent
+cleanup and exact artifact transfer passed before upload. Public releases and
+formal selections are unchanged. New SwiftUI interaction/rotation, physical
+iPhone/Watch, official Duo poses and Monterey runtime remain untested in this
+round. See `docs/internal-build42-20261101.md`.
+
 ## SDK-qualified internal candidate · 2026-11-01
 
 Use the verified shared Xcode 27.1 (27A9275) installation for internal Apple 42.

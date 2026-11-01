@@ -1,0 +1,180 @@
+{
+  "verifiedAt": "2026-11-01T01:59:25.713782+00:00",
+  "app": "OnlyIdeas",
+  "builds": [
+    {
+      "platform": "MAC_OS",
+      "id": "4dfb77a6-3317-4e16-98d8-9af10c3b7c6b",
+      "version": "1.0.10",
+      "build": "42",
+      "processing": "VALID",
+      "internal": "IN_BETA_TESTING",
+      "unexpired": true,
+      "existingInternalGroupMember": true,
+      "notesVerified": true
+    },
+    {
+      "platform": "IOS",
+      "id": "7de67635-e9a4-4e72-ac92-26fd3079a492",
+      "version": "1.0.10",
+      "build": "42",
+      "processing": "VALID",
+      "internal": "IN_BETA_TESTING",
+      "unexpired": true,
+      "existingInternalGroupMember": true,
+      "notesVerified": true
+    }
+  ],
+  "internalGroup": "aa16986d-2d1d-443b-9cf8-99677d3f7a68",
+  "existingTesterCount": 1,
+  "formalStoreSelectionsUnchanged": true,
+  "publicReviewSubmitted": false,
+  "source": "4d706350569e789aed309bc6b99f6d15cd60b67f",
+  "xcode": {
+    "version": "27.1",
+    "build": "27A9275"
+  },
+  "nativeCompilation": {
+    "iOSAndWatch": true,
+    "universalMacCatalyst": true
+  },
+  "nativeGeometryChecksPassed": 8,
+  "nativeGeometryScope": "Compiled exact-source algorithm only; no SwiftUI interaction, rotation or Duo pose test",
+  "appSourceFilesVerified": 166,
+  "liveProfileCertificateBindingsPassed": 3,
+  "artifacts": [
+    {
+      "platform": "ios",
+      "source": "4d706350569e789aed309bc6b99f6d15cd60b67f",
+      "version": "1.0.10",
+      "build": "42",
+      "sha256": "f185f733d5c6856e4c5c8be5d6144db5dfd7d28b1f010dd803af2c70e9c7c8e7",
+      "bytes": 10609161,
+      "archive": {
+        "bundle": "art.onlyideas.app",
+        "resources": 33,
+        "signer": "Q8M2S2FY77",
+        "xcodeBuild": "27A9275",
+        "sdk": "iphoneos27.1",
+        "minimumOS": "15.0",
+        "watch": {
+          "CFBundleIdentifier": "art.onlyideas.app.watchkitapp",
+          "CFBundleShortVersionString": "1.0.10",
+          "CFBundleVersion": "42",
+          "WKCompanionAppBundleIdentifier": "art.onlyideas.app",
+          "MinimumOSVersion": "11.0"
+        }
+      },
+      "exported": {
+        "bundle": "art.onlyideas.app",
+        "resources": 33,
+        "signer": "Q8M2S2FY77",
+        "xcodeBuild": "27A9275",
+        "sdk": "iphoneos27.1",
+        "minimumOS": "15.0",
+        "watch": {
+          "CFBundleIdentifier": "art.onlyideas.app.watchkitapp",
+          "CFBundleShortVersionString": "1.0.10",
+          "CFBundleVersion": "42",
+          "WKCompanionAppBundleIdentifier": "art.onlyideas.app",
+          "MinimumOSVersion": "11.0"
+        }
+      }
+    },
+    {
+      "platform": "macos",
+      "source": "4d706350569e789aed309bc6b99f6d15cd60b67f",
+      "version": "1.0.10",
+      "build": "42",
+      "sha256": "3a34d601cb20588a93f80bbc68946b5a1af87ff1bf1484f6335e1b6e8587e8ae",
+      "bytes": 9658971,
+      "archive": {
+        "bundle": "art.onlyideas.app",
+        "resources": 33,
+        "signer": "Q8M2S2FY77",
+        "xcodeBuild": "27A9275",
+        "sdk": "macosx27.0",
+        "minimumOS": "12.0",
+        "machO": {
+          "arm64": "15.0",
+          "x86_64": "15.0"
+        }
+      },
+      "exported": {
+        "bundle": "art.onlyideas.app",
+        "resources": 33,
+        "signer": "Q8M2S2FY77",
+        "xcodeBuild": "27A9275",
+        "sdk": "macosx27.0",
+        "minimumOS": "12.0",
+        "machO": {
+          "arm64": "15.0",
+          "x86_64": "15.0"
+        }
+      }
+    }
+  ],
+  "macTargetVariant": "Mac Catalyst",
+  "macArchitectures": [
+    "arm64",
+    "x86_64"
+  ],
+  "macDeclaredMinimumOS": "12.0",
+  "macCatalystMachOTargetByArchitecture": {
+    "arm64": "15.0",
+    "x86_64": "15.0"
+  },
+  "cleanup": {
+    "at": "2026-11-01T01:38:28.443396+00:00",
+    "guardAbsent": true,
+    "ownedProcessesAbsent": true,
+    "ownedProcessIdentities": 132,
+    "temporarySignerAbsent": true,
+    "originalSearchListRestored": true,
+    "profilesRestored": 6,
+    "sourceFilesUnchanged": 166,
+    "helpersUnchanged": 24,
+    "deviceMetadataFilesChecked": 31,
+    "rawDeviceMetadataBytePreserved": false,
+    "deviceStatePreserved": true,
+    "globalSelectionPreserved": true,
+    "sdkIdentityPreserved": true,
+    "onlyAcceptedMetadataChange": "one existing lastUsedAt timestamp advanced",
+    "deviceMetadataWritten": false
+  },
+  "macTransferRecovery": {
+    "originalFailurePreserved": true,
+    "initialConfirmedPartBytes": 5242880,
+    "originalIncompletePart": {
+      "offset": 5242880,
+      "length": 4416091,
+      "exit": 28,
+      "http_code": 0,
+      "size_upload": 3014656,
+      "time_total": 180.001609,
+      "time_connect": 0.159674
+    },
+    "sameExistingFileRecovered": true,
+    "firstPartReused": true,
+    "newReservationOrFileCreated": false,
+    "recoveredPart": {
+      "exit": 0,
+      "http_code": 200,
+      "size_upload": 4416091,
+      "time_total": 8.752829,
+      "time_connect": 0.215863
+    },
+    "fullFileChecksumAccepted": true
+  },
+  "deliveryHelperCorrections": [
+    "Private access modifier in generated geometry harness",
+    "Existing Apple sign-in provisioning profile selection; pre-write source/export/entitlement/certificate binding check"
+  ],
+  "priorFailedAttemptsPreserved": true,
+  "runtimeTestGaps": [
+    "New SwiftUI interaction and rotation tests",
+    "Official iPhone Duo poses and reserved regions",
+    "Physical iPhone and Watch",
+    "Fresh macOS Monterey runtime"
+  ]
+}
