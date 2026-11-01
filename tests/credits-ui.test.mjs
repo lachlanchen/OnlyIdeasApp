@@ -38,3 +38,11 @@ test('daily credits and carryover are visible while older responses still render
  assert.equal(w.document.querySelector('.credit-balance strong').textContent,'45');
  assert.doesNotMatch(w.document.body.textContent,/credits each day you use OnlyIdeas/);
 });
+test('weekly-reset responses show the expiry and preserve the old-server fallback',async t=>{
+ const {w,settle}=await fixture(t);w.api=async()=>({...balance,daily:{enabled:true,amount:100,nextAt:1,resetDays:7,resetsAt:2},expiring:{amount:100,nextAt:2},history:[{kind:'Daily credits',delta:100,created:1,expiresAt:2}]});w.render('weekly');await settle();
+ assert.match(w.document.body.textContent,/Unused daily credits reset every/);
+ assert.match(w.document.body.textContent,/weekly reset is Monday/);
+ assert.match(w.document.body.textContent,/unused daily credits expire on/);
+ assert.doesNotMatch(w.document.body.textContent,/Unused credits carry over|Credits never expire/);
+ assert.match(w.document.querySelector('.credit-history').textContent,/Expires on/);
+});

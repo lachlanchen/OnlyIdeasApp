@@ -1,5 +1,18 @@
 # OnlyIdeas · product contract
 
+## Weekly daily-credit reset · 2026-11-01
+
+New free daily usage grants expire at the end of their UTC period, defaulting
+to Monday at 00:00 UTC. This supersedes the daily-credit carryover rule below.
+An authorized administrator can change the period from 1 to 365 days in Profile
+→ Administration → Daily credit settings. The database setting is read at each
+grant, so saving needs no restart or native rebuild. Existing grant deadlines
+stay fixed; pre-policy balances, welcome/publication rewards and purchased
+credits are preserved. Spend the earliest-expiring daily credits first; active
+reservations retain their allocation and refunds cannot revive expired credits.
+Shared LAC points and subscriptions remain independent. See
+`docs/daily-credit-reset.md` for accounting and deployment evidence.
+
 ## Internal Apple delivery · 2026-11-01
 
 Apple iOS/Watch and universal Mac **1.0.10 (42)** are `VALID` and

@@ -2,7 +2,8 @@
 
 The profile label is **LAC · LazyingArt Coins**, scoped as **OnlyIdeas balance**.
 These are non-transferable database usage credits, not LAC cryptocurrency. They
-have no cash value and do not expire. Accounting is per OnlyIdeas account; no
+have no cash value. New daily grants expire at the end of their UTC reset period;
+purchased credits and earlier balances do not expire. Accounting is per OnlyIdeas account; no
 cross-product balance or automatic linking of separate provider accounts exists.
 
 The 15 October display update keeps the section mounted before its first request,
@@ -36,8 +37,12 @@ This rollout does not create shared points or merge balances. See the
 ### Daily usage credits
 
 Open OnlyIdeas while signed in to receive 100 usage credits once per UTC day.
-The next day starts at 00:00 UTC. Unused credits carry over; days without use
-do not accumulate grants. The welcome and public-contribution credits remain
+The next day starts at 00:00 UTC. New daily grants expire on Monday at 00:00 UTC
+by default, with no carryover into the next week. Administrators can change the
+period in Profile → Administration → Daily credit settings, without restarting
+the server or rebuilding the app. Changes apply to new grants; existing expiry
+dates remain fixed. Days without use do not accumulate grants. Pre-policy
+balances, welcome and public-contribution credits remain
 available separately. Fetching, conversion and agent service limits still apply.
 
 `credits.dailyBonusEnabled: true` enables this for accounts eligible to earn.

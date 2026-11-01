@@ -33,7 +33,7 @@ import { attachment, uploadAttachment } from './attachments.mjs';
 import { createBilling } from './billing.mjs';
 import { createAppleAuth } from './apple-auth.mjs';
 import { sourceKey, reusedImport, reusablePaper } from './import-reuse.mjs';
-import { creditTransaction, creditSummary, grantDailyCredits, reserveImport, retryImportCredits, finishImportCredits, seedCreditPublications } from './credits.mjs';
+import { creditTransaction, creditSummary, grantDailyCredits, reserveImport, retryImportCredits, finishImportCredits, seedCreditPublications, creditResetSettings, updateCreditResetSettings } from './credits.mjs';
 import {createLacBalance,LacReadError} from './lac-balance.mjs';
 import {createRewardSourceRoutes} from './reward-source-routes.mjs';
 import { createProfileStore } from './lazyingart-store.mjs';
@@ -162,6 +162,13 @@ export function createApp(store, config, { worker = true, provider = providerJSO
       }
       if (user && !native) res.setHeader('Set-Cookie', cookie(cookieName, token, 90 * 86400));
       const requireUser = () => { requireValue(user, 'Sign in to save papers and join the conversation.', 401); return user; };
+      if(path==='/api/admin/credits/reset' && ['GET','PUT'].includes(method)) {
+        reviews.authorized(user);
+        if(method==='GET')return response(res,creditResetSettings(store));
+        const body=await json(req);
+        reviews.authorized(user);
+        return response(res,updateCreditResetSettings(store,user.id,body));
+      }
       if(path==='/api/lac/balance'&&method==='GET'){
         requireUser();requireValue(lacBalance.enabled,'Shared LAC balance is not available yet.',503);
         try{const result=await lacBalance.read(user.id);requireValue(store.session(token)?.id===user.id,'Please sign in again.',401);return response(res,result)}
