@@ -43,8 +43,10 @@ export function pairReading(root:HTMLElement,view:ReadingView,render:(text:strin
  }
 }
 export function readingMode(root:HTMLElement,mode:ReadingMode){
- const anchor=Array.from(root.querySelectorAll<HTMLElement>('.reading-pair')).find(n=>n.getBoundingClientRect().bottom>0)
+ const changed=root.dataset.readingMode&&root.dataset.readingMode!==mode
+ const anchor=Array.from(root.querySelectorAll<HTMLElement>('.reading-pair')).find(n=>{const r=n.getBoundingClientRect();return r.height>0&&r.bottom>0})
  const top=anchor?.getBoundingClientRect().top
  root.dataset.readingMode=mode
  if(anchor&&top!==undefined){const delta=anchor.getBoundingClientRect().top-top;if(Math.abs(delta)>1)window.scrollBy(0,delta)}
+ if(changed&&root.animate&&!window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches)root.animate([{opacity:.7},{opacity:1}],{duration:160,easing:'ease-out'})
 }

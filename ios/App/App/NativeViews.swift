@@ -1158,21 +1158,29 @@ struct NativePaper: View {
   func refreshReading() async {
     guard let document else {return}
     let language=readLanguage
-    reading=store.cachedPaper(paper.id)?.readings?[language]
-    do {let result=try await store.loadReading(document,language:language);if readLanguage==language {reading=result;readingNotice=""}}
+    if reading?.language != language || reading == nil {reading=store.cachedPaper(paper.id)?.readings?[language]}
+    do {let result=try await store.loadReading(document,language:language);if readLanguage==language {
+      if reading?.mmd != result.mmd || reading?.translated != result.translated || reading?.complete != result.complete {reading=result}
+      readingNotice=""
+    }}
     catch {if readLanguage==language && reading==nil {readingNotice="Connect to fetch available languages."}}
   }
   func fetchReading() async {
     guard store.account != nil else {await store.signIn();return}
     guard !translationPending else {return}
-    let language=readLanguage;translationPending=true;defer{translationPending=false}
+    let language=readLanguage,account=store.account?.id;translationPending=true;defer{translationPending=false}
     do {
       let response=try await store.json("/api/papers/\(paper.id)/assist",method:"POST",body:["kind":"translation","language":language])
       let id=(response["job"] as? [String:Any])?["id"] as? String ?? ""
+      guard UUID(uuidString:id) != nil else {throw NSError(domain:"OnlyIdeas",code:0,userInfo:[NSLocalizedDescriptionKey:T("Could not load this request. Try again.")])}
+      guard store.account?.id==account else {return}
       for _ in 0..<120 {
-        await refreshReading();await store.loadJobs()
-        if store.jobs.first(where:{$0.id==id})?.state=="failed" {readingNotice="Translation failed. Open Your requests to retry.";break}
-        if reading?.complete==true || Task.isCancelled || readLanguage != language {break}
+        guard !Task.isCancelled,readLanguage==language,store.account?.id==account else {return}
+        let progress=try await store.json("/api/jobs/\(id)")["job"] as? [String:Any] ?? [:]
+        guard !Task.isCancelled,readLanguage==language,store.account?.id==account else {return}
+        await refreshReading()
+        if progress["state"] as? String == "failed" {readingNotice=progress["message"] as? String ?? "Translation failed. Open Your requests to retry.";break}
+        if reading?.complete==true || progress["state"] as? String == "completed" {break}
         try await Task.sleep(nanoseconds:3_000_000_000)
       }
     }catch{readingNotice=error.localizedDescription}

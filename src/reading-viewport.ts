@@ -50,3 +50,23 @@ export function preserveReadingViewport(scroller: HTMLElement, content: HTMLElem
   eventTarget.addEventListener('scroll', capture, { passive: true })
   return () => { observer.disconnect(); eventTarget.removeEventListener('scroll', capture) }
 }
+
+/** Restore a stable source passage after a translated document replaces its DOM. */
+export function captureReadingPosition(content:HTMLElement) {
+  const scroller=document.scrollingElement as HTMLElement|null
+  if(!scroller)return()=>{}
+  const atStart=scroller.scrollTop<1,edge=12
+  const node=Array.from(content.querySelectorAll<HTMLElement>('.reading-pair,[data_line_start]')).find(n=>{const r=n.getBoundingClientRect();return r.height>0&&r.bottom>edge})
+  if(!node)return()=>{}
+  const rect=node.getBoundingClientRect(),passage=node.closest<HTMLElement>('[data-passage]')?.dataset.passage
+  const line=node.getAttribute('data_line_start')||node.querySelector('[data_line_start]')?.getAttribute('data_line_start')
+  const fraction=Math.max(0,(edge-rect.top)/rect.height),offset=Math.max(0,rect.top-edge)
+  return()=>{
+    if(atStart){scroller.scrollTop=0;return}
+    let target=passage?Array.from(content.querySelectorAll<HTMLElement>('[data-passage]')).find(n=>n.dataset.passage===passage):undefined
+    target ||= Array.from(content.querySelectorAll<HTMLElement>('[data_line_start]')).find(n=>n.getAttribute('data_line_start')===line&&!n.closest('.reading-translation'))
+    if(target&&target.getBoundingClientRect().height<=0)target=target.closest<HTMLElement>('.reading-pair')||undefined
+    if(!target)return
+    const next=target.getBoundingClientRect();if(next.height>0)scroller.scrollTop+=next.top+fraction*next.height-offset-edge
+  }
+}

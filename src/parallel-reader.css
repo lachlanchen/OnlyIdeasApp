@@ -13,3 +13,8 @@
 .reader-language select{min-height:40px;font-size:14px;font-weight:700;padding:6px 10px;border:1px solid #8885;border-radius:10px;color:inherit;background:transparent;max-width:100%}
 .reader-language .segmented{margin:0;flex:1;min-width:230px}
 .reader-language .segmented button{min-height:40px;font-size:14px;padding:6px 10px;flex:1}
+/* Keep every reading mode reachable on narrow phones. */
+.reader-language{min-width:0;flex-wrap:wrap}
+.reader-language select{max-width:100%}
+.reader-language .segmented{min-width:0;max-width:100%}
+@media(max-width:480px){.reader-language>select{width:100%}.reader-language .segmented{width:100%}.reader-language .segmented button{min-width:0;white-space:normal;overflow-wrap:anywhere}}

@@ -8,6 +8,7 @@ import type { Paper } from './api'
 import bundleUrl from '../.generated/document-math.js?url'
 import { request, native } from './native'
 import { downloadedPaper, offlineSession } from './offline'
+import {captureReadingPosition,preserveReadingViewport} from './reading-viewport'
 
 type RendererWindow = Window & { markdownToHTML?: (text: string, options: Record<string, unknown>) => string }
 let renderer: Promise<void> | undefined
@@ -20,12 +21,15 @@ function loadRenderer() {
 }
 export function ReaderContent({ paper, reading, mode='original', assetBase, accountID, onSelection, onSection, onParagraph }: { paper: Paper; accountID?:string; assetBase?:string; reading?:ReadingView; mode?:ReadingMode; onSelection?: (quote: string, section: string) => void; onSection?: (section: string) => void; onParagraph?:(quote:string,id:string)=>void }) {
   const ref = useRef<HTMLDivElement>(null)
+  const rendered=useRef<{id:string;revision:string;mmd:string}|undefined>(undefined)
   const currentMode = useRef(mode)
   currentMode.current = mode
   const [error, setError] = useState('')
+  const assetsKey=paper.assets.map(a=>a.path).join('\0'),sectionsKey=paper.sections?.map(s=>s.id).join('\0')
   useEffect(() => {
     let active = true
     let stopTools:(()=>void)|undefined
+    let stopViewport:(()=>void)|undefined
     const objectURLs: string[] = []
     setError('')
     loadRenderer().then(async () => {
@@ -76,12 +80,17 @@ export function ReaderContent({ paper, reading, mode='original', assetBase, acco
       }
       const firstHeading = wrapper.querySelector('h1,h2,h3')
       if (firstHeading?.textContent?.trim().toLowerCase() === paper.title.trim().toLowerCase()) firstHeading.remove()
+      const restore=rendered.current?.id===paper.id&&rendered.current?.revision===paper.revision&&rendered.current?.mmd===(paper.mmd||'')?captureReadingPosition(ref.current):()=>{}
       ref.current.replaceChildren(wrapper)
+      rendered.current={id:paper.id,revision:paper.revision,mmd:paper.mmd||''}
       ref.current.dataset.readingMode=currentMode.current
+      restore()
       stopTools=mountReaderTools(ref.current,{revision:paper.revision,language:paper.language,translate:t,call:accountID&&!assetBase?async(resource,method,body)=>{if(!active)throw Error("Account changed.");return api(`/papers/${paper.id}/${resource}`,{method,headers:{"X-OnlyIdeas-Account":accountID},...(body?{body:JSON.stringify(body)}:{})})}:undefined})
+      const scroller=document.scrollingElement
+      if(scroller instanceof HTMLElement)stopViewport=preserveReadingViewport(scroller,ref.current,'.reading-pair,[data_line_start]')
     }).catch(() => { if (active) setError(t("The equation renderer could not load. Reload to try again; the original text is below.")) })
-    return () => { active = false; stopTools?.(); objectURLs.forEach(url => URL.revokeObjectURL(url)) }
-  }, [paper,reading,assetBase,accountID])
+    return () => { active = false; stopTools?.(); stopViewport?.(); objectURLs.forEach(url => URL.revokeObjectURL(url)) }
+  }, [paper.id,paper.revision,paper.title,paper.language,paper.mmd,assetsKey,sectionsKey,reading,assetBase,accountID])
   useEffect(()=>{if(ref.current)readingMode(ref.current,mode)},[mode])
   function select() {
     const selection = window.getSelection(), text = selection?.toString().trim() || ''

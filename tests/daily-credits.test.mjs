@@ -22,7 +22,7 @@ function fixture(t) {
 }
 const entries = store => store.db.prepare("SELECT * FROM credit_ledger WHERE kind='daily_bonus' ORDER BY created").all();
 
-test('daily credits persist, repeat once per UTC day, carry over, and never backfill missed days', t => {
+test('daily credits persist, repeat once per UTC day, expire weekly, and never backfill missed days', t => {
   const { store, dir } = fixture(t);
   assert.equal(grantDailyCredits(store, 'reader', config, midnight - 1), 100);
   assert.equal(grantDailyCredits(store, 'reader', config, midnight), 100);
@@ -31,7 +31,7 @@ test('daily credits persist, repeat once per UTC day, carry over, and never back
   try { assert.equal(grantDailyCredits(reopened, 'reader', config, midnight + 12), 0); }
   finally { reopened.close(); }
   assert.equal(grantDailyCredits(store, 'reader', config, midnight + 9 * day), 100);
-  assert.equal(creditSummary(store, 'reader', {}).balance, 300);
+  assert.equal(creditSummary(store, 'reader', {}, midnight + 9 * day).balance, 100);
   assert.equal(entries(store).length, 3);
 });
 
@@ -85,7 +85,7 @@ test('aliases, deletion and provider re-registration cannot grant a second daily
   assert.notEqual(recreated, owner);
   assert.equal(grantDailyCredits(store, recreated, config, midnight), 0);
   assert.equal(grantDailyCredits(store, recreated, config, midnight + day), 100);
-  assert.equal(creditSummary(store, recreated, {}).balance, 100);
+  assert.equal(creditSummary(store, recreated, {}, midnight + day).balance, 100);
 });
 
 test('failed grant rolls back its deduplication marker and later retry succeeds once', t => {

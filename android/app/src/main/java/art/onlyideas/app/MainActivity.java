@@ -1852,10 +1852,20 @@ public class MainActivity extends AppCompatActivity {
     if(account==null){signIn();return;}if(translationPending||document==null)return;
     String id=document.optJSONObject("paper").optString("id"),language=readLanguage;int epoch=authEpoch;
     translationPending=true;updateReaderLanguages();
-    io.execute(()->{try{api.json("/api/papers/"+id+"/assist","POST",new JSONObject().put("kind","translation").put("language",language));handler.post(()->{if(epoch!=authEpoch||!page.equals("reader")||document==null||!id.equals(document.optJSONObject("paper").optString("id")))return;translationPending=false;toast(t("Translation requested. Existing work is reused."));refreshReading();pollReading(id,language,epoch,0);});}catch(Exception e){handler.post(()->{if(epoch==authEpoch){translationPending=false;updateReaderLanguages();alert(e.getMessage());}});}});
+    io.execute(()->{try{JSONObject response=api.json("/api/papers/"+id+"/assist","POST",new JSONObject().put("kind","translation").put("language",language));JSONObject task=response.optJSONObject("job");String jobID=task==null?"":task.optString("id");if(!jobID.matches("[a-f0-9-]{36}"))throw new Exception(t("Could not load this request. Try again."));handler.post(()->{if(epoch!=authEpoch||!page.equals("reader")||document==null||!id.equals(document.optJSONObject("paper").optString("id")))return;toast(t("Translation requested. Existing work is reused."));refreshReading();pollReading(id,language,jobID,epoch,0);});}catch(Exception e){handler.post(()->{if(epoch==authEpoch){translationPending=false;updateReaderLanguages();alert(e.getMessage());}});}});
   }
-  void pollReading(String id,String language,int epoch,int attempt){
-    handler.postDelayed(()->{if(epoch!=authEpoch||!page.equals("reader")||document==null||!id.equals(document.optJSONObject("paper").optString("id"))||!language.equals(readLanguage)||attempt>=120)return;refreshReading();if(alignedReading==null||!alignedReading.optBoolean("complete"))pollReading(id,language,epoch,attempt+1);},3000);
+  void pollReading(String id,String language,String jobID,int epoch,int attempt){
+    if(epoch!=authEpoch||!page.equals("reader")||document==null||!id.equals(document.optJSONObject("paper").optString("id"))||!language.equals(readLanguage))return;
+    if(attempt>=120){translationPending=false;updateReaderLanguages();return;}
+    io.execute(()->{try{
+      JSONObject progress=api.json("/api/jobs/"+jobID,"GET",null).optJSONObject("job");
+      handler.post(()->{
+        if(epoch!=authEpoch||!page.equals("reader")||document==null||!id.equals(document.optJSONObject("paper").optString("id"))||!language.equals(readLanguage))return;
+        refreshReading();String state=progress==null?"":progress.optString("state");
+        if(state.equals("failed")||state.equals("completed")){translationPending=false;updateReaderLanguages();if(state.equals("failed"))alert(progress.optString("message",t("Translation failed. Open Your requests to retry.")));return;}
+        handler.postDelayed(()->pollReading(id,language,jobID,epoch,attempt+1),3000);
+      });
+    }catch(Exception e){handler.post(()->{if(epoch!=authEpoch||!page.equals("reader")||document==null||!id.equals(document.optJSONObject("paper").optString("id"))||!language.equals(readLanguage))return;translationPending=false;updateReaderLanguages();alert(e.getMessage());});}});
   }
 
   String paperAttribution(JSONObject p){JSONObject proof=p.optJSONObject("provenance");return proof==null?"":p.optString("license")+" · "+proof.optString("licenseUrl")+" · "+proof.optString("changes");}

@@ -459,6 +459,13 @@ export function createApp(store, config, { worker = true, provider = providerJSO
         return response(res, { job }, 202);
       }
       if (path === '/api/jobs' && method === 'GET') { requireUser(); return response(res, { jobs: store.jobs(user.id).filter(j=>{const p=j.paperId?store.paper(j.paperId):null;return j.owner===user.id||(p&&store.active(p.owner)&&!store.blocked(user.id,p.owner)&&(p.owner===user.id||p.visibility==='public'));}).map(safeJob) }); }
+      const jobProgress=path.match(/^\/api\/jobs\/([a-f0-9-]{36})$/);
+      if(jobProgress&&method==='GET'){
+        requireUser();const job=store.job(jobProgress[1]),paper=job?.paperId?store.paper(job.paperId):null;
+        const subscribed=job&&store.db.prepare('SELECT 1 FROM job_subscriptions WHERE owner=? AND job=?').get(user.id,job.id);
+        requireValue(job&&(job.owner===user.id||subscribed&&paper&&store.active(paper.owner)&&!store.blocked(user.id,paper.owner)&&(paper.owner===user.id||paper.visibility==='public')),'Request not found.',404);
+        return response(res,{job:safeJob(job)});
+      }
       const matchPaper = path.match(/^\/api\/papers\/([\w-]+)(?:\/(comments|notes|annotations|assist|publish|artifacts|export|segments|reading))?$/);
       if (matchPaper) {
         const p = paperFor(matchPaper[1]), action = matchPaper[2];

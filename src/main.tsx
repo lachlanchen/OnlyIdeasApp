@@ -21,7 +21,8 @@ import React, { useEffect, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { ArrowDownToLine, ArrowLeft, ArrowRight, BookOpen, Check, ChevronRight, FileText, GitFork as Github, Globe2, Library, Loader2, MessageCircle, Plus, Search, Sparkles, StickyNote, Sun, Moon, X, Bookmark, Send, Languages, LockKeyhole, ExternalLink } from 'lucide-react'
 import { api, post, APIError, type Paper, type Session, type Comment, type Job, type Artifact } from './api'
-import type {ReadingView,ReadingMode} from './parallel-reader'
+import type {ReadingMode} from './parallel-reader'
+import {usePaperReading} from './usePaperReading'
 import { ReaderContent } from './ReaderContent'
 import { initNative, signIn, cancelSignIn, completeSignIn, saveToken, authRevision, exportMarkdown, clearExportCache } from './native'
 import { rememberSession, offlineSession, downloadedPapers, downloadedPaper, downloadPaper, removeDownload, clearPrivateDownloads, cachedLibrary, rememberLibrary, reconcileCache, unpinPaper, cacheReading } from './offline'
@@ -217,15 +218,8 @@ function Reading({ paper, session, notify, needLogin, onBack, save, saved, jobs,
   useEffect(() => { localStorage.setItem(`${scope}:draft`, draft) }, [draft, scope])
   useEffect(() => { localStorage.setItem('onlyideas-text-size', String(size)) }, [size])
   const [acceptedTerms, setAcceptedTerms] = useState(false)
-  const [paragraph,setParagraph]=useState(''),[readLanguage,setReadLanguage]=useState(sessionStorage.getItem('onlyideas:reading:'+paper.id)||(paper.language==='zh-Hans'?'en':'zh-Hans')),[translationJob,setTranslationJob]=useState('')
-  const [mode,setMode]=useState<ReadingMode>(sessionStorage.getItem('onlyideas:reading:'+paper.id)?'interlaced':'original'),[reading,setReading]=useState<ReadingView>()
-  useEffect(()=>{
-    let active=true
-    void downloadedPaper(paper.id,session?.user?.id).then(r=>{if(active&&r?.paper.revision===paper.revision)setReading(r.readings?.[readLanguage])})
-    void api<ReadingView>(`/papers/${paper.id}/reading?language=${readLanguage}`).then(r=>{if(active){setReading(r);void cacheReading(r,session?.user?.id)}}).catch(()=>{})
-    return()=>{active=false}
-  },[paper.id,paper.revision,readLanguage,session?.user?.id,jobs.filter(j=>j.state==='completed').length])
-  async function fetchLanguage(language:string){sessionStorage.setItem('onlyideas:reading:'+paper.id,language);setReadLanguage(language);setReading(undefined);setMode('interlaced')}
+  const [paragraph,setParagraph]=useState(''),[translationJob,setTranslationJob]=useState('')
+  const {readLanguage,reading,mode,setMode,fetchLanguage}=usePaperReading(paper,session?.user?.id,jobs.filter(j=>j.state==='completed').length)
   async function requestLanguage(){if(needLogin())return;try{const result=await post<{job:Job}>(`/papers/${paper.id}/assist`,{kind:'translation',language:readLanguage});setTranslationJob(result.job.id);setMode('interlaced');notify(t("Translation requested. Existing work is reused."));onRefresh()}catch(e){notify((e as Error).message)}}
   async function send() {
     if (needLogin()) return

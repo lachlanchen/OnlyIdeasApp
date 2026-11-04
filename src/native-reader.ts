@@ -1,6 +1,6 @@
 import readerLabels from './reader-labels.json'
 import {mountReaderTools} from './reader-tools'
-import { preserveReadingViewport } from './reading-viewport'
+import { captureReadingPosition, preserveReadingViewport } from './reading-viewport'
 import { watchEditions } from './watch-prose'
 import { paragraphActions } from './paragraphs'
 import {cleanDocument,pairReading,readingMode,type ReadingView,type ReadingMode} from './parallel-reader'
@@ -15,13 +15,15 @@ const replies=new Map<string,{resolve:(v:any)=>void;reject:(e:Error)=>void;timer
 host.OnlyIdeasReaderReply=(id,result,error)=>{const pending=replies.get(id);if(!pending)return;clearTimeout(pending.timer);replies.delete(id);if(error)pending.reject(Error(error));else pending.resolve(result)}
 let stopTools:(()=>void)|undefined
 let stopViewport: (()=>void)|undefined
-let ready=false,pending:DocumentData|undefined
+let ready=false,pending:DocumentData|undefined,lastSource:{revision:string;mmd:string}|undefined
 host.OnlyIdeasRender=p=>{
   if(!ready){pending=p;return}
   host.OnlyIdeasStyle(p.fontSize||18,!!p.dark)
   const render=(text:string)=>host.markdownToHTML(text,{htmlTags:false,lineNumbering:true,width:Math.max(280,root.clientWidth),linkify:false,typographer:false,accessibility:{assistiveMml:true},outMath:{include_svg:true}})
   stopViewport?.();stopTools?.();for(const [id] of replies)host.OnlyIdeasReaderReply(id,null,"Reading view changed. Reopen the tool to continue.")
+  const restore=p.revision&&lastSource?.revision===p.revision&&lastSource.mmd===p.mmd?captureReadingPosition(root):()=>{}
   root.innerHTML=cleanDocument(render(p.mmd))
+  lastSource={revision:p.revision||'',mmd:p.mmd}
   if(p.comments)paragraphActions(root,p.commentLabel||'Discuss paragraph',(quote,paragraphId)=>{host.webkit?.messageHandlers.onlyideas.postMessage({action:'paragraph',quote,paragraphId});host.NativeReader?.paragraph?.(quote,paragraphId)})
   if(p.reading)pairReading(root,p.reading,render,p.labels||{source:p.language||'Original',translation:p.reading.language,partial:'Remaining passages use the original.'})
   root.dataset.readingMode=p.mode||'original'
@@ -32,6 +34,7 @@ host.OnlyIdeasRender=p=>{
   host.webkit?.messageHandlers.onlyideas.postMessage({watchEditions:watchEditions(root),watchLanguage:p.reading?.language||''})
   stopTools=mountReaderTools(root,{revision:p.revision||'',language:p.language||'en',translate:key=>p.toolLabels?.[key]||(readerLabels as Record<string,Record<string,string>>)[p.uiLanguage||'en']?.[key]||key,call:p.readerTools?(resource,method,body)=>new Promise((resolve,reject)=>{const id=crypto.randomUUID(),timer=setTimeout(()=>{replies.delete(id);reject(Error('Connection interrupted. Please try again.'))},65000);replies.set(id,{resolve,reject,timer});const message={action:'readerRequest',id,resource,method,body};if(host.webkit)host.webkit.messageHandlers.onlyideas.postMessage(message);else host.NativeReader?.request?.(JSON.stringify(message))}):undefined})
   root.dataset.ready='true'
+  restore()
   stopViewport=preserveReadingViewport(document.scrollingElement as HTMLElement,root,':scope > *')
 }
 const script=document.createElement('script');script.src=rendererUrl;script.onload=()=>{ready=true;if(pending)host.OnlyIdeasRender(pending);host.NativeReader?.ready?.();host.webkit?.messageHandlers.onlyideas.postMessage({ready:true})};script.onerror=()=>{root.textContent='The equation renderer could not load. Reopen this paper to try again.'};document.head.append(script)
