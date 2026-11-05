@@ -2,8 +2,8 @@
 
 Reopening a language keeps its existing translation visible. A late offline
 cache cannot replace a newer network response, and unchanged reading data keeps
-its rendered document. Original, translation and interlaced controls wrap on
-narrow phones. Changing a reading layout uses a short transition and respects
+its rendered document. Original, translation and interlaced controls use a full row on
+narrow phones, keeping their labels readable. Changing a reading layout uses a short transition and respects
 reduced motion.
 
 Translation requests track their exact job, including older shared jobs outside
@@ -18,21 +18,29 @@ and paragraph discussion anchors retain their existing rendering paths.
 
 ## Qualification and delivery
 
-All393 source tests pass, including translation failures, cross-account isolation,
+All 393 source tests pass, including translation failures, cross-account isolation,
 cache races, passage restoration, shared reuse and offline workflows. Renderer
 checks and the production build pass. Android Java compilation passes.
 
 Eleven live browser checks cover a public metasurface paper, local-first search,
-its existing543-piece Chinese translation, four widths, reading modes, saved
+its existing 543-piece Chinese translation, four widths, reading modes, saved
 figures and reopening from the offline cache. Browser testing is distinct from
-native device or Duo runtime qualification. Candidate43 carries native changes
-and needs its separate internal native checks before tester delivery.
+native device or Duo runtime qualification. Build 43 passed its separate native checks and is available internally;
+see [delivery details](internal-build43-20261105.md).
 
 The deployed API includes owner/subscriber-scoped job progress; unrelated users
-receive404. The web reading improvements are deployed. Existing papers, sessions,
+receive 404. The web reading improvements are deployed. Existing papers, sessions,
 credit lots, plans and protected service configuration were preserved. The prior
 weekly reset policy is unchanged.
 
 Shared LazyingArt login and canonical earned LAC remain a separate callback and
 consent qualification. This update does not enable new providers, reward grants
 or shared subscription entitlements.
+
+
+The additional phone control correction is web source `ee99ea5`, deployed after
+four browser width checks and a fresh 393-test/renderer/build pass. Native build
+43 remains bound to source `09553db`; its toolbar controls are native. Genuine
+walkthrough recordings and eight locally reviewed screenshot drafts were prepared
+with public books/papers and existing translations. They have not been posted
+publicly or uploaded as store screenshots.

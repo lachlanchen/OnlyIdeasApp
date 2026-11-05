@@ -1,5 +1,17 @@
 # OnlyIdeas · product contract
 
+## Internal reading-quality delivery · 2026-11-05
+
+Apple iOS/Watch and universal Mac **1.0.10 (43)** are VALID /
+IN_BETA_TESTING in the existing internal group; Android 43 is active internally.
+This delivers exact translation progress, retry/cancellation isolation and
+reading-position/cache corrections. Native compilation, eight exact-source
+geometry checks and both signed package gates passed. Independent handback and
+existing tester availability passed. Public reviews and releases are unchanged.
+The deployed PWA additionally has source `ee99ea5` for full-row phone language
+controls. See `docs/internal-build43-20261105.md` for exact source and runtime gaps.
+
+
 ## Weekly daily-credit reset · 2026-11-01
 
 New free daily usage grants expire at the end of their UTC period, defaulting

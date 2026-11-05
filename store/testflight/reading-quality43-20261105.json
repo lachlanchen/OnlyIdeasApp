@@ -1,0 +1,63 @@
+{
+  "app": "OnlyIdeas",
+  "version": "1.0.10",
+  "build": 43,
+  "source": "09553db4deb10e19d32c0a9b005a6e6ff756f288",
+  "appleInternal": [
+    {
+      "platform": "MAC_OS",
+      "id": "403a68fb-1284-4b35-b97e-501a1a5be126",
+      "version": "1.0.10",
+      "build": "43",
+      "processing": "VALID",
+      "internal": "IN_BETA_TESTING"
+    },
+    {
+      "platform": "IOS",
+      "id": "39ad2c1e-7b19-4a25-b5d2-33fbef39acb0",
+      "version": "1.0.10",
+      "build": "43",
+      "processing": "VALID",
+      "internal": "IN_BETA_TESTING"
+    }
+  ],
+  "androidInternal": {
+    "versionCode": 43,
+    "state": "active",
+    "existingTestersPreserved": true
+  },
+  "artifacts": [
+    {
+      "platform": "ios",
+      "sha256": "7bdeddbce7d5e2a1982cf19074b62e857f3055a06919b751c8a61be696eb2c48",
+      "bytes": 10627085
+    },
+    {
+      "platform": "macos",
+      "sha256": "82cb937985d636ac7475cc889fb22c690e7359ff7b1898b12ba5c87a75e0d7a8",
+      "bytes": 9685788
+    }
+  ],
+  "qualification": {
+    "sourceTests": 393,
+    "rendererAndProductionBuild": true,
+    "nativeCompilation": true,
+    "exactSourceGeometryChecks": 8,
+    "actualNativeUIRotationTest": false,
+    "archiveAndExportResourcesIdentitySignaturesSDK": true,
+    "independentCleanup": true,
+    "sourceFilesUnchanged": 166,
+    "helpersUnchanged": 24,
+    "deviceStatePreserved": true,
+    "forwardLastUsedAtMetadataDeltaRecorded": true,
+    "newMacFileOrReservationCreatedDuringRecovery": false
+  },
+  "pwaControlCorrectionSource": "ee99ea5319dec2bc0433f6b77c674c8634b7414c",
+  "coverageGaps": [
+    "New SwiftUI rotation/interaction runtime",
+    "Official Duo poses/reserved regions",
+    "Physical iPhone/Watch runtime",
+    "New Monterey runtime"
+  ],
+  "publicReviewOrReleaseChanged": false
+}
