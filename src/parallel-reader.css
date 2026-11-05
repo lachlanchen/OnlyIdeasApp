@@ -17,4 +17,4 @@
 .reader-language{min-width:0;flex-wrap:wrap}
 .reader-language select{max-width:100%}
 .reader-language .segmented{min-width:0;max-width:100%}
-@media(max-width:480px){.reader-language>select{width:100%}.reader-language .segmented{width:100%}.reader-language .segmented button{min-width:0;white-space:normal;overflow-wrap:anywhere}}
+@media(max-width:480px){.reader-language>select{width:100%}.reader-language .segmented{width:100%;flex:1 1 100%}.reader-language .segmented button{min-width:0;white-space:normal;overflow-wrap:anywhere}}
