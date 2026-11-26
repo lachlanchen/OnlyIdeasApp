@@ -1,0 +1,10 @@
+{
+  "name": "OnlyIdeas",
+  "slug": "onlyideas",
+  "id": "art.onlyideas.app",
+  "home": "https://agent.onlyideas.art/",
+  "version": "1.0.10",
+  "build": 1,
+  "onlyideas": true,
+  "library_action": "[...document.querySelectorAll(\"nav button\")].find(b=>b.textContent.trim()===\"Library\")?.click()"
+}
