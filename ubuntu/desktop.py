@@ -123,6 +123,13 @@ class DesktopApp(Adw.Application):
         return "\\" not in path and not any(item in (".", "..") for item in path.split("/")) and (
             path == self.scope.rstrip("/") or path.startswith(self.scope))
 
+    def allows_blob(self, uri):
+        if not uri.startswith("blob:"):
+            return False
+        origin = secure_url(uri[5:])
+        return bool(origin and origin.hostname == self.host and not origin.query and not origin.fragment
+                    and re.fullmatch(r"/[a-f0-9-]{36}", origin.path, re.IGNORECASE))
+
     def persist(self):
         if self.ephemeral:
             return
@@ -191,6 +198,7 @@ class DesktopApp(Adw.Application):
         self.configure_web(self.web)
         self.web.connect("decide-policy", self.policy)
         self.web.connect("create", self.popup)
+        self.web.connect("run-file-chooser", self.choose_upload)
         self.web.connect("load-changed", self.load_changed)
         self.web.connect("load-failed", self.load_failed)
         self.web.connect("web-process-terminated", lambda *_: self.error_page())
@@ -296,7 +304,7 @@ class DesktopApp(Adw.Application):
         if kind == WebKit.PolicyDecisionType.RESPONSE:
             if not decision.is_mime_type_supported() and decision.is_main_frame_main_resource():
                 target = decision.get_request().get_uri()
-                if self.allows(target.removeprefix("blob:")):
+                if self.allows(target) or self.allows_blob(target):
                     decision.download()
                 else:
                     decision.ignore()
@@ -311,7 +319,7 @@ class DesktopApp(Adw.Application):
                 self.start_login("github" if parts.path.endswith("github") else "lazyingart")
                 return True
             return False
-        if uri.startswith("blob:") and self.allows(uri[5:]):
+        if self.allows_blob(uri):
             return False
         decision.ignore()
         if action.is_user_gesture() and parts:
@@ -471,40 +479,76 @@ class DesktopApp(Adw.Application):
 
     def choose_destination(self, download, filename):
         source = download.get_request().get_uri()
-        if not self.allows(source.removeprefix("blob:")) or len(self.downloads) >= 4:
+        if (download.get_web_view() != self.web or len(self.downloads) >= 4
+                or not (self.allows(source) or self.allows_blob(source))):
             download.cancel()
             self.toast("Open the source in your browser to download this file.")
             return True
         name = Path(filename or "download").name.strip().lstrip(".")[:180] or "download"
-        dialog = Gtk.FileDialog(title="Save File", initial_name=name)
-        cancel = Gio.Cancellable.new()
-        self.downloads[download] = cancel
+        dialog = self.file_dialog("Save File", Gtk.FileChooserAction.SAVE, "Save")
+        dialog.set_current_name(name)
+        self.downloads[download] = dialog
 
-        def saved(dialog, result):
+        def saved(chooser, response):
             if download not in self.downloads:
                 return
-            try:
-                dest = dialog.save_finish(result)
-                path = dest.get_path() if dest else None
-                if not path:
-                    raise ValueError("Local destination required")
-                # The system picker has already confirmed replacement if needed.
+            chosen = chooser.get_file() if response == Gtk.ResponseType.ACCEPT else None
+            path = chosen.get_path() if chosen else None
+            chooser.hide()
+            if path:
                 download.set_allow_overwrite(True)
                 download.set_destination(path)
-            except (GLib.Error, ValueError):
+            else:
                 download.cancel()
 
-        dialog.save(self.window, cancel, saved)
+        dialog.connect("response", saved)
+        dialog.present()
+        return True
+
+    def file_dialog(self, title, action, confirm):
+        dialog = Gtk.FileChooserDialog(title=title, action=action, transient_for=self.window,
+                                      modal=True, destroy_with_parent=True)
+        dialog.add_button("Cancel", Gtk.ResponseType.CANCEL)
+        button = dialog.add_button(confirm, Gtk.ResponseType.ACCEPT)
+        button.add_css_class("suggested-action")
+        dialog.set_default_response(Gtk.ResponseType.ACCEPT)
+        return dialog
+
+    def choose_upload(self, _, request):
+        dialog = self.file_dialog("Choose Files", Gtk.FileChooserAction.OPEN, "Open")
+        dialog.set_select_multiple(request.get_select_multiple())
+        types = request.get_mime_types() or ()
+        if types:
+            file_filter = Gtk.FileFilter()
+            file_filter.set_name("Supported files")
+            for mime in types:
+                file_filter.add_mime_type(mime)
+            dialog.add_filter(file_filter)
+
+        def chosen(chooser, response):
+            files = chooser.get_files()
+            paths = [files.get_item(i).get_path() for i in range(files.get_n_items())]
+            paths = [path for path in paths if path]
+            if paths and response == Gtk.ResponseType.ACCEPT:
+                request.select_files(paths)
+            else:
+                request.cancel()
+            chooser.destroy()
+
+        dialog.connect("response", chosen)
+        dialog.present()
         return True
 
     def finish_download(self, download, message):
-        if self.downloads.pop(download, None):
+        dialog = self.downloads.pop(download, None)
+        if dialog:
+            dialog.destroy()
             self.toast(message)
 
     def download_failed(self, download, error):
-        cancel = self.downloads.pop(download, None)
-        if cancel:
-            cancel.cancel()
+        dialog = self.downloads.pop(download, None)
+        if dialog:
+            dialog.destroy()
             if not error.matches(WebKit.download_error_quark(), WebKit.DownloadError.CANCELLED_BY_USER):
                 self.toast("The file could not be saved.")
 
@@ -600,8 +644,7 @@ class DesktopApp(Adw.Application):
 
     def close_window(self, _):
         self.cancel_login()
-        for download, cancel in list(self.downloads.items()):
-            cancel.cancel()
+        for download in list(self.downloads):
             download.cancel()
         self.window = None
         return False

@@ -6,5 +6,5 @@
   "version": "1.0.10",
   "build": 1,
   "onlyideas": true,
-  "library_action": "[...document.querySelectorAll(\"nav button\")].find(b=>b.textContent.trim()===\"Library\")?.click()"
+  "library_action": "document.querySelector(\".app-header .brand\")?.click()"
 }
